@@ -641,6 +641,41 @@ pre, code, .mono { font-variant-ligatures: none; } /* <= bleibt <= (wie auf dem 
 
 
 
+
+/* ---------- Lernverbesserungen: Sicherheit, Erklär-Feld, Fehlerprotokoll, Operatoren, Lernplan */
+.rate.three { grid-template-columns: 1fr 1fr 1fr; }
+.btn.unsure { background: var(--yellow-soft); color: var(--ink); }
+.explain { display: flex; flex-direction: column; gap: 6px; margin-top: 14px; }
+.explain textarea { width: 100%; font: inherit; color: var(--ink); background: var(--surface-2); border: 1.5px solid var(--line-2); border-radius: var(--r-sm); padding: 10px 12px; resize: vertical; }
+.explain textarea:focus { outline: none; border-color: var(--blue); box-shadow: 0 0 0 3px var(--blue-soft); }
+.explain + .reveal { margin-top: 12px; }
+.answer-wrap.own { background: var(--surface-2); border-radius: var(--r-sm); padding: 10px 12px; margin-bottom: 10px; }
+.cause-box { margin-top: 10px; display: flex; flex-direction: column; gap: 6px; }
+.causes { display: flex; flex-wrap: wrap; gap: 6px; }
+.chip.cause { cursor: pointer; border: 1.5px solid transparent; padding: 5px 10px; }
+.chip.cause.on { border-color: var(--violet); background: var(--violet-soft); }
+.tip-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 12px; margin-bottom: 16px; }
+.tip-card { display: flex; flex-direction: column; align-items: flex-start; gap: 4px; text-align: left; border: 0; cursor: pointer; color: var(--ink); font: inherit; }
+.tip-card .ic { width: 26px; height: 26px; color: var(--violet-d); margin-bottom: 4px; }
+.tip-card:hover { box-shadow: var(--sh-2); }
+.ladder { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 12px; margin-top: 14px; }
+.lad { background: var(--surface-2); border-radius: var(--r); padding: 12px; display: flex; flex-direction: column; gap: 10px; }
+.lad-h { display: flex; align-items: center; gap: 8px; }
+.lad-n { width: 28px; height: 28px; border-radius: 50%; display: grid; place-items: center; background: var(--violet); color: #fff; font-weight: 800; font-size: 0.8rem; }
+.lad-op { display: flex; flex-direction: column; gap: 2px; }
+.lad-ex { font-size: 0.82rem; border-left: 3px solid var(--blue); padding-left: 8px; margin-top: 4px; font-style: italic; }
+.plan-items { list-style: none; margin: 8px 0 0; padding: 0; display: flex; flex-direction: column; gap: 6px; }
+.plan-items li { display: flex; align-items: center; gap: 10px; }
+.plan-items .pi-ic { width: 32px; height: 32px; border-radius: 10px; display: grid; place-items: center; background: var(--surface-2); flex: none; }
+.plan-items .pi-t { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+.plan-items li.rep { opacity: 0.85; }
+.plan-days { list-style: none; margin: 16px 0 0; padding: 0; display: flex; flex-direction: column; gap: 10px; }
+.plan-days > li { display: grid; grid-template-columns: 120px minmax(0, 1fr); gap: 14px; background: var(--surface); border-radius: var(--r); box-shadow: var(--sh-1); padding: 12px 14px; }
+.plan-days > li.today { border: 2px solid var(--blue); }
+.plan-days > li.sun { background: var(--violet-soft); }
+.plan-days .pd-date { display: flex; flex-direction: column; }
+.plan-days .pd-today .plan-items { margin-top: 0; }
+@media (max-width: 560px) { .plan-days > li { grid-template-columns: 1fr; gap: 6px; } .rate.three { grid-template-columns: 1fr; } }
 /* ---------- Einstellungen, Tipps, Tutorial, Auswahl, Timer */
 img.brand-mark { width: 40px; height: 40px; border-radius: 12px; display: block; }
 .hud .hb.on { background: var(--blue-soft-2); }
@@ -783,6 +818,8 @@ a.iconbtn { color: var(--ink); text-decoration: none; }
       <section class="view" id="v-tipps" hidden></section>
       <section class="view" id="v-einstellungen" hidden></section>
       <section class="view" id="v-tutorial" hidden></section>
+      <section class="view" id="v-operatoren" hidden></section>
+      <section class="view" id="v-plan" hidden></section>
     </main>
     <footer class="foot"><span>TAP2 Prüfungscoach · Dein Fortschritt wird lokal in diesem Browser gespeichert.</span></footer>
   </div>
@@ -2471,7 +2508,7 @@ CARDS_RAW.algo.push(
   const inTeil = (t, part) => (part === "wiso" ? t.teil === "SoWi" : t.teil !== "SoWi" && t.teil.includes(part === "t1" ? "1" : "2"));
 
   // ---------- state + storage
-  const blank = () => ({ v: 7, q: {}, mark: {}, custom: {}, ueb: {}, runs: [], log: {}, last: null });
+  const blank = () => ({ v: 7, q: {}, mark: {}, custom: {}, ueb: {}, runs: [], log: {}, last: null, errlog: [] });
   let S = blank();
   function normalize(o) {
     const x = Object.assign(blank(), o || {});
@@ -2511,11 +2548,11 @@ CARDS_RAW.algo.push(
   const isDue = (id) => { const r = S.q[id]; return !!(r && r.d && r.d <= today()); };
   const dueIn = (id) => { const r = S.q[id]; return r && r.d ? daysBetween(today(), r.d) : null; };
   const nextTxt = (id) => { const d = dueIn(id); return d == null ? "" : d <= 0 ? "heute noch einmal" : d === 1 ? "wieder morgen" : `wieder in ${d} Tagen`; };
-  function answer(id, ok) {
+  function answer(id, ok, unsure) {
     const r = S.q[id] || { s: -1, n: 0, w: 0, b: 0 }, before = r.s;
     r.n++;
     if (r.b == null) r.b = r.s >= 2 ? 2 : r.s === 1 ? 1 : 0;
-    if (ok) r.b = Math.min(r.b + 1, IV.length - 1); else { r.b = 0; r.w++; }
+    if (ok) r.b = unsure ? 1 : Math.min(r.b + 1, IV.length - 1); else { r.b = 0; r.w++; }
     r.s = ok ? (r.b >= 2 ? 2 : 1) : 0;
     r.d = addDays(today(), IV[r.b]);
     S.q[id] = r;
@@ -2540,8 +2577,8 @@ CARDS_RAW.algo.push(
 
   // ---------- routing + shell
   let view = "start";
-  const VIEWS = ["start", "lernen", "aufgaben", "pruefung", "tipps", "einstellungen", "tutorial"];
-  const VTITLE = { start: "Übersicht", lernen: "Lernen", aufgaben: "Aufgaben", pruefung: "Prüfung", tipps: "Tipps", einstellungen: "Einstellungen", tutorial: "So lernst du mit dem Coach" };
+  const VIEWS = ["start", "lernen", "aufgaben", "pruefung", "tipps", "einstellungen", "tutorial", "operatoren", "plan"];
+  const VTITLE = { start: "Übersicht", lernen: "Lernen", aufgaben: "Aufgaben", pruefung: "Prüfung", tipps: "Tipps", einstellungen: "Einstellungen", tutorial: "So lernst du mit dem Coach", operatoren: "Operator-Trainer", plan: "Lernplan" };
   const UI = { sess: null, topic: null, ttab: "theorie", tf: "alle", ueb: null, showSol: false, addQ: false, pk: { mode: "sim", teil: "t1" }, run: null, confirm: null, sel: [] };
   function go(v) {
     view = VIEWS.includes(v) ? v : "start";
@@ -2567,11 +2604,12 @@ CARDS_RAW.algo.push(
   }
   function render() {
     VIEWS.forEach((v) => { $("#v-" + v).hidden = v !== view; });
-    document.querySelectorAll("nav.side .nav-i").forEach((b) => b.setAttribute("aria-current", b.dataset.view === view ? "page" : "false"));
+    const navView = view === "operatoren" || view === "plan" ? "tipps" : view;
+    document.querySelectorAll("nav.side .nav-i").forEach((b) => b.setAttribute("aria-current", b.dataset.view === navView ? "page" : "false"));
     $("#page-title").textContent = VTITLE[view];
     document.body.classList.toggle("focus", !!(view === "lernen" && UI.sess) || !!(view === "pruefung" && UI.run && UI.run.phase === "write"));
     hud();
-    ({ start: rStart, lernen: rLernen, aufgaben: rUeb, pruefung: rPK, tipps: rTipps, einstellungen: rSettings, tutorial: rTutorial })[view]();
+    ({ start: rStart, lernen: rLernen, aufgaben: rUeb, pruefung: rPK, tipps: rTipps, einstellungen: rSettings, tutorial: rTutorial, operatoren: rOperatoren, plan: rPlan })[view]();
     animRings($("#v-" + view));
   }
 
@@ -2951,10 +2989,18 @@ INSERT INTO Konto VALUES (1,'Weingut Becker',1500.00),(2,'Klinik am Rhein',320.0
     render(); window.scrollTo({ top: 0 });
     focusMain();
   }
-  function focusMain() { const b = $("#s-reveal") || $(".opt:not(:disabled)"); if (b) b.focus({ preventScroll: true }); }
+  function focusMain() { const b = $("#s-opts") || $("#s-reveal") || $(".opt:not(:disabled)"); if (b) b.focus({ preventScroll: true }); }
   const selQ = () => allQ().filter((q) => UI.sel.includes(q.topic));
-  function learnSel() { if (!UI.sel.length) return; const names = UI.sel.map((id) => TP[id] ? TP[id].n.split(/[,&]/)[0].trim() : id); startSess(smartOrder(selQ()).slice(0, ROUND), "Auswahl: " + names.join(" + "), { kind: "sel", tids: UI.sel.slice() }); }
-  function learnTopic(tid) { startSess(smartOrder(topicQ(tid)).slice(0, ROUND), TP[tid].n, { kind: "learn", tid }); }
+  function learnSel() { if (!UI.sel.length) return; const names = UI.sel.map((id) => TP[id] ? TP[id].n.split(/[,&]/)[0].trim() : id); startSess(mixIn(smartOrder(selQ()), UI.sel), "Auswahl: " + names.join(" + "), { kind: "sel", tids: UI.sel.slice() }); }
+  // Gemischt üben: bis zu 4 von 20 Fragen aus bereits bearbeiteten anderen Themen (fällige und rote zuerst)
+  function mixIn(base, excludeTids) {
+    const pool = smartOrder(allQ().filter((q) => !excludeTids.includes(q.topic) && st(q.id) >= 0));
+    const k = Math.min(4, pool.length), own = base.slice(0, ROUND - k), extra = pool.slice(0, k);
+    const out = own.slice();
+    extra.forEach((q, i) => out.splice(Math.min(out.length, Math.round((i + 1) * (out.length + extra.length) / (extra.length + 1))), 0, q));
+    return out;
+  }
+  function learnTopic(tid) { startSess(mixIn(smartOrder(topicQ(tid)), [tid]), TP[tid].n, { kind: "learn", tid }); }
   function learnList(kind, tid) {
     if (kind === "learn") return learnTopic(tid);
     if (kind === "part") { const tids = TOPICS.filter((x) => inTeil(x, tid)).map((x) => x.id); return startSess(smartOrder(allQ().filter((q) => tids.includes(q.topic))).slice(0, ROUND), TEIL[tid].k, { kind, part: tid }); }
@@ -2967,7 +3013,7 @@ INSERT INTO Konto VALUES (1,'Weingut Becker',1500.00),(2,'Klinik am Rhein',320.0
     else if (kind === "rand") startSess(shuffle(base.slice()).slice(0, ROUND), pre + "Zufällige Fragen", { kind, tid });
     else if (kind === "all") startSess(base, pre + "Alle Fragen", { kind, tid });
   }
-  function sessNext() { const s = UI.sess; s.i++; s.pick = null; s.rev = false; keepSess(); render(); window.scrollTo({ top: 0 }); focusMain(); }
+  function sessNext() { const s = UI.sess; s.i++; s.pick = null; s.rev = false; s.optOpen = false; s.own = ""; keepSess(); render(); window.scrollTo({ top: 0 }); focusMain(); }
   function pickMCq(i) {
     const s = UI.sess, q = getQ(s.ids[s.i]);
     if (s.pick !== null || !q) return;
@@ -2978,10 +3024,15 @@ INSERT INTO Konto VALUES (1,'Weingut Becker',1500.00),(2,'Klinik am Rhein',320.0
     const nx = $("#s-next"); if (nx) nx.focus({ preventScroll: true });
   }
   function reveal() { const s = UI.sess; s.rev = true; keepSess(); render(); const y = $("#s-yes"); if (y) y.focus({ preventScroll: true }); }
-  function rateCard(ok) {
+  function markGuess() { // Auswahlfrage richtig, aber geraten → morgen wieder, höchstens gelb
+    const s = UI.sess, q = getQ(s.ids[s.i]); if (!q) return;
+    const r = S.q[q.id]; if (r && s.res[q.id] && s.res[q.id].ok) { r.b = 1; r.s = 1; r.d = addDays(today(), IV[1]); save(); s.res[q.id].t = 1; s.res[q.id].guess = true; }
+    sessNext();
+  }
+  function rateCard(ok, unsure) {
     const s = UI.sess, q = getQ(s.ids[s.i]);
     if (!q || !s.rev) return;
-    const [f, t] = answer(q.id, ok);
+    const [f, t] = answer(q.id, ok, unsure);
     s.res[q.id] = { ok, f, t }; s.last = { ok, f, t, id: q.id };
     sessNext();
   }
@@ -2997,12 +3048,15 @@ INSERT INTO Konto VALUES (1,'Weingut Becker',1500.00),(2,'Klinik am Rhein',320.0
       if (e.key === "Escape") { closeSess(); return; }
       if (q.type === "mc") {
         const idx = "1234".indexOf(k) >= 0 ? "1234".indexOf(k) : "abcd".indexOf(k);
-        if (s.pick === null && idx >= 0 && idx < q.opts.length) { e.preventDefault(); pickMCq(optOrder(s, q)[idx]); }
+        if (s.pick === null && !s.optOpen) { if (e.key === " " || e.key === "Enter") { e.preventDefault(); $("#s-opts").click(); } }
+        else if (s.pick === null && idx >= 0 && idx < q.opts.length) { e.preventDefault(); pickMCq(optOrder(s, q)[idx]); }
+        else if (s.pick !== null && k === "g" && $("#s-guess")) { e.preventDefault(); markGuess(); }
         else if (s.pick !== null && (e.key === "Enter" || e.key === "ArrowRight")) { e.preventDefault(); sessNext(); }
       } else {
         if (!s.rev && (e.key === " " || e.key === "Enter")) { e.preventDefault(); reveal(); }
         else if (s.rev && (k === "1" || e.key === "ArrowLeft")) { e.preventDefault(); rateCard(false); }
-        else if (s.rev && (k === "2" || e.key === "ArrowRight")) { e.preventDefault(); rateCard(true); }
+        else if (s.rev && k === "2") { e.preventDefault(); rateCard(true, true); }
+        else if (s.rev && (k === "3" || e.key === "ArrowRight")) { e.preventDefault(); rateCard(true); }
       }
       return;
     }
@@ -3021,6 +3075,7 @@ INSERT INTO Konto VALUES (1,'Weingut Becker',1500.00),(2,'Klinik am Rhein',320.0
   const situHTML = (sit) => esc(sit).replace(/\n?```\n?([\s\S]*?)\n?```\n?/g, (m, c) => `<pre class="situ-code">${c}</pre>`);
   const frontHTML = (t) => { const [sit, task] = qParts(t); return (sit ? `<div class="situ">${situHTML(sit)}</div>` : "") + `<div class="front">${esc(task)}</div>`; };
   const ewhHTML = (q) => (q.n ? `<div class="ewh"><span class="alab">Erwartungshorizont</span><div class="ewh-b">${esc(q.n)}</div></div>` : "");
+  const rateHTML = () => `<div class="rate three"><button type="button" class="btn big no" id="s-no">${ic("x", "ic sm")} Nicht gewusst</button><button type="button" class="btn big unsure" id="s-unsure">${ic("info", "ic sm")} Unsicher</button><button type="button" class="btn big yes" id="s-yes">${ic("check", "ic sm")} Sicher gewusst</button></div><p class="kbdhelp"><span class="kbd">1</span> nicht gewusst · <span class="kbd">2</span> unsicher · <span class="kbd">3</span> sicher · „Unsicher“ kommt morgen wieder und wird noch nicht grün</p>`;
   const looksCode = (q) => q.code && /\n|SELECT |wenn |für |CREATE |\(\)/.test(q.a);
   function rSess(el) {
     const s = UI.sess;
@@ -3028,27 +3083,31 @@ INSERT INTO Konto VALUES (1,'Weingut Becker',1500.00),(2,'Klinik am Rhein',320.0
     const q = getQ(s.ids[s.i]);
     if (!q) { s.i++; return rSess(el); }
     const t = TP[q.topic], sv = st(q.id), marked = !!S.mark[q.id];
-    const multi = !s.src.tid;
+    const mixed = (s.src.tid && q.topic !== s.src.tid) || (s.src.tids && !s.src.tids.includes(q.topic));
+    const multi = !s.src.tid || mixed;
     let body = "", foot = "";
-    if (q.type === "mc") {
+    if (q.type === "mc" && s.pick === null && !s.optOpen) {
+      body = `<button type="button" class="reveal" id="s-opts">${ic("eye")}<b>Antwortmöglichkeiten zeigen</b><span>Überlege zuerst deine eigene Antwort – dann siehst du die Optionen</span></button>`;
+      foot = `<p class="kbdhelp"><span class="kbd">Leertaste</span> Antworten zeigen · <span class="kbd">Esc</span> beenden</p>`;
+    } else if (q.type === "mc") {
       const ok = s.pick === q.right;
       const ord = optOrder(s, q);
       body = `<div class="optlist">${ord.map((i, d) => `<button type="button" class="opt ${s.pick !== null ? (i === q.right ? "right" : i === s.pick ? "wrong" : "") : ""}" data-i="${i}" ${s.pick !== null ? "disabled" : ""}><span class="k">${s.pick !== null && i === q.right ? ic("check", "ic sm") : s.pick === i ? ic("x", "ic sm") : "ABCD"[d]}</span><span>${esc(q.opts[i])}</span></button>`).join("")}</div>`;
-      if (s.pick !== null) { const r = s.res[q.id]; foot = `<div class="feedback ${ok ? "ok" : "bad"}"><span class="fi">${ic(ok ? "check" : "x")}</span><div><div class="row" style="gap:10px"><b>${ok ? "Richtig" : "Falsch"}</b>${trans(r.f, r.t)}<span class="nexttxt">${nextTxt(q.id)}</span></div><p>${esc(q.why)}</p></div><button type="button" class="btn primary" id="s-next">${s.i + 1 < s.ids.length ? "Weiter" : "Auswertung"} ${ic("right", "ic sm")}</button></div>`; }
+      if (s.pick !== null) { const r = s.res[q.id]; foot = `<div class="feedback ${ok ? "ok" : "bad"}"><span class="fi">${ic(ok ? "check" : "x")}</span><div><div class="row" style="gap:10px"><b>${ok ? "Richtig" : "Falsch"}</b>${trans(r.f, r.t)}<span class="nexttxt">${nextTxt(q.id)}</span></div><p>${esc(q.why)}</p></div>${ok ? `<button type="button" class="btn ghost small" id="s-guess" title="Taste G">War geraten</button>` : ""}<button type="button" class="btn primary" id="s-next">${s.i + 1 < s.ids.length ? "Weiter" : "Auswertung"} ${ic("right", "ic sm")}</button></div>`; }
       else foot = `<p class="kbdhelp">Tasten <span class="kbd">1</span>–<span class="kbd">4</span> zum Antworten · <span class="kbd">Enter</span> weiter</p>`;
     } else if (CODE[q.id] && !q.own) {
       body = codeBody(s, q, CODE[q.id]);
-      foot = s.rev ? `<div class="rate"><button type="button" class="btn big no" id="s-no">${ic("x", "ic sm")} Nicht gewusst</button><button type="button" class="btn big yes" id="s-yes">${ic("check", "ic sm")} Gewusst</button></div><p class="kbdhelp"><span class="kbd">←</span> nicht gewusst · <span class="kbd">→</span> gewusst</p>` : `<p class="kbdhelp">Im Editor: <span class="kbd">Tab</span> einrücken · <span class="kbd">Strg/Cmd</span> + <span class="kbd">Enter</span> vergleichen · <span class="kbd">Esc</span> außerhalb beendet</p>`;
+      foot = s.rev ? `${rateHTML()}` : `<p class="kbdhelp">Im Editor: <span class="kbd">Tab</span> einrücken · <span class="kbd">Strg/Cmd</span> + <span class="kbd">Enter</span> vergleichen · <span class="kbd">Esc</span> außerhalb beendet</p>`;
     } else {
-      body = s.rev ? `<div class="answer-wrap"><span class="alab">${q.n ? "Musterlösung" : "Antwort"}</span><div class="answer ${looksCode(q) ? "mono" : ""}">${esc(q.a)}</div></div>${ewhHTML(q)}` : `<button type="button" class="reveal" id="s-reveal">${ic("eye")}<b>Antwort zeigen</b><span>Erst selbst überlegen, dann aufdecken</span></button>`;
-      foot = s.rev ? `<div class="rate"><button type="button" class="btn big no" id="s-no">${ic("x", "ic sm")} Nicht gewusst</button><button type="button" class="btn big yes" id="s-yes">${ic("check", "ic sm")} Gewusst</button></div><p class="kbdhelp"><span class="kbd">←</span> nicht gewusst · <span class="kbd">→</span> gewusst</p>` : `<p class="kbdhelp"><span class="kbd">Leertaste</span> Antwort zeigen · <span class="kbd">Esc</span> beenden</p>`;
+      body = s.rev ? `${(s.own || "").trim() ? `<div class="answer-wrap own"><span class="alab">Deine Antwort</span><div class="answer">${esc(s.own)}</div></div>` : ""}<div class="answer-wrap"><span class="alab">${q.n ? "Musterlösung" : "Antwort"}</span><div class="answer ${looksCode(q) ? "mono" : ""}">${esc(q.a)}</div></div>${ewhHTML(q)}${(s.own || "").trim() ? `<p class="cmp-hint">Vergleiche: Sind alle Aspekte aus dem Erwartungshorizont drin? Passt deine Antwort zum Operator?</p>` : ""}` : `<label class="explain" for="s-own"><span class="alab">Deine Antwort – kurz in Stichpunkten</span><textarea id="s-own" rows="3" placeholder="Erst selbst formulieren, dann aufdecken (Strg/Cmd + Enter) …">${esc(s.own || "")}</textarea></label><button type="button" class="reveal" id="s-reveal">${ic("eye")}<b>Antwort zeigen</b><span>Mit deiner Antwort vergleichen – Feld leer lassen geht auch</span></button>`;
+      foot = s.rev ? `${rateHTML()}` : `<p class="kbdhelp"><span class="kbd">Leertaste</span> Antwort zeigen · <span class="kbd">Esc</span> beenden</p>`;
     }
     const lastNote = s.last ? `<div class="lastnote ${s.last.ok ? "ok" : "bad"}">${ic(s.last.ok ? "check" : "x", "ic xs")} Vorherige Frage ${s.last.ok ? "gewusst" : "nicht gewusst"} ${trans(s.last.f, s.last.t)}${s.last.id ? `<span class="nexttxt">${nextTxt(s.last.id)}</span>` : ""}</div>` : "";
     el.innerHTML = `<div class="quiz t-${tcolOf(t.teil)}">
       <div class="quiz-top"><button type="button" class="iconbtn" id="s-close" aria-label="Runde beenden">${ic("x")}</button><div class="prog"><span>${esc(s.title)}</span><div class="bar"><i style="width:${s.i / s.ids.length * 100}%"></i></div></div><span class="qcount num">${s.i + 1} / ${s.ids.length}</span><a class="iconbtn report" href="${reportUrl(q)}" target="_blank" rel="noopener" aria-label="Fehler in dieser Frage melden" title="Fehler melden">${ic("flag")}</a><button type="button" class="iconbtn star ${marked ? "marked" : ""}" id="s-mark" aria-pressed="${marked}" aria-label="${marked ? "Markierung entfernen" : "Frage markieren"}" title="Markieren">${ic("star")}</button></div>
       ${lastNote}
       <section class="card qcard">
-        <div class="qlab"><span class="stat-chip"><i class="amp ${sv >= 0 ? "s" + sv : ""}"></i>${ST_LBL[sv]}</span><span class="chip">${q.type === "mc" ? "Auswahlfrage" : q.own ? "Eigene Frage" : "Wissensfrage"}</span>${multi ? `<span class="chip tchip">${esc(t.n)}</span>` : ""}</div>
+        <div class="qlab"><span class="stat-chip"><i class="amp ${sv >= 0 ? "s" + sv : ""}"></i>${ST_LBL[sv]}</span><span class="chip">${q.type === "mc" ? "Auswahlfrage" : q.own ? "Eigene Frage" : "Wissensfrage"}</span>${multi ? `<span class="chip tchip">${mixed ? "Wiederholung · " : ""}${esc(t.n)}</span>` : ""}</div>
         ${frontHTML(q.q)}
         ${body}
       </section>
@@ -3060,7 +3119,11 @@ INSERT INTO Konto VALUES (1,'Weingut Becker',1500.00),(2,'Klinik am Rhein',320.0
     const nx = $("#s-next"); if (nx) nx.onclick = sessNext;
     const rv = $("#s-reveal"); if (rv) rv.onclick = reveal;
     const no = $("#s-no"); if (no) no.onclick = () => rateCard(false);
+    const un = $("#s-unsure"); if (un) un.onclick = () => rateCard(true, true);
     const yes = $("#s-yes"); if (yes) yes.onclick = () => rateCard(true);
+    const gs = $("#s-guess"); if (gs) gs.onclick = markGuess;
+    const so = $("#s-opts"); if (so) so.onclick = () => { s.optOpen = true; keepSess(); render(); const f = $(".opt:not(:disabled)"); if (f) f.focus({ preventScroll: true }); };
+    const own = $("#s-own"); if (own) { own.addEventListener("input", () => { s.own = own.value; clearTimeout(cmSave); cmSave = setTimeout(keepSess, 400); }); own.addEventListener("keydown", (e) => { if ((e.ctrlKey || e.metaKey) && e.key === "Enter") { e.preventDefault(); reveal(); } }); }
     if (CODE[q.id] && !q.own) mountEditors(el, { docs: { user: (s.code || {})[q.id] || "", sol: q.a }, onChange: (v) => { s.code = s.code || {}; s.code[q.id] = v; clearTimeout(cmSave); cmSave = setTimeout(keepSess, 400); }, onSubmit: () => { clearTimeout(cmSave); keepSess(); reveal(); }, onRun: CODE[q.id] === "sql" ? () => sqlRun(s, q) : null });
     if (CODE[q.id] === "sql" && !q.own) bindSQL(el, s, q);
     else if (EDS.length) { EDS.forEach((e) => e.destroy()); EDS = []; }
@@ -3133,8 +3196,8 @@ INSERT INTO Konto VALUES (1,'Weingut Becker',1500.00),(2,'Klinik am Rhein',320.0
       <div class="parts">${parts.map(({ p, c: pc }) => `<section class="card part t-${tcolOf(p)}"><div class="row">${ring(pc.pct, 58, 6, `<span class="tiny">${Math.round(pc.pct * 100)}%</span>`, "anim")}<div style="flex:1;min-width:0"><span class="tiny muted">${p === "wiso" ? "SoWi · 60 Min." : p === "t1" ? "Teil 1 · 90 Min." : "Teil 2 · 90 Min."}</span><h3>${TEIL[p].k}</h3></div></div>${ampBar(pc)}<div class="row"><span class="tiny muted">${pc.g} von ${pc.t} grün</span><span class="spacer"></span><button type="button" class="btn small" data-part="${p}">${ic("play", "ic xs")} Lernen</button></div></section>`).join("")}</div>
       <div class="grid2">
         <section class="card">
-          <h3>Lernempfehlung</h3>
-          <p class="muted small" style="margin-top:4px">${need ? `Damit bis zum ${dayBefore} alle Fragen grün sind, beantworte jeden Tag etwa <b class="ink">${perDay} Fragen</b>${dueN ? `, dazu heute <b class="ink">${dueN} fällige Wiederholungen</b>` : ""}. Am letzten Tag nur noch eine Simulation.` : dueN ? `Alle Fragen sind grün. Heute sind <b class="ink">${dueN} Wiederholungen</b> fällig, damit das Wissen frisch bleibt.` : "Alle Fragen sind grün. Halte das Wissen mit Simulationen und Real-Klausuren frisch."}</p>
+          <div class="row"><h3>Heute laut Lernplan</h3><span class="spacer"></span><button type="button" class="linkbtn" data-go2="plan">Ganzer Plan</button></div>
+          ${todayPlanHTML()}
           <div class="today"><span>Heute beantwortet</span><b class="num">${todayN}${perDay ? ` von ${perDay}` : ""}</b></div>
           <div class="bar"><i style="width:${perDay ? Math.min(100, todayN / perDay * 100) : 100}%"></i></div>
         </section>
@@ -3152,16 +3215,133 @@ INSERT INTO Konto VALUES (1,'Weingut Becker',1500.00),(2,'Klinik am Rhein',320.0
 `;
     el.querySelectorAll("[data-go2]").forEach((b) => b.onclick = () => navTo(b.dataset.go2));
     el.querySelectorAll("[data-part]").forEach((b) => b.onclick = () => learnList("part", b.dataset.part));
+    bindPlan(el);
     el.querySelectorAll("[data-kind]").forEach((b) => b.onclick = () => learnList(b.dataset.kind));
     bindTopicRows(el);
   }
 
 
+
+  // ---------- Fehlerprotokoll: Ursachen für Punktverluste
+  const CAUSES = { wissen: ["Wissen gefehlt", "book"], operator: ["Operator verfehlt", "bulb"], aufgabe: ["Aufgabe falsch verstanden", "eye"], zeit: ["Zeit gefehlt", "clock"], fluecht: ["Flüchtigkeitsfehler", "alert"] };
+  const CAUSE_TIP = {
+    wissen: ["Theorie des Themas lesen und Lernrunden machen, bis die Ampel grün ist.", "lernen"],
+    operator: ["Operator-Trainer: Welche Antworttiefe verlangt „Nennen“, „Erläutern“, „Beurteilen“?", "operatoren"],
+    aufgabe: ["Aufgabentext zweimal lesen, Operator und Punkte markieren, Bezug zur Situation herstellen.", "tipps"],
+    zeit: ["Aufgaben mit Timer üben: Punkte = Minuten als Richtwert, nicht an einer Teilaufgabe festbeißen.", "aufgaben"],
+    fluecht: ["Am Ende 5 Minuten zur Kontrolle einplanen: Einheiten, Vorzeichen, Schleifengrenzen, Semikolons.", "tipps"]
+  };
+  const causeChips = (sel, attr) => `<div class="causes" role="group" aria-label="Ursache">${Object.entries(CAUSES).map(([k, [l, i]]) => `<button type="button" class="chip cause ${sel === k ? "on" : ""}" ${attr}="${k}" aria-pressed="${sel === k}">${ic(i, "ic xs")} ${l}</button>`).join("")}</div>`;
+  function logCause(src, ref, pts, cause) {
+    S.errlog = (S.errlog || []).filter((x) => !(x.src === src && x.ref === ref && x.at === today()));
+    if (cause) S.errlog.push({ at: today(), src, ref, pts, cause });
+    save();
+  }
+  function errSummaryHTML() {
+    const log = S.errlog || [];
+    if (!log.length) return `<section class="card"><h3>Deine Fehlerursachen</h3><p class="small muted" style="margin-top:4px">Nach Real-Klausuren und Übungsaufgaben kannst du jedem Punktverlust eine Ursache zuordnen. Hier siehst du dann, woran es am häufigsten liegt – und was dagegen hilft.</p></section>`;
+    const sum = {}; log.forEach((x) => { sum[x.cause] = (sum[x.cause] || 0) + (x.pts || 0); });
+    const tot = Object.values(sum).reduce((a, b) => a + b, 0) || 1, rows = Object.entries(sum).sort((a, b) => b[1] - a[1]);
+    return `<section class="card"><div class="row"><h3>Deine Fehlerursachen</h3><span class="spacer"></span><span class="small muted">${log.length} Einträge · ${dec(tot)} P verloren</span></div>
+      <div class="stack" style="margin-top:12px">${rows.map(([k, v], n) => `<div><div class="row"><b>${ic(CAUSES[k][1], "ic xs")} ${CAUSES[k][0]}</b><span class="spacer"></span><span class="small num">${dec(v)} P · ${Math.round(v / tot * 100)} %</span></div><div class="bar" style="margin-top:6px"><i style="width:${v / tot * 100}%"></i></div>${n === 0 ? `<p class="small" style="margin:8px 0 0"><b>Tipp:</b> ${CAUSE_TIP[k][0]} <button type="button" class="linkbtn" data-go2="${CAUSE_TIP[k][1]}">Los</button></p>` : ""}</div>`).join("")}</div></section>`;
+  }
+  // Operator-Trainer: Welche Antwort erfüllt den Operator? (je 3 Antworten, eine passt)
+  const OPDRILLS = [
+    { op: "Nennen", q: "Nennen Sie zwei Schutzziele der Informationssicherheit. (2 P)", opts: ["Vertraulichkeit, Integrität", "Sicherheit und Schutz der Daten", "Vertraulichkeit"], right: 0, why: "Bei „Nennen“ genügen Stichworte – je richtigem Aspekt ein Punkt. „Sicherheit und Schutz“ ist zu ungenau, eine einzige Nennung bringt nur 1 von 2 Punkten." },
+    { op: "Nennen", q: "Nennen Sie drei Phasen des Wasserfallmodells. (3 P)", opts: ["In der Analyse werden die Anforderungen erhoben, mit dem Kunden abgestimmt und im Lastenheft dokumentiert.", "Analyse, Entwurf, Implementierung", "Sprint Planning, Daily Scrum, Review"], right: 1, why: "Drei Stichworte = drei Punkte. Die ausführliche Beschreibung einer einzigen Phase kostet viel Zeit und bringt nur einen Punkt. Die dritte Antwort gehört zu Scrum." },
+    { op: "Beschreiben", q: "Beschreiben Sie den Ablauf eines Sprints in Scrum. (4 P)", opts: ["Sprint Planning, Daily Scrum, Review, Retrospektive.", "Im Sprint Planning wählt das Team Einträge aus dem Product Backlog und plant sie. Täglich stimmt es sich im Daily Scrum ab. Am Ende zeigt es das Ergebnis im Sprint Review und verbessert in der Retrospektive die Zusammenarbeit.", "Scrum ist besser als das Wasserfallmodell, weil der Kunde schneller Ergebnisse sieht."], right: 1, why: "„Beschreiben“ heißt: Sachverhalt in ganzen Sätzen und sinnvoller Reihenfolge darstellen. Eine Aufzählung ist nur „Nennen“, die Wertung beantwortet eine andere Frage." },
+    { op: "Erläutern", q: "Ein Online-Shop zählt die Bestellungen je Kunde. Erläutern Sie, warum dafür ein LEFT JOIN nötig ist. (4 P)", opts: ["Weil sonst Kunden fehlen.", "Ein INNER JOIN liefert nur Kunden mit mindestens einer Bestellung. Der LEFT JOIN behält alle Kunden; fehlt eine Bestellung, stehen NULL-Werte in den Bestellspalten. So erscheint z. B. ein Neukunde mit 0 Bestellungen.", "Der LEFT JOIN ist ein Join-Typ in SQL, der zwei Tabellen verbindet."], right: 1, why: "„Erläutern“ = beschreiben und mit Begründung oder Beispiel verständlich machen. Die kurze Antwort ist nur eine Behauptung (höchstens die Hälfte der Punkte), die dritte erklärt den Begriff, aber nicht das Warum." },
+    { op: "Erläutern", q: "Eine Tierarztpraxis speichert Halterdaten. Erläutern Sie einen Vorteil der 3. Normalform für die Praxis. (4 P)", opts: ["Redundanz wird vermieden: Die Adresse eines Halters steht nur einmal in der Tabelle Halter. Zieht er um, wird sie an einer Stelle geändert – widersprüchliche Adressen (Änderungsanomalien) entstehen nicht.", "Weniger Redundanz.", "Die 3. Normalform ist besser als die 2. Normalform."], right: 0, why: "Volle Punkte gibt es nur mit Erläuterung und Bezug zur Situation (hier: Praxis, Halteradresse). „Weniger Redundanz“ ist nur genannt." },
+    { op: "Erklären", q: "Erklären Sie, warum die binäre Suche eine sortierte Liste voraussetzt. (4 P)", opts: ["Weil sie sonst nicht funktioniert.", "Die binäre Suche hat die Laufzeit O(log n).", "Sie vergleicht mit dem mittleren Element und verwirft dann eine Hälfte. Das ist nur korrekt, wenn alle kleineren Werte links und alle größeren rechts liegen – also bei sortierten Daten."], right: 2, why: "„Erklären“ verlangt den Zusammenhang (Warum?). Die Laufzeit stimmt, beantwortet aber nicht die Frage." },
+    { op: "Begründen", q: "Begründen Sie, warum Passwörter gehasht und nicht verschlüsselt gespeichert werden. (3 P)", opts: ["Hashing ist sicherer.", "Mit bcrypt und einem zufälligen Salt pro Benutzer.", "Das Passwort muss nie wieder im Klartext vorliegen – zur Prüfung reicht der Vergleich der Hashes. Verschlüsselte Passwörter könnte jeder mit dem Schlüssel zurückrechnen, ein Hash ist nicht umkehrbar."], right: 2, why: "„Begründen“ braucht ein tragfähiges Argument. „Sicherer“ ist eine Behauptung ohne Grund, bcrypt + Salt beschreibt das Wie, nicht das Warum." },
+    { op: "Beurteilen", q: "Ein Weingut ohne eigene IT-Abteilung überlegt, seine Kundendaten in der Cloud zu speichern. Beurteilen Sie das Vorhaben. (4 P)", opts: ["Vorteile: keine eigene Hardware, Backups und Updates durch den Anbieter. Nachteile: Abhängigkeit vom Anbieter, Datenschutz. Da das Weingut keine eigene IT hat, überwiegen die Vorteile – sofern ein Rechenzentrum in der EU und ein Auftragsverarbeitungsvertrag vereinbart werden.", "Vorteile: keine eigene Hardware. Nachteile: Abhängigkeit vom Anbieter, Datenschutz.", "Ja, die Cloud ist gut."], right: 0, why: "„Beurteilen/Bewerten“ = abwägen und zu einem eigenen, begründeten Urteil mit Bezug zur Situation kommen. Ohne Urteil fehlt der wichtigste Teil, ein Urteil ohne Begründung bringt kaum Punkte." },
+    { op: "Abwägen", q: "Wägen Sie Eigenentwicklung und Standardsoftware für die Buchhaltung eines Handwerksbetriebs ab. (4 P)", opts: ["Standardsoftware ist schnell verfügbar und erprobt, aber begrenzt anpassbar. Eine Eigenentwicklung passt genau, kostet aber viel Zeit und Geld. Da Buchhaltung ein Standardprozess ist, spricht mehr für Standardsoftware.", "Standardsoftware ist schnell verfügbar und günstig.", "Eine Eigenentwicklung ist teuer."], right: 0, why: "Beim Abwägen gehören Pro und Contra beider Seiten dazu und am Ende ein begründetes Ergebnis. Eine einseitige Antwort erfüllt den Operator nicht." },
+    { op: "Vergleichen", q: "Vergleichen Sie Wasserfallmodell und Scrum hinsichtlich Planung und Kundeneinbindung. (4 P)", opts: ["Scrum arbeitet in Sprints, der Kunde sieht regelmäßig Ergebnisse.", "Planung: Wasserfall plant alles vorab im Lastenheft, Scrum plant iterativ pro Sprint. Kundeneinbindung: Beim Wasserfall vor allem am Anfang und bei der Abnahme, bei Scrum laufend im Sprint Review.", "Wasserfall ist alt, Scrum ist modern und agil."], right: 1, why: "„Vergleichen“ = beide Seiten nach denselben Kriterien gegenüberstellen. Die erste Antwort beschreibt nur Scrum, die dritte nennt kein Kriterium." },
+    { op: "Unterscheiden", q: "Unterscheiden Sie Aggregation und Komposition. (2 P)", opts: ["Beide sind Ganzes-Teil-Beziehungen.", "Bei der Komposition ist das Teil existenzabhängig vom Ganzen (gefüllte Raute), bei der Aggregation kann es allein weiterbestehen (leere Raute).", "Die Komposition ist stärker."], right: 1, why: "Beim „Unterscheiden“ muss der Unterschied ausdrücklich genannt sein. Die Gemeinsamkeit bringt keine Punkte, „stärker“ ist zu ungenau." },
+    { op: "Berechnen", q: "Berechnen Sie den Speicherbedarf von 1.000 Bildern mit je 2 MiB in GiB. (3 P)", opts: ["1,95 GiB", "1.000 · 2 MiB = 2.000 MiB; 2.000 MiB ÷ 1.024 ≈ 1,95 GiB", "2.000 MiB ÷ 1.000 = 2 GiB"], right: 1, why: "Beim „Berechnen“ zählt der Rechenweg mit Einheiten. Nur das Ergebnis kann Punkte kosten; die dritte Antwort rechnet mit 1.000 statt 1.024 – bei MiB/GiB falsch." }
+  ];
+
+  const OP_LADDER = [
+    ["I", "Wiedergeben", [["Nennen / Angeben", "Stichworte genügen. Punkte je Aspekt.", "Hashen mit Salt."]]],
+    ["II", "Darstellen und erklären", [["Beschreiben", "Ganze Sätze, sinnvolle Reihenfolge, ohne Wertung.", "Beim Speichern wird ein zufälliger Salt erzeugt, Passwort und Salt werden mit bcrypt gehasht und gespeichert."], ["Erläutern / Erklären", "Beschreiben + Begründung oder Beispiel, Bezug zur Situation.", "… Dadurch ergeben gleiche Passwörter unterschiedliche Hashes – vorberechnete Tabellen (Rainbow Tables) helfen einem Angreifer nicht."], ["Vergleichen / Unterscheiden", "Beide Seiten nach gleichen Kriterien, Unterschied ausdrücklich nennen.", "Hashing ist nicht umkehrbar, Verschlüsselung schon – deshalb Hashing für Passwörter."], ["Berechnen", "Rechenweg mit Einheiten, Ergebnis markieren.", ""], ["Erstellen / Entwickeln", "Vollständige Lösung (Pseudocode, SQL, Diagramm) nach Vorgabe.", ""]]],
+    ["III", "Urteilen", [["Begründen", "Entscheidung + tragfähiges Argument.", "Hashing, weil das Passwort nie wieder im Klartext gebraucht wird."], ["Beurteilen / Bewerten / Abwägen", "Pro und Contra, dann eigenes begründetes Urteil mit Bezug zur Situation.", "Für das Kundenportal ist bcrypt mit Salt angemessen: etwas langsamer beim Login, aber Brute Force wird stark erschwert."]]]
+  ];
+  function rOperatoren() {
+    const el = $("#v-operatoren");
+    UI.od = UI.od || null;
+    const d = UI.od;
+    let drill;
+    if (!d) drill = `<section class="card"><h3>Training: Welche Antwort erfüllt den Operator?</h3><p class="small muted" style="margin-top:4px">${OPDRILLS.length} kurze Aufgaben. Du wählst die Antwort, die die volle Punktzahl bekommt – und lernst, wie tief du je Operator antworten musst.</p><div class="row" style="margin-top:12px"><button type="button" class="btn primary" id="od-go">${ic("play", "ic sm")} Training starten</button></div></section>`;
+    else if (d.i >= d.order.length) drill = `<section class="card"><h3>${d.score} von ${d.order.length} richtig</h3><p class="small muted" style="margin-top:4px">${d.score === d.order.length ? "Stark – du triffst die Antworttiefe sicher." : "Lies dir die Operator-Treppe oben noch einmal durch und starte das Training erneut."}</p><div class="row" style="margin-top:12px"><button type="button" class="btn primary" id="od-go">${ic("again", "ic sm")} Noch einmal</button></div></section>`;
+    else {
+      const x = OPDRILLS[d.order[d.i]], picked = d.pick !== null;
+      drill = `<section class="card qcard"><div class="row"><span class="chip violet">${esc(x.op)}</span><span class="spacer"></span><span class="small muted num">${d.i + 1} / ${d.order.length} · ${d.score} richtig</span></div>
+        <div class="front" style="margin-top:10px">${esc(x.q)}</div><p class="small muted">Welche Antwort bekommt die volle Punktzahl?</p>
+        <div class="optlist">${x.opts.map((o, k) => `<button type="button" class="opt ${picked ? (k === x.right ? "right" : k === d.pick ? "wrong" : "") : ""}" data-od="${k}" ${picked ? "disabled" : ""}><span class="k">${"ABC"[k]}</span><span>${esc(o)}</span></button>`).join("")}</div>
+        ${picked ? `<div class="feedback ${d.pick === x.right ? "ok" : "bad"}" style="margin-top:12px"><span class="fi">${ic(d.pick === x.right ? "check" : "x")}</span><div><b>${d.pick === x.right ? "Richtig" : "Nicht ganz"}</b><p>${esc(x.why)}</p></div><button type="button" class="btn primary" id="od-next">${d.i + 1 < d.order.length ? "Weiter" : "Auswertung"} ${ic("right", "ic sm")}</button></div>` : ""}</section>`;
+    }
+    el.innerHTML = `
+      <section class="card"><h3>Die Operator-Treppe</h3><p class="small muted" style="margin-top:4px">Der Operator am Satzanfang bestimmt, wie ausführlich du antworten musst. Zu knapp kostet Punkte, zu ausführlich kostet Zeit. Beispiel durchgehend: Passwörter speichern.</p>
+        <div class="ladder">${OP_LADDER.map(([lv, name, ops]) => `<div class="lad"><div class="lad-h"><span class="lad-n">${lv}</span><b>${name}</b></div>${ops.map(([o, t, ex]) => `<div class="lad-op"><b>${esc(o)}</b><span class="small muted">${esc(t)}</span>${ex ? `<span class="lad-ex">${esc(ex)}</span>` : ""}</div>`).join("")}</div>`).join("")}</div>
+      </section>
+      ${drill}`;
+    const go = $("#od-go"); if (go) go.onclick = () => { UI.od = { i: 0, pick: null, score: 0, order: shuffle(OPDRILLS.map((_, k) => k)) }; render(); };
+    el.querySelectorAll("[data-od]").forEach((b) => b.onclick = () => { const x = OPDRILLS[d.order[d.i]]; d.pick = +b.dataset.od; if (d.pick === x.right) d.score++; render(); const n = $("#od-next"); if (n) n.focus({ preventScroll: true }); });
+    const nx = $("#od-next"); if (nx) nx.onclick = () => { d.i++; d.pick = null; render(); };
+  }
+
+  // ---------- Lernplan bis zur Prüfung (passt sich täglich dem Lernstand an)
+  const WDL = ["Sonntag", "Montag", "Dienstag", "Mittwoch", "Donnerstag", "Freitag", "Samstag"];
+  const wdOf = (d) => new Date(d + "T12:00:00").getDay();
+  function buildPlan() {
+    const days = []; for (let d = today(); d < EXAM_DAY && days.length < 120; d = addDays(d, 1)) days.push(d);
+    const plan = {}; days.forEach((d) => (plan[d] = []));
+    if (!days.length) return { days, plan, per: 0, total: 0 };
+    const last = days[days.length - 1];
+    const study = days.filter((d) => d !== last && wdOf(d) !== 0);
+    const topics = TOPICS.slice().sort((a, b) => teilRank(a) - teilRank(b) || (a.prio === "Muss" ? 0 : 1) - (b.prio === "Muss" ? 0 : 1)).map((t) => ({ t, open: topicQ(t.id).filter((q) => st(q.id) !== 2).length })).filter((x) => x.open > 0);
+    const total = topics.reduce((a, x) => a + x.open, 0), per = study.length ? Math.ceil(total / study.length) : total;
+    let di = 0, cap = per;
+    topics.forEach((x) => { let rest = x.open; while (rest > 0 && di < study.length) { const take = Math.min(rest, cap); plan[study[di]].push({ kind: "topic", tid: x.t.id, n: take }); rest -= take; cap -= take; if (cap <= 0) { di++; cap = per; } } });
+    let k = 0; days.filter((d) => wdOf(d) === 0 && d !== last).forEach((d) => plan[d].push({ kind: "sim", teil: ["t1", "t2", "wiso"][k++ % 3] }));
+    days.filter((d) => wdOf(d) === 3 && d !== last).forEach((d) => plan[d].push({ kind: "op" }));
+    plan[last].push({ kind: "final" });
+    return { days, plan, per, total };
+  }
+  function planItemHTML(it, isToday) {
+    if (it.kind === "topic") { const t = TP[it.tid]; return `<li><span class="pi-ic">${ic(t.ic, "ic sm")}</span><span class="pi-t"><b>${esc(t.n)}</b><span class="small muted">${it.n} Fragen · ${esc(t.teil)}</span></span>${isToday ? `<button type="button" class="btn small" data-plan-topic="${it.tid}">${ic("play", "ic xs")} Lernen</button>` : ""}</li>`; }
+    if (it.kind === "sim") return `<li><span class="pi-ic">${ic("timer", "ic sm")}</span><span class="pi-t"><b>Prüfung simulieren: ${TEIL[it.teil].k}</b><span class="small muted">${it.teil === "wiso" ? "Simulation, 60 Min." : "Real-Klausur, 90 Min."} · danach Fehlerursachen eintragen</span></span>${isToday ? `<button type="button" class="btn small" data-plan-sim="${it.teil}">Starten</button>` : ""}</li>`;
+    if (it.kind === "op") return `<li><span class="pi-ic">${ic("bulb", "ic sm")}</span><span class="pi-t"><b>Operator-Trainer</b><span class="small muted">10 Min. · Antworttiefe üben</span></span>${isToday ? `<button type="button" class="btn small" data-plan-go="operatoren">Öffnen</button>` : ""}</li>`;
+    return `<li><span class="pi-ic">${ic("star", "ic sm")}</span><span class="pi-t"><b>Nur wiederholen</b><span class="small muted">Fällige Fragen und Fehler, Tipps lesen, nichts Neues. Früh schlafen.</span></span>${isToday ? `<button type="button" class="btn small" data-plan-go="tipps">Tipps</button>` : ""}</li>`;
+  }
+  function bindPlan(el) {
+    el.querySelectorAll("[data-plan-topic]").forEach((b) => b.onclick = () => learnTopic(b.dataset.planTopic));
+    el.querySelectorAll("[data-plan-sim]").forEach((b) => b.onclick = () => { const t = b.dataset.planSim; UI.pk = { mode: t === "wiso" ? "sim" : "real", teil: t }; navTo("pruefung"); });
+    el.querySelectorAll("[data-plan-go]").forEach((b) => b.onclick = () => navTo(b.dataset.planGo));
+    el.querySelectorAll("[data-plan-due]").forEach((b) => b.onclick = () => learnList("due"));
+  }
+  function todayPlanHTML(compact) {
+    const P = buildPlan(), t0 = today(), items = P.plan[t0] || [], dueN = allQ().filter((q) => isDue(q.id)).length;
+    return `<ul class="plan-items">${dueN ? `<li><span class="pi-ic">${ic("again", "ic sm")}</span><span class="pi-t"><b>Fällige Wiederholungen</b><span class="small muted">${dueN} Fragen · zuerst erledigen</span></span><button type="button" class="btn small primary" data-plan-due>Starten</button></li>` : ""}${items.map((it) => planItemHTML(it, true)).join("") || (dueN ? "" : `<li><span class="pi-t small muted">Heute steht nichts Neues an.</span></li>`)}</ul>`;
+  }
+  function rPlan() {
+    const el = $("#v-plan"), P = buildPlan(), t0 = today();
+    el.innerHTML = `
+      <section class="card"><h3>Dein Lernplan bis zum ${EXAM_DE}</h3><p class="small muted" style="margin-top:4px">Alle ${P.total} noch nicht grünen Fragen sind auf die Lerntage verteilt – Teil 1 zuerst, Pflichtthemen vor den übrigen, etwa ${P.per} Fragen pro Tag. Sonntags: Prüfung simulieren. Mittwochs: Operator-Trainer. Jeden Tag zuerst die fälligen Wiederholungen. Der Plan rechnet sich täglich neu aus deinem Lernstand.</p></section>
+      ${P.days.length ? `<ol class="plan-days">${P.days.map((d) => `<li class="${d === t0 ? "today" : ""} ${wdOf(d) === 0 ? "sun" : ""}"><div class="pd-date"><b>${d === t0 ? "Heute" : WDL[wdOf(d)]}</b><span class="small muted">${fmtDay(d)}</span></div><ul class="plan-items">${d === t0 ? "" : `<li class="rep"><span class="small muted">${ic("again", "ic xs")} + fällige Wiederholungen</span></li>`}${P.plan[d].map((it) => planItemHTML(it, d === t0)).join("")}</ul>${d === t0 ? `<div class="pd-today">${todayPlanHTML()}</div>` : ""}</li>`).join("")}</ol>` : `<p class="empty">Die Prüfung ist heute oder vorbei – viel Erfolg!</p>`}`;
+    const td = el.querySelector("li.today > .plan-items"); if (td) td.remove();
+    bindPlan(el);
+  }
   // ---------- Tipps (allgemein, nicht themenspezifisch)
   function rTipps() {
     const el = $("#v-tipps"), X = PK.X01;
     const weak = TOPICS.map((t) => ({ t, c: counts(topicQ(t.id)) })).filter((x) => x.c.t && x.c.open).sort((a, b) => (a.t.prio === "Muss" ? 0 : 1) - (b.t.prio === "Muss" ? 0 : 1) || a.c.pct - b.c.pct || teilRank(a.t) - teilRank(b.t)).slice(0, 5);
     el.innerHTML = `
+      <div class="tip-cards">
+        <button type="button" class="card tip-card" data-go2="operatoren">${ic("bulb", "ic")}<b>Operator-Trainer</b><span class="small muted">Wie ausführlich bei „Nennen“, „Erläutern“, „Beurteilen“? ${OPDRILLS.length} Übungen.</span></button>
+        <button type="button" class="card tip-card" data-go2="plan">${ic("calendar", "ic")}<b>Lernplan bis ${EXAM_DE}</b><span class="small muted">Was du an welchem Tag lernst – passt sich deinem Stand an.</span></button>
+      </div>
+      ${errSummaryHTML()}
       ${X ? `<section class="card"><div class="row"><h3>So holst du die Punkte</h3><span class="spacer"></span><span class="small muted">Prüfungstechnik</span></div><p class="small muted" style="margin-top:4px">${esc(X.relevanz)}</p><div class="kern-list">${X.kern.map(([h, t, c], i) => `<details class="kern" ${i === 0 ? "open" : ""}><summary><span class="kn">${i + 1}</span><span>${esc(h)}</span>${ic("down", "ic chev")}</summary><div class="kb"><p>${esc(t)}</p>${c ? `<pre>${esc(c)}</pre>` : ""}</div></details>`).join("")}</div>
         ${X.fallen && X.fallen.length ? `<div class="sub-box fallen-box"><h4>${ic("alert", "ic sm")} Hier verlieren Prüflinge Punkte</h4><ul class="fallen">${X.fallen.map((x) => `<li><span>${esc(x)}</span></li>`).join("")}</ul></div>` : ""}</section>` : ""}
       ${weak.length ? `<section class="sec"><div class="sec-head"><h2>Hier holst du am meisten raus</h2><span class="spacer"></span><button type="button" class="linkbtn" data-go2="lernen">Alle Themen</button></div><p class="small muted" style="margin:-4px 2px 10px">Pflichtthemen mit dem größten Rückstand – nach deinem Lernstand sortiert.</p><div class="tlist">${weak.map((x) => topicRow(x.t)).join("")}</div></section>` : ""}
@@ -3249,12 +3429,14 @@ INSERT INTO Konto VALUES (1,'Weingut Becker',1500.00),(2,'Klinik am Rhein',320.0
     const need = all.reduce((a, q) => { const s0 = st(q.id); return a + (s0 === 2 ? 0 : s0 === 1 ? 1 : 2); }, 0);
     const perDay = need ? Math.ceil(need / Math.max(1, left - 1)) : 0;
     const steps = [
+      ["calendar", "Dem Lernplan folgen", "Der Lernplan verteilt alle offenen Fragen bis zum Vortag der Prüfung auf die Tage – Teil 1 zuerst. In der Übersicht steht immer, was heute dran ist.", `<button type="button" class="btn small primary" data-tut="plan">Lernplan ansehen</button>`],
       ["again", "Jeden Tag zuerst: fällige Wiederholungen", "10–15 Min. Fragen, die du schon kannst, kommen nach 1, 3, 7, 14 und 30 Tagen wieder. So bleibt das Wissen bis zur Prüfung frisch.", dueN ? `<button type="button" class="btn small primary" data-tut="due">Fällige wiederholen (${dueN})</button>` : `<span class="small muted">Heute nichts fällig.</span>`],
-      ["book", "Thema für Thema: erst Theorie, dann Fragen", "Unter Lernen ein Thema öffnen, die Theorie lesen (Lernzeit-Timer starten) und dann Lernrunden à 20 Fragen machen, bis die Ampel grün ist. Rote Fragen kommen automatisch zuerst.", `<button type="button" class="btn small" data-tut="lernen">Zu den Themen</button>`],
+      ["book", "Thema für Thema: erst Theorie, dann Fragen", "Unter Lernen ein Thema öffnen, die Theorie lesen (Lernzeit-Timer starten) und dann Lernrunden à 20 Fragen machen, bis die Ampel grün ist. Erst selbst antworten, dann Optionen bzw. Lösung ansehen. Bist du unsicher, sag es ehrlich – die Frage kommt dann morgen wieder. In jeder Runde stecken ein paar Wiederholungen aus anderen Themen.", `<button type="button" class="btn small" data-tut="lernen">Zu den Themen</button>`],
       ["layers", "Themen mischen", "Unter Lernen mehrere Themen anhaken und gemeinsam üben – zum Beispiel SQL und Datenmodell. Gemischt üben trainiert, Aufgaben zu erkennen, statt sie nur zu wiederholen.", `<button type="button" class="btn small" data-tut="lernen">Themen auswählen</button>`],
       ["code", "Code schreiben, nicht nur lesen", "Bei Pseudocode- und SQL-Karten deine Lösung im Editor tippen, SQL mit Shift + Enter ausführen und mit der Musterlösung vergleichen.", `<button type="button" class="btn small" data-tut="code">Code-Karte üben</button>`],
       ["pencil", "Große Aufgaben auf Papier, mit Timer", "Unter Aufgaben eine Aufgabe starten – der Timer läuft mit der Prüfungszeit. Auf Papier lösen, Stopp drücken, mit der Musterlösung vergleichen und Punkte eintragen.", `<button type="button" class="btn small" data-tut="aufgaben">Zu den Aufgaben</button>`],
-      ["timer", "Einmal pro Woche: Prüfung simulieren", "Je Teil eine Real-Klausur (Teil 1, Teil 2) bzw. SoWi-Simulation unter Zeitdruck. Danach Fehler auswerten.", `<button type="button" class="btn small" data-tut="pruefung">Zur Prüfung</button>`],
+      ["bulb", "Operatoren beherrschen", "Der Operator bestimmt die Antworttiefe: „Nennen“ = Stichwort, „Erläutern“ = mit Begründung oder Beispiel, „Beurteilen“ = mit eigenem Urteil. Im Operator-Trainer übst du genau das.", `<button type="button" class="btn small" data-tut="operatoren">Operator-Trainer</button>`],
+      ["timer", "Einmal pro Woche: Prüfung simulieren", "Je Teil eine Real-Klausur (Teil 1, Teil 2) bzw. SoWi-Simulation unter Zeitdruck. Beim Bewerten jedem Punktverlust eine Ursache zuordnen – unter Tipps siehst du, woran es am häufigsten liegt.", `<button type="button" class="btn small" data-tut="pruefung">Zur Prüfung</button>`],
       ["bulb", "Letzte Woche: festigen statt neu lernen", "Nur noch fällige Wiederholungen, Fehlerfragen und Simulationen. Prüfungstechnik unter Tipps lesen. Am Tag vor der Prüfung nichts Neues mehr.", `<button type="button" class="btn small" data-tut="tipps">Zu den Tipps</button>`]
     ];
     el.innerHTML = `
@@ -3400,12 +3582,14 @@ INSERT INTO Konto VALUES (1,'Weingut Becker',1500.00),(2,'Klinik am Rhein',320.0
         <p class="small muted" style="margin-top:12px">${ust === "run" ? "Löse die Aufgabe auf Papier wie in der Prüfung. Wenn du fertig bist: Stopp drücken, dann siehst du die Musterlösung." : "Löse die Aufgabe auf Papier wie in der Prüfung, erst dann die Lösung ansehen."}</p>
         ${ust === "run" ? "" : `<div class="row" style="margin-top:14px"><button type="button" class="btn ${UI.showSol ? "" : "primary"}" id="u-sol">${UI.showSol ? "Lösung ausblenden" : "Musterlösung zeigen"}</button></div>`}`}
         ${UI.showSol && ust !== "run" && (ust !== "idle" || UI.uFree) ? `<pre style="margin-top:14px">${esc(u.loesung)}</pre>
-        <div class="row" style="margin-top:14px;align-items:flex-end"><label class="f" for="u-pts">Deine Punkte (0–${u.max})<input type="number" id="u-pts" min="0" max="${u.max}" step="0.5" value="${r ? r.p : ""}"></label><button type="button" class="btn primary" id="u-save">Speichern</button>${r ? `<span class="small muted">Zuletzt ${r.p}/${u.max} am ${fmtDay(r.at)}</span>` : ""}</div>` : ""}
+        <div class="row" style="margin-top:14px;align-items:flex-end"><label class="f" for="u-pts">Deine Punkte (0–${u.max})<input type="number" id="u-pts" min="0" max="${u.max}" step="0.5" value="${r ? r.p : ""}"></label><button type="button" class="btn primary" id="u-save">Speichern</button>${r ? `<span class="small muted">Zuletzt ${r.p}/${u.max} am ${fmtDay(r.at)}</span>` : ""}</div>
+        ${r && r.p < u.max ? `<div class="cause-box"><span class="small muted">Fehlerprotokoll: Warum fehlen ${dec(u.max - r.p)} P?</span>${causeChips(r.cause, "data-uc")}</div>` : ""}` : ""}
         </section>`;
       $("#u-back").onclick = () => { UI.ueb = null; render(); };
       const ut = $("#u-topic"); if (ut) ut.onclick = () => { UI.topic = tid; UI.ttab = "theorie"; UI.sess = null; go("lernen"); };
       const us = $("#u-sol"); if (us) us.onclick = () => { UI.showSol = !UI.showSol; render(); };
       const uf = $("#u-free"); if (uf) uf.onclick = () => { UI.uFree = true; render(); };
+      el.querySelectorAll("[data-uc]").forEach((b) => b.onclick = () => { const c = r.cause === b.dataset.uc ? null : b.dataset.uc; r.cause = c; logCause("ueb", u.id + " " + u.titel, u.max - r.p, c); const y = window.scrollY; render(); window.scrollTo({ top: y }); });
       bindTM(el);
       const sv = $("#u-save");
       if (sv) sv.onclick = () => { const v = Math.max(0, Math.min(u.max, parseFloat($("#u-pts").value))); if (isNaN(v)) return; S.ueb[u.id] = { p: v, at: today(), n: (r?.n || 0) + 1 }; save(); render(); };
@@ -3624,12 +3808,16 @@ INSERT INTO Konto VALUES (1,'Weingut Becker',1500.00),(2,'Klinik am Rhein',320.0
         ${a.items.map((it, ii) => { const op = opHint(it.q); return `<div class="sub-q"><div class="row"><b>${"abcdefgh"[ii]})</b>${op ? `<span class="chip violet">${esc(op[0])}</span>` : ""}<span class="spacer"></span><span class="small muted">${it.p} P</span></div><div class="qtext small">${esc(it.q)}</div>
           ${op ? `<p class="ophint">${esc(op[1])}</p>` : ""}
           <div class="grade-grid"><div><span class="small muted">Deine Antwort</span><pre class="mine">${esc(it.ans || "(leer)")}</pre></div><div><span class="small muted">Erwartungshorizont</span><pre>${esc(it.a)}</pre></div></div>
-          <div class="row steps">${steps(it.p).map((v, k) => `<button type="button" class="btn small ${it.got === v ? "sel" : ""}" data-g="${ai}|${ii}|${v}" aria-pressed="${it.got === v}">${stepLbl[k]}${k && k < 4 ? ` · ${dec(v)}` : ""}</button>`).join("")}<label class="f inline" for="g-${ai}-${ii}">Punkte <input type="number" id="g-${ai}-${ii}" min="0" max="${it.p}" step="0.5" value="${it.got ?? ""}" data-gi="${ai}|${ii}"></label></div></div>`; }).join("")}</section>`).join("")}
+          <div class="row steps">${steps(it.p).map((v, k) => `<button type="button" class="btn small ${it.got === v ? "sel" : ""}" data-g="${ai}|${ii}|${v}" aria-pressed="${it.got === v}">${stepLbl[k]}${k && k < 4 ? ` · ${dec(v)}` : ""}</button>`).join("")}<label class="f inline" for="g-${ai}-${ii}">Punkte <input type="number" id="g-${ai}-${ii}" min="0" max="${it.p}" step="0.5" value="${it.got ?? ""}" data-gi="${ai}|${ii}"></label></div>${it.got !== null && it.got < it.p ? `<div class="cause-box"><span class="small muted">Warum fehlen ${dec(it.p - it.got)} P?</span>${causeChips(it.cause, `data-cz="${ai}|${ii}" data-c`)}</div>` : ""}</div>`; }).join("")}</section>`).join("")}
       <div class="row"><button type="button" class="btn primary big" id="r-finish" ${graded === all.length ? "" : "disabled"}>Ergebnis speichern (${pct} %)</button><span class="small muted">${graded === all.length ? "" : "Bitte alle Teilaufgaben bewerten."}</span></div>`;
     const setG = (key, v) => { const [ai, ii] = key.split("|").map(Number); const it = r.auf[ai].items[ii]; it.got = Math.max(0, Math.min(it.p, v)); keepRun(); const y = window.scrollY; render(); window.scrollTo({ top: y }); };
     el.querySelectorAll("[data-g]").forEach((b) => b.onclick = () => { const p = b.dataset.g.split("|"); setG(p[0] + "|" + p[1], +p[2]); });
     el.querySelectorAll("[data-gi]").forEach((inp) => inp.onchange = () => { const v = parseFloat(inp.value); if (!isNaN(v)) setG(inp.dataset.gi, v); });
-    $("#r-finish").onclick = () => { r.phase = "done"; finishRun(pct, { detail: dec(got) + "/" + total + " P" }); keepRun(); render(); window.scrollTo({ top: 0 }); };
+    el.querySelectorAll("[data-cz]").forEach((b) => b.onclick = () => { const [ai, ii] = b.dataset.cz.split("|").map(Number), it = r.auf[ai].items[ii]; it.cause = it.cause === b.dataset.c ? null : b.dataset.c; keepRun(); const y = window.scrollY; render(); window.scrollTo({ top: y }); });
+    $("#r-finish").onclick = () => {
+      r.auf.forEach((a, ai) => a.items.forEach((it, ii) => { if (it.cause && it.got < it.p) logCause("real", "Real-Klausur " + TEIL[r.teil].k + " · " + (ai + 1) + "abcdefgh"[ii] + " · " + r.start, it.p - it.got, it.cause); }));
+      r.phase = "done"; finishRun(pct, { detail: dec(got) + "/" + total + " P" }); keepRun(); render(); window.scrollTo({ top: 0 });
+    };
   }
 
   // ---------- Offline-App (Service Worker), Installation, Update-Hinweis

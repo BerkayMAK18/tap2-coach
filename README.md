@@ -31,6 +31,10 @@ In jeder Lernfrage gibt es oben ein Fahnen-Symbol, in jeder Übungsaufgabe den L
 - **Einstellungen:** Zahnrad oben rechts – Hell/Dunkel, App installieren, Sicherung speichern/laden, Fortschritt zurücksetzen
 - **Tipps:** Prüfungstechnik und deine schwächsten Themen
 - **Tutorial:** Lernpfad bis zur Prüfung und Spickzettel aller Funktionen
+- **Lernplan:** verteilt alle offenen Fragen bis zur Prüfung auf die Tage; die Übersicht zeigt, was heute dran ist
+- **Operator-Trainer:** unter Tipps – wie ausführlich bei „Nennen“, „Erläutern“, „Beurteilen“ geantwortet werden muss
+- **Ehrlich einschätzen:** „Unsicher“ bzw. „War geraten“ – die Frage kommt morgen wieder
+- **Fehlerprotokoll:** Punktverluste einer Ursache zuordnen, Auswertung unter Tipps
 - **Themen kombinieren:** unter Lernen mehrere Themen anhaken und gemeinsam üben
 - **Timer:** Übungsaufgaben starten mit der Prüfungszeit, danach läuft der Timer ins Minus
 

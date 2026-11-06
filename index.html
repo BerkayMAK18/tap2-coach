@@ -588,6 +588,44 @@ th { font-size: 0.72rem; color: var(--muted); font-weight: 700; text-transform: 
   .tabs-in button { padding: 10px 10px; }
 }
 
+
+/* ---------- Code-Editor (CodeMirror) */
+pre, code, .mono { font-variant-ligatures: none; } /* <= bleibt <= (wie auf dem Prüfungsbogen) */
+:root { --tk-kw: #5D4495; --tk-ty: #0B7285; --tk-num: #A85D00; --tk-str: #1B7A19; --tk-op: #9C2A1E; }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { --tk-kw: #BDB7F7; --tk-ty: #6AD2E2; --tk-num: #FFD03D; --tk-str: #86DC8A; --tk-op: #F7A487; } }
+:root[data-theme="dark"] { --tk-kw: #BDB7F7; --tk-ty: #6AD2E2; --tk-num: #FFD03D; --tk-str: #86DC8A; --tk-op: #F7A487; }
+.code-task { margin-top: 16px; display: flex; flex-direction: column; gap: 8px; }
+.ct-head { display: flex; align-items: flex-start; gap: 8px; font-size: 0.86rem; font-weight: 700; color: var(--muted); }
+.ct-head .ic { margin-top: 2px; }
+.ct-head .spacer { flex: 1; }
+.cmwrap { border: 1.5px solid var(--line-2); border-radius: var(--r-sm); overflow: hidden; background: var(--surface-2); transition: border-color 0.15s, box-shadow 0.15s; }
+.cmwrap:focus-within { border-color: var(--blue); box-shadow: 0 0 0 3px var(--blue-soft); }
+.cmwrap .cm-editor { background: transparent; color: var(--ink); font-size: 0.9rem; }
+.cmwrap.edit .cm-editor, .cmwrap.edit .cm-fallback { min-height: 200px; }
+.cmwrap .cm-editor.cm-focused { outline: none; }
+.cmwrap .cm-scroller { font-family: var(--mono); line-height: 1.6; font-variant-ligatures: none; }
+.cmwrap .cm-content { padding: 10px 0; caret-color: var(--ink); }
+.cmwrap .cm-gutters { background: transparent; border-right: 1px solid var(--line); color: var(--faint); }
+.cmwrap .cm-activeLine { background: var(--blue-soft); }
+.cmwrap .cm-activeLineGutter { background: transparent; color: var(--ink); }
+.cmwrap .cm-cursor { border-left: 2px solid var(--ink); }
+.cmwrap .cm-selectionBackground, .cmwrap .cm-focused .cm-selectionBackground, .cmwrap .cm-content ::selection { background: var(--blue-soft-2) !important; }
+.cmwrap .cm-placeholder { color: var(--faint); font-style: italic; }
+.cmwrap .cm-matchingBracket { background: var(--yellow-soft); outline: 1px solid var(--yellow); }
+.cm-fallback { font-variant-ligatures: none; display: block; width: 100%; margin: 0; border: 0; background: transparent; color: var(--ink); font-family: var(--mono); font-size: 0.9rem; line-height: 1.6; padding: 10px 12px; white-space: pre-wrap; resize: vertical; outline: none; }
+.tok-keyword { color: var(--tk-kw); font-weight: 700; }
+.tok-typeName { color: var(--tk-ty); }
+.tok-number, .tok-bool, .tok-atom { color: var(--tk-num); }
+.tok-string { color: var(--tk-str); }
+.tok-operator { color: var(--tk-op); }
+.tok-comment { color: var(--faint); font-style: italic; }
+.cmp { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-top: 16px; }
+.cmp.solo { grid-template-columns: 1fr; }
+.cmp > div { display: flex; flex-direction: column; gap: 6px; min-width: 0; }
+.cmp .alab { font-size: 0.78rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.04em; color: var(--muted); }
+.cmp .sol .cmwrap { border-color: var(--ok); }
+.cmp-hint { margin-top: 10px; font-size: 0.84rem; color: var(--muted); }
+@media (max-width: 760px) { .cmp { grid-template-columns: 1fr; } }
 /* ---------- Suche, Fehler melden, Darstellung */
 .hud .hb { width: 36px; height: 36px; background: var(--surface); box-shadow: var(--sh-1); color: var(--ink); }
 .hud .hb .ic { width: 18px; height: 18px; }
@@ -2537,13 +2575,56 @@ const NOTATION = {
       if (e.key === "Tab") { const f = [...document.querySelectorAll("#srch input, #srch button")]; const i = f.indexOf(document.activeElement); if (e.shiftKey && i <= 0) { e.preventDefault(); f[f.length - 1].focus(); } else if (!e.shiftKey && i === f.length - 1) { e.preventDefault(); f[0].focus(); } }
       e.stopPropagation(); return;
     }
-    const typing = e.target && /INPUT|TEXTAREA|SELECT/.test(e.target.tagName);
+    const typing = e.target && (/INPUT|TEXTAREA|SELECT/.test(e.target.tagName) || e.target.isContentEditable);
     if ((e.key === "/" && !typing && !e.metaKey && !e.ctrlKey && !e.altKey) || ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "k")) {
       if (view === "pruefung" && UI.run && UI.run.phase === "write") return;
       e.preventDefault(); e.stopPropagation(); openSearch();
     }
   }, true);
   $("#hud").addEventListener("click", (e) => { const b = e.target.closest("[data-hud]"); if (!b) return; if (b.dataset.hud === "search") openSearch(); else cycleTheme(); });
+
+
+  // ---------- Code-Editor für Code-Karteikarten (CodeMirror, wird erst bei Bedarf geladen)
+  const CODE = {
+    "k:algo0": "pseudo", "k:algo3": "pseudo", "k:algo6": "pseudo", "k:algo7": "pseudo", "k:algo15": "pseudo", "k:algo19": "pseudo",
+    "k:sql3": "sql", "k:sql7": "sql", "k:sql8": "sql", "k:sql9": "sql", "k:sql10": "sql", "k:sql11": "sql", "k:sql12": "sql",
+    "k:sql13": "sql", "k:sql14": "sql", "k:sql19": "sql", "k:sql22": "sql", "k:sql23": "sql", "k:sql25": "sql"
+  };
+  const LANG_N = { pseudo: "Pseudocode", sql: "SQL" };
+  let cmLoad = null;
+  function loadCM() {
+    if (window.TAPCM) return Promise.resolve();
+    if (!cmLoad) cmLoad = new Promise((res, rej) => { const sc = document.createElement("script"); sc.src = "vendor/codemirror.min.js"; sc.onload = res; sc.onerror = () => { cmLoad = null; rej(new Error("load")); }; document.head.appendChild(sc); });
+    return cmLoad;
+  }
+  let EDS = [], cmSave = 0;
+  function mountEditors(root, o) {
+    EDS.forEach((e) => e.destroy()); EDS = [];
+    const nodes = [...root.querySelectorAll("[data-cm]")];
+    if (!nodes.length) return;
+    const fb = root.querySelector("textarea.cm-fallback");
+    if (fb && o.onChange) fb.addEventListener("input", () => o.onChange(fb.value));
+    loadCM().then(() => nodes.forEach((n) => {
+      if (!n.isConnected || n.dataset.mounted) return;
+      const edit = n.dataset.cm === "edit", ta = n.querySelector("textarea");
+      const doc = edit ? (ta ? ta.value : "") : (o.docs[n.dataset.doc] || "");
+      const hadFocus = ta && document.activeElement === ta;
+      n.innerHTML = ""; n.dataset.mounted = "1";
+      const ed = window.TAPCM.create(n, { doc, lang: n.dataset.lang, readOnly: !edit, label: edit ? "Deine Lösung" : n.dataset.doc === "sol" ? "Musterlösung" : "Deine Lösung (nur lesen)", placeholder: edit ? (n.dataset.lang === "sql" ? "SELECT …" : "Tippe hier deine Lösung …") : "", onChange: edit ? o.onChange : null, onSubmit: edit ? o.onSubmit : null });
+      EDS.push(ed);
+      if (hadFocus) ed.focus();
+    })).catch(() => {});
+  }
+  function codeBody(s, q, lang) {
+    s.code = s.code || {};
+    const mine = s.code[q.id] || "";
+    if (!s.rev) return `<div class="code-task"><div class="ct-head">${ic("code", "ic sm")}<span>${LANG_N[lang]} – tippe deine Lösung, dann vergleichst du sie mit der Musterlösung</span></div>
+      <div class="cmwrap edit" data-cm="edit" data-lang="${lang}"><textarea class="cm-fallback" spellcheck="false" autocapitalize="off" aria-label="Deine Lösung">${esc(mine)}</textarea></div></div>
+      <button type="button" class="reveal" id="s-reveal" style="margin-top:14px">${ic("eye")}<b>Mit Musterlösung vergleichen</b><span>${mine.trim() ? "Erst fertig tippen" : "Oder ohne Tippen direkt aufdecken"} · Strg/Cmd + Enter im Editor</span></button>`;
+    const has = !!mine.trim();
+    return `<div class="cmp ${has ? "" : "solo"}">${has ? `<div><span class="alab">Deine Lösung</span><div class="cmwrap" data-cm="ro" data-doc="user" data-lang="${lang}"><pre class="cm-fallback">${esc(mine)}</pre></div></div>` : ""}<div class="sol"><span class="alab">Musterlösung</span><div class="cmwrap" data-cm="ro" data-doc="sol" data-lang="${lang}"><pre class="cm-fallback">${esc(q.a)}</pre></div></div></div>
+      <p class="cmp-hint">${has ? "Vergleiche Struktur und Logik, nicht jedes Zeichen: Andere Variablennamen oder eine gleichwertige Lösung zählen in der Prüfung genauso." : "Tipp: Beim nächsten Mal erst selbst tippen, so merkst du dir die Struktur deutlich besser."}</p>`;
+  }
 
   // ---------- Lernrunde
   const ROUND = 20;
@@ -2592,7 +2673,7 @@ const NOTATION = {
   function toggleMark(id) { if (S.mark[id]) delete S.mark[id]; else S.mark[id] = 1; save(); render(); }
   function closeSess() { const src = UI.sess && UI.sess.src; UI.sess = null; keepSess(); UI.topic = src && src.tid ? src.tid : null; render(); window.scrollTo({ top: 0 }); }
   document.addEventListener("keydown", (e) => {
-    if (e.target && /INPUT|TEXTAREA|SELECT/.test(e.target.tagName)) return;
+    if (e.target && (/INPUT|TEXTAREA|SELECT/.test(e.target.tagName) || e.target.isContentEditable)) return;
     if (e.metaKey || e.ctrlKey || e.altKey) return;
     const s = UI.sess;
     if (view === "lernen" && s && s.i < s.ids.length) {
@@ -2635,6 +2716,9 @@ const NOTATION = {
       body = `<div class="optlist">${ord.map((i, d) => `<button type="button" class="opt ${s.pick !== null ? (i === q.right ? "right" : i === s.pick ? "wrong" : "") : ""}" data-i="${i}" ${s.pick !== null ? "disabled" : ""}><span class="k">${s.pick !== null && i === q.right ? ic("check", "ic sm") : s.pick === i ? ic("x", "ic sm") : "ABCD"[d]}</span><span>${esc(q.opts[i])}</span></button>`).join("")}</div>`;
       if (s.pick !== null) { const r = s.res[q.id]; foot = `<div class="feedback ${ok ? "ok" : "bad"}"><span class="fi">${ic(ok ? "check" : "x")}</span><div><div class="row" style="gap:10px"><b>${ok ? "Richtig" : "Falsch"}</b>${trans(r.f, r.t)}</div><p>${esc(q.why)}</p></div><button type="button" class="btn primary" id="s-next">${s.i + 1 < s.ids.length ? "Weiter" : "Auswertung"} ${ic("right", "ic sm")}</button></div>`; }
       else foot = `<p class="kbdhelp">Tasten <span class="kbd">1</span>–<span class="kbd">4</span> zum Antworten · <span class="kbd">Enter</span> weiter</p>`;
+    } else if (CODE[q.id] && !q.own) {
+      body = codeBody(s, q, CODE[q.id]);
+      foot = s.rev ? `<div class="rate"><button type="button" class="btn big no" id="s-no">${ic("x", "ic sm")} Nicht gewusst</button><button type="button" class="btn big yes" id="s-yes">${ic("check", "ic sm")} Gewusst</button></div><p class="kbdhelp"><span class="kbd">←</span> nicht gewusst · <span class="kbd">→</span> gewusst</p>` : `<p class="kbdhelp">Im Editor: <span class="kbd">Tab</span> einrücken · <span class="kbd">Strg/Cmd</span> + <span class="kbd">Enter</span> vergleichen · <span class="kbd">Esc</span> außerhalb beendet</p>`;
     } else {
       body = s.rev ? `<div class="answer-wrap"><span class="alab">Antwort</span><div class="answer ${looksCode(q) ? "mono" : ""}">${esc(q.a)}</div></div>` : `<button type="button" class="reveal" id="s-reveal">${ic("eye")}<b>Antwort zeigen</b><span>Erst selbst überlegen, dann aufdecken</span></button>`;
       foot = s.rev ? `<div class="rate"><button type="button" class="btn big no" id="s-no">${ic("x", "ic sm")} Nicht gewusst</button><button type="button" class="btn big yes" id="s-yes">${ic("check", "ic sm")} Gewusst</button></div><p class="kbdhelp"><span class="kbd">←</span> nicht gewusst · <span class="kbd">→</span> gewusst</p>` : `<p class="kbdhelp"><span class="kbd">Leertaste</span> Antwort zeigen · <span class="kbd">Esc</span> beenden</p>`;
@@ -2657,6 +2741,8 @@ const NOTATION = {
     const rv = $("#s-reveal"); if (rv) rv.onclick = reveal;
     const no = $("#s-no"); if (no) no.onclick = () => rateCard(false);
     const yes = $("#s-yes"); if (yes) yes.onclick = () => rateCard(true);
+    if (CODE[q.id] && !q.own) mountEditors(el, { docs: { user: (s.code || {})[q.id] || "", sol: q.a }, onChange: (v) => { s.code = s.code || {}; s.code[q.id] = v; clearTimeout(cmSave); cmSave = setTimeout(keepSess, 400); }, onSubmit: () => { clearTimeout(cmSave); keepSess(); reveal(); } });
+    else if (EDS.length) { EDS.forEach((e) => e.destroy()); EDS = []; }
   }
   function rSessEnd(el) {
     const s = UI.sess;

@@ -6,7 +6,7 @@ Lern-App für die Abschlussprüfung Teil 2 (Fachinformatiker/in Anwendungsentwic
 
 ## Als App installieren und offline nutzen
 
-- **Android/Chrome:** In der Übersicht unter „App & Offline“ auf „App installieren“ tippen (oder im Browser-Menü „App installieren“).
+- **Android/Chrome:** In den Einstellungen unter „App & Offline“ auf „App installieren“ tippen (oder im Browser-Menü „App installieren“).
 - **iPhone/iPad:** In Safari auf „Teilen“ → „Zum Home-Bildschirm“.
 - Nach dem ersten Besuch funktioniert der Coach auch ohne Internet. Bei einer neuen Version erscheint der Hinweis „Neue Version verfügbar“.
 
@@ -28,7 +28,11 @@ In jeder Lernfrage gibt es oben ein Fahnen-Symbol, in jeder Übungsaufgabe den L
 - **Code-Karten:** Bei Pseudocode- und SQL-Karten tippst du deine Lösung in einen Editor und vergleichst sie dann mit der Musterlösung (`Strg/Cmd + Enter`).
 - **SQL ausführen:** SQL-Karten laufen mit SQLite direkt im Browser gegen eine Beispiel-Datenbank (`Shift + Enter`). Bei vielen Karten wird dein Ergebnis automatisch mit der Musterlösung abgeglichen.
 - **Wiederholungen:** Richtig beantwortete Fragen kommen nach 1, 3, 7, 14 und 30 Tagen wieder. „Weiterlernen“ startet zuerst die fälligen Wiederholungen.
-- **Darstellung:** Knopf oben rechts wechselt zwischen System, Hell und Dunkel
+- **Einstellungen:** Zahnrad oben rechts – Hell/Dunkel, App installieren, Sicherung speichern/laden, Fortschritt zurücksetzen
+- **Tipps:** Prüfungstechnik und deine schwächsten Themen
+- **Tutorial:** Lernpfad bis zur Prüfung und Spickzettel aller Funktionen
+- **Themen kombinieren:** unter Lernen mehrere Themen anhaken und gemeinsam üben
+- **Timer:** Übungsaufgaben starten mit der Prüfungszeit, danach läuft der Timer ins Minus
 
 ## Inhalte
 

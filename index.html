@@ -7,7 +7,8 @@
 <title>TAP2 Prüfungscoach</title>
 <meta name="description" content="Lern-App für die Abschlussprüfung Teil 2 – Fachinformatik Anwendungsentwicklung">
 <link rel="manifest" href="manifest.webmanifest">
-<link rel="icon" type="image/png" href="icons/icon-192.png">
+<link rel="icon" type="image/svg+xml" href="icons/raven.svg">
+<link rel="icon" type="image/png" sizes="32x32" href="icons/favicon-32.png">
 <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
 <meta name="theme-color" content="#F6F5F3" media="(prefers-color-scheme: light)">
 <meta name="theme-color" content="#11182A" media="(prefers-color-scheme: dark)">
@@ -639,6 +640,37 @@ pre, code, .mono { font-variant-ligatures: none; } /* <= bleibt <= (wie auf dem 
 
 
 
+
+/* ---------- Einstellungen, Tipps, Tutorial, Auswahl, Timer */
+img.brand-mark { width: 40px; height: 40px; border-radius: 12px; display: block; }
+.hud .hb.on { background: var(--blue-soft-2); }
+.tip-link .ic { width: 26px; height: 26px; color: var(--violet-d); }
+.trow-sel { display: flex; gap: 8px; align-items: stretch; }
+.trow-sel .trow { flex: 1; min-width: 0; }
+.tsel { position: relative; flex: none; width: 44px; display: grid; place-items: center; border-radius: var(--r); background: var(--surface); box-shadow: var(--sh-1); cursor: pointer; }
+.tsel input { position: absolute; opacity: 0; inset: 0; cursor: pointer; }
+.tsel .box { width: 22px; height: 22px; border-radius: 7px; border: 2px solid var(--line-2); display: grid; place-items: center; color: transparent; transition: background 0.15s, border-color 0.15s; }
+.tsel input:checked + .box { background: var(--blue); border-color: var(--blue); color: #08312A; }
+.tsel input:focus-visible + .box { box-shadow: 0 0 0 3px var(--blue-soft-2); }
+.sel-hint { display: flex; align-items: center; gap: 6px; margin: -4px 2px 6px; }
+.selbar { position: sticky; bottom: calc(14px + var(--nav-h)); z-index: 30; display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin-top: 16px; padding: 10px 12px 10px 16px; border-radius: var(--r); background: var(--surface); box-shadow: var(--sh-2); border: 1.5px solid var(--blue); }
+.selbar .sb-t { flex: 1; min-width: 150px; display: flex; flex-direction: column; } .selbar .sb-t span { font-size: 0.8rem; color: var(--muted); }
+.tm { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+.tm-start-box { margin-top: 18px; padding: 22px; border-radius: var(--r); background: var(--surface-2); display: flex; flex-direction: column; align-items: flex-start; gap: 12px; }
+.tm-bar { margin-top: 16px; padding: 10px 14px; border-radius: var(--r-sm); background: var(--surface-2); position: sticky; top: 70px; z-index: 5; }
+.tm-clock { font-family: var(--mono); font-size: 1.5rem; font-weight: 700; font-variant-numeric: tabular-nums; }
+.tm.compact .tm-clock { font-size: 1.1rem; }
+.tm-clock.over { color: var(--bad); }
+.tm-theory { margin-top: 10px; }
+.tut-raven { width: 64px; height: 64px; border-radius: 18px; flex: none; }
+.tut-steps { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 10px; }
+.tut-steps li { display: grid; grid-template-columns: 36px minmax(0, 1fr); gap: 14px; background: var(--surface); border-radius: var(--r); box-shadow: var(--sh-1); padding: 14px 16px; }
+.ts-n { width: 32px; height: 32px; border-radius: 50%; display: grid; place-items: center; background: var(--blue); color: #08312A; font-weight: 800; font-family: var(--display); }
+.ts-b b { display: flex; align-items: center; gap: 6px; } .ts-b p { margin: 4px 0 8px; }
+.cheat { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 10px; }
+.cheat h4 { display: flex; align-items: center; gap: 6px; margin: 0 0 4px; }
+.cheat-keys { margin-top: 10px; } .cheat-keys ul { margin: 8px 0 0; padding-left: 0; list-style: none; display: flex; flex-direction: column; gap: 8px; font-size: 0.9rem; }
+.cheat-keys li { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; } .cheat-keys .amp { display: inline-block; }
 /* ---------- Offline-App: Update-Hinweis, App-Karte */
 .upd { position: fixed; left: 50%; transform: translateX(-50%); bottom: calc(18px + var(--nav-h)); z-index: 55; display: flex; align-items: center; gap: 10px; background: var(--surface); color: var(--ink); box-shadow: var(--sh-2); border-radius: 999px; padding: 8px 8px 8px 18px; font-size: 0.9rem; max-width: calc(100vw - 32px); }
 .upd[hidden] { display: none; }
@@ -731,15 +763,12 @@ a.iconbtn { color: var(--ink); text-decoration: none; }
 <body>
 <div class="app">
   <nav class="side" aria-label="Hauptnavigation">
-    <div class="brand"><span class="brand-mark">T2</span><div class="brand-t">TAP2 Coach<span>Fachinformatik AE</span></div></div>
+    <div class="brand"><img class="brand-mark" src="icons/raven.svg" alt=""><div class="brand-t">TAP2 Coach<span>Fachinformatik AE</span></div></div>
     <button type="button" class="nav-i" data-view="start"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 11l9-8 9 8"/><path d="M5 9.5V21h14V9.5"/><path d="M10 21v-6h4v6"/></svg><span>Übersicht</span></button>
     <button type="button" class="nav-i" data-view="lernen"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5a2 2 0 0 1 2-2h14v16H6a2 2 0 0 0-2 2V5z"/><path d="M4 19a2 2 0 0 1 2-2h14"/></svg><span>Lernen</span></button>
     <button type="button" class="nav-i" data-view="aufgaben"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20h4L19 9a2.8 2.8 0 0 0-4-4L4 16v4z"/><path d="M13.5 6.5l4 4"/></svg><span>Aufgaben</span></button>
     <button type="button" class="nav-i" data-view="pruefung"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l2.5 2.5"/><path d="M9 2h6"/></svg><span>Prüfung</span></button>
-    <div class="side-foot">
-      <div class="count-card" id="side-count"></div>
-      <div class="reife-card" id="side-reife"></div>
-    </div>
+    <button type="button" class="nav-i" data-view="tipps"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 18h6M10 21h4"/><path d="M12 3a6 6 0 0 0-3.5 10.9c.6.5 1 1.2 1 2V16h5v-.1c0-.8.4-1.5 1-2A6 6 0 0 0 12 3z"/></svg><span>Tipps</span></button>
   </nav>
   <div class="col">
     <header class="top" id="topbar">
@@ -751,6 +780,9 @@ a.iconbtn { color: var(--ink); text-decoration: none; }
       <section class="view" id="v-lernen" hidden></section>
       <section class="view" id="v-aufgaben" hidden></section>
       <section class="view" id="v-pruefung" hidden></section>
+      <section class="view" id="v-tipps" hidden></section>
+      <section class="view" id="v-einstellungen" hidden></section>
+      <section class="view" id="v-tutorial" hidden></section>
     </main>
     <footer class="foot"><span>TAP2 Prüfungscoach · Dein Fortschritt wird lokal in diesem Browser gespeichert.</span></footer>
   </div>
@@ -784,12 +816,12 @@ const DECKS = {
   pm: { n: "Projektmanagement & Anforderungen", teil: "Teil 1" },
   web: { n: "Web, Netzwerk & UI", teil: "Teil 1" },
   neu: { n: "Neu im Katalog 2025", teil: "Teil 1 + 2" },
-  wa: { n: "WiSo: Ausbildung", teil: "WiSo" },
-  wr: { n: "WiSo: Arbeitsrecht", teil: "WiSo" },
-  wb: { n: "WiSo: Betriebsrat & Tarif", teil: "WiSo" },
-  ws: { n: "WiSo: Sozialversicherung & Entgelt", teil: "WiSo" },
-  wu: { n: "WiSo: Unternehmen & Wirtschaft", teil: "WiSo" },
-  wx: { n: "WiSo: Arbeits- & Umweltschutz", teil: "WiSo" }
+  wa: { n: "SoWi: Ausbildung", teil: "SoWi" },
+  wr: { n: "SoWi: Arbeitsrecht", teil: "SoWi" },
+  wb: { n: "SoWi: Betriebsrat & Tarif", teil: "SoWi" },
+  ws: { n: "SoWi: Sozialversicherung & Entgelt", teil: "SoWi" },
+  wu: { n: "SoWi: Unternehmen & Wirtschaft", teil: "SoWi" },
+  wx: { n: "SoWi: Arbeits- & Umweltschutz", teil: "SoWi" }
 };
 
 const CARDS_RAW = {
@@ -1266,7 +1298,7 @@ const MC = [
   ["t2", "diag", "Im Aktivitätsdiagramm einer Bestellung wird nach „Lager prüfen“ verzweigt, je nachdem ob die Ware verfügbar ist.\n\nWo stehen die Bedingungen?", ["In der Aktion selbst","In eckigen Klammern an den ausgehenden Kanten der Raute","Im Startknoten","In der Überschrift der Swimlane"], 1, "Jede ausgehende Kante der Entscheidungsraute erhält eine Bedingung in eckigen Klammern, z. B. [verfügbar] und [nicht verfügbar]. Die Bedingungen müssen sich ausschließen."],
   ["t2", "diag", "Bestellservice und Zahlungsservice wurden einzeln getestet. Jetzt soll geprüft werden, ob die Übergabe der Bestelldaten zwischen beiden funktioniert.\n\nWelche Teststufe ist das?", ["Komponententest einer einzelnen Methode","Integrationstest","Abnahmetest durch den Kunden","Oberflächentest"], 1, "Der Integrationstest prüft das Zusammenspiel und die Schnittstellen mehrerer Komponenten."],
 
-  // ---------- WiSo
+  // ---------- SoWi
   ["wiso", "w", "Die Netzwerk GmbH schließt mit Lena einen Ausbildungsvertrag zur Fachinformatikerin. Im Vertrag soll die Probezeit festgelegt werden.\n\nWie lange darf die Probezeit in einem Ausbildungsverhältnis höchstens dauern?", ["1 Monat","3 Monate","4 Monate","6 Monate"], 2, "§ 20 BBiG: mindestens 1 Monat, höchstens 4 Monate. Im normalen Arbeitsverhältnis sind bis zu 6 Monate möglich."],
   ["wiso", "w", "Jonas ist seit sechs Wochen Auszubildender und merkt, dass ihm der Beruf nicht liegt. Er befindet sich noch in der Probezeit.\n\nWas gilt für seine Kündigung?", ["Er muss eine Frist von 4 Wochen einhalten.","Er kann jederzeit ohne Frist kündigen, aber schriftlich.","Er kann nur aus wichtigem Grund kündigen.","Eine mündliche Kündigung genügt."], 1, "§ 22 BBiG: In der Probezeit können beide Seiten jederzeit ohne Frist und ohne Angabe von Gründen kündigen – immer schriftlich."],
   ["wiso", "w", "Mias Ausbildungsvertrag läuft bis 31. Januar. Ihre Abschlussprüfung besteht sie am 25. November, das Ergebnis wird ihr am selben Tag bekannt gegeben.\n\nWann endet ihr Ausbildungsverhältnis?", ["Mit Ablauf der vertraglichen Zeit am 31. Januar","Mit Bekanntgabe des Prüfungsergebnisses am 25. November","Mit dem Zeugnis der Berufsschule","Am Monatsende nach der Prüfung"], 1, "§ 21 Abs. 2 BBiG: Besteht der Auszubildende vor Ablauf der Ausbildungszeit die Abschlussprüfung, endet das Ausbildungsverhältnis mit der Bekanntgabe des Ergebnisses."],
@@ -1448,7 +1480,7 @@ const OPEN = [
 function UEB_TEXT(id) { const u = UEB.find((x) => x.id === id); return u ? u.text : ""; }
 function UEB_LOES(id) { const u = UEB.find((x) => x.id === id); return u ? u.loesung : ""; }
 
-// Zusätzliche Rechenfragen für WiSo (werden an MC angehängt, damit bestehende IDs stabil bleiben)
+// Zusätzliche Rechenfragen für SoWi (werden an MC angehängt, damit bestehende IDs stabil bleiben)
 MC.push(
   ["wiso", "w", "Ein Arbeitnehmer ist seit 3 Jahren im Betrieb und kündigt selbst. Die Kündigung geht dem Arbeitgeber am 20.05. zu; es gilt die gesetzliche Grundfrist.\n\nWann endet das Arbeitsverhältnis frühestens?", ["15.06.","17.06.","30.06.","15.07."], 2, "§ 622 Abs. 1 BGB: vier Wochen zum 15. oder zum Monatsende. 20.05. + 4 Wochen = 17.06.; der nächste zulässige Termin ist der 30.06. Die verlängerten Fristen gelten nur für Arbeitgeberkündigungen."],
   ["wiso", "w", "Der Arbeitgeber kündigt einer Mitarbeiterin nach 8 Jahren Betriebszugehörigkeit. Die Kündigung geht am 12.02. zu.\n\nWann endet das Arbeitsverhältnis?", ["12.05.","15.05.","31.05.","30.06."], 2, "§ 622 Abs. 2 BGB: ab 8 Jahren drei Monate zum Ende eines Kalendermonats. 12.02. + 3 Monate = 12.05. → nächstes Monatsende 31.05."],
@@ -1476,11 +1508,11 @@ const TOPICS = [
   { id: "T09", n: "Web, HTTP & Schnittstellen", teil: "Teil 1", prio: "Wichtig", ic: "globe", th: ["P10", "G10"], decks: ["web"], cats: ["t1|ux"] },
   { id: "T18", n: "Architektur, Cloud & Versionsverwaltung", teil: "Teil 1", prio: "Wichtig", ic: "cloud", th: ["G12"], decks: ["arch"], cats: [] },
   { id: "T19", n: "Ergonomie, Recht & Softwarearten", teil: "Teil 1", prio: "Wichtig", ic: "sliders", th: ["P11", "G13"], decks: ["ergo"], cats: [] },
-  { id: "T11", n: "Ausbildung & Arbeitsrecht", teil: "WiSo", prio: "Muss", ic: "book", th: ["W01"], decks: ["wa", "wr"], cats: [] },
-  { id: "T12", n: "Mitbestimmung, Tarif & Sozialversicherung", teil: "WiSo", prio: "Muss", ic: "users", th: ["W02"], decks: ["wb", "ws"], cats: [] },
-  { id: "T13", n: "Unternehmen & Wirtschaft", teil: "WiSo", prio: "Muss", ic: "briefcase", th: ["W03"], decks: ["wu"], cats: [] },
-  { id: "T14", n: "Arbeits- & Umweltschutz", teil: "WiSo", prio: "Wichtig", ic: "leaf", th: ["W05"], decks: ["wx"], cats: [] },
-  { id: "T15", n: "WiSo-Rechenaufgaben", teil: "WiSo", prio: "Muss", ic: "calc", th: ["W04"], decks: [], cats: [] }
+  { id: "T11", n: "Ausbildung & Arbeitsrecht", teil: "SoWi", prio: "Muss", ic: "book", th: ["W01"], decks: ["wa", "wr"], cats: [] },
+  { id: "T12", n: "Mitbestimmung, Tarif & Sozialversicherung", teil: "SoWi", prio: "Muss", ic: "users", th: ["W02"], decks: ["wb", "ws"], cats: [] },
+  { id: "T13", n: "Unternehmen & Wirtschaft", teil: "SoWi", prio: "Muss", ic: "briefcase", th: ["W03"], decks: ["wu"], cats: [] },
+  { id: "T14", n: "Arbeits- & Umweltschutz", teil: "SoWi", prio: "Wichtig", ic: "leaf", th: ["W05"], decks: ["wx"], cats: [] },
+  { id: "T15", n: "SoWi-Rechenaufgaben", teil: "SoWi", prio: "Muss", ic: "calc", th: ["W04"], decks: [], cats: [] }
 ];
 
 // Einzelne Lernkarten, die thematisch in ein anderes Thema gehören als ihr Stapel
@@ -1699,8 +1731,8 @@ const PAKETE = [
     alt: ""
   },
   {
-    id: "W01", titel: "Ausbildung und Arbeitsrecht", teil: "WiSo", prio: "Muss", h: 3,
-    relevanz: "Rund ein Drittel der WiSo-Fragen: Berufsbildungsgesetz, Jugendarbeitsschutz, Kündigung, Befristung, Mutterschutz, Zeugnis, AGG.",
+    id: "W01", titel: "Ausbildung und Arbeitsrecht", teil: "SoWi", prio: "Muss", h: 3,
+    relevanz: "Rund ein Drittel der SoWi-Fragen: Berufsbildungsgesetz, Jugendarbeitsschutz, Kündigung, Befristung, Mutterschutz, Zeugnis, AGG.",
     kern: [
       ["Berufsbildungsgesetz", "Probezeit 1 bis 4 Monate, in der Probezeit Kündigung jederzeit ohne Frist, schriftlich. Danach: Azubi mit 4 Wochen Frist bei Aufgabe oder Wechsel der Ausbildung, fristlos nur aus wichtigem Grund. Vertrag schriftlich spätestens vor Beginn. Ende mit Bekanntgabe des Prüfungsergebnisses. Weiterbeschäftigung ohne Vereinbarung: unbefristetes Arbeitsverhältnis. Ausbilder: persönlich und fachlich geeignet. Berichtsheft ist Zulassungsvoraussetzung."],
       ["Jugendarbeitsschutz", "Höchstens 8 Stunden täglich und 40 pro Woche, 5-Tage-Woche. Pausen: mehr als 4,5 Stunden 30 Minuten, mehr als 6 Stunden 60 Minuten. Urlaub nach Alter zu Jahresbeginn: unter 16 → 30, unter 17 → 27, unter 18 → 25 Werktage. Berufsschultag mit mehr als 5 Stunden zählt einmal pro Woche als 8 Stunden."],
@@ -1711,11 +1743,11 @@ const PAKETE = [
     fallen: ["Probezeit der Ausbildung (max. 4 Monate) mit der im Arbeitsvertrag (max. 6 Monate) verwechselt.", "Urlaub nach dem Alter am Urlaubstag statt zu Jahresbeginn bestimmt.", "Kündigungsfrist ab Kündigungstag falsch gezählt (siehe Rechenpaket)."],
     ziele: ["Ich kenne alle Regeln zur Probezeit und Kündigung in der Ausbildung.", "Ich kenne die Grenzen des Jugendarbeitsschutzgesetzes.", "Ich berechne Kündigungsfristen für Arbeitnehmer und Arbeitgeber.", "Ich kenne besonderen Kündigungsschutz, Mutterschutz und AGG-Merkmale."],
     decks: ["wa", "wr"], ueb: [], quiz: { teil: "wiso", cats: null },
-    alt: "WiSo aus allen Altklausuren (W 21/22 bis S 26)"
+    alt: "SoWi aus allen Altklausuren (W 21/22 bis S 26)"
   },
   {
-    id: "W02", titel: "Mitbestimmung, Tarif und Sozialversicherung", teil: "WiSo", prio: "Muss", h: 2.5,
-    relevanz: "Betriebsrat, JAV und Tarifrecht rund 15 %, Sozialversicherung rund 10 % der WiSo-Fragen.",
+    id: "W02", titel: "Mitbestimmung, Tarif und Sozialversicherung", teil: "SoWi", prio: "Muss", h: 2.5,
+    relevanz: "Betriebsrat, JAV und Tarifrecht rund 15 %, Sozialversicherung rund 10 % der SoWi-Fragen.",
     kern: [
       ["Betriebsrat", "Ab 5 ständigen wahlberechtigten Arbeitnehmern, davon 3 wählbar. Wahlberechtigt ab 16, wählbar ab 18 mit 6 Monaten Betriebszugehörigkeit, Amtszeit 4 Jahre. Größe: 5–20 Wahlberechtigte 1 Mitglied, 21–50 3, 51–100 5, 101–200 7, 201–400 9. Mitbestimmung nach § 87: Arbeitszeit, Pausen, Urlaubsgrundsätze, Überwachungstechnik, Ordnung im Betrieb, Entlohnungsgrundsätze. Anhörung vor jeder Kündigung, sonst unwirksam."],
       ["JAV", "Ab 5 Arbeitnehmern unter 18 oder Azubis unter 25. Wählbar: unter 25. Amtszeit 2 Jahre. Setzt einen Betriebsrat voraus."],
@@ -1727,11 +1759,11 @@ const PAKETE = [
     fallen: ["Wahlberechtigung (ab 16) und Wählbarkeit (ab 18 und 6 Monate) verwechselt.", "Betriebsvereinbarung mit Tarifvertrag verwechselt.", "Unfallversicherung als paritätisch finanziert angenommen."],
     ziele: ["Ich kenne Wahl, Größe und Mitbestimmungsrechte des Betriebsrats.", "Ich kenne die Regeln der JAV.", "Ich erkläre den Ablauf einer Tarifauseinandersetzung.", "Ich kenne die fünf Sozialversicherungen, ihre Finanzierung und Träger."],
     decks: ["wb", "ws"], ueb: [], quiz: { teil: "wiso", cats: null },
-    alt: "WiSo aus allen Altklausuren"
+    alt: "SoWi aus allen Altklausuren"
   },
   {
-    id: "W03", titel: "Unternehmen und Wirtschaft", teil: "WiSo", prio: "Muss", h: 2.5,
-    relevanz: "Größter WiSo-Bereich, seit 2024 fast 30 % der Fragen: Rechtsformen, Organisation, Ziele, Märkte, Konjunktur, Globalisierung.",
+    id: "W03", titel: "Unternehmen und Wirtschaft", teil: "SoWi", prio: "Muss", h: 2.5,
+    relevanz: "Größter SoWi-Bereich, seit 2024 fast 30 % der Fragen: Rechtsformen, Organisation, Ziele, Märkte, Konjunktur, Globalisierung.",
     kern: [
       ["Rechtsformen", "GmbH: Stammkapital 25.000 € (12.500 € bei Gründung einzahlen), Haftung mit Gesellschaftsvermögen, Geschäftsführer und Gesellschafterversammlung, entsteht mit Eintragung, Gewinn nach Geschäftsanteilen. UG ab 1 €. AG: 50.000 € Grundkapital, Vorstand, Aufsichtsrat, Hauptversammlung. KG: Komplementär haftet unbeschränkt, Kommanditist bis zur Einlage. OHG: alle unbeschränkt. Handelsregister beim Amtsgericht, Abteilung A Personen-, B Kapitalgesellschaften."],
       ["Organisation", "Einliniensystem (ein Vorgesetzter), Mehrliniensystem (mehrere), Stabliniensystem (Stabsstellen beraten ohne Weisungsrecht), Matrixorganisation. Am Organigramm erkennen."],
@@ -1742,11 +1774,11 @@ const PAKETE = [
     fallen: ["Kommanditist haftet unbeschränkt angenommen.", "Wirtschaftlichkeit mit Produktivität verwechselt.", "Konzern und Fusion verwechselt."],
     ziele: ["Ich kenne Kapital, Haftung und Organe von GmbH, UG, AG, KG und OHG.", "Ich erkenne Leitungssysteme am Organigramm.", "Ich ordne Ziele ein und erkenne Zielkonflikte.", "Ich kenne Marktformen, Konjunkturphasen und Sektoren."],
     decks: ["wu"], ueb: [], quiz: { teil: "wiso", cats: null },
-    alt: "WiSo aus allen Altklausuren"
+    alt: "SoWi aus allen Altklausuren"
   },
   {
-    id: "W04", titel: "WiSo-Rechenaufgaben", teil: "WiSo", prio: "Muss", h: 1.5,
-    relevanz: "In fast jedem WiSo-Satz kommen 2 bis 4 Offen-Antwort-Aufgaben mit Zahlen oder Datum. Hier gibt es keine Teilpunkte, nur richtig oder falsch.",
+    id: "W04", titel: "SoWi-Rechenaufgaben", teil: "SoWi", prio: "Muss", h: 1.5,
+    relevanz: "In fast jedem SoWi-Satz kommen 2 bis 4 Offen-Antwort-Aufgaben mit Zahlen oder Datum. Hier gibt es keine Teilpunkte, nur richtig oder falsch.",
     kern: [
       ["Kündigungsdatum (Arbeitnehmer)", "Kündigung geht am 10. März zu. 4 Wochen später ist der 7. April. Nächster zulässiger Termin ist der 15. oder das Monatsende: also der 15. April.", "10.03. + 28 Tage = 07.04. → nächster 15. oder Monatsende → 15.04."],
       ["Kündigungsdatum (Arbeitgeber)", "Arbeitnehmerin seit 8 Jahren im Betrieb, Kündigung geht am 20. Mai zu. Frist 3 Monate zum Monatsende: 20. August, also zum 31. August.", "8 Jahre → 3 Monate zum Monatsende\n20.05. + 3 Monate = 20.08. → 31.08."],
@@ -1760,11 +1792,11 @@ const PAKETE = [
     fallen: ["Beim Kündigungsdatum vom Monatsende aus gerechnet statt vom Zugang der Kündigung.", "Beim Urlaub angefangene Monate mitgezählt.", "Gerundetes Zwischenergebnis weiterverwendet, obwohl nicht verlangt (oder umgekehrt: die Aufgabe verlangt es)."],
     ziele: ["Ich berechne Kündigungstermine für beide Seiten.", "Ich berechne Teilurlaub und das Ende des Mutterschutzes.", "Ich verteile Gewinne nach Anteilen und berechne Rentabilität und Wirtschaftlichkeit.", "Ich berechne den Arbeitnehmeranteil zur Sozialversicherung."],
     decks: ["wr", "wu"], ueb: [], quiz: { teil: "wiso", cats: null },
-    alt: "Offen-Antwort-Aufgaben in den WiSo-Sätzen W 23/24, S 24, W 24/25, W 25/26, S 26"
+    alt: "Offen-Antwort-Aufgaben in den SoWi-Sätzen W 23/24, S 24, W 24/25, W 25/26, S 26"
   },
   {
-    id: "W05", titel: "Arbeitsschutz und Nachhaltigkeit", teil: "WiSo", prio: "Wichtig", h: 1,
-    relevanz: "In jedem WiSo-Satz 3 bis 5 Fragen zu Brandschutz, Sicherheitszeichen, Arbeitsschutz und Umwelt.",
+    id: "W05", titel: "Arbeitsschutz und Nachhaltigkeit", teil: "SoWi", prio: "Wichtig", h: 1,
+    relevanz: "In jedem SoWi-Satz 3 bis 5 Fragen zu Brandschutz, Sicherheitszeichen, Arbeitsschutz und Umwelt.",
     kern: [
       ["Arbeitsschutz", "Verantwortlich ist der Arbeitgeber: Unterweisung vor Beginn und mindestens jährlich, Gefährdungsbeurteilung. Sicherheitsbeauftragte unterstützen ab mehr als 20 Beschäftigten, ohne rechtliche Verantwortung. Sicherheitszeichen: rot Verbot und Brandschutz, gelb Warnung, blau Gebot, grün Rettung."],
       ["Brandfall", "Ruhe bewahren, Brand melden (112), Menschen in Sicherheit bringen, keinen Aufzug benutzen, dann löschen: mit dem Wind, von vorne nach hinten, von unten nach oben, mehrere Löscher gleichzeitig."],
@@ -1773,7 +1805,7 @@ const PAKETE = [
     fallen: ["Erst löschen, dann melden.", "Sicherheitsbeauftragten als verantwortlich angesehen."],
     ziele: ["Ich kenne Farben der Sicherheitszeichen und das Verhalten im Brandfall.", "Ich kenne Verursacherprinzip, Abfallhierarchie und Blauen Engel."],
     decks: ["wx"], ueb: [], quiz: { teil: "wiso", cats: null },
-    alt: "WiSo aus allen Altklausuren"
+    alt: "SoWi aus allen Altklausuren"
   },
   {
     id: "X01", titel: "Prüfungstechnik für eine 1", teil: "Alle Teile", prio: "Muss", h: 1.5,
@@ -1801,7 +1833,7 @@ const PAKETE = [
       ["Fehler auswerten", "Notiere jeden Punktverlust mit Ursache: Wissen fehlte, Operator falsch gelesen, Zeit, Flüchtigkeit. Wissenslücken gehen zurück ins passende Paket."]
     ],
     fallen: ["Probeklausur mit Unterbrechungen geschrieben.", "Zu milde selbst bewertet."],
-    ziele: ["Real-Probeklausur Planen mit mindestens 92 %.", "Real-Probeklausur Algorithmen mit mindestens 92 %.", "Real-Probeklausur WiSo mit mindestens 92 %.", "Altklausur Sommer 2026 vollständig unter Zeitdruck geschrieben.", "Altklausur Winter 2025/26 vollständig unter Zeitdruck geschrieben.", "Fehlerliste ausgewertet und Lücken nachgearbeitet."],
+    ziele: ["Real-Probeklausur Planen mit mindestens 92 %.", "Real-Probeklausur Algorithmen mit mindestens 92 %.", "Real-Probeklausur SoWi mit mindestens 92 %.", "Altklausur Sommer 2026 vollständig unter Zeitdruck geschrieben.", "Altklausur Winter 2025/26 vollständig unter Zeitdruck geschrieben.", "Fehlerliste ausgewertet und Lücken nachgearbeitet."],
     decks: [], ueb: [], quiz: null, real: true,
     alt: "S 26 und W 25/26 komplett"
   }
@@ -2390,7 +2422,7 @@ CARDS_RAW.algo.push(
   "use strict";
   const EXAM_DAY = "2026-11-25"; // Prüfungstermin TAP2 – hier für einen neuen Jahrgang anpassen
   const EXAM_DE = EXAM_DAY.split("-").reverse().join(".");
-  const TEIL = { t1: { k: "Planen", n: "Planen eines Softwareprodukts", min: 90 }, t2: { k: "Algorithmen", n: "Entwicklung und Umsetzung von Algorithmen", min: 90 }, wiso: { k: "WiSo", n: "Wirtschafts- und Sozialkunde", min: 60 }, mix: { k: "Gemischt", n: "Alle Bereiche", min: 0 } };
+  const TEIL = { t1: { k: "Planen", n: "Planen eines Softwareprodukts", min: 90 }, t2: { k: "Algorithmen", n: "Entwicklung und Umsetzung von Algorithmen", min: 90 }, wiso: { k: "SoWi", n: "Wirtschafts- und Sozialkunde", min: 60 }, mix: { k: "Gemischt", n: "Alle Bereiche", min: 0 } };
 
   // ---------- helpers
   const $ = (s, r = document) => r.querySelector(s);
@@ -2406,7 +2438,7 @@ CARDS_RAW.algo.push(
   const shuffle = (a) => { for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; };
   const dec = (x) => String(Math.round(x * 10) / 10).replace(".", ",");
   const ic = (n, cls) => `<svg class="${cls || "ic"}" viewBox="0 0 24 24" aria-hidden="true">${ICONS[n] || ""}</svg>`;
-  const tcolOf = (t) => (/wiso/i.test(t) ? "yellow" : /alle|mix/i.test(t) ? "red" : t === "Teil 1" || t === "t1" ? "violet" : "blue");
+  const tcolOf = (t) => (/wiso|sowi/i.test(t) ? "yellow" : /alle|mix/i.test(t) ? "red" : t === "Teil 1" || t === "t1" ? "violet" : "blue");
   const daysLeft = () => daysBetween(today(), EXAM_DAY);
   const reduced = () => window.matchMedia && matchMedia("(prefers-reduced-motion: reduce)").matches;
   const pctS = (x) => Math.round(x * 100) + " %";
@@ -2430,13 +2462,13 @@ CARDS_RAW.algo.push(
   OPEN.forEach((o, i) => { o.id = "o" + i; });
   const BASE_Q = [];
   MC.forEach((m) => BASE_Q.push({ id: m.id, type: "mc", topic: MC_TOPIC[m.id] || m[6] || CAT_TOPIC[m[0] + "|" + m[1]] || "T01", teil: m[0], q: m[2], opts: m[3], right: m[4], why: m[5] }));
-  Object.entries(CARDS_RAW).forEach(([deck, list]) => list.forEach(([f, b, n], i) => BASE_Q.push({ id: "k:" + deck + i, type: "card", topic: CARD_TOPIC["k:" + deck + i] || DECK_TOPIC[deck] || "T01", q: f, a: b, n: n || "", code: !DECKS[deck] || DECKS[deck].teil !== "WiSo" })));
+  Object.entries(CARDS_RAW).forEach(([deck, list]) => list.forEach(([f, b, n], i) => BASE_Q.push({ id: "k:" + deck + i, type: "card", topic: CARD_TOPIC["k:" + deck + i] || DECK_TOPIC[deck] || "T01", q: f, a: b, n: n || "", code: !DECKS[deck] || DECKS[deck].teil !== "SoWi" })));
   const QMAP = Object.fromEntries(BASE_Q.map((q) => [q.id, q]));
   const customQ = () => Object.entries(S.custom || {}).flatMap(([t, l]) => (l || []).map((c) => ({ id: c.id, type: "card", topic: t, q: c.f, a: c.b, own: true, code: true })));
   const allQ = () => BASE_Q.concat(customQ());
   const getQ = (id) => QMAP[id] || customQ().find((q) => q.id === id);
   const topicQ = (tid) => allQ().filter((q) => q.topic === tid);
-  const inTeil = (t, part) => (part === "wiso" ? t.teil === "WiSo" : t.teil !== "WiSo" && t.teil.includes(part === "t1" ? "1" : "2"));
+  const inTeil = (t, part) => (part === "wiso" ? t.teil === "SoWi" : t.teil !== "SoWi" && t.teil.includes(part === "t1" ? "1" : "2"));
 
   // ---------- state + storage
   const blank = () => ({ v: 7, q: {}, mark: {}, custom: {}, ueb: {}, runs: [], log: {}, last: null });
@@ -2508,9 +2540,9 @@ CARDS_RAW.algo.push(
 
   // ---------- routing + shell
   let view = "start";
-  const VIEWS = ["start", "lernen", "aufgaben", "pruefung"];
-  const VTITLE = { start: "Übersicht", lernen: "Lernen", aufgaben: "Aufgaben", pruefung: "Prüfung" };
-  const UI = { sess: null, topic: null, ttab: "theorie", tf: "alle", ueb: null, showSol: false, addQ: false, pk: { mode: "sim", teil: "t2" }, run: null, confirm: null };
+  const VIEWS = ["start", "lernen", "aufgaben", "pruefung", "tipps", "einstellungen", "tutorial"];
+  const VTITLE = { start: "Übersicht", lernen: "Lernen", aufgaben: "Aufgaben", pruefung: "Prüfung", tipps: "Tipps", einstellungen: "Einstellungen", tutorial: "So lernst du mit dem Coach" };
+  const UI = { sess: null, topic: null, ttab: "theorie", tf: "alle", ueb: null, showSol: false, addQ: false, pk: { mode: "sim", teil: "t1" }, run: null, confirm: null, sel: [] };
   function go(v) {
     view = VIEWS.includes(v) ? v : "start";
     try { if (location.hash.slice(1) !== view) history.replaceState(null, "", "#" + view); } catch (e) {}
@@ -2531,9 +2563,7 @@ CARDS_RAW.algo.push(
 
   function hud() {
     const c = counts(allQ()), left = daysLeft();
-    $("#hud").innerHTML = `<button type="button" class="pill" data-go="start" title="Anteil der Fragen auf Grün, gelbe zählen halb">${ring(c.pct, 22, 4)}<span class="lbl">Prüfungsreife</span><b>${pctS(c.pct)}</b></button><span class="pill days">${ic("calendar")}<b>${Math.max(0, left)}</b><span class="lbl">${left === 1 ? "Tag" : "Tage"}</span></span><button type="button" class="iconbtn hb" data-hud="search" aria-label="Fragen durchsuchen" title="Suchen (Taste /)">${ic("search")}</button><button type="button" class="iconbtn hb" data-hud="theme" aria-label="Darstellung: ${THEME_LBL[themeMode()]}" title="Darstellung: ${THEME_LBL[themeMode()]}">${ic(THEME_IC[themeMode()])}</button>`;
-    $("#side-count").innerHTML = left > 0 ? `<b>${left} ${left === 1 ? "Tag" : "Tage"}</b>bis zur TAP2 am ${EXAM_DE}` : left === 0 ? "<b>Heute ist Prüfung</b>Viel Erfolg!" : `<b>TAP2</b>am ${EXAM_DE}`;
-    $("#side-reife").innerHTML = `<span class="sr-top"><span>Prüfungsreife</span><b>${pctS(c.pct)}</b></span>${ampBar(c)}`;
+    $("#hud").innerHTML = `<button type="button" class="pill" data-go="start" title="Anteil der Fragen auf Grün, gelbe zählen halb">${ring(c.pct, 22, 4)}<span class="lbl">Prüfungsreife</span><b>${pctS(c.pct)}</b></button><span class="pill days">${ic("calendar")}<b>${Math.max(0, left)}</b><span class="lbl">${left === 1 ? "Tag" : "Tage"}</span></span><button type="button" class="iconbtn hb" data-hud="search" aria-label="Fragen durchsuchen" title="Suchen (Taste /)">${ic("search")}</button><button type="button" class="iconbtn hb ${view === "einstellungen" ? "on" : ""}" data-go="einstellungen" aria-label="Einstellungen" title="Einstellungen">${ic("gear")}</button>`;
   }
   function render() {
     VIEWS.forEach((v) => { $("#v-" + v).hidden = v !== view; });
@@ -2541,7 +2571,7 @@ CARDS_RAW.algo.push(
     $("#page-title").textContent = VTITLE[view];
     document.body.classList.toggle("focus", !!(view === "lernen" && UI.sess) || !!(view === "pruefung" && UI.run && UI.run.phase === "write"));
     hud();
-    ({ start: rStart, lernen: rLernen, aufgaben: rUeb, pruefung: rPK })[view]();
+    ({ start: rStart, lernen: rLernen, aufgaben: rUeb, pruefung: rPK, tipps: rTipps, einstellungen: rSettings, tutorial: rTutorial })[view]();
     animRings($("#v-" + view));
   }
 
@@ -2552,6 +2582,13 @@ CARDS_RAW.algo.push(
   ICONS.moon = '<path d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5z"/>';
   ICONS.auto = '<circle cx="12" cy="12" r="9"/><path d="M12 3a9 9 0 0 0 0 18z" fill="currentColor"/>';
   ICONS.flag = '<path d="M5 21V4h12l-2 4 2 4H5"/>';
+  ICONS.gear = '<circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/>';
+  ICONS.bulb = '<path d="M9 18h6M10 21h4"/><path d="M12 3a6 6 0 0 0-3.5 10.9c.6.5 1 1.2 1 2V16h5v-.1c0-.8.4-1.5 1-2A6 6 0 0 0 12 3z"/>';
+  ICONS.map = '<path d="M9 4L3 6v14l6-2 6 2 6-2V4l-6 2-6-2z"/><path d="M9 4v14M15 6v14"/>';
+  function setTheme(m) {
+    if (m === "auto") document.documentElement.removeAttribute("data-theme"); else document.documentElement.setAttribute("data-theme", m);
+    try { if (m === "auto") localStorage.removeItem(KEY_THEME); else localStorage.setItem(KEY_THEME, m); } catch (e) {}
+  }
   const KEY_THEME = "tap2coach-theme";
   const THEME_LBL = { auto: "wie System", light: "hell", dark: "dunkel" };
   const THEME_IC = { auto: "auto", light: "sun", dark: "moon" };
@@ -2658,7 +2695,7 @@ CARDS_RAW.algo.push(
     if (b.hasAttribute("data-sall")) { closeSearch(); UI.topic = null; startSess(SR.hits, srchTitle(), { kind: "search" }); }
     else if (b.dataset.sq != null) { closeSearch(); UI.topic = null; startSess(SR.hits, srchTitle(), { kind: "search" }, +b.dataset.sq); }
     else if (b.dataset.st) { closeSearch(); UI.sess = null; keepSess(); UI.topic = b.dataset.st; UI.ttab = "theorie"; go("lernen"); }
-    else if (b.dataset.su) { closeSearch(); UI.ueb = b.dataset.su; UI.showSol = false; go("aufgaben"); }
+    else if (b.dataset.su) { closeSearch(); UI.ueb = b.dataset.su; UI.showSol = false; UI.uFree = false; go("aufgaben"); }
   });
   $("#srch-res").addEventListener("keydown", (e) => {
     if (e.key !== "ArrowDown" && e.key !== "ArrowUp") return;
@@ -2679,7 +2716,7 @@ CARDS_RAW.algo.push(
       e.preventDefault(); e.stopPropagation(); openSearch();
     }
   }, true);
-  $("#hud").addEventListener("click", (e) => { const b = e.target.closest("[data-hud]"); if (!b) return; if (b.dataset.hud === "search") openSearch(); else cycleTheme(); });
+  $("#hud").addEventListener("click", (e) => { const b = e.target.closest("[data-hud]"); if (!b) return; if (b.dataset.hud === "search") openSearch(); });
 
 
   // ---------- SQL ausführen (sql.js / SQLite im Browser) mit Beispiel-Datenbank
@@ -2870,6 +2907,37 @@ INSERT INTO Konto VALUES (1,'Weingut Becker',1500.00),(2,'Klinik am Rhein',320.0
       <p class="cmp-hint">${has ? "Vergleiche Struktur und Logik, nicht jedes Zeichen: Andere Variablennamen oder eine gleichwertige Lösung zählen in der Prüfung genauso." : "Tipp: Beim nächsten Mal erst selbst tippen, so merkst du dir die Struktur deutlich besser."}</p>${ewhHTML(q)}`;
   }
 
+
+  // ---------- Timer (Übungsaufgaben, Theorie): Start → Countdown → läuft ins Minus → Stopp. Wird nicht ausgewertet.
+  const KEY_TIMER = "tap2coach-timer";
+  let TM = null; try { TM = JSON.parse(localStorage.getItem(KEY_TIMER) || "null"); } catch (e) {}
+  const keepTM = () => { try { if (TM) localStorage.setItem(KEY_TIMER, JSON.stringify(TM)); else localStorage.removeItem(KEY_TIMER); } catch (e) {} };
+  const fmtClock = (sec) => { const neg = sec < 0, a = Math.abs(Math.round(sec)), h = Math.floor(a / 3600), m = Math.floor((a % 3600) / 60), x = a % 60; return (neg ? "−" : "") + (h ? h + ":" + pad(m) : m) + ":" + pad(x); };
+  const tmLeft = () => (TM ? TM.min * 60 - ((TM.stop || Date.now()) - TM.start) / 1000 : 0);
+  const tmState = (key) => (!TM || TM.key !== key ? "idle" : TM.stop ? "done" : "run");
+  function tmStart(key, min) { TM = { key, min, start: Date.now(), stop: null }; keepTM(); render(); }
+  function tmStop() { if (TM && !TM.stop) { TM.stop = Date.now(); keepTM(); render(); } }
+  function tmReset() { TM = null; keepTM(); render(); }
+  function tmHTML(key, min, o) {
+    o = o || {};
+    const stt = tmState(key);
+    if (stt === "idle") return `<div class="tm ${o.compact ? "compact" : ""}"><button type="button" class="btn ${o.compact ? "small" : "primary big"}" data-tm-start="${key}" data-tm-min="${min}">${ic("play", "ic sm")} ${o.label || "Start"} · ${fmtClock(min * 60)}</button>${o.hint ? `<span class="small muted">${o.hint}</span>` : ""}</div>`;
+    const left = tmLeft();
+    if (stt === "run") return `<div class="tm run ${o.compact ? "compact" : ""}"><span class="tm-clock num ${left < 0 ? "over" : ""}" data-tm-clock>${fmtClock(left)}</span><span class="small muted" data-tm-sub>${left < 0 ? "über der Zeit" : "verbleibend"}</span><button type="button" class="btn small" data-tm-stop>${ic("check", "ic xs")} Stopp – fertig</button></div>`;
+    const used = (TM.stop - TM.start) / 1000, over = used - min * 60;
+    return `<div class="tm done ${o.compact ? "compact" : ""}"><span class="app-ok">${ic("check", "ic sm")} Bearbeitet in ${fmtClock(used)}</span><span class="small ${over > 0 ? "warn-text" : "muted"}">${over > 0 ? fmtClock(over) + " über der Zeit" : "in der Zeit"}</span><button type="button" class="linkbtn" data-tm-reset>Timer zurücksetzen</button></div>`;
+  }
+  function bindTM(el) {
+    el.querySelectorAll("[data-tm-start]").forEach((b) => b.onclick = () => tmStart(b.dataset.tmStart, +b.dataset.tmMin));
+    el.querySelectorAll("[data-tm-stop]").forEach((b) => b.onclick = tmStop);
+    el.querySelectorAll("[data-tm-reset]").forEach((b) => b.onclick = tmReset);
+  }
+  setInterval(() => {
+    if (!TM || TM.stop) return;
+    const left = tmLeft();
+    document.querySelectorAll("[data-tm-clock]").forEach((c) => { c.textContent = fmtClock(left); c.classList.toggle("over", left < 0); });
+    document.querySelectorAll("[data-tm-sub]").forEach((c) => { c.textContent = left < 0 ? "über der Zeit" : "verbleibend"; });
+  }, 1000);
   // ---------- Lernrunde
   const ROUND = 20;
   function startSess(list, title, src, startAt) {
@@ -2884,6 +2952,8 @@ INSERT INTO Konto VALUES (1,'Weingut Becker',1500.00),(2,'Klinik am Rhein',320.0
     focusMain();
   }
   function focusMain() { const b = $("#s-reveal") || $(".opt:not(:disabled)"); if (b) b.focus({ preventScroll: true }); }
+  const selQ = () => allQ().filter((q) => UI.sel.includes(q.topic));
+  function learnSel() { if (!UI.sel.length) return; const names = UI.sel.map((id) => TP[id] ? TP[id].n.split(/[,&]/)[0].trim() : id); startSess(smartOrder(selQ()).slice(0, ROUND), "Auswahl: " + names.join(" + "), { kind: "sel", tids: UI.sel.slice() }); }
   function learnTopic(tid) { startSess(smartOrder(topicQ(tid)).slice(0, ROUND), TP[tid].n, { kind: "learn", tid }); }
   function learnList(kind, tid) {
     if (kind === "learn") return learnTopic(tid);
@@ -3015,6 +3085,7 @@ INSERT INTO Konto VALUES (1,'Weingut Becker',1500.00),(2,'Klinik am Rhein',320.0
     $("#e-next").onclick = () => {
       const src = s.src;
       if (src.kind === "due" && dueList(src.tid ? topicQ(src.tid) : allQ()).length) learnList("due", src.tid);
+      else if (src.kind === "sel" && src.tids) { UI.sel = src.tids.slice(); learnSel(); }
       else if (src.kind === "part") learnList("part", src.part);
       else if (src.tid) learnTopic(src.tid);
       else startSess(smartOrder(allQ()).slice(0, ROUND), "Gemischte Runde", { kind: "mixed" });
@@ -3023,10 +3094,11 @@ INSERT INTO Konto VALUES (1,'Weingut Becker',1500.00),(2,'Klinik am Rhein',320.0
   }
 
   // ---------- Übersicht
+  const teilRank = (t) => ({ "Teil 1": 0, "Teil 2": 1, "Teil 1 + 2": 2, "SoWi": 3 })[t.teil] ?? 4;
   function nextTopic() {
     if (S.last && TP[S.last] && counts(topicQ(S.last)).open) return TP[S.last];
     const list = TOPICS.map((t) => ({ t, c: counts(topicQ(t.id)) })).filter((x) => x.c.t && x.c.open);
-    list.sort((a, b) => (a.t.prio === "Muss" ? 0 : 1) - (b.t.prio === "Muss" ? 0 : 1) || a.c.pct - b.c.pct);
+    list.sort((a, b) => (a.t.prio === "Muss" ? 0 : 1) - (b.t.prio === "Muss" ? 0 : 1) || a.c.pct - b.c.pct || teilRank(a.t) - teilRank(b.t));
     return list.length ? list[0].t : TOPICS[0];
   }
   function topicRow(t) {
@@ -3042,8 +3114,7 @@ INSERT INTO Konto VALUES (1,'Weingut Becker',1500.00),(2,'Klinik am Rhein',320.0
     const perDay = need ? Math.ceil(need / Math.max(1, left - 1)) : 0;
     const todayN = S.log[today()] || 0;
     const nt = nextTopic(), ntc = counts(topicQ(nt.id));
-    const parts = ["t2", "t1", "wiso"].map((p) => { const tids = TOPICS.filter((t) => inTeil(t, p)).map((t) => t.id); return { p, c: counts(all.filter((q) => tids.includes(q.topic))) }; });
-    const weak = TOPICS.map((t) => ({ t, c: counts(topicQ(t.id)) })).filter((x) => x.c.t && x.c.open).sort((a, b) => (a.t.prio === "Muss" ? 0 : 1) - (b.t.prio === "Muss" ? 0 : 1) || a.c.pct - b.c.pct).slice(0, 4);
+    const parts = ["t1", "t2", "wiso"].map((p) => { const tids = TOPICS.filter((t) => inTeil(t, p)).map((t) => t.id); return { p, c: counts(all.filter((q) => tids.includes(q.topic))) }; });
     const errN = c.r, markN = all.filter((q) => S.mark[q.id]).length, dueN = all.filter((q) => isDue(q.id)).length;
     const dayBefore = (() => { const d = addDays(EXAM_DAY, -1).split("-"); return d[2] + "." + d[1] + "."; })();
     el.innerHTML = `
@@ -3054,12 +3125,12 @@ INSERT INTO Konto VALUES (1,'Weingut Becker',1500.00),(2,'Klinik am Rhein',320.0
           <h2>${reifeLabel(c.pct)}</h2>
           <p class="mot">${c.t - c.g} von ${c.t} Fragen sind noch nicht grün. Eine Frage wird grün, wenn du sie zweimal hintereinander richtig beantwortest. Danach kommt sie nach 3, 7, 14 und 30 Tagen zur Wiederholung.</p>
           ${ampBar(c, "lg")}${legend(c)}
-          <div class="row" style="margin-top:20px"><button type="button" class="btn white" id="h-learn">${ic("play", "ic sm")} Weiterlernen</button><button type="button" class="btn glass" data-go2="pruefung">${ic("timer", "ic sm")} Prüfung simulieren</button></div>
+          <div class="row" style="margin-top:20px"><button type="button" class="btn white" data-go2="tutorial">${ic("map", "ic sm")} Tutorial: So lernst du am besten</button></div>
           <p class="nexthint">${dueN ? `Als Nächstes: <b>${dueN} ${dueN === 1 ? "fällige Wiederholung" : "fällige Wiederholungen"}</b>, danach ${esc(nt.n)}` : `Als Nächstes: <b>${esc(nt.n)}</b> · ${ntc.open} offene Fragen`}</p>
         </div>
         <div class="hero-side">${ring(c.pct, 150, 12, `${Math.round(c.pct * 100)}<small>% prüfungsreif</small>`, "anim")}</div>
       </section>
-      <div class="parts">${parts.map(({ p, c: pc }) => `<section class="card part t-${tcolOf(p)}"><div class="row">${ring(pc.pct, 58, 6, `<span class="tiny">${Math.round(pc.pct * 100)}%</span>`, "anim")}<div style="flex:1;min-width:0"><span class="tiny muted">${p === "wiso" ? "WiSo · 60 Min." : p === "t1" ? "Teil 1 · 90 Min." : "Teil 2 · 90 Min."}</span><h3>${TEIL[p].k}</h3></div></div>${ampBar(pc)}<div class="row"><span class="tiny muted">${pc.g} von ${pc.t} grün</span><span class="spacer"></span><button type="button" class="btn small" data-part="${p}">${ic("play", "ic xs")} Lernen</button></div></section>`).join("")}</div>
+      <div class="parts">${parts.map(({ p, c: pc }) => `<section class="card part t-${tcolOf(p)}"><div class="row">${ring(pc.pct, 58, 6, `<span class="tiny">${Math.round(pc.pct * 100)}%</span>`, "anim")}<div style="flex:1;min-width:0"><span class="tiny muted">${p === "wiso" ? "SoWi · 60 Min." : p === "t1" ? "Teil 1 · 90 Min." : "Teil 2 · 90 Min."}</span><h3>${TEIL[p].k}</h3></div></div>${ampBar(pc)}<div class="row"><span class="tiny muted">${pc.g} von ${pc.t} grün</span><span class="spacer"></span><button type="button" class="btn small" data-part="${p}">${ic("play", "ic xs")} Lernen</button></div></section>`).join("")}</div>
       <div class="grid2">
         <section class="card">
           <h3>Lernempfehlung</h3>
@@ -3078,10 +3149,35 @@ INSERT INTO Konto VALUES (1,'Weingut Becker',1500.00),(2,'Klinik am Rhein',320.0
           </div>
         </section>
       </div>
-      ${weak.length ? `<section class="sec">
-        <div class="sec-head"><h2>Hier holst du am meisten raus</h2><span class="spacer"></span><button type="button" class="linkbtn" data-go2="lernen">Alle Themen</button></div>
-        <div class="tlist">${weak.map((x) => topicRow(x.t)).join("")}</div>
-      </section>` : ""}
+`;
+    el.querySelectorAll("[data-go2]").forEach((b) => b.onclick = () => navTo(b.dataset.go2));
+    el.querySelectorAll("[data-part]").forEach((b) => b.onclick = () => learnList("part", b.dataset.part));
+    el.querySelectorAll("[data-kind]").forEach((b) => b.onclick = () => learnList(b.dataset.kind));
+    bindTopicRows(el);
+  }
+
+
+  // ---------- Tipps (allgemein, nicht themenspezifisch)
+  function rTipps() {
+    const el = $("#v-tipps"), X = PK.X01;
+    const weak = TOPICS.map((t) => ({ t, c: counts(topicQ(t.id)) })).filter((x) => x.c.t && x.c.open).sort((a, b) => (a.t.prio === "Muss" ? 0 : 1) - (b.t.prio === "Muss" ? 0 : 1) || a.c.pct - b.c.pct || teilRank(a.t) - teilRank(b.t)).slice(0, 5);
+    el.innerHTML = `
+      ${X ? `<section class="card"><div class="row"><h3>So holst du die Punkte</h3><span class="spacer"></span><span class="small muted">Prüfungstechnik</span></div><p class="small muted" style="margin-top:4px">${esc(X.relevanz)}</p><div class="kern-list">${X.kern.map(([h, t, c], i) => `<details class="kern" ${i === 0 ? "open" : ""}><summary><span class="kn">${i + 1}</span><span>${esc(h)}</span>${ic("down", "ic chev")}</summary><div class="kb"><p>${esc(t)}</p>${c ? `<pre>${esc(c)}</pre>` : ""}</div></details>`).join("")}</div>
+        ${X.fallen && X.fallen.length ? `<div class="sub-box fallen-box"><h4>${ic("alert", "ic sm")} Hier verlieren Prüflinge Punkte</h4><ul class="fallen">${X.fallen.map((x) => `<li><span>${esc(x)}</span></li>`).join("")}</ul></div>` : ""}</section>` : ""}
+      ${weak.length ? `<section class="sec"><div class="sec-head"><h2>Hier holst du am meisten raus</h2><span class="spacer"></span><button type="button" class="linkbtn" data-go2="lernen">Alle Themen</button></div><p class="small muted" style="margin:-4px 2px 10px">Pflichtthemen mit dem größten Rückstand – nach deinem Lernstand sortiert.</p><div class="tlist">${weak.map((x) => topicRow(x.t)).join("")}</div></section>` : ""}
+      <section class="card tip-link"><div class="row">${ic("map", "ic")}<div style="flex:1;min-width:200px"><b>Wie lerne ich am besten mit dem Coach?</b><br><span class="small muted">Der Lernpfad bis zur Prüfung und alle Funktionen auf einen Blick.</span></div><button type="button" class="btn small" data-go2="tutorial">Tutorial öffnen</button></div></section>`;
+    el.querySelectorAll("[data-go2]").forEach((b) => b.onclick = () => navTo(b.dataset.go2));
+    bindTopicRows(el);
+  }
+
+  // ---------- Einstellungen
+  function rSettings() {
+    const el = $("#v-einstellungen"), tm = themeMode();
+    el.innerHTML = `
+      <section class="card">
+        <h3>Darstellung</h3>
+        <div class="segs" role="group" aria-label="Darstellung" style="margin-top:10px">${[["auto", "wie System", "auto"], ["light", "Hell", "sun"], ["dark", "Dunkel", "moon"]].map(([m, l, i]) => `<button type="button" class="seg ${tm === m ? "on" : ""}" data-theme-set="${m}" aria-pressed="${tm === m}">${ic(i, "ic xs")} ${l}</button>`).join("")}</div>
+      </section>
       <section class="card app-card">
         <h3>App &amp; Offline</h3>
         <p class="small muted">${PWA.standalone ? "Du nutzt den Coach als installierte App." : "Du kannst den Coach wie eine App auf dem Startbildschirm ablegen. Er funktioniert dann auch ohne Internet, z. B. in der Bahn."}</p>
@@ -3103,7 +3199,11 @@ INSERT INTO Konto VALUES (1,'Weingut Becker',1500.00),(2,'Klinik am Rhein',320.0
           ${UI.confirm === "reset" ? `<button type="button" class="btn small danger" id="d-reset2">Wirklich alles löschen</button><button type="button" class="btn small ghost" id="d-cancel">Abbrechen</button>` : `<button type="button" class="btn small ghost" id="d-reset">Fortschritt zurücksetzen</button>`}
         </div>
         <p class="small ${storeOk ? "muted" : "warn-text"}" id="d-msg">${storeOk ? `Zuletzt gespeichert: ${Object.keys(S.q).length} Fragen bearbeitet, ${S.runs.length} Prüfungen.` : "Dieser Browser erlaubt gerade kein Speichern, z. B. in einem privaten Fenster. Lade dir zwischendurch eine Sicherung herunter."}</p>
-      </section>`;
+      </section>
+      <section class="card"><h3>Hilfe</h3><div class="row" style="margin-top:8px"><button type="button" class="btn small" data-go2="tutorial">${ic("map", "ic xs")} Tutorial öffnen</button><a class="btn small ghost" href="https://github.com/${REPO}/issues" target="_blank" rel="noopener">Gemeldete Fehler ansehen</a></div></section>`;
+    el.querySelectorAll("[data-theme-set]").forEach((b) => b.onclick = () => { setTheme(b.dataset.themeSet); render(); });
+    el.querySelectorAll("[data-go2]").forEach((b) => b.onclick = () => navTo(b.dataset.go2));
+    const ai = $("#app-install"); if (ai) ai.onclick = async () => { const pr = PWA.prompt; PWA.prompt = null; pr.prompt(); try { await pr.userChoice; } catch (e) {} render(); };
     $("#d-export").onclick = async () => {
       const data = JSON.stringify({ app: "tap2coach", exportiert: new Date().toISOString(), data: S }, null, 1);
       const name = "tap2-fortschritt-" + today() + ".json", msg = $("#d-msg");
@@ -3138,12 +3238,59 @@ INSERT INTO Konto VALUES (1,'Weingut Becker',1500.00),(2,'Klinik am Rhein',320.0
     const rs = $("#d-reset"); if (rs) rs.onclick = () => { UI.confirm = "reset"; render(); $("#d-reset2").scrollIntoView({ block: "center" }); };
     const rs2 = $("#d-reset2"); if (rs2) rs2.onclick = () => { S = blank(); save(); UI.sess = null; UI.run = null; keepSess(); try { localStorage.removeItem(KEY_RUN); } catch (x) {} UI.confirm = null; render(); window.scrollTo({ top: 0 }); };
     const dc = $("#d-cancel"); if (dc) dc.onclick = () => { UI.confirm = null; render(); };
-    $("#h-learn").onclick = () => (dueN ? learnList("due") : learnTopic(nt.id));
-    const ai = $("#app-install"); if (ai) ai.onclick = async () => { const pr = PWA.prompt; PWA.prompt = null; pr.prompt(); try { await pr.userChoice; } catch (e) {} render(); };
-    el.querySelectorAll("[data-go2]").forEach((b) => b.onclick = () => navTo(b.dataset.go2));
-    el.querySelectorAll("[data-part]").forEach((b) => b.onclick = () => learnList("part", b.dataset.part));
-    el.querySelectorAll("[data-kind]").forEach((b) => b.onclick = () => learnList(b.dataset.kind));
-    bindTopicRows(el);
+  }
+
+  // ---------- Tutorial: Lernpfad und Spickzettel
+  const KEY_TUT = "tap2coach-tut";
+  function rTutorial() {
+    try { localStorage.setItem(KEY_TUT, "1"); } catch (e) {}
+    const el = $("#v-tutorial");
+    const all = allQ(), c = counts(all), left = Math.max(0, daysLeft()), dueN = all.filter((q) => isDue(q.id)).length;
+    const need = all.reduce((a, q) => { const s0 = st(q.id); return a + (s0 === 2 ? 0 : s0 === 1 ? 1 : 2); }, 0);
+    const perDay = need ? Math.ceil(need / Math.max(1, left - 1)) : 0;
+    const steps = [
+      ["again", "Jeden Tag zuerst: fällige Wiederholungen", "10–15 Min. Fragen, die du schon kannst, kommen nach 1, 3, 7, 14 und 30 Tagen wieder. So bleibt das Wissen bis zur Prüfung frisch.", dueN ? `<button type="button" class="btn small primary" data-tut="due">Fällige wiederholen (${dueN})</button>` : `<span class="small muted">Heute nichts fällig.</span>`],
+      ["book", "Thema für Thema: erst Theorie, dann Fragen", "Unter Lernen ein Thema öffnen, die Theorie lesen (Lernzeit-Timer starten) und dann Lernrunden à 20 Fragen machen, bis die Ampel grün ist. Rote Fragen kommen automatisch zuerst.", `<button type="button" class="btn small" data-tut="lernen">Zu den Themen</button>`],
+      ["layers", "Themen mischen", "Unter Lernen mehrere Themen anhaken und gemeinsam üben – zum Beispiel SQL und Datenmodell. Gemischt üben trainiert, Aufgaben zu erkennen, statt sie nur zu wiederholen.", `<button type="button" class="btn small" data-tut="lernen">Themen auswählen</button>`],
+      ["code", "Code schreiben, nicht nur lesen", "Bei Pseudocode- und SQL-Karten deine Lösung im Editor tippen, SQL mit Shift + Enter ausführen und mit der Musterlösung vergleichen.", `<button type="button" class="btn small" data-tut="code">Code-Karte üben</button>`],
+      ["pencil", "Große Aufgaben auf Papier, mit Timer", "Unter Aufgaben eine Aufgabe starten – der Timer läuft mit der Prüfungszeit. Auf Papier lösen, Stopp drücken, mit der Musterlösung vergleichen und Punkte eintragen.", `<button type="button" class="btn small" data-tut="aufgaben">Zu den Aufgaben</button>`],
+      ["timer", "Einmal pro Woche: Prüfung simulieren", "Je Teil eine Real-Klausur (Teil 1, Teil 2) bzw. SoWi-Simulation unter Zeitdruck. Danach Fehler auswerten.", `<button type="button" class="btn small" data-tut="pruefung">Zur Prüfung</button>`],
+      ["bulb", "Letzte Woche: festigen statt neu lernen", "Nur noch fällige Wiederholungen, Fehlerfragen und Simulationen. Prüfungstechnik unter Tipps lesen. Am Tag vor der Prüfung nichts Neues mehr.", `<button type="button" class="btn small" data-tut="tipps">Zu den Tipps</button>`]
+    ];
+    el.innerHTML = `
+      <section class="card tut-plan">
+        <div class="row" style="align-items:flex-start"><img src="icons/raven.svg" alt="" class="tut-raven"><div style="flex:1;min-width:220px"><h2>Dein Plan bis zum ${EXAM_DE}</h2><p class="muted" style="margin-top:6px">${left > 0 ? `Noch <b class="ink">${left} ${left === 1 ? "Tag" : "Tage"}</b>. ` : ""}${need ? `Beantworte jeden Tag etwa <b class="ink">${perDay} Fragen</b>${dueN ? ` plus die fälligen Wiederholungen` : ""}, dann ist bis zum Vortag alles grün.` : "Alle Fragen sind grün – jetzt geht es ums Festigen."} Aktuell: ${pctS(c.pct)} prüfungsreif.</p></div></div>
+      </section>
+      <section class="sec"><div class="sec-head"><h2>Der Lernpfad</h2></div>
+        <ol class="tut-steps">${steps.map(([i, h, t, act], n) => `<li><span class="ts-n">${n + 1}</span><div class="ts-b"><b>${ic(i, "ic sm")} ${h}</b><p class="small muted">${t}</p><div class="row">${act}</div></div></li>`).join("")}</ol>
+      </section>
+      <section class="sec"><div class="sec-head"><h2>Spickzettel</h2><span class="small muted">Was kann ich wo?</span></div>
+        <div class="cheat">
+          <div class="card"><h4>${ic("home", "ic sm")} Übersicht</h4><p class="small muted">Prüfungsreife, Stand je Teil, Lernempfehlung, „Gezielt üben“ (fällig, Fehler, neu, markiert, Zufall).</p></div>
+          <div class="card"><h4>${ic("book", "ic sm")} Lernen</h4><p class="small muted">Themen mit Theorie und Fragen. Mehrere Themen anhaken = gemeinsame Lernrunde. Eigene Fragen anlegen.</p></div>
+          <div class="card"><h4>${ic("pencil", "ic sm")} Aufgaben</h4><p class="small muted">Große Aufgaben im Prüfungsstil mit Timer, Musterlösung und Punkteeintrag.</p></div>
+          <div class="card"><h4>${ic("timer", "ic sm")} Prüfung</h4><p class="small muted">Simulation (30 Auswahlfragen) und Real-Klausur (4 offene Aufgaben, 90 Min.) mit Note.</p></div>
+          <div class="card"><h4>${ic("bulb", "ic sm")} Tipps</h4><p class="small muted">Prüfungstechnik, Operatoren, typische Punktverluste und deine schwächsten Themen.</p></div>
+          <div class="card"><h4>${ic("gear", "ic sm")} Einstellungen</h4><p class="small muted">Hell/Dunkel, App installieren, Sicherung speichern/laden, Fortschritt zurücksetzen.</p></div>
+        </div>
+        <div class="card cheat-keys">
+          <h4>Symbole und Tastenkürzel</h4>
+          <ul>
+            <li><span class="amp s2"></span><span class="amp s1"></span><span class="amp s0"></span> <b>Ampel:</b> grün = sitzt (2× richtig), gelb = 1× richtig, rot = zuletzt falsch</li>
+            <li>${ic("search", "ic xs")} <b>Suche</b> oben rechts oder Taste <span class="kbd">/</span></li>
+            <li>${ic("star", "ic xs")} <b>Markieren</b> und ${ic("flag", "ic xs")} <b>Fehler melden</b> in jeder Frage</li>
+            <li><span class="kbd">1</span>–<span class="kbd">4</span> Antwort wählen · <span class="kbd">Leertaste</span> aufdecken · <span class="kbd">←</span>/<span class="kbd">→</span> nicht gewusst/gewusst · <span class="kbd">Esc</span> Runde beenden</li>
+            <li>Im Code-Editor: <span class="kbd">Strg/Cmd + Enter</span> vergleichen · <span class="kbd">Shift + Enter</span> SQL ausführen</li>
+          </ul>
+        </div>
+      </section>
+      <div class="row" style="justify-content:center;margin:8px 0 24px"><button type="button" class="btn primary big" data-tut="start">${ic("play", "ic sm")} Los geht's</button></div>`;
+    el.querySelectorAll("[data-tut]").forEach((b) => b.onclick = () => {
+      const k = b.dataset.tut;
+      if (k === "due") learnList("due");
+      else if (k === "code") { const ids = Object.keys(CODE); const q = getQ(ids.find((id) => st(id) !== 2) || ids[0]); if (q) startSess([q], "Code-Karte", { kind: "code" }); }
+      else navTo(k);
+    });
   }
 
   // ---------- Lernen: Themen
@@ -3153,18 +3300,23 @@ INSERT INTO Konto VALUES (1,'Weingut Becker',1500.00),(2,'Klinik am Rhein',320.0
     if (UI.topic && TP[UI.topic]) return rTopic(el, TP[UI.topic]);
     const all = allQ(), c = counts(all), f = UI.tf;
     const markN = all.filter((q) => S.mark[q.id]).length;
-    const groups = [["Algorithmen · Teil 2", (t) => t.teil === "Teil 2"], ["Beide IT-Teile", (t) => t.teil === "Teil 1 + 2"], ["Planen · Teil 1", (t) => t.teil === "Teil 1"], ["Wirtschafts- und Sozialkunde", (t) => t.teil === "WiSo"]];
-    const show = (t) => f === "alle" || (f === "WiSo" ? t.teil === "WiSo" : t.teil !== "WiSo" && t.teil.includes(f.slice(-1)));
+    const groups = [["Planen · Teil 1", (t) => t.teil === "Teil 1"], ["Algorithmen · Teil 2", (t) => t.teil === "Teil 2"], ["Beide IT-Teile", (t) => t.teil === "Teil 1 + 2"], ["Wirtschafts- und Sozialkunde · SoWi", (t) => t.teil === "SoWi"]];
+    const show = (t) => f === "alle" || (f === "SoWi" ? t.teil === "SoWi" : t.teil !== "SoWi" && t.teil.includes(f.slice(-1)));
     el.innerHTML = `
       <section class="card overall">
         <div class="row" style="align-items:flex-end"><div style="flex:1;min-width:220px"><span class="small muted">Gesamter Fragenkatalog</span><h2>${c.t} Fragen · ${pctS(c.pct)} prüfungsreif</h2></div>
           <div class="row"><button type="button" class="btn small" data-kind="due" ${all.some((q) => isDue(q.id)) ? "" : "disabled"}>${ic("again", "ic xs")} Fällig (${all.filter((q) => isDue(q.id)).length})</button><button type="button" class="btn small" data-kind="err" ${c.r ? "" : "disabled"}><i class="amp s0"></i> Fehler (${c.r})</button><button type="button" class="btn small" data-kind="mark" ${markN ? "" : "disabled"}>${ic("star", "ic xs")} Markiert (${markN})</button><button type="button" class="btn small" data-kind="rand">${ic("shuffle", "ic xs")} Zufall</button></div></div>
         <div style="margin-top:14px">${ampBar(c, "lg")}${legend(c)}</div>
       </section>
-      <div class="sec-head"><h2>Themen</h2><div class="filters"><div class="segs" role="group" aria-label="Prüfungsteil">${["alle", "Teil 1", "Teil 2", "WiSo"].map((t) => `<button type="button" class="seg ${f === t ? "on" : ""}" data-tf="${t}" aria-pressed="${f === t}">${t === "alle" ? "Alle" : t}</button>`).join("")}</div></div></div>
-      ${groups.map(([name, fn]) => { const ts = TOPICS.filter((t) => fn(t) && show(t)); return ts.length ? `<div class="tgroup"><h3>${name}</h3><div class="tlist">${ts.map(topicRow).join("")}</div></div>` : ""; }).join("")}`;
+      <div class="sec-head"><h2>Themen</h2><div class="filters"><div class="segs" role="group" aria-label="Prüfungsteil">${["alle", "Teil 1", "Teil 2", "SoWi"].map((t) => `<button type="button" class="seg ${f === t ? "on" : ""}" data-tf="${t}" aria-pressed="${f === t}">${t === "alle" ? "Alle" : t}</button>`).join("")}</div></div></div>
+      <p class="small muted sel-hint">${ic("check", "ic xs")} Tipp: Hake mehrere Themen an, um sie gemeinsam in einer Lernrunde zu üben.</p>
+      ${groups.map(([name, fn]) => { const ts = TOPICS.filter((t) => fn(t) && show(t)); return ts.length ? `<div class="tgroup"><h3>${name}</h3><div class="tlist">${ts.map((t) => `<div class="trow-sel"><label class="tsel" title="Für gemeinsame Lernrunde auswählen"><input type="checkbox" data-sel="${t.id}" ${UI.sel.includes(t.id) ? "checked" : ""} aria-label="${esc(t.n)} auswählen"><span class="box">${ic("check", "ic xs")}</span></label>${topicRow(t)}</div>`).join("")}</div></div>` : ""; }).join("")}
+      ${UI.sel.length ? (() => { const qs = selQ(), cc = counts(qs); return `<div class="selbar" role="region" aria-label="Auswahl"><div class="sb-t"><b>${UI.sel.length} ${UI.sel.length === 1 ? "Thema" : "Themen"}</b><span>${qs.length} Fragen · ${cc.open} offen</span></div><button type="button" class="btn primary small" id="sel-go">${ic("play", "ic xs")} Lernrunde starten</button><button type="button" class="btn small ghost" id="sel-x">Aufheben</button></div>`; })() : ""}`;
     el.querySelectorAll("[data-kind]").forEach((b) => b.onclick = () => learnList(b.dataset.kind));
     el.querySelectorAll("[data-tf]").forEach((b) => b.onclick = () => { UI.tf = b.dataset.tf; render(); });
+    el.querySelectorAll("[data-sel]").forEach((b) => b.onchange = () => { const id = b.dataset.sel; UI.sel = b.checked ? UI.sel.concat(id) : UI.sel.filter((x) => x !== id); render(); });
+    const sg = $("#sel-go"); if (sg) sg.onclick = () => learnSel();
+    const sx = $("#sel-x"); if (sx) sx.onclick = () => { UI.sel = []; render(); };
     bindTopicRows(el);
   }
   function theoryHTML(p, idx, many) {
@@ -3172,6 +3324,7 @@ INSERT INTO Konto VALUES (1,'Weingut Becker',1500.00),(2,'Klinik am Rhein',320.0
     return `<section class="card theory">
       <div class="th-head">${many ? `<span class="chip">Kapitel ${idx + 1}</span>` : ""}<h3>${esc(p.titel)}</h3></div>
       <p class="pd-rel"><b>Warum es zählt:</b> ${esc(p.relevanz)} <span class="muted">Lesezeit mit Üben ca. ${dec(p.h)} h.</span></p>
+      <div class="tm-theory">${tmHTML("t:" + (p.id || p.titel), Math.round(p.h * 60), { compact: true, label: "Lernzeit starten" })}</div>
       <div class="kern-list">${p.kern.map(([h, t, c], i) => `<details class="kern" ${i === 0 ? "open" : ""}><summary><span class="kn">${i + 1}</span><span>${esc(h)}</span>${ic("down", "ic chev")}</summary><div class="kb"><p>${esc(t)}</p>${c ? `<pre>${esc(c)}</pre>` : ""}</div></details>`).join("")}</div>
       ${nt ? `<div class="sub-box"><h4>${esc(nt.titel)}</h4><div class="notation">${nt.svg}</div><p class="small muted">${esc(nt.hinweis)}</p></div>` : ""}
       <div class="sub-box fallen-box"><h4>${ic("alert", "ic sm")} Hier verlieren Prüflinge Punkte</h4><ul class="fallen">${p.fallen.map((x) => `<li><span>${esc(x)}</span></li>`).join("")}</ul></div>
@@ -3216,8 +3369,9 @@ INSERT INTO Konto VALUES (1,'Weingut Becker',1500.00),(2,'Klinik am Rhein',320.0
     $("#t-back").onclick = () => { UI.topic = null; UI.addQ = false; render(); window.scrollTo({ top: 0 }); };
     el.querySelectorAll("[data-act]").forEach((b) => b.onclick = () => learnList(b.dataset.act, t.id));
     el.querySelectorAll("[data-tab]").forEach((b) => b.onclick = () => { UI.ttab = b.dataset.tab; UI.addQ = false; render(); });
+    bindTM(el);
     el.querySelectorAll("[data-qi]").forEach((b) => b.onclick = () => startSess(qs, t.n + ": Alle Fragen", { kind: "all", tid: t.id }, +b.dataset.qi));
-    el.querySelectorAll("[data-u]").forEach((b) => b.onclick = () => { UI.ueb = b.dataset.u; UI.showSol = false; go("aufgaben"); });
+    el.querySelectorAll("[data-u]").forEach((b) => b.onclick = () => { UI.ueb = b.dataset.u; UI.showSol = false; UI.uFree = false; go("aufgaben"); });
     const qa = $("#q-add"); if (qa) qa.onclick = () => { UI.addQ = true; render(); const f = $("#add-f"); if (f) f.focus(); };
     if (UI.addQ && tab === "fragen") {
       $("#add-close").onclick = () => { UI.addQ = false; render(); };
@@ -3237,19 +3391,22 @@ INSERT INTO Konto VALUES (1,'Weingut Becker',1500.00),(2,'Klinik am Rhein',320.0
   function rUeb() {
     const el = $("#v-aufgaben");
     if (UI.ueb && UE[UI.ueb]) {
-      const u = UE[UI.ueb], r = S.ueb[u.id], tid = UEB_TOPIC[u.id];
+      const u = UE[UI.ueb], r = S.ueb[u.id], tid = UEB_TOPIC[u.id], tkey = "u:" + u.id, ust = tmState(tkey);
       el.innerHTML = `<button type="button" class="backlink" id="u-back">${ic("left", "ic sm")} Alle Aufgaben</button>
         <section class="card t-${tcolOf(u.teil)}"><div class="row" style="align-items:flex-start"><span class="pk-num">${esc(u.id)}</span><div style="flex:1;min-width:200px"><h2>${esc(u.titel)}</h2><div class="row" style="margin-top:6px"><span class="chip">${esc(u.teil)}</span><span class="chip">${esc(u.thema)}</span><span class="chip blue">${u.max} P · ca. ${u.min} Min.</span>${tid ? `<button type="button" class="linkbtn" id="u-topic">Theorie: ${esc(TP[tid].n)}</button>` : ""}<a class="linkbtn" href="${reportUrlUeb(u)}" target="_blank" rel="noopener">Fehler melden</a></div></div></div>
+        ${ust === "idle" && !UI.uFree ? `<div class="tm-start-box">${tmHTML(tkey, u.min, { label: "Aufgabe starten", hint: "Die Aufgabe erscheint mit dem Start. Läuft die Zeit ab, zählt der Timer ins Minus weiter." })}<button type="button" class="linkbtn" id="u-free">Ohne Zeitmessung öffnen</button></div>` : `<div class="tm-bar">${ust === "idle" ? `<span class="small muted">Ohne Zeitmessung geöffnet</span>` : tmHTML(tkey, u.min)}</div>
         ${u.schema ? `<div style="margin-top:16px"><span class="small muted">Tabellen</span><pre>${esc(SQL_SCHEMA)}</pre></div>` : ""}
         <div class="qtext" style="margin-top:16px">${esc(u.text)}</div>
-        <p class="small muted" style="margin-top:12px">Löse die Aufgabe auf Papier wie in der Prüfung, erst dann die Lösung ansehen.</p>
-        <div class="row" style="margin-top:14px"><button type="button" class="btn ${UI.showSol ? "" : "primary"}" id="u-sol">${UI.showSol ? "Lösung ausblenden" : "Musterlösung zeigen"}</button></div>
-        ${UI.showSol ? `<pre style="margin-top:14px">${esc(u.loesung)}</pre>
+        <p class="small muted" style="margin-top:12px">${ust === "run" ? "Löse die Aufgabe auf Papier wie in der Prüfung. Wenn du fertig bist: Stopp drücken, dann siehst du die Musterlösung." : "Löse die Aufgabe auf Papier wie in der Prüfung, erst dann die Lösung ansehen."}</p>
+        ${ust === "run" ? "" : `<div class="row" style="margin-top:14px"><button type="button" class="btn ${UI.showSol ? "" : "primary"}" id="u-sol">${UI.showSol ? "Lösung ausblenden" : "Musterlösung zeigen"}</button></div>`}`}
+        ${UI.showSol && ust !== "run" && (ust !== "idle" || UI.uFree) ? `<pre style="margin-top:14px">${esc(u.loesung)}</pre>
         <div class="row" style="margin-top:14px;align-items:flex-end"><label class="f" for="u-pts">Deine Punkte (0–${u.max})<input type="number" id="u-pts" min="0" max="${u.max}" step="0.5" value="${r ? r.p : ""}"></label><button type="button" class="btn primary" id="u-save">Speichern</button>${r ? `<span class="small muted">Zuletzt ${r.p}/${u.max} am ${fmtDay(r.at)}</span>` : ""}</div>` : ""}
         </section>`;
       $("#u-back").onclick = () => { UI.ueb = null; render(); };
       const ut = $("#u-topic"); if (ut) ut.onclick = () => { UI.topic = tid; UI.ttab = "theorie"; UI.sess = null; go("lernen"); };
-      $("#u-sol").onclick = () => { UI.showSol = !UI.showSol; render(); };
+      const us = $("#u-sol"); if (us) us.onclick = () => { UI.showSol = !UI.showSol; render(); };
+      const uf = $("#u-free"); if (uf) uf.onclick = () => { UI.uFree = true; render(); };
+      bindTM(el);
       const sv = $("#u-save");
       if (sv) sv.onclick = () => { const v = Math.max(0, Math.min(u.max, parseFloat($("#u-pts").value))); if (isNaN(v)) return; S.ueb[u.id] = { p: v, at: today(), n: (r?.n || 0) + 1 }; save(); render(); };
       return;
@@ -3259,7 +3416,7 @@ INSERT INTO Konto VALUES (1,'Weingut Becker',1500.00),(2,'Klinik am Rhein',320.0
     const done = UEB.filter((u) => S.ueb[u.id]).length;
     el.innerHTML = `<div class="row" style="align-items:flex-end"><p class="lead" style="flex:1;min-width:260px">Große Aufgaben im Stil der IHK-Prüfung mit Musterlösung, so wie sie in Planen und Algorithmen drankommen. Löse sie auf Papier, vergleiche mit der Lösung und trage deine Punkte ein. Unter 70 % lohnt sich ein zweiter Versuch.</p><span class="chip">${done} von ${UEB.length} bearbeitet</span></div>
       ${Object.entries(groups).map(([g, l]) => `<div class="ueb-group"><h3>${esc(g)}</h3><div class="ueb-list">${l.map((u) => { const r = S.ueb[u.id]; const pct = r ? r.p / u.max : null; return `<button type="button" class="ueb-item t-${tcolOf(u.teil)}" data-u="${u.id}"><span class="id">${u.id}</span><span><span class="t">${esc(u.titel)}</span><br><span class="sub">${esc(u.teil)} · ${u.max} P · ca. ${u.min} Min.</span></span><span class="r">${r ? `<span class="chip ${pct >= 0.81 ? "ok" : pct >= 0.67 ? "warn" : "bad"}"><span class="d"></span>${r.p}/${u.max}</span>` : '<span class="chip">offen</span>'}</span></button>`; }).join("")}</div></div>`).join("")}`;
-    el.querySelectorAll("[data-u]").forEach((b) => b.onclick = () => { UI.ueb = b.dataset.u; UI.showSol = false; render(); window.scrollTo({ top: 0 }); });
+    el.querySelectorAll("[data-u]").forEach((b) => b.onclick = () => { UI.ueb = b.dataset.u; UI.showSol = false; UI.uFree = false; render(); window.scrollTo({ top: 0 }); });
   }
 
   // ---------- Prüfung: Erzeugen
@@ -3354,11 +3511,11 @@ INSERT INTO Konto VALUES (1,'Weingut Becker',1500.00),(2,'Klinik am Rhein',320.0
     if (r && r.mode === "sim") return rSim(el);
     if (r) return rReal(el);
     const p = UI.pk;
-    if (p.mode === "real" && !(p.teil === "t1" || p.teil === "t2")) p.teil = "t2";
+    if (p.mode === "real" && !(p.teil === "t1" || p.teil === "t2")) p.teil = "t1";
     const hist = S.runs.slice().reverse();
     const X = PK.X01;
     const cat = counts(allQ());
-    const teile = p.mode === "sim" ? ["t2", "t1", "wiso", "mix"] : ["t2", "t1"];
+    const teile = p.mode === "sim" ? ["t1", "t2", "wiso", "mix"] : ["t1", "t2"];
     el.innerHTML = `
       <div class="grid2">
         <section class="card">
@@ -3368,22 +3525,23 @@ INSERT INTO Konto VALUES (1,'Weingut Becker',1500.00),(2,'Klinik am Rhein',320.0
             <button type="button" class="mode t-blue ${p.mode === "real" ? "on" : ""}" data-mode="real" aria-pressed="${p.mode === "real"}"><span class="mi">${ic("pencil")}</span><b>Real-Klausur</b><span>Wie in der echten Prüfung: vier offene Aufgaben à rund 25 Punkte in 90 Minuten. Danach bewertest du wie ein IHK-Prüfer mit Erwartungshorizont und Operator-Hinweisen.</span></button>
           </div>
           <label class="f" for="pk-teil">Prüfungsteil<select id="pk-teil">${teile.map((t) => `<option value="${t}" ${t === p.teil ? "selected" : ""}>${TEIL[t].k}${t === "mix" ? " (alle Teile)" : " – " + TEIL[t].n}</option>`).join("")}</select></label>
-          <div class="row" style="margin-top:18px"><button type="button" class="btn primary big" id="pk-go">${ic("play", "ic sm")} Starten</button><span class="small muted">${p.mode === "sim" ? `30 Fragen · ${SIM_MIN[p.teil] || 45} Minuten` : "90 Minuten · Papier für Skizzen bereitlegen"}</span></div>
+          <div class="row" style="margin-top:18px"><button type="button" class="btn primary big" id="pk-go">${ic("play", "ic sm")} Starten · ${fmtClock((p.mode === "sim" ? SIM_MIN[p.teil] || 45 : 90) * 60)}</button><span class="small muted">${p.mode === "sim" ? `30 Fragen · ${SIM_MIN[p.teil] || 45} Minuten` : "90 Minuten · Papier für Skizzen bereitlegen"}</span></div>
         </section>
         <section class="card">
           <h3>Bereit für eine 1?</h3>
           <p class="small muted" style="margin-top:4px">Prüferblick: Das Wissen sitzt, und du schaffst es unter Prüfungsbedingungen.</p>
           <ul class="n1">
             <li class="${cat.pct >= 0.9 ? "ok" : ""}"><span class="n1-i">${cat.pct >= 0.9 ? ic("check", "ic sm") : ""}</span><span><b>Fragenkatalog</b><br><span class="tiny muted">mindestens 90 % prüfungsreif</span></span><span class="chip ${cat.pct >= 0.9 ? "yellow" : ""}">${pctS(cat.pct)}</span></li>
-            ${["t2", "t1", "wiso"].map((t) => { const rs = runsFor(t), ok = n1ok(t), good = rs.filter((x) => x.pct >= 92).length; return `<li class="${ok ? "ok" : ""}"><span class="n1-i">${ok ? ic("check", "ic sm") : ""}</span><span><b>${TEIL[t].k}</b><br><span class="tiny muted">${t === "wiso" ? "zwei Simulationen in Folge ab 92 %" : "zwei Real-Klausuren in Folge ab 92 %"}${rs.length ? " · zuletzt " + rs.map((x) => x.pct + " %").join(", ") : ""}</span></span><span class="chip ${ok ? "yellow" : ""}">${good}/2</span></li>`; }).join("")}
+            ${["t1", "t2", "wiso"].map((t) => { const rs = runsFor(t), ok = n1ok(t), good = rs.filter((x) => x.pct >= 92).length; return `<li class="${ok ? "ok" : ""}"><span class="n1-i">${ok ? ic("check", "ic sm") : ""}</span><span><b>${TEIL[t].k}</b><br><span class="tiny muted">${t === "wiso" ? "zwei Simulationen in Folge ab 92 %" : "zwei Real-Klausuren in Folge ab 92 %"}${rs.length ? " · zuletzt " + rs.map((x) => x.pct + " %").join(", ") : ""}</span></span><span class="chip ${ok ? "yellow" : ""}">${good}/2</span></li>`; }).join("")}
           </ul>
         </section>
       </div>
-      ${X ? `<section class="card"><div class="row"><h3>So holst du die Punkte</h3><span class="spacer"></span><span class="small muted">Prüfungstechnik</span></div><div class="kern-list">${X.kern.map(([h, t, c], i) => `<details class="kern"><summary><span class="kn">${i + 1}</span><span>${esc(h)}</span>${ic("down", "ic chev")}</summary><div class="kb"><p>${esc(t)}</p>${c ? `<pre>${esc(c)}</pre>` : ""}</div></details>`).join("")}</div></section>` : ""}
+      <section class="card tip-link"><div class="row">${ic("bulb", "ic")}<div style="flex:1;min-width:200px"><b>Prüfungstechnik</b><br><span class="small muted">Operatoren, Zeiteinteilung und typische Punktverluste findest du unter Tipps.</span></div><button type="button" class="btn small" data-go2="tipps">Zu den Tipps</button></div></section>
       <section class="card"><div class="row"><h3>Deine Ergebnisse</h3><span class="spacer"></span><span class="small muted">${hist.length} ${hist.length === 1 ? "Durchgang" : "Durchgänge"}</span></div>
         ${hist.length ? `<div class="res-list">${hist.map((x) => `<div class="res">${gradeBadge(x.note)}<div><div class="t">${MODE_LBL[x.mode] || x.mode} · ${TEIL[x.teil] ? TEIL[x.teil].k : esc(x.teil)}</div><div class="s">${fmtDay(x.at)}${x.detail ? " · " + esc(x.detail) : ""} · ${x.pct >= 50 ? "bestanden" : "nicht bestanden"}</div></div><span class="chip num">${x.pct} %</span>${UI.confirm === x.ts ? `<button type="button" class="btn small danger del" data-del="${x.ts}">Wirklich löschen</button>` : `<button type="button" class="iconbtn sm del" data-ask="${x.ts}" aria-label="Ergebnis löschen">${ic("x", "ic xs")}</button>`}</div>`).join("")}</div>` : `<p class="empty">Noch keine Prüfung geschrieben. Starte mit einer Simulation.</p>`}
       </section>`;
     el.querySelectorAll("[data-mode]").forEach((b) => b.onclick = () => { p.mode = b.dataset.mode; render(); });
+    el.querySelectorAll("[data-go2]").forEach((b) => b.onclick = () => navTo(b.dataset.go2));
     $("#pk-teil").onchange = (e) => { p.teil = e.target.value; render(); };
     $("#pk-go").onclick = () => { startRun(); render(); window.scrollTo({ top: 0 }); };
     el.querySelectorAll("[data-ask]").forEach((b) => b.onclick = () => { UI.confirm = +b.dataset.ask; render(); });
@@ -3476,10 +3634,10 @@ INSERT INTO Konto VALUES (1,'Weingut Becker',1500.00),(2,'Klinik am Rhein',320.0
 
   // ---------- Offline-App (Service Worker), Installation, Update-Hinweis
   const PWA = { prompt: null, offline: false, ios: /iphone|ipad|ipod/i.test(navigator.userAgent), standalone: (window.matchMedia && matchMedia("(display-mode: standalone)").matches) || navigator.standalone === true, tag: null };
-  window.addEventListener("beforeinstallprompt", (e) => { e.preventDefault(); PWA.prompt = e; if (view === "start" && !UI.sess) render(); });
-  window.addEventListener("appinstalled", () => { PWA.prompt = null; PWA.standalone = true; if (view === "start") render(); });
+  window.addEventListener("beforeinstallprompt", (e) => { e.preventDefault(); PWA.prompt = e; if (view === "einstellungen") render(); });
+  window.addEventListener("appinstalled", () => { PWA.prompt = null; PWA.standalone = true; if (view === "einstellungen") render(); });
   if ("serviceWorker" in navigator && /^https?:$/.test(location.protocol)) {
-    navigator.serviceWorker.register("sw.js").then(() => navigator.serviceWorker.ready).then(() => { PWA.offline = true; if (view === "start" && !UI.sess) render(); }).catch(() => { PWA.swFail = true; if (view === "start" && !UI.sess) render(); });
+    navigator.serviceWorker.register("sw.js").then(() => navigator.serviceWorker.ready).then(() => { PWA.offline = true; if (view === "einstellungen") render(); }).catch(() => { PWA.swFail = true; if (view === "einstellungen") render(); });
   } else PWA.swFail = true;
   // Neue Version erkennen: ETag bzw. Last-Modified der Seite vergleichen (ohne manuelle Versionsnummer)
   async function pageTag() { try { const r = await fetch(location.pathname, { method: "HEAD", cache: "no-store" }); return r.ok ? r.headers.get("etag") || r.headers.get("last-modified") : null; } catch (e) { return null; } }
@@ -3497,6 +3655,7 @@ INSERT INTO Konto VALUES (1,'Weingut Becker',1500.00),(2,'Klinik am Rhein',320.0
   if (VIEWS.includes(h)) view = h;
   localLoad();
   try { const ss = JSON.parse(localStorage.getItem(KEY_SESS) || "null"); if (ss && Array.isArray(ss.ids) && ss.i < ss.ids.length) { UI.sess = ss; view = "lernen"; } } catch (e) {}
+  try { if (!h && !UI.sess && !localStorage.getItem(KEY_TUT) && !Object.keys(S.q).length) view = "tutorial"; } catch (e) {}
   render();
 })();
 

@@ -642,6 +642,16 @@ pre, code, .mono { font-variant-ligatures: none; } /* <= bleibt <= (wie auf dem 
 
 
 
+
+/* ---------- Übertragen (Link + QR) */
+.tx-out { display: flex; gap: 16px; align-items: flex-start; flex-wrap: wrap; } .qr-wrap { max-width: 100%; flex: none; box-sizing: border-box; }
+.qr-wrap { background: #fff; border-radius: var(--r-sm); box-shadow: var(--sh-1); overflow: hidden; }
+.qr { display: block; max-width: 100%; image-rendering: pixelated; }
+.tx-act { flex: 1; min-width: 220px; display: flex; flex-direction: column; gap: 8px; }
+.tx-in { margin-top: 12px; padding: 12px 14px; border-radius: var(--r-sm); border: 1.5px solid var(--blue); background: var(--blue-soft); display: flex; flex-direction: column; gap: 6px; }
+.tx-paste { margin-top: 12px; } .tx-paste summary { cursor: pointer; font-weight: 700; }
+.tx-paste input { flex: 1; min-width: 200px; font: inherit; padding: 8px 10px; border-radius: var(--r-sm); border: 1.5px solid var(--line-2); background: var(--surface-2); color: var(--ink); }
+@media (max-width: 560px) { .qr { width: 100% !important; height: auto !important; aspect-ratio: 1; } .qr-wrap { width: 100%; } }
 /* ---------- Lernverbesserungen: Sicherheit, Erklär-Feld, Fehlerprotokoll, Operatoren, Lernplan */
 .rate.three { grid-template-columns: 1fr 1fr 1fr; }
 .btn.unsure { background: var(--yellow-soft); color: var(--ink); }
@@ -2555,6 +2565,7 @@ CARDS_RAW.algo.push(
     if (ok) r.b = unsure ? 1 : Math.min(r.b + 1, IV.length - 1); else { r.b = 0; r.w++; }
     r.s = ok ? (r.b >= 2 ? 2 : 1) : 0;
     r.d = addDays(today(), IV[r.b]);
+    r.t = Date.now();
     S.q[id] = r;
     const d = today(); S.log[d] = (S.log[d] || 0) + 1;
     save();
@@ -3026,7 +3037,7 @@ INSERT INTO Konto VALUES (1,'Weingut Becker',1500.00),(2,'Klinik am Rhein',320.0
   function reveal() { const s = UI.sess; s.rev = true; keepSess(); render(); const y = $("#s-yes"); if (y) y.focus({ preventScroll: true }); }
   function markGuess() { // Auswahlfrage richtig, aber geraten → morgen wieder, höchstens gelb
     const s = UI.sess, q = getQ(s.ids[s.i]); if (!q) return;
-    const r = S.q[q.id]; if (r && s.res[q.id] && s.res[q.id].ok) { r.b = 1; r.s = 1; r.d = addDays(today(), IV[1]); save(); s.res[q.id].t = 1; s.res[q.id].guess = true; }
+    const r = S.q[q.id]; if (r && s.res[q.id] && s.res[q.id].ok) { r.b = 1; r.s = 1; r.d = addDays(today(), IV[1]); r.t = Date.now(); save(); s.res[q.id].t = 1; s.res[q.id].guess = true; }
     sessNext();
   }
   function rateCard(ok, unsure) {
@@ -3332,6 +3343,134 @@ INSERT INTO Konto VALUES (1,'Weingut Becker',1500.00),(2,'Klinik am Rhein',320.0
     const td = el.querySelector("li.today > .plan-items"); if (td) td.remove();
     bindPlan(el);
   }
+
+  // ---------- Auf ein anderes Gerät übertragen: Link + QR-Code, ohne Server
+  // Format: Version "1" + base64url( deflate( [2 Byte JSON-Länge][JSON][je bearbeiteter Frage 3 Byte][Markierungs-Bitmap] ) )
+  const TX_IDS = () => BASE_Q.map((q) => q.id);
+  const b64u = {
+    enc: (u8) => { let x = ""; for (let i = 0; i < u8.length; i += 0x8000) x += String.fromCharCode.apply(null, u8.subarray(i, i + 0x8000)); return btoa(x).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, ""); },
+    dec: (t) => { t = t.replace(/-/g, "+").replace(/_/g, "/"); while (t.length % 4) t += "="; const x = atob(t), u = new Uint8Array(x.length); for (let i = 0; i < x.length; i++) u[i] = x.charCodeAt(i); return u; }
+  };
+  async function deflate(u8, inflate) {
+    if (typeof CompressionStream === "undefined") return null;
+    const st = inflate ? new DecompressionStream("deflate-raw") : new CompressionStream("deflate-raw");
+    return new Uint8Array(await new Response(new Blob([u8]).stream().pipeThrough(st)).arrayBuffer());
+  }
+  const dayDiff = (a, b) => daysBetween(a, b);
+  async function txEncode(full) {
+    const at = today(), ids = TX_IDS(), q = [];
+    let prev = -1;
+    ids.forEach((id, i) => {
+      const r = S.q[id]; if (!r || r.s === -1 || r.s == null) return;
+      let delta = i - prev; while (delta > 255) { q.push(255, 0xff, 0); delta -= 255; } // Sprungmarke
+      const b = Math.max(0, Math.min(5, r.b != null ? r.b : r.s >= 2 ? 2 : r.s === 1 ? 1 : 0));
+      if (r.t) { const off = Math.max(-127, Math.min(127, dayDiff(at, iso(new Date(r.t))))); q.push(delta, b, off + 128); }
+      else { const off = Math.max(-127, Math.min(127, r.d ? dayDiff(at, r.d) : 0)); q.push(delta, b | 0x80, off + 128); } // ohne Zeitstempel: Fälligkeit statt letzter Antwort
+      prev = i;
+    });
+    const marks = new Uint8Array(Math.ceil(ids.length / 8)); ids.forEach((id, i) => { if (S.mark[id]) marks[i >> 3] |= 1 << (i & 7); });
+    const meta = { a: at, n: ids.length, u: Object.fromEntries(Object.entries(S.ueb || {}).map(([k, v]) => [k, [v.p, v.at]])) };
+    if (full) { meta.r = (S.runs || []).slice(-30); meta.e = (S.errlog || []).slice(-60); meta.c = S.custom || {}; meta.l = Object.fromEntries(Object.entries(S.log || {}).slice(-40)); }
+    const mj = new TextEncoder().encode(JSON.stringify(meta));
+    const raw = new Uint8Array(2 + mj.length + q.length + marks.length);
+    raw[0] = mj.length >> 8; raw[1] = mj.length & 255; raw.set(mj, 2); raw.set(q, 2 + mj.length); raw.set(marks, 2 + mj.length + q.length);
+    const z = await deflate(raw);
+    return (z ? "1" : "0") + b64u.enc(z || raw);
+  }
+  async function txDecode(code) {
+    code = String(code || "").trim();
+    const m = code.match(/import=([A-Za-z0-9_-]+)/); if (m) code = m[1];
+    if (!/^[01][A-Za-z0-9_-]+$/.test(code)) throw new Error("format");
+    let raw = b64u.dec(code.slice(1));
+    if (code[0] === "1") { raw = await deflate(raw, true); if (!raw) throw new Error("nozip"); }
+    const ml = (raw[0] << 8) | raw[1], meta = JSON.parse(new TextDecoder().decode(raw.subarray(2, 2 + ml)));
+    const ids = TX_IDS(), nIds = Math.min(meta.n, ids.length), qs = {}, mBytes = Math.ceil(meta.n / 8);
+    const qb = raw.subarray(2 + ml, raw.length - mBytes), mb = raw.subarray(raw.length - mBytes);
+    let idx = -1;
+    for (let k = 0; k + 2 < qb.length + 0; k += 3) {
+      if (qb[k] === 255 && qb[k + 1] === 0xff) { idx += 255; continue; }
+      idx += qb[k]; if (idx >= nIds) continue;
+      const legacy = !!(qb[k + 1] & 0x80), b = qb[k + 1] & 0x7f, off = qb[k + 2] - 128;
+      const day = addDays(meta.a, off);
+      qs[ids[idx]] = legacy ? { b, s: b >= 2 ? 2 : b, d: day, n: 1, w: 0 } : { b, s: b >= 2 ? 2 : b, d: addDays(day, IV[b]), t: new Date(day + "T12:00:00").getTime(), n: 1, w: 0 };
+    }
+    const marks = {}; for (let i = 0; i < nIds; i++) if (mb[i >> 3] & (1 << (i & 7))) marks[ids[i]] = 1;
+    return { at: meta.a, q: qs, mark: marks, ueb: meta.u || {}, runs: meta.r || [], errlog: meta.e || [], custom: meta.c || {}, log: meta.l || {}, full: !!meta.r };
+  }
+  function txApply(inc, mode) {
+    if (mode === "replace") {
+      const n = blank();
+      n.q = inc.q; n.mark = inc.mark; n.ueb = Object.fromEntries(Object.entries(inc.ueb).map(([k, [p0, a0]]) => [k, { p: p0, at: a0, n: 1 }])); n.runs = inc.runs; n.errlog = inc.errlog; n.custom = inc.custom; n.log = inc.log;
+      S = normalize(n);
+    } else {
+      const dayOf = (r) => (r && r.t ? iso(new Date(r.t)) : "");
+      Object.entries(inc.q).forEach(([id, r]) => {
+        const L = S.q[id];
+        if (!L || L.s === -1) { S.q[id] = r; return; }
+        const a = dayOf(L), b = dayOf(r);
+        if (b > a || (b === a && (r.b || 0) > (L.b || 0))) S.q[id] = Object.assign({}, L, { b: r.b, s: r.s, d: r.d, t: r.t || L.t });
+      });
+      Object.assign(S.mark, inc.mark);
+      Object.entries(inc.ueb).forEach(([k, [p0, a0]]) => { const L = S.ueb[k]; if (!L || (a0 || "") > (L.at || "")) S.ueb[k] = Object.assign({}, L || {}, { p: p0, at: a0, n: (L && L.n) || 1 }); });
+      const runKeys = new Set((S.runs || []).map((x) => x.ts)); inc.runs.forEach((x) => { if (!runKeys.has(x.ts)) S.runs.push(x); }); S.runs.sort((x, y) => (x.ts || 0) - (y.ts || 0));
+      const ek = (x) => x.at + "|" + x.src + "|" + x.ref; const eKeys = new Set((S.errlog || []).map(ek)); S.errlog = S.errlog || []; inc.errlog.forEach((x) => { if (!eKeys.has(ek(x))) S.errlog.push(x); });
+      Object.entries(inc.custom).forEach(([t, l]) => { const have = new Set((S.custom[t] || []).map((c) => c.id)); S.custom[t] = (S.custom[t] || []).concat((l || []).filter((c) => !have.has(c.id))); });
+      Object.entries(inc.log).forEach(([d, n]) => { S.log[d] = Math.max(S.log[d] || 0, n); });
+    }
+    save();
+  }
+  const txSummary = (inc) => { const n = Object.keys(inc.q).length, g = Object.values(inc.q).filter((r) => r.s === 2).length; return `${n} Fragen bearbeitet, davon ${g} grün${inc.runs.length ? `, ${inc.runs.length} Prüfungen` : ""}${Object.values(inc.custom).flat().length ? `, ${Object.values(inc.custom).flat().length} eigene Fragen` : ""}`; };
+  let qrLoad = null;
+  function loadQR() { if (window.qrcode) return Promise.resolve(); if (!qrLoad) qrLoad = new Promise((res, rej) => { const sc = document.createElement("script"); sc.src = "vendor/qrcode.min.js"; sc.onload = res; sc.onerror = () => { qrLoad = null; rej(new Error("load")); }; document.head.appendChild(sc); }); return qrLoad; }
+  function qrSVG(text) {
+    const q = window.qrcode(0, "L"); q.addData(text, "Byte"); q.make();
+    const n = q.getModuleCount(); let d = "";
+    for (let r = 0; r < n; r++) for (let c = 0; c < n; c++) if (q.isDark(r, c)) d += `M${c} ${r}h1v1h-1z`;
+    const k = Math.max(3, Math.ceil(240 / (n + 8))); // ganze Pixel pro Modul = sicher scannbar
+    return `<svg class="qr" style="width:${(n + 8) * k}px;height:${(n + 8) * k}px" viewBox="-4 -4 ${n + 8} ${n + 8}" role="img" aria-label="QR-Code mit deinem Lernstand" shape-rendering="crispEdges"><rect x="-4" y="-4" width="${n + 8}" height="${n + 8}" fill="#fff"/><path d="${d}" fill="#000"/></svg>`;
+  }
+  const txBase = () => location.origin + location.pathname;
+  async function txBuild() {
+    UI.tx = { busy: true }; render();
+    try {
+      const full = txBase() + "#import=" + (await txEncode(true));
+      let qrText = full, partial = false, svg = "";
+      await loadQR();
+      if (full.length > 1100) { const core = txBase() + "#import=" + (await txEncode(false)); if (core.length < full.length) { qrText = core; partial = true; } } // QR möglichst klein halten = sicher scannbar
+      try { svg = qrSVG(qrText); } catch (e) { svg = ""; }
+      UI.tx = { link: full, svg, partial, at: new Date().toLocaleTimeString("de-DE", { hour: "2-digit", minute: "2-digit" }) };
+    } catch (e) { UI.tx = { err: "Der QR-Code konnte nicht erstellt werden. Nutze den Link oder die Sicherungsdatei." }; }
+    if (view === "einstellungen") render();
+  }
+  async function txReceive(code) {
+    try { const inc = await txDecode(code); UI.imp = { inc, msg: "" }; }
+    catch (e) { UI.imp = { err: e && e.message === "nozip" ? "Dieser Browser kann den Lernstand nicht entpacken. Bitte Browser aktualisieren oder die Sicherungsdatei nutzen." : "Der Link bzw. Code ist ungültig oder unvollständig." }; }
+    UI.confirm = null; view = "einstellungen"; try { history.replaceState(null, "", "#einstellungen"); } catch (e) {} render(); window.scrollTo({ top: 0 });
+  }
+  function txCardHTML() {
+    const tx = UI.tx, imp = UI.imp;
+    const recv = imp ? (imp.err ? `<div class="sql-msg bad">${ic("alert", "ic sm")}<div><b>Übertragung nicht möglich</b><p>${esc(imp.err)}</p></div></div>`
+      : imp.done ? `<div class="sql-msg ok">${ic("check", "ic sm")}<div><b>Lernstand übernommen</b><p>${esc(imp.done)}</p></div></div>`
+      : `<div class="tx-in"><b>Lernstand von einem anderen Gerät</b><p class="small muted">Stand vom ${fmtDay(imp.inc.at)}: ${txSummary(imp.inc)}.</p><div class="row"><button type="button" class="btn primary small" id="tx-merge">${ic("layers", "ic xs")} Zusammenführen (empfohlen)</button><button type="button" class="btn small" id="tx-replace">Ersetzen</button><button type="button" class="btn small ghost" id="tx-cancel">Abbrechen</button></div><p class="tiny muted">Zusammenführen: Pro Frage gilt der neuere Stand, nichts geht verloren. Ersetzen: Dein Stand auf diesem Gerät wird überschrieben.</p></div>`) : "";
+    const send = !tx ? `<button type="button" class="btn small primary" id="tx-make">${ic("layers", "ic xs")} QR-Code &amp; Link erstellen</button>`
+      : tx.busy ? `<span class="small muted">Wird erstellt …</span>`
+      : tx.err ? `<p class="small warn-text">${esc(tx.err)}</p>`
+      : `<div class="tx-out">${tx.svg ? `<div class="qr-wrap">${tx.svg}</div>` : `<p class="small muted">Für einen QR-Code ist dein Lernstand zu groß – nutze den Link.</p>`}<div class="tx-act"><p class="small">Mit der Kamera des anderen Geräts scannen oder den Link dorthin schicken.${tx.partial ? " <b>Der QR-Code enthält deinen Lernstand, Markierungen und Aufgabenpunkte. Eigene Fragen, Prüfungsergebnisse und das Fehlerprotokoll überträgt nur der Link.</b>" : ""}</p><div class="row"><button type="button" class="btn small" id="tx-copy">${ic("check", "ic xs")} Link kopieren</button>${navigator.share ? `<button type="button" class="btn small" id="tx-share">Teilen …</button>` : ""}<button type="button" class="btn small ghost" id="tx-new">Neu erstellen</button></div><p class="tiny muted" id="tx-msg">Momentaufnahme von ${tx.at} Uhr.</p></div></div>`;
+    return `<section class="card tx-card"><h3>Auf anderes Gerät übertragen</h3><p class="small muted" style="margin-top:4px">Ohne Konto und ohne Server: Dein Lernstand steckt komplett im Link bzw. QR-Code. Auf dem anderen Gerät öffnen – fertig.</p>
+      ${recv}<div style="margin-top:12px">${send}</div>
+      <details class="tx-paste"><summary class="small">Link oder Code hier einfügen</summary><p class="tiny muted">Für die installierte iPhone-App: Sie hat einen eigenen Speicher, der Link öffnet sich aber in Safari. Kopiere ihn deshalb und füge ihn hier in der App ein.</p><div class="row"><input type="text" id="tx-in" placeholder="https://…#import=…" autocomplete="off" spellcheck="false"><button type="button" class="btn small" id="tx-go">Übernehmen</button></div></details>
+    </section>`;
+  }
+  function bindTx(el) {
+    const mk = $("#tx-make"); if (mk) mk.onclick = txBuild;
+    const nw = $("#tx-new"); if (nw) nw.onclick = txBuild;
+    const cp = $("#tx-copy"); if (cp) cp.onclick = async () => { try { await navigator.clipboard.writeText(UI.tx.link); $("#tx-msg").textContent = "Link kopiert."; } catch (e) { prompt("Link kopieren:", UI.tx.link); } };
+    const sh = $("#tx-share"); if (sh) sh.onclick = () => navigator.share({ title: "TAP2 Coach – mein Lernstand", url: UI.tx.link }).catch(() => {});
+    const go = $("#tx-go"); if (go) go.onclick = () => { const v = $("#tx-in").value; if (v.trim()) txReceive(v); };
+    const mg = $("#tx-merge"); if (mg) mg.onclick = () => { txApply(UI.imp.inc, "merge"); UI.imp = { done: "Mit deinem Stand zusammengeführt." }; UI.tx = null; render(); };
+    const rp = $("#tx-replace"); if (rp) rp.onclick = () => { txApply(UI.imp.inc, "replace"); UI.imp = { done: "Dein Stand wurde ersetzt." }; UI.tx = null; UI.sess = null; keepSess(); render(); };
+    const cc = $("#tx-cancel"); if (cc) cc.onclick = () => { UI.imp = null; render(); };
+  }
   // ---------- Tipps (allgemein, nicht themenspezifisch)
   function rTipps() {
     const el = $("#v-tipps"), X = PK.X01;
@@ -3369,6 +3508,7 @@ INSERT INTO Konto VALUES (1,'Weingut Becker',1500.00),(2,'Klinik am Rhein',320.0
         ${!PWA.standalone && !PWA.prompt && PWA.ios ? `<p class="small muted" style="margin-top:8px">iPhone/iPad: In Safari auf <b>Teilen</b> tippen und <b>Zum Home-Bildschirm</b> wählen.</p>` : ""}
         ${!PWA.standalone && !PWA.prompt && !PWA.ios ? `<p class="small muted" style="margin-top:8px">Installieren: im Browser-Menü „App installieren“ bzw. „Zum Startbildschirm hinzufügen“ wählen.</p>` : ""}
       </section>
+      ${txCardHTML()}
       <section class="card data-card">
         <h3>Dein Fortschritt</h3>
         <p class="small muted">Wird automatisch in diesem Browser gespeichert: Lernstand jeder Frage, Markierungen, eigene Fragen, Aufgabenpunkte und Prüfungsergebnisse. Mit einer Sicherung nimmst du ihn auf ein anderes Gerät oder in einen anderen Browser mit.</p>
@@ -3382,6 +3522,7 @@ INSERT INTO Konto VALUES (1,'Weingut Becker',1500.00),(2,'Klinik am Rhein',320.0
       </section>
       <section class="card"><h3>Hilfe</h3><div class="row" style="margin-top:8px"><button type="button" class="btn small" data-go2="tutorial">${ic("map", "ic xs")} Tutorial öffnen</button><a class="btn small ghost" href="https://github.com/${REPO}/issues" target="_blank" rel="noopener">Gemeldete Fehler ansehen</a></div></section>`;
     el.querySelectorAll("[data-theme-set]").forEach((b) => b.onclick = () => { setTheme(b.dataset.themeSet); render(); });
+    bindTx(el);
     el.querySelectorAll("[data-go2]").forEach((b) => b.onclick = () => navTo(b.dataset.go2));
     const ai = $("#app-install"); if (ai) ai.onclick = async () => { const pr = PWA.prompt; PWA.prompt = null; pr.prompt(); try { await pr.userChoice; } catch (e) {} render(); };
     $("#d-export").onclick = async () => {
@@ -3840,6 +3981,7 @@ INSERT INTO Konto VALUES (1,'Weingut Becker',1500.00),(2,'Klinik am Rhein',320.0
 
   // ---------- boot
   const h = location.hash.slice(1);
+  if (h.startsWith("import=")) { setTimeout(() => txReceive(h), 0); }
   if (VIEWS.includes(h)) view = h;
   localLoad();
   try { const ss = JSON.parse(localStorage.getItem(KEY_SESS) || "null"); if (ss && Array.isArray(ss.ids) && ss.i < ss.ids.length) { UI.sess = ss; view = "lernen"; } } catch (e) {}

@@ -8,6 +8,7 @@ Lern-App für die Abschlussprüfung Teil 2 (Fachinformatiker/in Anwendungsentwic
 
 - **Android/Chrome:** In den Einstellungen unter „App & Offline“ auf „App installieren“ tippen (oder im Browser-Menü „App installieren“).
 - **iPhone/iPad:** In Safari auf „Teilen“ → „Zum Home-Bildschirm“.
+- **Lernstand auf ein anderes Gerät übertragen:** Einstellungen → „Auf anderes Gerät übertragen“ → QR-Code scannen oder Link öffnen → „Zusammenführen“. Ohne Konto und ohne Server, der Stand steckt im Link. iPhone-App vom Home-Bildschirm: Link kopieren und in der App unter „Link oder Code hier einfügen“ einfügen.
 - Nach dem ersten Besuch funktioniert der Coach auch ohne Internet. Bei einer neuen Version erscheint der Hinweis „Neue Version verfügbar“.
 
 ## Datenschutz
@@ -15,7 +16,8 @@ Lern-App für die Abschlussprüfung Teil 2 (Fachinformatiker/in Anwendungsentwic
 - Keine Anmeldung, kein Tracking, keine externen Server.
 - Dein Lernfortschritt wird nur lokal in deinem Browser gespeichert (`localStorage`).
 - Für einen Geräte- oder Browserwechsel: Übersicht → „Sicherung herunterladen“ und auf dem anderen Gerät „Sicherung laden“.
-- Code-Editor ([CodeMirror](https://codemirror.net)) und SQLite ([sql.js](https://github.com/sql-js/sql.js)), beide MIT-Lizenz, liegen ebenfalls im Repo (`vendor/`).
+- Code-Editor ([CodeMirror](https://codemirror.net)), SQLite ([sql.js](https://github.com/sql-js/sql.js)) und QR-Code-Erzeugung ([qrcode-generator](https://github.com/kazuhikoarase/qrcode-generator)), alle MIT-Lizenz, liegen ebenfalls im Repo (`vendor/`).
+- Übertragungs-Links enthalten nur den Lernstand (keine Namen o. Ä.) und werden nirgends gespeichert.
 - Schriften sind lokal eingebunden (SIL Open Font License), es gibt keine Verbindung zu Google.
 
 ## Fehler gefunden?

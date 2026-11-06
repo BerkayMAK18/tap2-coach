@@ -1,12 +1,12 @@
 // TAP2 Prüfungscoach – Service Worker
 // Seite: Netz zuerst (immer aktuell), ohne Netz aus dem Cache. Dateien: aus dem Cache, im Hintergrund aktualisiert.
-const CACHE = "tap2-v2";
+const CACHE = "tap2-v3";
 const CORE = [
   "./", "./index.html", "./manifest.webmanifest",
   "./icons/icon-192.png", "./icons/icon-512.png", "./icons/raven.svg", "./icons/favicon-32.png",
   "./fonts/dm-sans-latin.woff2", "./fonts/plus-jakarta-sans-latin.woff2", "./fonts/jetbrains-mono-latin.woff2"
 ];
-const EXTRA = ["./vendor/codemirror.min.js", "./vendor/sqljs/sql-wasm.js", "./vendor/sqljs/sql-wasm.wasm"];
+const EXTRA = ["./vendor/codemirror.min.js", "./vendor/sqljs/sql-wasm.js", "./vendor/sqljs/sql-wasm.wasm", "./vendor/qrcode.min.js"];
 
 self.addEventListener("install", (e) => {
   e.waitUntil(

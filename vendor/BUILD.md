@@ -11,3 +11,7 @@ npx esbuild codemirror-entry.js --bundle --minify --format=iife --target=es2019 
 # vendor/sqljs/
 
 [sql.js](https://github.com/sql-js/sql.js) 1.10.3 (SQLite 3.45 als WebAssembly, MIT-Lizenz, siehe `sqljs/LICENSE.txt`), unverändert aus `node_modules/sql.js/dist/` kopiert (`sql-wasm.js`, `sql-wasm.wasm`).
+
+# vendor/qrcode.min.js
+
+[qrcode-generator](https://github.com/kazuhikoarase/qrcode-generator) 1.4.4 (Kazuhiko Arase, MIT), mit esbuild minifiziert. Wird erst beim Erstellen eines Übertragungs-QR-Codes geladen.

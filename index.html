@@ -3,6 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
+<script>try { var t = localStorage.getItem("tap2coach-theme"); if (t === "light" || t === "dark") document.documentElement.setAttribute("data-theme", t); } catch (e) {}</script>
 <title>TAP2 Prüfungscoach</title>
 <style>
 /* Schriften lokal eingebunden (SIL Open Font License), keine Verbindung zu Google */
@@ -586,6 +587,39 @@ th { font-size: 0.72rem; color: var(--muted); font-weight: 700; text-transform: 
   .qrow { grid-template-columns: 12px minmax(0, 1fr) auto; } .qrow .qty { display: none; }
   .tabs-in button { padding: 10px 10px; }
 }
+
+/* ---------- Suche, Fehler melden, Darstellung */
+.hud .hb { width: 36px; height: 36px; background: var(--surface); box-shadow: var(--sh-1); color: var(--ink); }
+.hud .hb .ic { width: 18px; height: 18px; }
+a.iconbtn { color: var(--ink); text-decoration: none; }
+.iconbtn.report .ic { width: 18px; height: 18px; }
+.srch-back { position: fixed; inset: 0; z-index: 60; background: rgba(8, 18, 30, 0.45); backdrop-filter: blur(3px); display: flex; justify-content: center; align-items: flex-start; padding: 8vh 16px 16px; }
+.srch-back[hidden] { display: none; }
+.srch { width: 100%; max-width: 760px; max-height: 84vh; display: flex; flex-direction: column; background: var(--surface); border-radius: var(--r-lg); box-shadow: var(--sh-2); overflow: hidden; }
+.srch-top { display: flex; align-items: center; gap: 10px; padding: 12px 14px; border-bottom: 1px solid var(--line); }
+.srch-top .ic { color: var(--muted); }
+.srch-top input { flex: 1; min-width: 0; border: 0; background: none; font: inherit; font-size: 1.05rem; color: var(--ink); padding: 8px 2px; outline: none; }
+.srch-top input::-webkit-search-cancel-button { -webkit-appearance: none; display: none; }
+.srch-res { overflow-y: auto; padding: 6px 10px 14px; }
+.srch-res h4 { margin: 14px 6px 6px; font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.04em; color: var(--muted); display: flex; align-items: center; gap: 8px; }
+.srch-res h4 .spacer { flex: 1; }
+.srch-hit { width: 100%; display: grid; grid-template-columns: 14px minmax(0, 1fr) auto; gap: 4px 12px; align-items: start; text-align: left; border: 0; background: none; color: var(--ink); padding: 10px 8px; border-radius: 12px; cursor: pointer; font: inherit; }
+.srch-hit:hover, .srch-hit:focus-visible { background: var(--surface-2); outline: none; }
+.srch-hit .amp { margin-top: 6px; }
+.srch-hit .ht { font-size: 0.94rem; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; white-space: pre-line; }
+.srch-hit .hs { grid-column: 2; font-size: 0.82rem; color: var(--muted); display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.srch-hit .chip { justify-self: end; }
+.srch-hit mark, .srch-res mark { background: var(--yellow-soft); color: inherit; border-radius: 3px; padding: 0 1px; box-shadow: 0 0 0 1px var(--yellow); }
+.srch-empty { padding: 24px 8px; color: var(--muted); text-align: center; }
+.srch-more { padding: 6px 8px; font-size: 0.82rem; color: var(--muted); }
+.srch-foot { padding: 8px 14px; border-top: 1px solid var(--line); font-size: 0.78rem; color: var(--muted); }
+@media (max-width: 560px) {
+  .srch-back { padding: 0; }
+  .srch { max-width: none; max-height: none; height: 100%; border-radius: 0; }
+  .srch-hit { grid-template-columns: 12px minmax(0, 1fr); } .srch-hit .chip { grid-column: 2; justify-self: start; }
+  .srch-foot { display: none; }
+  .hud { gap: 6px; } .hud .hb { width: 32px; height: 32px; }
+}
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation-duration: 0.001ms !important; animation-iteration-count: 1 !important; transition-duration: 0.001ms !important; }
 }
@@ -617,6 +651,17 @@ th { font-size: 0.72rem; color: var(--muted); font-weight: 700; text-transform: 
       <section class="view" id="v-pruefung" hidden></section>
     </main>
     <footer class="foot"><span>TAP2 Prüfungscoach · Dein Fortschritt wird lokal in diesem Browser gespeichert.</span></footer>
+  </div>
+</div>
+<div class="srch-back" id="srch" hidden>
+  <div class="srch" role="dialog" aria-modal="true" aria-label="Fragen durchsuchen">
+    <div class="srch-top">
+      <svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>
+      <input type="search" id="srch-in" placeholder="Suchen, z. B. LEFT JOIN, Kündigungsfrist, Bubble Sort" autocomplete="off" spellcheck="false" aria-label="Suchbegriff">
+      <button type="button" class="iconbtn sm" id="srch-x" aria-label="Suche schließen"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
+    </div>
+    <div class="srch-res" id="srch-res" aria-live="polite"></div>
+    <div class="srch-foot">Durchsucht Fragen, Antworten, Themen und Übungsaufgaben · <span class="kbd">/</span> öffnen · <span class="kbd">Esc</span> schließen</div>
   </div>
 </div>
 <script>
@@ -2350,7 +2395,7 @@ const NOTATION = {
 
   function hud() {
     const c = counts(allQ()), left = daysLeft();
-    $("#hud").innerHTML = `<button type="button" class="pill" data-go="start" title="Anteil der Fragen auf Grün, gelbe zählen halb">${ring(c.pct, 22, 4)}<span class="lbl">Prüfungsreife</span><b>${pctS(c.pct)}</b></button><span class="pill days">${ic("calendar")}<b>${Math.max(0, left)}</b><span class="lbl">${left === 1 ? "Tag" : "Tage"}</span></span>`;
+    $("#hud").innerHTML = `<button type="button" class="pill" data-go="start" title="Anteil der Fragen auf Grün, gelbe zählen halb">${ring(c.pct, 22, 4)}<span class="lbl">Prüfungsreife</span><b>${pctS(c.pct)}</b></button><span class="pill days">${ic("calendar")}<b>${Math.max(0, left)}</b><span class="lbl">${left === 1 ? "Tag" : "Tage"}</span></span><button type="button" class="iconbtn hb" data-hud="search" aria-label="Fragen durchsuchen" title="Suchen (Taste /)">${ic("search")}</button><button type="button" class="iconbtn hb" data-hud="theme" aria-label="Darstellung: ${THEME_LBL[themeMode()]}" title="Darstellung: ${THEME_LBL[themeMode()]}">${ic(THEME_IC[themeMode()])}</button>`;
     $("#side-count").innerHTML = left > 0 ? `<b>${left} ${left === 1 ? "Tag" : "Tage"}</b>bis zur TAP2 am ${EXAM_DE}` : left === 0 ? "<b>Heute ist Prüfung</b>Viel Erfolg!" : `<b>TAP2</b>am ${EXAM_DE}`;
     $("#side-reife").innerHTML = `<span class="sr-top"><span>Prüfungsreife</span><b>${pctS(c.pct)}</b></span>${ampBar(c)}`;
   }
@@ -2363,6 +2408,142 @@ const NOTATION = {
     ({ start: rStart, lernen: rLernen, aufgaben: rUeb, pruefung: rPK })[view]();
     animRings($("#v-" + view));
   }
+
+
+  // ---------- Darstellung (Automatisch / Hell / Dunkel)
+  ICONS.search = '<circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/>';
+  ICONS.sun = '<circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/>';
+  ICONS.moon = '<path d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5z"/>';
+  ICONS.auto = '<circle cx="12" cy="12" r="9"/><path d="M12 3a9 9 0 0 0 0 18z" fill="currentColor"/>';
+  ICONS.flag = '<path d="M5 21V4h12l-2 4 2 4H5"/>';
+  const KEY_THEME = "tap2coach-theme";
+  const THEME_LBL = { auto: "wie System", light: "hell", dark: "dunkel" };
+  const THEME_IC = { auto: "auto", light: "sun", dark: "moon" };
+  const themeMode = () => { const t = document.documentElement.getAttribute("data-theme"); return t === "light" || t === "dark" ? t : "auto"; };
+  function cycleTheme() {
+    const next = { auto: "light", light: "dark", dark: "auto" }[themeMode()];
+    if (next === "auto") document.documentElement.removeAttribute("data-theme"); else document.documentElement.setAttribute("data-theme", next);
+    try { if (next === "auto") localStorage.removeItem(KEY_THEME); else localStorage.setItem(KEY_THEME, next); } catch (e) {}
+    hud();
+    const b = document.querySelector('[data-hud="theme"]'); if (b) b.focus({ preventScroll: true });
+  }
+
+  // ---------- Fehler melden (vorausgefülltes GitHub-Issue)
+  const REPO = "BerkayMAK18/tap2-coach";
+  const clip = (x, n) => { x = String(x || "").trim(); return x.length > n ? x.slice(0, n) + " …" : x; };
+  const quote = (x) => clip(x, 1200).split("\n").map((l) => "> " + l).join("\n");
+  function issueUrl(title, lines) {
+    const body = lines.concat(["", "**Was ist falsch, was schlägst du vor?**", "", "<!-- Bitte hier beschreiben. Quelle (z. B. Lösungshinweis, Gesetz) hilft beim Prüfen. -->", ""]).join("\n");
+    return "https://github.com/" + REPO + "/issues/new?" + new URLSearchParams({ title, labels: "fehler", body }).toString();
+  }
+  function reportUrl(q) {
+    const t = TP[q.topic];
+    const L = ["**Frage-ID:** `" + q.id + "`", "**Thema:** " + (t ? t.n : q.topic), "**Art:** " + (q.type === "mc" ? "Auswahlfrage" : "Karteikarte"), "", "**Frage:**", quote(q.q)];
+    if (q.type === "mc") L.push("", "**Antworten:**", ...q.opts.map((o, i) => "- " + (i === q.right ? "✅ " : "") + clip(o, 200)));
+    else L.push("", "**Hinterlegte Antwort:**", quote(q.a));
+    return issueUrl("Fehler in " + q.id + ": " + clip(q.q, 60), L);
+  }
+  function reportUrlUeb(u) {
+    return issueUrl("Fehler in Aufgabe " + u.id + ": " + clip(u.titel, 60), ["**Aufgabe:** `" + u.id + "` – " + u.titel, "**Thema:** " + u.thema, "", "**Aufgabentext (Anfang):**", quote(clip(u.text, 600))]);
+  }
+
+  // ---------- Suche über alle Fragen
+  const norm1 = (c) => c.toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "").replace(/ß/g, "ss");
+  const norm = (x) => norm1(String(x || ""));
+  function normMap(text) { // normalisierter Text + Zuordnung zur Originalposition
+    let n = ""; const map = [];
+    for (let i = 0; i < text.length; i++) { const m = norm1(text[i]); for (const ch of m) { n += ch; map.push(i); } }
+    return [n, map];
+  }
+  function hl(text, terms) {
+    text = String(text || ""); if (!terms.length) return esc(text);
+    const [n, map] = normMap(text), marks = new Array(text.length).fill(false);
+    terms.forEach((t) => { let at = n.indexOf(t); while (at >= 0) { for (let k = at; k < at + t.length; k++) marks[map[k]] = true; at = n.indexOf(t, at + t.length); } });
+    let out = "", open = false;
+    for (let i = 0; i < text.length; i++) { if (marks[i] && !open) { out += "<mark>"; open = true; } if (!marks[i] && open) { out += "</mark>"; open = false; } out += esc(text[i]); }
+    return out + (open ? "</mark>" : "");
+  }
+  function snippet(text, terms, w) {
+    text = String(text || "").replace(/\s+/g, " ");
+    const [n, map] = normMap(text);
+    let at = -1; terms.some((t) => (at = n.indexOf(t)) >= 0);
+    if (at < 0) return "";
+    const o = map[at], a = Math.max(0, o - w), b = Math.min(text.length, o + w * 2);
+    return (a > 0 ? "… " : "") + hl(text.slice(a, b), terms) + (b < text.length ? " …" : "");
+  }
+  const SR = { open: false, q: "", hits: [] };
+  function srchIndex() {
+    const qs = allQ().map((q) => ({ q, front: norm(q.q), back: norm([q.a, (q.opts || []).join(" "), q.why].join(" ")) }));
+    const us = UEB.map((u) => ({ u, front: norm(u.titel + " " + u.thema), back: norm(u.text + " " + u.loesung) }));
+    const ts = TOPICS.map((t) => ({ t, front: norm(t.n), back: norm(t.th.map((id) => PK[id] ? PK[id].titel + " " + PK[id].kern.map((k) => k[0]).join(" ") : "").join(" ")) }));
+    return { qs, us, ts };
+  }
+  let SIDX = null;
+  function openSearch() {
+    if (SR.open || (view === "pruefung" && UI.run && UI.run.phase === "write")) return; // keine Suche während der Prüfungssimulation
+    SR.open = true; SIDX = srchIndex();
+    $("#srch").hidden = false; document.body.style.overflow = "hidden";
+    const inp = $("#srch-in"); inp.value = SR.q; runSearch(); inp.focus(); inp.select();
+  }
+  function closeSearch() {
+    if (!SR.open) return;
+    SR.open = false; $("#srch").hidden = true; document.body.style.overflow = "";
+    const b = document.querySelector('[data-hud="search"]'); if (b) b.focus({ preventScroll: true });
+  }
+  function runSearch() {
+    const raw = $("#srch-in").value, terms = norm(raw).split(/\s+/).filter((t) => t.length > 0);
+    SR.q = raw;
+    const res = $("#srch-res");
+    if (!terms.length || norm(raw).replace(/\s/g, "").length < 2) { res.innerHTML = `<div class="srch-empty">Mindestens zwei Zeichen eingeben. Mehrere Wörter werden alle gesucht.</div>`; SR.hits = []; return; }
+    const all = (x) => terms.every((t) => (x.front + " " + x.back).includes(t));
+    const score = (x) => terms.filter((t) => x.front.includes(t)).length;
+    const byScore = (a, b) => score(b) - score(a);
+    const T = SIDX.ts.filter(all).sort(byScore), Q = SIDX.qs.filter(all).sort(byScore), U = SIDX.us.filter(all).sort(byScore);
+    SR.hits = Q.map((x) => x.q);
+    const MAX = 60;
+    let h = "";
+    if (T.length) h += `<h4>Themen <span class="cnt">${T.length}</span></h4>` + T.map((x) => `<button type="button" class="srch-hit" data-st="${x.t.id}">${ic(x.t.ic, "ic sm")}<span class="ht">${hl(x.t.n, terms)}</span><span class="chip">${esc(x.t.teil)}</span></button>`).join("");
+    if (Q.length) {
+      h += `<h4>Lernfragen <span class="cnt">${Q.length}</span><span class="spacer"></span><button type="button" class="btn small" data-sall>${ic("play", "ic xs")} Alle ${Q.length} lernen</button></h4>`;
+      h += Q.slice(0, MAX).map((x, i) => { const q = x.q, s = st(q.id), inFront = terms.some((t) => x.front.includes(t)); const sn = inFront ? "" : snippet(q.type === "mc" ? q.opts.join(" · ") + " " + (q.why || "") : q.a, terms, 50); return `<button type="button" class="srch-hit" data-sq="${i}"><i class="amp ${s >= 0 ? "s" + s : ""}" title="${ST_LBL[s]}"></i><span class="ht">${hl(q.q, terms)}</span><span class="chip">${esc((TP[q.topic] || {}).n || "")}</span>${sn ? `<span class="hs">${q.type === "mc" ? "Antworten" : "Antwort"}: ${sn}</span>` : ""}</button>`; }).join("");
+      if (Q.length > MAX) h += `<div class="srch-more">… und ${Q.length - MAX} weitere. Suchbegriff verfeinern oder „Alle lernen“ nutzen.</div>`;
+    }
+    if (U.length) h += `<h4>Übungsaufgaben <span class="cnt">${U.length}</span></h4>` + U.map((x) => `<button type="button" class="srch-hit" data-su="${x.u.id}">${ic("pencil", "ic sm")}<span class="ht">${esc(x.u.id)} · ${hl(x.u.titel, terms)}</span><span class="chip">${esc(x.u.thema)}</span>${terms.some((t) => x.front.includes(t)) ? "" : `<span class="hs">${snippet(x.u.text + " " + x.u.loesung, terms, 50)}</span>`}</button>`).join("");
+    res.innerHTML = h || `<div class="srch-empty">Keine Treffer für „${esc(raw.trim())}“. Tipp: Wortanfang oder Synonym probieren.</div>`;
+    res.scrollTop = 0;
+  }
+  function srchTitle() { return "Suche: „" + clip(SR.q.trim(), 30) + "“"; }
+  $("#srch-in").addEventListener("input", () => runSearch());
+  $("#srch-in").addEventListener("keydown", (e) => { if (e.key === "ArrowDown" || (e.key === "Enter" && !e.isComposing)) { const f = $("#srch-res .srch-hit"); if (f) { e.preventDefault(); if (e.key === "Enter") f.click(); else f.focus(); } } });
+  $("#srch-x").onclick = closeSearch;
+  $("#srch").addEventListener("mousedown", (e) => { if (e.target.id === "srch") closeSearch(); });
+  $("#srch-res").addEventListener("click", (e) => {
+    const b = e.target.closest("button"); if (!b) return;
+    if (b.hasAttribute("data-sall")) { closeSearch(); UI.topic = null; startSess(SR.hits, srchTitle(), { kind: "search" }); }
+    else if (b.dataset.sq != null) { closeSearch(); UI.topic = null; startSess(SR.hits, srchTitle(), { kind: "search" }, +b.dataset.sq); }
+    else if (b.dataset.st) { closeSearch(); UI.sess = null; keepSess(); UI.topic = b.dataset.st; UI.ttab = "theorie"; go("lernen"); }
+    else if (b.dataset.su) { closeSearch(); UI.ueb = b.dataset.su; UI.showSol = false; go("aufgaben"); }
+  });
+  $("#srch-res").addEventListener("keydown", (e) => {
+    if (e.key !== "ArrowDown" && e.key !== "ArrowUp") return;
+    const list = [...document.querySelectorAll("#srch-res .srch-hit")], i = list.indexOf(document.activeElement);
+    e.preventDefault();
+    if (e.key === "ArrowDown" && i < list.length - 1) list[i + 1].focus();
+    else if (e.key === "ArrowUp") (i > 0 ? list[i - 1] : $("#srch-in")).focus();
+  });
+  window.addEventListener("keydown", (e) => { // Capture: vor den Tastenkürzeln der Lernrunde
+    if (SR.open) {
+      if (e.key === "Escape") { e.preventDefault(); closeSearch(); }
+      if (e.key === "Tab") { const f = [...document.querySelectorAll("#srch input, #srch button")]; const i = f.indexOf(document.activeElement); if (e.shiftKey && i <= 0) { e.preventDefault(); f[f.length - 1].focus(); } else if (!e.shiftKey && i === f.length - 1) { e.preventDefault(); f[0].focus(); } }
+      e.stopPropagation(); return;
+    }
+    const typing = e.target && /INPUT|TEXTAREA|SELECT/.test(e.target.tagName);
+    if ((e.key === "/" && !typing && !e.metaKey && !e.ctrlKey && !e.altKey) || ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "k")) {
+      if (view === "pruefung" && UI.run && UI.run.phase === "write") return;
+      e.preventDefault(); e.stopPropagation(); openSearch();
+    }
+  }, true);
+  $("#hud").addEventListener("click", (e) => { const b = e.target.closest("[data-hud]"); if (!b) return; if (b.dataset.hud === "search") openSearch(); else cycleTheme(); });
 
   // ---------- Lernrunde
   const ROUND = 20;
@@ -2460,7 +2641,7 @@ const NOTATION = {
     }
     const lastNote = s.last ? `<div class="lastnote ${s.last.ok ? "ok" : "bad"}">${ic(s.last.ok ? "check" : "x", "ic xs")} Vorherige Frage ${s.last.ok ? "gewusst" : "nicht gewusst"} ${trans(s.last.f, s.last.t)}</div>` : "";
     el.innerHTML = `<div class="quiz t-${tcolOf(t.teil)}">
-      <div class="quiz-top"><button type="button" class="iconbtn" id="s-close" aria-label="Runde beenden">${ic("x")}</button><div class="prog"><span>${esc(s.title)}</span><div class="bar"><i style="width:${s.i / s.ids.length * 100}%"></i></div></div><span class="qcount num">${s.i + 1} / ${s.ids.length}</span><button type="button" class="iconbtn star ${marked ? "marked" : ""}" id="s-mark" aria-pressed="${marked}" aria-label="${marked ? "Markierung entfernen" : "Frage markieren"}" title="Markieren">${ic("star")}</button></div>
+      <div class="quiz-top"><button type="button" class="iconbtn" id="s-close" aria-label="Runde beenden">${ic("x")}</button><div class="prog"><span>${esc(s.title)}</span><div class="bar"><i style="width:${s.i / s.ids.length * 100}%"></i></div></div><span class="qcount num">${s.i + 1} / ${s.ids.length}</span><a class="iconbtn report" href="${reportUrl(q)}" target="_blank" rel="noopener" aria-label="Fehler in dieser Frage melden" title="Fehler melden">${ic("flag")}</a><button type="button" class="iconbtn star ${marked ? "marked" : ""}" id="s-mark" aria-pressed="${marked}" aria-label="${marked ? "Markierung entfernen" : "Frage markieren"}" title="Markieren">${ic("star")}</button></div>
       ${lastNote}
       <section class="card qcard">
         <div class="qlab"><span class="stat-chip"><i class="amp ${sv >= 0 ? "s" + sv : ""}"></i>${ST_LBL[sv]}</span><span class="chip">${q.type === "mc" ? "Auswahlfrage" : q.own ? "Eigene Frage" : "Wissensfrage"}</span>${multi ? `<span class="chip tchip">${esc(t.n)}</span>` : ""}</div>
@@ -2705,7 +2886,7 @@ const NOTATION = {
     if (UI.ueb && UE[UI.ueb]) {
       const u = UE[UI.ueb], r = S.ueb[u.id], tid = UEB_TOPIC[u.id];
       el.innerHTML = `<button type="button" class="backlink" id="u-back">${ic("left", "ic sm")} Alle Aufgaben</button>
-        <section class="card t-${tcolOf(u.teil)}"><div class="row" style="align-items:flex-start"><span class="pk-num">${esc(u.id)}</span><div style="flex:1;min-width:200px"><h2>${esc(u.titel)}</h2><div class="row" style="margin-top:6px"><span class="chip">${esc(u.teil)}</span><span class="chip">${esc(u.thema)}</span><span class="chip blue">${u.max} P · ca. ${u.min} Min.</span>${tid ? `<button type="button" class="linkbtn" id="u-topic">Theorie: ${esc(TP[tid].n)}</button>` : ""}</div></div></div>
+        <section class="card t-${tcolOf(u.teil)}"><div class="row" style="align-items:flex-start"><span class="pk-num">${esc(u.id)}</span><div style="flex:1;min-width:200px"><h2>${esc(u.titel)}</h2><div class="row" style="margin-top:6px"><span class="chip">${esc(u.teil)}</span><span class="chip">${esc(u.thema)}</span><span class="chip blue">${u.max} P · ca. ${u.min} Min.</span>${tid ? `<button type="button" class="linkbtn" id="u-topic">Theorie: ${esc(TP[tid].n)}</button>` : ""}<a class="linkbtn" href="${reportUrlUeb(u)}" target="_blank" rel="noopener">Fehler melden</a></div></div></div>
         ${u.schema ? `<div style="margin-top:16px"><span class="small muted">Tabellen</span><pre>${esc(SQL_SCHEMA)}</pre></div>` : ""}
         <div class="qtext" style="margin-top:16px">${esc(u.text)}</div>
         <p class="small muted" style="margin-top:12px">Löse die Aufgabe auf Papier wie in der Prüfung, erst dann die Lösung ansehen.</p>

@@ -59,6 +59,7 @@ function create(parent, opts) {
     ext.push(highlightActiveLine(), placeholder(opts.placeholder || ""));
     const km = [];
     if (opts.onSubmit) km.push({ key: "Mod-Enter", run: () => { opts.onSubmit(); return true; } }, { key: "Ctrl-Enter", run: () => { opts.onSubmit(); return true; } });
+    if (opts.onRun) km.push({ key: "Shift-Enter", run: () => { opts.onRun(); return true; } });
     if (opts.lang !== "sql") km.push({ key: "Enter", run: pseudoEnter });
     ext.push(keymap.of([...km, indentWithTab, ...defaultKeymap, ...historyKeymap]));
     if (opts.onChange) ext.push(EditorView.updateListener.of((u) => { if (u.docChanged) opts.onChange(u.state.doc.toString()); }));

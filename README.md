@@ -9,7 +9,7 @@ Lern-App für die Abschlussprüfung Teil 2 (Fachinformatiker/in Anwendungsentwic
 - Keine Anmeldung, kein Tracking, keine externen Server.
 - Dein Lernfortschritt wird nur lokal in deinem Browser gespeichert (`localStorage`).
 - Für einen Geräte- oder Browserwechsel: Übersicht → „Sicherung herunterladen“ und auf dem anderen Gerät „Sicherung laden“.
-- Der Code-Editor ([CodeMirror](https://codemirror.net), MIT-Lizenz) liegt ebenfalls im Repo (`vendor/`).
+- Code-Editor ([CodeMirror](https://codemirror.net)) und SQLite ([sql.js](https://github.com/sql-js/sql.js)), beide MIT-Lizenz, liegen ebenfalls im Repo (`vendor/`).
 - Schriften sind lokal eingebunden (SIL Open Font License), es gibt keine Verbindung zu Google.
 
 ## Fehler gefunden?
@@ -20,6 +20,7 @@ In jeder Lernfrage gibt es oben ein Fahnen-Symbol, in jeder Übungsaufgabe den L
 
 - **Suche:** Lupe oben rechts oder Taste `/` (bzw. `Strg/Cmd + K`)
 - **Code-Karten:** Bei Pseudocode- und SQL-Karten tippst du deine Lösung in einen Editor und vergleichst sie dann mit der Musterlösung (`Strg/Cmd + Enter`).
+- **SQL ausführen:** SQL-Karten laufen mit SQLite direkt im Browser gegen eine Beispiel-Datenbank (`Shift + Enter`). Bei vielen Karten wird dein Ergebnis automatisch mit der Musterlösung abgeglichen.
 - **Darstellung:** Knopf oben rechts wechselt zwischen System, Hell und Dunkel
 
 ## Inhalte

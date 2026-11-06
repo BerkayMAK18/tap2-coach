@@ -21,6 +21,7 @@ In jeder Lernfrage gibt es oben ein Fahnen-Symbol, in jeder Übungsaufgabe den L
 - **Suche:** Lupe oben rechts oder Taste `/` (bzw. `Strg/Cmd + K`)
 - **Code-Karten:** Bei Pseudocode- und SQL-Karten tippst du deine Lösung in einen Editor und vergleichst sie dann mit der Musterlösung (`Strg/Cmd + Enter`).
 - **SQL ausführen:** SQL-Karten laufen mit SQLite direkt im Browser gegen eine Beispiel-Datenbank (`Shift + Enter`). Bei vielen Karten wird dein Ergebnis automatisch mit der Musterlösung abgeglichen.
+- **Wiederholungen:** Richtig beantwortete Fragen kommen nach 1, 3, 7, 14 und 30 Tagen wieder. „Weiterlernen“ startet zuerst die fälligen Wiederholungen.
 - **Darstellung:** Knopf oben rechts wechselt zwischen System, Hell und Dunkel
 
 ## Inhalte

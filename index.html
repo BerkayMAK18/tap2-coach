@@ -628,6 +628,13 @@ pre, code, .mono { font-variant-ligatures: none; } /* <= bleibt <= (wie auf dem 
 @media (max-width: 760px) { .cmp { grid-template-columns: 1fr; } }
 
 
+
+/* ---------- Wiederholungsintervalle */
+.nexttxt { font-size: 0.78rem; color: var(--muted); margin-left: 6px; }
+.nexttxt::before { content: "· "; }
+.duechip { font-size: 0.7rem; font-weight: 700; color: var(--violet-d); background: var(--violet-soft); border-radius: 99px; padding: 2px 8px; }
+:root[data-theme="dark"] .duechip { color: var(--violet-m); }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .duechip { color: var(--violet-m); } }
 /* ---------- IHK-Stil: Situation + Aufgabe, Erwartungshorizont */
 .qcard .front { white-space: pre-line; }
 .situ { margin: 0 0 12px; padding: 2px 0 2px 12px; border-left: 3px solid var(--blue); color: var(--muted); font-size: 0.98rem; line-height: 1.6; white-space: pre-line; }
@@ -2369,6 +2376,7 @@ CARDS_RAW.algo.push(
   const pad = (n) => String(n).padStart(2, "0");
   const iso = (d) => d.getFullYear() + "-" + pad(d.getMonth() + 1) + "-" + pad(d.getDate());
   const today = () => iso(new Date());
+  const addDays = (iso0, n) => { const d = new Date(iso0 + "T12:00:00"); d.setDate(d.getDate() + n); return iso(d); };
   const daysBetween = (a, b) => Math.round((new Date(b + "T12:00:00") - new Date(a + "T12:00:00")) / 86400000);
   const WD = ["So", "Mo", "Di", "Mi", "Do", "Fr", "Sa"];
   const fmtDay = (s) => { const d = new Date(s + "T12:00:00"); return WD[d.getDay()] + ", " + pad(d.getDate()) + "." + pad(d.getMonth() + 1) + "."; };
@@ -2409,7 +2417,7 @@ CARDS_RAW.algo.push(
   const inTeil = (t, part) => (part === "wiso" ? t.teil === "WiSo" : t.teil !== "WiSo" && t.teil.includes(part === "t1" ? "1" : "2"));
 
   // ---------- state + storage
-  const blank = () => ({ v: 6, q: {}, mark: {}, custom: {}, ueb: {}, runs: [], log: {}, last: null });
+  const blank = () => ({ v: 7, q: {}, mark: {}, custom: {}, ueb: {}, runs: [], log: {}, last: null });
   let S = blank();
   function normalize(o) {
     const x = Object.assign(blank(), o || {});
@@ -2421,12 +2429,21 @@ CARDS_RAW.algo.push(
       x.custom = c; x.mark = {}; x.log = {};
     }
     ["cards", "plan", "exams", "quiz", "taken", "goals", "qstat", "xp", "days", "goal", "goalHit", "badges", "aw", "st", "bestStreak", "board"].forEach((k) => delete x[k]);
-    x.v = 6;
+    if (!o || !o.v || o.v < 7) { // v7: Wiederholungsintervalle. Box aus der Ampel ableiten, grüne Fragen auf die nächsten Tage verteilen
+      const t0 = today();
+      Object.entries(x.q).forEach(([id, r]) => {
+        if (!r || r.b != null) return;
+        r.b = r.s >= 2 ? 2 : r.s === 1 ? 1 : 0;
+        let h = 0; for (const ch of id) h = (h * 31 + ch.charCodeAt(0)) % 997;
+        r.d = r.s >= 2 ? addDays(t0, 1 + (h % 3)) : t0;
+      });
+    }
+    x.v = 7;
     return x;
   }
   const KEY = "tap2coach", KEY_RUN = "tap2coach-run", KEY_SESS = "tap2coach-sess";
   let storeOk = true;
-  function localLoad() { try { const t = localStorage.getItem(KEY); if (t) S = normalize(JSON.parse(t)); } catch (e) { storeOk = false; } }
+  function localLoad() { try { const t = localStorage.getItem(KEY); if (t) { const o = JSON.parse(t); S = normalize(o); if (!o.v || o.v < 7) save(); } } catch (e) { storeOk = false; } }
   function save() { try { localStorage.setItem(KEY, JSON.stringify(S)); storeOk = true; } catch (e) { storeOk = false; } }
   function keepSess() { try { if (UI.sess) localStorage.setItem(KEY_SESS, JSON.stringify(UI.sess)); else localStorage.removeItem(KEY_SESS); } catch (e) {} }
   window.addEventListener("storage", (e) => { if (e.key === KEY && e.newValue) { try { S = normalize(JSON.parse(e.newValue)); if (!UI.sess && !UI.run) render(); else hud(); } catch (x) {} } });
@@ -2435,10 +2452,18 @@ CARDS_RAW.algo.push(
   const ST_LBL = { "-1": "Neu", 0: "Rot · zuletzt falsch", 1: "Gelb · einmal richtig", 2: "Grün · sitzt" };
   const ST_SHORT = { "-1": "Neu", 0: "Rot", 1: "Gelb", 2: "Grün" };
   const st = (id) => (S.q[id] ? S.q[id].s : -1);
+  // Wiederholungsintervalle (Leitner): Box 0 = falsch/heute, 1 = gelb (1 Tag), ab 2 = grün (3, 7, 14, 30 Tage)
+  const IV = [0, 1, 3, 7, 14, 30];
+  const isDue = (id) => { const r = S.q[id]; return !!(r && r.d && r.d <= today()); };
+  const dueIn = (id) => { const r = S.q[id]; return r && r.d ? daysBetween(today(), r.d) : null; };
+  const nextTxt = (id) => { const d = dueIn(id); return d == null ? "" : d <= 0 ? "heute noch einmal" : d === 1 ? "wieder morgen" : `wieder in ${d} Tagen`; };
   function answer(id, ok) {
-    const r = S.q[id] || { s: -1, n: 0, w: 0 }, before = r.s;
+    const r = S.q[id] || { s: -1, n: 0, w: 0, b: 0 }, before = r.s;
     r.n++;
-    if (ok) r.s = r.s >= 1 ? 2 : 1; else { r.s = 0; r.w++; }
+    if (r.b == null) r.b = r.s >= 2 ? 2 : r.s === 1 ? 1 : 0;
+    if (ok) r.b = Math.min(r.b + 1, IV.length - 1); else { r.b = 0; r.w++; }
+    r.s = ok ? (r.b >= 2 ? 2 : 1) : 0;
+    r.d = addDays(today(), IV[r.b]);
     S.q[id] = r;
     const d = today(); S.log[d] = (S.log[d] || 0) + 1;
     save();
@@ -2453,8 +2478,10 @@ CARDS_RAW.algo.push(
   }
   const ampBar = (c, cls) => `<div class="amp-bar ${cls || ""}" role="img" aria-label="${c.g} grün, ${c.y} gelb, ${c.r} rot, ${c.n} neu"><i class="g" style="width:${c.t ? c.g / c.t * 100 : 0}%"></i><i class="y" style="width:${c.t ? c.y / c.t * 100 : 0}%"></i><i class="r" style="width:${c.t ? c.r / c.t * 100 : 0}%"></i></div>`;
   const legend = (c) => `<div class="legend-a"><span><i class="amp s2"></i>${c.g} grün</span><span><i class="amp s1"></i>${c.y} gelb</span><span><i class="amp s0"></i>${c.r} rot</span><span><i class="amp"></i>${c.n} neu</span></div>`;
-  const prio = (q) => { const s = st(q.id); return s === 0 ? 0 : s === -1 ? 1 : s === 1 ? 2 : 3; };
-  const smartOrder = (list) => shuffle(list.slice()).sort((a, b) => prio(a) - prio(b));
+  const prio = (q) => { const s = st(q.id); if (s === -1) return 2; if (s === 0) return 0; if (isDue(q.id)) return 1; return s === 1 ? 3 : 4; };
+  const dueKey = (q) => (S.q[q.id] && S.q[q.id].d) || "9999";
+  const smartOrder = (list) => shuffle(list.slice()).sort((a, b) => prio(a) - prio(b) || (prio(a) === 1 ? (dueKey(a) < dueKey(b) ? -1 : dueKey(a) > dueKey(b) ? 1 : 0) : 0));
+  const dueList = (list) => smartOrder(list.filter((q) => isDue(q.id)));
   const reifeLabel = (p) => (p >= 0.9 ? "Prüfungsreif" : p >= 0.7 ? "Fast prüfungsreif" : p >= 0.4 ? "Auf dem Weg" : p > 0 ? "Am Anfang" : "Noch nicht gestartet");
 
   // ---------- routing + shell
@@ -2841,6 +2868,7 @@ INSERT INTO Konto VALUES (1,'Weingut Becker',1500.00),(2,'Klinik am Rhein',320.0
     if (kind === "part") { const tids = TOPICS.filter((x) => inTeil(x, tid)).map((x) => x.id); return startSess(smartOrder(allQ().filter((q) => tids.includes(q.topic))).slice(0, ROUND), TEIL[tid].k, { kind, part: tid }); }
     const base = tid ? topicQ(tid) : allQ();
     const pre = tid ? TP[tid].n + ": " : "";
+    if (kind === "due") return startSess(dueList(base).slice(0, ROUND), pre + "Fällige Wiederholungen", { kind, tid });
     if (kind === "err") startSess(shuffle(base.filter((q) => st(q.id) === 0)), pre + "Fehlerfragen", { kind, tid });
     else if (kind === "new") startSess(shuffle(base.filter((q) => st(q.id) === -1)).slice(0, ROUND), pre + "Neue Fragen", { kind, tid });
     else if (kind === "mark") startSess(base.filter((q) => S.mark[q.id]), pre + "Markierte Fragen", { kind, tid });
@@ -2862,7 +2890,7 @@ INSERT INTO Konto VALUES (1,'Weingut Becker',1500.00),(2,'Klinik am Rhein',320.0
     const s = UI.sess, q = getQ(s.ids[s.i]);
     if (!q || !s.rev) return;
     const [f, t] = answer(q.id, ok);
-    s.res[q.id] = { ok, f, t }; s.last = { ok, f, t };
+    s.res[q.id] = { ok, f, t }; s.last = { ok, f, t, id: q.id };
     sessNext();
   }
   function toggleMark(id) { if (S.mark[id]) delete S.mark[id]; else S.mark[id] = 1; save(); render(); }
@@ -2914,7 +2942,7 @@ INSERT INTO Konto VALUES (1,'Weingut Becker',1500.00),(2,'Klinik am Rhein',320.0
       const ok = s.pick === q.right;
       const ord = optOrder(s, q);
       body = `<div class="optlist">${ord.map((i, d) => `<button type="button" class="opt ${s.pick !== null ? (i === q.right ? "right" : i === s.pick ? "wrong" : "") : ""}" data-i="${i}" ${s.pick !== null ? "disabled" : ""}><span class="k">${s.pick !== null && i === q.right ? ic("check", "ic sm") : s.pick === i ? ic("x", "ic sm") : "ABCD"[d]}</span><span>${esc(q.opts[i])}</span></button>`).join("")}</div>`;
-      if (s.pick !== null) { const r = s.res[q.id]; foot = `<div class="feedback ${ok ? "ok" : "bad"}"><span class="fi">${ic(ok ? "check" : "x")}</span><div><div class="row" style="gap:10px"><b>${ok ? "Richtig" : "Falsch"}</b>${trans(r.f, r.t)}</div><p>${esc(q.why)}</p></div><button type="button" class="btn primary" id="s-next">${s.i + 1 < s.ids.length ? "Weiter" : "Auswertung"} ${ic("right", "ic sm")}</button></div>`; }
+      if (s.pick !== null) { const r = s.res[q.id]; foot = `<div class="feedback ${ok ? "ok" : "bad"}"><span class="fi">${ic(ok ? "check" : "x")}</span><div><div class="row" style="gap:10px"><b>${ok ? "Richtig" : "Falsch"}</b>${trans(r.f, r.t)}<span class="nexttxt">${nextTxt(q.id)}</span></div><p>${esc(q.why)}</p></div><button type="button" class="btn primary" id="s-next">${s.i + 1 < s.ids.length ? "Weiter" : "Auswertung"} ${ic("right", "ic sm")}</button></div>`; }
       else foot = `<p class="kbdhelp">Tasten <span class="kbd">1</span>–<span class="kbd">4</span> zum Antworten · <span class="kbd">Enter</span> weiter</p>`;
     } else if (CODE[q.id] && !q.own) {
       body = codeBody(s, q, CODE[q.id]);
@@ -2923,7 +2951,7 @@ INSERT INTO Konto VALUES (1,'Weingut Becker',1500.00),(2,'Klinik am Rhein',320.0
       body = s.rev ? `<div class="answer-wrap"><span class="alab">${q.n ? "Musterlösung" : "Antwort"}</span><div class="answer ${looksCode(q) ? "mono" : ""}">${esc(q.a)}</div></div>${ewhHTML(q)}` : `<button type="button" class="reveal" id="s-reveal">${ic("eye")}<b>Antwort zeigen</b><span>Erst selbst überlegen, dann aufdecken</span></button>`;
       foot = s.rev ? `<div class="rate"><button type="button" class="btn big no" id="s-no">${ic("x", "ic sm")} Nicht gewusst</button><button type="button" class="btn big yes" id="s-yes">${ic("check", "ic sm")} Gewusst</button></div><p class="kbdhelp"><span class="kbd">←</span> nicht gewusst · <span class="kbd">→</span> gewusst</p>` : `<p class="kbdhelp"><span class="kbd">Leertaste</span> Antwort zeigen · <span class="kbd">Esc</span> beenden</p>`;
     }
-    const lastNote = s.last ? `<div class="lastnote ${s.last.ok ? "ok" : "bad"}">${ic(s.last.ok ? "check" : "x", "ic xs")} Vorherige Frage ${s.last.ok ? "gewusst" : "nicht gewusst"} ${trans(s.last.f, s.last.t)}</div>` : "";
+    const lastNote = s.last ? `<div class="lastnote ${s.last.ok ? "ok" : "bad"}">${ic(s.last.ok ? "check" : "x", "ic xs")} Vorherige Frage ${s.last.ok ? "gewusst" : "nicht gewusst"} ${trans(s.last.f, s.last.t)}${s.last.id ? `<span class="nexttxt">${nextTxt(s.last.id)}</span>` : ""}</div>` : "";
     el.innerHTML = `<div class="quiz t-${tcolOf(t.teil)}">
       <div class="quiz-top"><button type="button" class="iconbtn" id="s-close" aria-label="Runde beenden">${ic("x")}</button><div class="prog"><span>${esc(s.title)}</span><div class="bar"><i style="width:${s.i / s.ids.length * 100}%"></i></div></div><span class="qcount num">${s.i + 1} / ${s.ids.length}</span><a class="iconbtn report" href="${reportUrl(q)}" target="_blank" rel="noopener" aria-label="Fehler in dieser Frage melden" title="Fehler melden">${ic("flag")}</a><button type="button" class="iconbtn star ${marked ? "marked" : ""}" id="s-mark" aria-pressed="${marked}" aria-label="${marked ? "Markierung entfernen" : "Frage markieren"}" title="Markieren">${ic("star")}</button></div>
       ${lastNote}
@@ -2964,7 +2992,8 @@ INSERT INTO Konto VALUES (1,'Weingut Becker',1500.00),(2,'Klinik am Rhein',320.0
     const w = $("#e-wrong"); if (w) w.onclick = () => startSess(wrong.map((x) => x.q), "Fehler wiederholen", s.src);
     $("#e-next").onclick = () => {
       const src = s.src;
-      if (src.kind === "part") learnList("part", src.part);
+      if (src.kind === "due" && dueList(src.tid ? topicQ(src.tid) : allQ()).length) learnList("due", src.tid);
+      else if (src.kind === "part") learnList("part", src.part);
       else if (src.tid) learnTopic(src.tid);
       else startSess(smartOrder(allQ()).slice(0, ROUND), "Gemischte Runde", { kind: "mixed" });
     };
@@ -2993,17 +3022,18 @@ INSERT INTO Konto VALUES (1,'Weingut Becker',1500.00),(2,'Klinik am Rhein',320.0
     const nt = nextTopic(), ntc = counts(topicQ(nt.id));
     const parts = ["t2", "t1", "wiso"].map((p) => { const tids = TOPICS.filter((t) => inTeil(t, p)).map((t) => t.id); return { p, c: counts(all.filter((q) => tids.includes(q.topic))) }; });
     const weak = TOPICS.map((t) => ({ t, c: counts(topicQ(t.id)) })).filter((x) => x.c.t && x.c.open).sort((a, b) => (a.t.prio === "Muss" ? 0 : 1) - (b.t.prio === "Muss" ? 0 : 1) || a.c.pct - b.c.pct).slice(0, 4);
-    const errN = c.r, markN = all.filter((q) => S.mark[q.id]).length;
+    const errN = c.r, markN = all.filter((q) => S.mark[q.id]).length, dueN = all.filter((q) => isDue(q.id)).length;
+    const dayBefore = (() => { const d = addDays(EXAM_DAY, -1).split("-"); return d[2] + "." + d[1] + "."; })();
     el.innerHTML = `
       <section class="hero grad">
         
         <div>
           <div class="eyebrow">${ic("calendar", "ic sm")}${daysLeft() > 0 ? `Noch ${daysLeft()} ${daysLeft() === 1 ? "Tag" : "Tage"} bis zur TAP2 am ${EXAM_DE}` : `TAP2 am ${EXAM_DE}`}</div>
           <h2>${reifeLabel(c.pct)}</h2>
-          <p class="mot">${c.t - c.g} von ${c.t} Fragen sind noch nicht grün. Eine Frage wird grün, wenn du sie zweimal hintereinander richtig beantwortest.</p>
+          <p class="mot">${c.t - c.g} von ${c.t} Fragen sind noch nicht grün. Eine Frage wird grün, wenn du sie zweimal hintereinander richtig beantwortest. Danach kommt sie nach 3, 7, 14 und 30 Tagen zur Wiederholung.</p>
           ${ampBar(c, "lg")}${legend(c)}
           <div class="row" style="margin-top:20px"><button type="button" class="btn white" id="h-learn">${ic("play", "ic sm")} Weiterlernen</button><button type="button" class="btn glass" data-go2="pruefung">${ic("timer", "ic sm")} Prüfung simulieren</button></div>
-          <p class="nexthint">Als Nächstes: <b>${esc(nt.n)}</b> · ${ntc.open} offene Fragen</p>
+          <p class="nexthint">${dueN ? `Als Nächstes: <b>${dueN} ${dueN === 1 ? "fällige Wiederholung" : "fällige Wiederholungen"}</b>, danach ${esc(nt.n)}` : `Als Nächstes: <b>${esc(nt.n)}</b> · ${ntc.open} offene Fragen`}</p>
         </div>
         <div class="hero-side">${ring(c.pct, 150, 12, `${Math.round(c.pct * 100)}<small>% prüfungsreif</small>`, "anim")}</div>
       </section>
@@ -3011,13 +3041,14 @@ INSERT INTO Konto VALUES (1,'Weingut Becker',1500.00),(2,'Klinik am Rhein',320.0
       <div class="grid2">
         <section class="card">
           <h3>Lernempfehlung</h3>
-          <p class="muted small" style="margin-top:4px">${need ? `Damit bis zum 24.11. alle Fragen grün sind, beantworte jeden Tag etwa <b class="ink">${perDay} Fragen</b>. Am letzten Tag nur noch eine Simulation.` : "Alle Fragen sind grün. Halte das Wissen mit Simulationen und Real-Klausuren frisch."}</p>
+          <p class="muted small" style="margin-top:4px">${need ? `Damit bis zum ${dayBefore} alle Fragen grün sind, beantworte jeden Tag etwa <b class="ink">${perDay} Fragen</b>${dueN ? `, dazu heute <b class="ink">${dueN} fällige Wiederholungen</b>` : ""}. Am letzten Tag nur noch eine Simulation.` : dueN ? `Alle Fragen sind grün. Heute sind <b class="ink">${dueN} Wiederholungen</b> fällig, damit das Wissen frisch bleibt.` : "Alle Fragen sind grün. Halte das Wissen mit Simulationen und Real-Klausuren frisch."}</p>
           <div class="today"><span>Heute beantwortet</span><b class="num">${todayN}${perDay ? ` von ${perDay}` : ""}</b></div>
           <div class="bar"><i style="width:${perDay ? Math.min(100, todayN / perDay * 100) : 100}%"></i></div>
         </section>
         <section class="card">
           <h3>Gezielt üben</h3>
           <div class="quick">
+            <button type="button" class="qk" data-kind="due" ${dueN ? "" : "disabled"}>${ic("again", "ic sm")}<span>Fällige Wiederholungen</span><b class="num">${dueN}</b></button>
             <button type="button" class="qk" data-kind="err" ${errN ? "" : "disabled"}><i class="amp s0"></i><span>Fehlerfragen</span><b class="num">${errN}</b></button>
             <button type="button" class="qk" data-kind="new" ${c.n ? "" : "disabled"}><i class="amp"></i><span>Neue Fragen</span><b class="num">${c.n}</b></button>
             <button type="button" class="qk" data-kind="mark" ${markN ? "" : "disabled"}>${ic("star", "ic sm")}<span>Markierte Fragen</span><b class="num">${markN}</b></button>
@@ -3074,7 +3105,7 @@ INSERT INTO Konto VALUES (1,'Weingut Becker',1500.00),(2,'Klinik am Rhein',320.0
     const rs = $("#d-reset"); if (rs) rs.onclick = () => { UI.confirm = "reset"; render(); $("#d-reset2").scrollIntoView({ block: "center" }); };
     const rs2 = $("#d-reset2"); if (rs2) rs2.onclick = () => { S = blank(); save(); UI.sess = null; UI.run = null; keepSess(); try { localStorage.removeItem(KEY_RUN); } catch (x) {} UI.confirm = null; render(); window.scrollTo({ top: 0 }); };
     const dc = $("#d-cancel"); if (dc) dc.onclick = () => { UI.confirm = null; render(); };
-    $("#h-learn").onclick = () => learnTopic(nt.id);
+    $("#h-learn").onclick = () => (dueN ? learnList("due") : learnTopic(nt.id));
     el.querySelectorAll("[data-go2]").forEach((b) => b.onclick = () => navTo(b.dataset.go2));
     el.querySelectorAll("[data-part]").forEach((b) => b.onclick = () => learnList("part", b.dataset.part));
     el.querySelectorAll("[data-kind]").forEach((b) => b.onclick = () => learnList(b.dataset.kind));
@@ -3093,7 +3124,7 @@ INSERT INTO Konto VALUES (1,'Weingut Becker',1500.00),(2,'Klinik am Rhein',320.0
     el.innerHTML = `
       <section class="card overall">
         <div class="row" style="align-items:flex-end"><div style="flex:1;min-width:220px"><span class="small muted">Gesamter Fragenkatalog</span><h2>${c.t} Fragen · ${pctS(c.pct)} prüfungsreif</h2></div>
-          <div class="row"><button type="button" class="btn small" data-kind="err" ${c.r ? "" : "disabled"}><i class="amp s0"></i> Fehler (${c.r})</button><button type="button" class="btn small" data-kind="mark" ${markN ? "" : "disabled"}>${ic("star", "ic xs")} Markiert (${markN})</button><button type="button" class="btn small" data-kind="rand">${ic("shuffle", "ic xs")} Zufall</button></div></div>
+          <div class="row"><button type="button" class="btn small" data-kind="due" ${all.some((q) => isDue(q.id)) ? "" : "disabled"}>${ic("again", "ic xs")} Fällig (${all.filter((q) => isDue(q.id)).length})</button><button type="button" class="btn small" data-kind="err" ${c.r ? "" : "disabled"}><i class="amp s0"></i> Fehler (${c.r})</button><button type="button" class="btn small" data-kind="mark" ${markN ? "" : "disabled"}>${ic("star", "ic xs")} Markiert (${markN})</button><button type="button" class="btn small" data-kind="rand">${ic("shuffle", "ic xs")} Zufall</button></div></div>
         <div style="margin-top:14px">${ampBar(c, "lg")}${legend(c)}</div>
       </section>
       <div class="sec-head"><h2>Themen</h2><div class="filters"><div class="segs" role="group" aria-label="Prüfungsteil">${["alle", "Teil 1", "Teil 2", "WiSo"].map((t) => `<button type="button" class="seg ${f === t ? "on" : ""}" data-tf="${t}" aria-pressed="${f === t}">${t === "alle" ? "Alle" : t}</button>`).join("")}</div></div></div>
@@ -3123,7 +3154,7 @@ INSERT INTO Konto VALUES (1,'Weingut Becker',1500.00),(2,'Klinik am Rhein',320.0
       content = `<section class="card">
         <div class="row"><span class="small muted">Tippe eine Frage an, um dort zu starten.</span><span class="spacer"></span><button type="button" class="btn small" id="q-add">${ic("plus", "ic xs")} Eigene Frage</button></div>
         ${UI.addQ ? `<div class="addq"><label class="f" for="add-f">Frage<textarea id="add-f" rows="2" placeholder="z. B. Was ist der Unterschied zwischen PUT und PATCH?"></textarea></label><label class="f" for="add-b">Antwort<textarea id="add-b" rows="4"></textarea></label><div class="row"><button type="button" class="btn primary" id="add-save">Frage hinzufügen</button><button type="button" class="btn ghost" id="add-close">Schließen</button><span class="small muted" id="add-msg"></span></div></div>` : ""}
-        <ul class="qlist">${qs.map((q, i) => { const s = st(q.id); return `<li><button type="button" class="qrow" data-qi="${i}"><i class="amp ${s >= 0 ? "s" + s : ""}" title="${ST_LBL[s]}"></i><span class="qt">${esc(qTask(q.q))}</span>${S.mark[q.id] ? `<span class="mk">${ic("star", "ic xs")}</span>` : ""}<span class="qty">${q.type === "mc" ? "Auswahl" : q.own ? "Eigene" : "Wissen"}</span></button>${q.own ? (UI.confirm === q.id ? `<button type="button" class="btn small danger" data-del="${q.id}">Löschen?</button>` : `<button type="button" class="iconbtn sm" data-ask="${q.id}" aria-label="Eigene Frage löschen">${ic("x", "ic xs")}</button>`) : ""}</li>`; }).join("")}</ul>
+        <ul class="qlist">${qs.map((q, i) => { const s = st(q.id); return `<li><button type="button" class="qrow" data-qi="${i}"><i class="amp ${s >= 0 ? "s" + s : ""}" title="${ST_LBL[s]}"></i><span class="qt">${esc(qTask(q.q))}</span>${isDue(q.id) && s > 0 ? `<span class="duechip" title="Wiederholung fällig">fällig</span>` : ""}${S.mark[q.id] ? `<span class="mk">${ic("star", "ic xs")}</span>` : ""}<span class="qty">${q.type === "mc" ? "Auswahl" : q.own ? "Eigene" : "Wissen"}</span></button>${q.own ? (UI.confirm === q.id ? `<button type="button" class="btn small danger" data-del="${q.id}">Löschen?</button>` : `<button type="button" class="iconbtn sm" data-ask="${q.id}" aria-label="Eigene Frage löschen">${ic("x", "ic xs")}</button>`) : ""}</li>`; }).join("")}</ul>
       </section>`;
     } else {
       content = `<div class="ueb-list">${t.ueb.map((id) => { const u = UE[id], r = S.ueb[id], pct = r ? r.p / u.max : null; return `<button type="button" class="ueb-item t-${tcolOf(u.teil)}" data-u="${id}"><span class="id">${id}</span><span><span class="t">${esc(u.titel)}</span><br><span class="sub">${esc(u.teil)} · ${u.max} P · ca. ${u.min} Min.</span></span><span class="r">${r ? `<span class="chip ${pct >= 0.81 ? "ok" : pct >= 0.67 ? "warn" : "bad"}"><span class="d"></span>${r.p}/${u.max}</span>` : '<span class="chip">offen</span>'}</span></button>`; }).join("")}</div>`;
@@ -3137,6 +3168,7 @@ INSERT INTO Konto VALUES (1,'Weingut Becker',1500.00),(2,'Klinik am Rhein',320.0
       </section>
       <div class="actions">
         <button type="button" class="btn primary big" data-act="learn">${ic("play", "ic sm")} Lernen</button>
+        <button type="button" class="btn" data-act="due" ${qs.some((q) => isDue(q.id)) ? "" : "disabled"}>${ic("again", "ic xs")} Fällig (${qs.filter((q) => isDue(q.id)).length})</button>
         <button type="button" class="btn" data-act="err" ${c.r ? "" : "disabled"}><i class="amp s0"></i> Fehler (${c.r})</button>
         <button type="button" class="btn" data-act="new" ${c.n ? "" : "disabled"}><i class="amp"></i> Neue (${c.n})</button>
         <button type="button" class="btn" data-act="all">Alle (${qs.length})</button>

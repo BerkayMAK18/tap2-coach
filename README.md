@@ -4,6 +4,12 @@ Lern-App für die Abschlussprüfung Teil 2 (Fachinformatiker/in Anwendungsentwic
 
 **Online nutzen:** über den GitHub-Pages-Link dieses Repos (Settings → Pages).
 
+## Als App installieren und offline nutzen
+
+- **Android/Chrome:** In der Übersicht unter „App & Offline“ auf „App installieren“ tippen (oder im Browser-Menü „App installieren“).
+- **iPhone/iPad:** In Safari auf „Teilen“ → „Zum Home-Bildschirm“.
+- Nach dem ersten Besuch funktioniert der Coach auch ohne Internet. Bei einer neuen Version erscheint der Hinweis „Neue Version verfügbar“.
+
 ## Datenschutz
 
 - Keine Anmeldung, kein Tracking, keine externen Server.

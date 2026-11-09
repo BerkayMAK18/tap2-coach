@@ -1057,7 +1057,7 @@ const CARDS_RAW = {
   wr: [
     ["Ein Entwickler möchte seinen Arbeitsvertrag ordentlich kündigen. Weder Vertrag noch Tarif enthalten eine Regelung.\n\nNennen Sie die gesetzliche Kündigungsfrist für Arbeitnehmer. (2 P)", "4 Wochen zum 15. oder zum Ende eines Kalendermonats (§ 622 Abs. 1 BGB).", "1 P Frist, 1 P Termine. Die Frist gilt für Arbeitnehmer unabhängig von der Betriebszugehörigkeit."],
     ["Ein Arbeitgeber kündigt drei Mitarbeitern mit 3, 9 und 16 Jahren Betriebszugehörigkeit. Es gelten die gesetzlichen Fristen.\n\nGeben Sie die jeweilige Kündigungsfrist an. (3 P)", "3 Jahre (ab 2 Jahren): 1 Monat zum Monatsende\n9 Jahre (ab 8 Jahren): 3 Monate zum Monatsende\n16 Jahre (ab 15 Jahren): 6 Monate zum Monatsende\nStaffel: 2 J. → 1, 5 J. → 2, 8 J. → 3, 10 J. → 4, 12 J. → 5, 15 J. → 6, 20 J. → 7 Monate", "Je 1 P (§ 622 Abs. 2 BGB). Die verlängerten Fristen gelten nur für Kündigungen durch den Arbeitgeber."],
-    ["Eine neu eingestellte Projektmanagerin hat im Arbeitsvertrag eine Probezeit.\n\nNennen Sie die Höchstdauer der Probezeit und die Kündigungsfrist in dieser Zeit. (2 P)", "Höchstens 6 Monate.\nKündigungsfrist: 2 Wochen, zu jedem Tag (§ 622 Abs. 3 BGB).", "Je 1 P."],
+    ["Eine neu eingestellte Projektmanagerin hat im Arbeitsvertrag eine Probezeit.\n\nNennen Sie die Höchstdauer der Probezeit und die Kündigungsfrist in dieser Zeit. (2 P)", "Höchstens 6 Monate.\nKündigungsfrist: 2 Wochen, zu jedem Tag (§ 622 Abs. 3 BGB).", "Je 1 P. Nicht verwechseln: In der Probezeit einer Ausbildung gibt es keine Kündigungsfrist – beide Seiten können jederzeit schriftlich kündigen (§ 22 Abs. 1 BBiG). Für Arbeitnehmer gelten 2 Wochen."],
     ["Ein Mitarbeiter wird beim Diebstahl von Firmen-Notebooks erwischt. Der Arbeitgeber erfährt am 2. Juni davon.\n\nBeschreiben Sie die Voraussetzungen der fristlosen Kündigung und nennen Sie die Frist, bis zu der sie erklärt werden muss. (3 P)", "Fristlose (außerordentliche) Kündigung nur aus wichtigem Grund, wenn die Fortsetzung bis zum Ablauf der Kündigungsfrist unzumutbar ist – z. B. Diebstahl, Tätlichkeit, beharrliche Arbeitsverweigerung.\nSie muss innerhalb von 2 Wochen nach Kenntnis erklärt werden – hier bis 16. Juni (§ 626 BGB).", "1 P wichtiger Grund, 1 P Beispiel, 1 P Frist."],
     ["Ein Mitarbeiter eines Betriebs mit 8 Beschäftigten und ein Mitarbeiter eines Betriebs mit 50 Beschäftigten werden jeweils nach 2 Jahren gekündigt.\n\nNennen Sie die Voraussetzungen des Kündigungsschutzgesetzes und prüfen Sie, für wen es gilt. (3 P)", "Voraussetzungen: Betrieb mit mehr als 10 Arbeitnehmern und Arbeitsverhältnis länger als 6 Monate. Dann muss die Kündigung sozial gerechtfertigt sein.\nBetrieb mit 8 Beschäftigten: KSchG gilt nicht (Kleinbetrieb).\nBetrieb mit 50 Beschäftigten: KSchG gilt.", "1 P Voraussetzungen, je 1 P pro Prüfung."],
     ["Ein Unternehmen mit 200 Beschäftigten möchte drei Mitarbeitern kündigen: einem wegen dauerhafter Krankheit, einem wegen wiederholter Unpünktlichkeit und einem wegen der Schließung seiner Abteilung.\n\nOrdnen Sie die drei Gründe nach dem KSchG zu und nennen Sie jeweils eine Voraussetzung. (3 P)", "Dauerhafte Krankheit: personenbedingt – negative Gesundheitsprognose, erhebliche betriebliche Beeinträchtigung.\nUnpünktlichkeit: verhaltensbedingt – in der Regel vorherige Abmahnung.\nSchließung der Abteilung: betriebsbedingt – dringende betriebliche Erfordernisse, Sozialauswahl.", "Je 1 P pro richtiger Zuordnung mit Voraussetzung."],
@@ -2713,6 +2713,7 @@ CARDS_RAW.algo.push(
     const b = document.querySelector('[data-hud="search"]'); if (b) b.focus({ preventScroll: true });
   }
   function runSearch() {
+    if (!SIDX) SIDX = srchIndex();
     const raw = $("#srch-in").value, terms = norm(raw).split(/\s+/).filter((t) => t.length > 0);
     SR.q = raw;
     const res = $("#srch-res");
@@ -3002,7 +3003,12 @@ INSERT INTO Konto VALUES (1,'Weingut Becker',1500.00),(2,'Klinik am Rhein',320.0
   }
   function focusMain() { const b = $("#s-opts") || $("#s-reveal") || $(".opt:not(:disabled)"); if (b) b.focus({ preventScroll: true }); }
   const selQ = () => allQ().filter((q) => UI.sel.includes(q.topic));
-  function learnSel() { if (!UI.sel.length) return; const names = UI.sel.map((id) => TP[id] ? TP[id].n.split(/[,&]/)[0].trim() : id); startSess(mixIn(smartOrder(selQ()), UI.sel), "Auswahl: " + names.join(" + "), { kind: "sel", tids: UI.sel.slice() }); }
+  const selNames = () => UI.sel.map((id) => TP[id] ? TP[id].n.split(/[,&]/)[0].trim() : id).join(" + ");
+  function learnSel() { if (!UI.sel.length) return; startSess(mixIn(smartOrder(selQ()), UI.sel), "Auswahl: " + selNames(), { kind: "sel", tids: UI.sel.slice() }); }
+  // Nur Fehler / fällige / neue Fragen der Auswahl – genau so viele, wie es gibt (Fehler und Fällige ohne Auffüllen)
+  const onlyList = (kind, qs) => kind === "err" ? shuffle(qs.filter((q) => st(q.id) === 0)) : kind === "due" ? dueList(qs) : shuffle(qs.filter((q) => st(q.id) === -1)).slice(0, ROUND);
+  const ONLY_T = { err: "Fehlerfragen", due: "Fällige Wiederholungen", new: "Neue Fragen" };
+  function learnSelOnly(kind) { if (!UI.sel.length) return; startSess(onlyList(kind, selQ()), "Auswahl: " + selNames() + " · " + ONLY_T[kind], { kind: "sel", only: kind, tids: UI.sel.slice() }); }
   // Gemischt üben: bis zu 4 von 20 Fragen aus bereits bearbeiteten anderen Themen (fällige und rote zuerst)
   function mixIn(base, excludeTids) {
     const pool = smartOrder(allQ().filter((q) => !excludeTids.includes(q.topic) && st(q.id) >= 0));
@@ -3159,7 +3165,8 @@ INSERT INTO Konto VALUES (1,'Weingut Becker',1500.00),(2,'Klinik am Rhein',320.0
     $("#e-next").onclick = () => {
       const src = s.src;
       if (src.kind === "due" && dueList(src.tid ? topicQ(src.tid) : allQ()).length) learnList("due", src.tid);
-      else if (src.kind === "sel" && src.tids) { UI.sel = src.tids.slice(); learnSel(); }
+      else if (src.kind === "sel" && src.tids) { UI.sel = src.tids.slice(); if (src.only && onlyList(src.only, selQ()).length) learnSelOnly(src.only); else learnSel(); }
+      else if ((src.kind === "err" || src.kind === "new") && onlyList(src.kind, src.tid ? topicQ(src.tid) : allQ()).length) learnList(src.kind, src.tid);
       else if (src.kind === "part") learnList("part", src.part);
       else if (src.tid) learnTopic(src.tid);
       else startSess(smartOrder(allQ()).slice(0, ROUND), "Gemischte Runde", { kind: "mixed" });
@@ -3286,9 +3293,11 @@ INSERT INTO Konto VALUES (1,'Weingut Becker',1500.00),(2,'Klinik am Rhein',320.0
     else if (d.i >= d.order.length) drill = `<section class="card"><h3>${d.score} von ${d.order.length} richtig</h3><p class="small muted" style="margin-top:4px">${d.score === d.order.length ? "Stark – du triffst die Antworttiefe sicher." : "Lies dir die Operator-Treppe oben noch einmal durch und starte das Training erneut."}</p><div class="row" style="margin-top:12px"><button type="button" class="btn primary" id="od-go">${ic("again", "ic sm")} Noch einmal</button></div></section>`;
     else {
       const x = OPDRILLS[d.order[d.i]], picked = d.pick !== null;
+      // Antworten pro Aufgabe mischen, damit die richtige nicht immer an derselben Stelle steht
+      d.ord = d.ord || {}; const ord = d.ord[d.order[d.i]] || (d.ord[d.order[d.i]] = shuffle(x.opts.map((_, k) => k)));
       drill = `<section class="card qcard"><div class="row"><span class="chip violet">${esc(x.op)}</span><span class="spacer"></span><span class="small muted num">${d.i + 1} / ${d.order.length} · ${d.score} richtig</span></div>
         <div class="front" style="margin-top:10px">${esc(x.q)}</div><p class="small muted">Welche Antwort bekommt die volle Punktzahl?</p>
-        <div class="optlist">${x.opts.map((o, k) => `<button type="button" class="opt ${picked ? (k === x.right ? "right" : k === d.pick ? "wrong" : "") : ""}" data-od="${k}" ${picked ? "disabled" : ""}><span class="k">${"ABC"[k]}</span><span>${esc(o)}</span></button>`).join("")}</div>
+        <div class="optlist">${ord.map((k, pos) => `<button type="button" class="opt ${picked ? (k === x.right ? "right" : k === d.pick ? "wrong" : "") : ""}" data-od="${k}" ${picked ? "disabled" : ""}><span class="k">${"ABC"[pos]}</span><span>${esc(x.opts[k])}</span></button>`).join("")}</div>
         ${picked ? `<div class="feedback ${d.pick === x.right ? "ok" : "bad"}" style="margin-top:12px"><span class="fi">${ic(d.pick === x.right ? "check" : "x")}</span><div><b>${d.pick === x.right ? "Richtig" : "Nicht ganz"}</b><p>${esc(x.why)}</p></div><button type="button" class="btn primary" id="od-next">${d.i + 1 < d.order.length ? "Weiter" : "Auswertung"} ${ic("right", "ic sm")}</button></div>` : ""}</section>`;
     }
     el.innerHTML = `
@@ -3637,11 +3646,12 @@ INSERT INTO Konto VALUES (1,'Weingut Becker',1500.00),(2,'Klinik am Rhein',320.0
       <div class="sec-head"><h2>Themen</h2><div class="filters"><div class="segs" role="group" aria-label="Prüfungsteil">${["alle", "Teil 1", "Teil 2", "SoWi"].map((t) => `<button type="button" class="seg ${f === t ? "on" : ""}" data-tf="${t}" aria-pressed="${f === t}">${t === "alle" ? "Alle" : t}</button>`).join("")}</div></div></div>
       <p class="small muted sel-hint">${ic("check", "ic xs")} Tipp: Hake mehrere Themen an, um sie gemeinsam in einer Lernrunde zu üben.</p>
       ${groups.map(([name, fn]) => { const ts = TOPICS.filter((t) => fn(t) && show(t)); return ts.length ? `<div class="tgroup"><h3>${name}</h3><div class="tlist">${ts.map((t) => `<div class="trow-sel"><label class="tsel" title="Für gemeinsame Lernrunde auswählen"><input type="checkbox" data-sel="${t.id}" ${UI.sel.includes(t.id) ? "checked" : ""} aria-label="${esc(t.n)} auswählen"><span class="box">${ic("check", "ic xs")}</span></label>${topicRow(t)}</div>`).join("")}</div></div>` : ""; }).join("")}
-      ${UI.sel.length ? (() => { const qs = selQ(), cc = counts(qs); return `<div class="selbar" role="region" aria-label="Auswahl"><div class="sb-t"><b>${UI.sel.length} ${UI.sel.length === 1 ? "Thema" : "Themen"}</b><span>${qs.length} Fragen · ${cc.open} offen</span></div><button type="button" class="btn primary small" id="sel-go">${ic("play", "ic xs")} Lernrunde starten</button><button type="button" class="btn small ghost" id="sel-x">Aufheben</button></div>`; })() : ""}`;
+      ${UI.sel.length ? (() => { const qs = selQ(), cc = counts(qs); return `<div class="selbar" role="region" aria-label="Auswahl"><div class="sb-t"><b>${UI.sel.length} ${UI.sel.length === 1 ? "Thema" : "Themen"}</b><span>${qs.length} Fragen · ${cc.open} offen</span></div><button type="button" class="btn primary small" id="sel-go">${ic("play", "ic xs")} Lernrunde starten</button><button type="button" class="btn small" data-only="err" ${cc.r ? "" : "disabled"} title="Nur die Fehlerfragen der Auswahl – ohne Auffüllen"><i class="amp s0"></i> Fehler (${cc.r})</button><button type="button" class="btn small" data-only="due" ${qs.some((q) => isDue(q.id)) ? "" : "disabled"}>${ic("again", "ic xs")} Fällig (${qs.filter((q) => isDue(q.id)).length})</button><button type="button" class="btn small" data-only="new" ${cc.n ? "" : "disabled"}><i class="amp"></i> Neue (${cc.n})</button><button type="button" class="btn small ghost" id="sel-x">Aufheben</button></div>`; })() : ""}`;
     el.querySelectorAll("[data-kind]").forEach((b) => b.onclick = () => learnList(b.dataset.kind));
     el.querySelectorAll("[data-tf]").forEach((b) => b.onclick = () => { UI.tf = b.dataset.tf; render(); });
     el.querySelectorAll("[data-sel]").forEach((b) => b.onchange = () => { const id = b.dataset.sel; UI.sel = b.checked ? UI.sel.concat(id) : UI.sel.filter((x) => x !== id); render(); });
     const sg = $("#sel-go"); if (sg) sg.onclick = () => learnSel();
+    el.querySelectorAll("[data-only]").forEach((b) => b.onclick = () => learnSelOnly(b.dataset.only));
     const sx = $("#sel-x"); if (sx) sx.onclick = () => { UI.sel = []; render(); };
     bindTopicRows(el);
   }
@@ -3965,22 +3975,25 @@ INSERT INTO Konto VALUES (1,'Weingut Becker',1500.00),(2,'Klinik am Rhein',320.0
   }
 
   // ---------- Offline-App (Service Worker), Installation, Update-Hinweis
-  const PWA = { prompt: null, offline: false, ios: /iphone|ipad|ipod/i.test(navigator.userAgent), standalone: (window.matchMedia && matchMedia("(display-mode: standalone)").matches) || navigator.standalone === true, tag: null };
+  const PWA = { prompt: null, offline: false, ios: /iphone|ipad|ipod/i.test(navigator.userAgent), standalone: (window.matchMedia && matchMedia("(display-mode: standalone)").matches) || navigator.standalone === true, dismissed: null };
   window.addEventListener("beforeinstallprompt", (e) => { e.preventDefault(); PWA.prompt = e; if (view === "einstellungen") render(); });
   window.addEventListener("appinstalled", () => { PWA.prompt = null; PWA.standalone = true; if (view === "einstellungen") render(); });
   if ("serviceWorker" in navigator && /^https?:$/.test(location.protocol)) {
     navigator.serviceWorker.register("sw.js").then(() => navigator.serviceWorker.ready).then(() => { PWA.offline = true; if (view === "einstellungen") render(); }).catch(() => { PWA.swFail = true; if (view === "einstellungen") render(); });
   } else PWA.swFail = true;
-  // Neue Version erkennen: ETag bzw. Last-Modified der Seite vergleichen (ohne manuelle Versionsnummer)
-  async function pageTag() { try { const r = await fetch(location.pathname, { method: "HEAD", cache: "no-store" }); return r.ok ? r.headers.get("etag") || r.headers.get("last-modified") : null; } catch (e) { return null; } }
-  async function checkUpdate() { const t = await pageTag(); if (!t) return; if (!PWA.tag) { PWA.tag = t; return; } if (t !== PWA.tag) $("#upd").hidden = false; }
+  // Neue Version erkennen: Beim Veröffentlichen setzt die GitHub Action BUILD auf eine Prüfsumme
+  // der index.html und legt dieselbe in version.json ab. Weichen beide ab, gibt es neuen Inhalt.
+  // (Lokal bleibt BUILD = "dev" – dann wird nicht geprüft.)
+  const BUILD = "dev";
+  async function liveBuild() { try { const r = await fetch("version.json?t=" + Date.now(), { cache: "no-store" }); return r.ok ? (await r.json()).build || null : null; } catch (e) { return null; } }
+  async function checkUpdate() { if (BUILD === "dev") return; const b = await liveBuild(); if (b && b !== BUILD && b !== PWA.dismissed) $("#upd").hidden = false; }
   if (/^https?:$/.test(location.protocol)) {
     checkUpdate();
     setInterval(checkUpdate, 10 * 60 * 1000);
     document.addEventListener("visibilitychange", () => { if (document.visibilityState === "visible") checkUpdate(); });
   }
   $("#upd-go").onclick = () => location.reload();
-  $("#upd-x").onclick = () => { $("#upd").hidden = true; };
+  $("#upd-x").onclick = async () => { $("#upd").hidden = true; PWA.dismissed = await liveBuild(); };
 
   // ---------- boot
   const h = location.hash.slice(1);

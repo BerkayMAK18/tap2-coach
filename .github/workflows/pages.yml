@@ -41,6 +41,15 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: actions/configure-pages@v5
+      # Versionskennung = Prüfsumme der index.html. Ändert sich nur, wenn sich die App wirklich ändert
+      # (README- oder Skript-Commits lösen also keinen „Neue Version“-Hinweis aus).
+      - name: Versionskennung setzen
+        run: |
+          v=$(sha256sum index.html | cut -c1-12)
+          grep -q 'const BUILD = "dev";' index.html || { echo "Platzhalter const BUILD = \"dev\"; fehlt in index.html"; exit 1; }
+          sed -i "s/const BUILD = \"dev\";/const BUILD = \"$v\";/" index.html
+          printf '{"build":"%s"}\n' "$v" > version.json
+          echo "Version: $v"
       - uses: actions/upload-pages-artifact@v3
         with:
           path: .

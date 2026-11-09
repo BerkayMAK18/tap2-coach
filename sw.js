@@ -27,6 +27,7 @@ self.addEventListener("activate", (e) => {
 self.addEventListener("fetch", (e) => {
   const req = e.request;
   if (req.method !== "GET" || new URL(req.url).origin !== self.location.origin) return;
+  if (new URL(req.url).pathname.endsWith("/version.json")) return; // Versionsprüfung immer direkt übers Netz
 
   if (req.mode === "navigate") {
     e.respondWith(

@@ -44,6 +44,20 @@ In jeder Lernfrage gibt es oben ein Fahnen-Symbol, in jeder Übungsaufgabe den L
 
 Alle Aufgaben und Lösungen sind eigenständig im Stil der IHK-Prüfung formuliert. Original-Prüfungen und Lösungshinweise sind nicht enthalten.
 
-## Aktualisieren
+## Aktualisieren – ohne dass der Lernstand verloren geht
 
-Neue Version als `index.html` ersetzen, committen, pushen. Der Prüfungstermin steht im Code als `EXAM_DAY`.
+Neue Version als `index.html` ersetzen, committen, pushen. Eine GitHub Action prüft vor jedem Veröffentlichen, ob der Lernstand aller Nutzer erhalten bleibt, und **stoppt den Deploy**, wenn nicht. Lokal vorab prüfen:
+
+```bash
+node tools/check-ids.js
+```
+
+Regeln, weil der Lernstand an der Position der Fragen hängt:
+
+- Fragen **nur am Ende anhängen** (Auswahlfragen ans Ende von `MC`, Karten ans Ende eines Decks) – nie mittendrin einfügen, löschen oder umsortieren.
+- Text, Antworten und Erklärungen einer Frage an gleicher Stelle ändern ist erlaubt. Eine Frage, die weg soll: Inhalt ersetzen statt löschen.
+- Interne Namen nicht ändern: Themen-IDs (`T01` …), Deck-Namen (`sql`, `algo` …), Aufgaben-IDs (`P1` …), Speicherschlüssel `tap2coach`.
+- `</script>` in einem Fragetext als `<\/script>` schreiben.
+- Die Adresse (`berkaymak18.github.io`) beibehalten – der Lernstand gehört zur Domain.
+
+Der Prüfungstermin steht im Code als `EXAM_DAY`.

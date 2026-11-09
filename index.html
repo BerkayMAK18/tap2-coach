@@ -3347,6 +3347,9 @@ INSERT INTO Konto VALUES (1,'Weingut Becker',1500.00),(2,'Klinik am Rhein',320.0
   // ---------- Auf ein anderes Gerät übertragen: Link + QR-Code, ohne Server
   // Format: Version "1" + base64url( deflate( [2 Byte JSON-Länge][JSON][je bearbeiteter Frage 3 Byte][Markierungs-Bitmap] ) )
   const TX_IDS = () => BASE_Q.map((q) => q.id);
+  // Listenlängen des Absenders: daraus ergeben sich die IDs eindeutig (m0…, k:deck0…), auch wenn der Empfänger eine neuere Version mit mehr Fragen hat
+  const txLens = () => [["m", MC.length]].concat(Object.entries(CARDS_RAW).map(([d, l]) => [d, l.length]));
+  const txExpand = (L) => L.flatMap(([k, n]) => Array.from({ length: n }, (_, i) => (k === "m" ? "m" + i : "k:" + k + i)));
   const b64u = {
     enc: (u8) => { let x = ""; for (let i = 0; i < u8.length; i += 0x8000) x += String.fromCharCode.apply(null, u8.subarray(i, i + 0x8000)); return btoa(x).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, ""); },
     dec: (t) => { t = t.replace(/-/g, "+").replace(/_/g, "/"); while (t.length % 4) t += "="; const x = atob(t), u = new Uint8Array(x.length); for (let i = 0; i < x.length; i++) u[i] = x.charCodeAt(i); return u; }
@@ -3358,7 +3361,7 @@ INSERT INTO Konto VALUES (1,'Weingut Becker',1500.00),(2,'Klinik am Rhein',320.0
   }
   const dayDiff = (a, b) => daysBetween(a, b);
   async function txEncode(full) {
-    const at = today(), ids = TX_IDS(), q = [];
+    const at = today(), L = txLens(), ids = txExpand(L), q = [];
     let prev = -1;
     ids.forEach((id, i) => {
       const r = S.q[id]; if (!r || r.s === -1 || r.s == null) return;
@@ -3369,7 +3372,7 @@ INSERT INTO Konto VALUES (1,'Weingut Becker',1500.00),(2,'Klinik am Rhein',320.0
       prev = i;
     });
     const marks = new Uint8Array(Math.ceil(ids.length / 8)); ids.forEach((id, i) => { if (S.mark[id]) marks[i >> 3] |= 1 << (i & 7); });
-    const meta = { a: at, n: ids.length, u: Object.fromEntries(Object.entries(S.ueb || {}).map(([k, v]) => [k, [v.p, v.at]])) };
+    const meta = { a: at, n: ids.length, L, u: Object.fromEntries(Object.entries(S.ueb || {}).map(([k, v]) => [k, [v.p, v.at]])) };
     if (full) { meta.r = (S.runs || []).slice(-30); meta.e = (S.errlog || []).slice(-60); meta.c = S.custom || {}; meta.l = Object.fromEntries(Object.entries(S.log || {}).slice(-40)); }
     const mj = new TextEncoder().encode(JSON.stringify(meta));
     const raw = new Uint8Array(2 + mj.length + q.length + marks.length);
@@ -3384,7 +3387,7 @@ INSERT INTO Konto VALUES (1,'Weingut Becker',1500.00),(2,'Klinik am Rhein',320.0
     let raw = b64u.dec(code.slice(1));
     if (code[0] === "1") { raw = await deflate(raw, true); if (!raw) throw new Error("nozip"); }
     const ml = (raw[0] << 8) | raw[1], meta = JSON.parse(new TextDecoder().decode(raw.subarray(2, 2 + ml)));
-    const ids = TX_IDS(), nIds = Math.min(meta.n, ids.length), qs = {}, mBytes = Math.ceil(meta.n / 8);
+    const ids = meta.L ? txExpand(meta.L) : TX_IDS(), nIds = Math.min(meta.n, ids.length), qs = {}, mBytes = Math.ceil(meta.n / 8);
     const qb = raw.subarray(2 + ml, raw.length - mBytes), mb = raw.subarray(raw.length - mBytes);
     let idx = -1;
     for (let k = 0; k + 2 < qb.length + 0; k += 3) {

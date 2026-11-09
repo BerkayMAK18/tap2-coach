@@ -39,6 +39,8 @@ In jeder Lernfrage gibt es oben ein Fahnen-Symbol, in jeder Übungsaufgabe den L
 - **Fehlerprotokoll:** Punktverluste einer Ursache zuordnen, Auswertung unter Tipps
 - **Themen kombinieren:** unter Lernen mehrere Themen anhaken und gemeinsam üben
 - **Timer:** Übungsaufgaben starten mit der Prüfungszeit, danach läuft der Timer ins Minus
+- **Lernrunden:** enthalten nur offene und fällige Fragen (höchstens 20). Unter Lernen gibt es für ausgewählte Themen eigene Runden nur mit Fehlern, fälligen oder neuen Fragen.
+- **Belohnungen:** Figur oben rechts – XP und Level fürs Lernen (Serien ×1,5 bis ×3), Tagesquests, Login-Kalender, Schatzkammer mit 5 Tieren à 40 Skins und Garderobe. Federn gibt es nur durchs Lernen, kein Echtgeld.
 
 ## Inhalte
 
@@ -59,5 +61,6 @@ Regeln, weil der Lernstand an der Position der Fragen hängt:
 - Interne Namen nicht ändern: Themen-IDs (`T01` …), Deck-Namen (`sql`, `algo` …), Aufgaben-IDs (`P1` …), Speicherschlüssel `tap2coach`.
 - `</script>` in einem Fragetext als `<\/script>` schreiben.
 - Die Adresse (`berkaymak18.github.io`) beibehalten – der Lernstand gehört zur Domain.
+- Belohnungen liegen getrennt unter `tap2coach-gami` und lesen den Lernstand nur. Skins nur anhängen, nie umbenennen (Besitz hängt an den IDs). Übertragung und Sicherung führen Belohnungen immer zusammen, nie ersetzen.
 
 Der Prüfungstermin steht im Code als `EXAM_DAY`.

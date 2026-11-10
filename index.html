@@ -3574,7 +3574,7 @@ INSERT INTO Konto VALUES (1,'Weingut Becker',1500.00),(2,'Klinik am Rhein',320.0
   // Ohne Konto: Ein geheimer Sync-Schlüssel (nur auf den Geräten) bestimmt den Datensatz. Der Server kennt nur eine Prüfsumme davon
   // und den im Browser verschlüsselten Stand. Abgleich heißt immer Zusammenführen (nie Ersetzen), siehe syncMerge.
   // Einrichtung des Servers: tools/supabase-sync.sql
-  const SYNC_URL = "", SYNC_ANON = ""; // Supabase-Projekt-URL + öffentlicher anon/publishable key. Leer = Sync ist ausgeblendet.
+  const SYNC_URL = "", SYNC_ANON = ""; // Bleibt im Repo leer: Die Action setzt beim Veröffentlichen die Repo-Secrets SYNC_URL / SYNC_ANON (Publishable key) ein. Leer = Sync ausgeblendet.
   const KEY_SYNC = "tap2coach-sync", KEY_SYNC_DEV = "tap2coach-sync-dev", KEY_VORSYNC = "tap2coach-vorsync";
   const isLocalHost = /^(localhost|127\.0\.0\.1|\[::1\])$/.test(location.hostname);
   const syncConf = () => {

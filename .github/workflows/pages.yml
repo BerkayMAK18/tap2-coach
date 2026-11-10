@@ -41,6 +41,23 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: actions/configure-pages@v5
+      # Geräte-Sync: Supabase-Projekt aus den Repo-Secrets SYNC_URL / SYNC_ANON eintragen – nur in die veröffentlichte Datei, nie ins Repo.
+      # Der Publishable key ist absichtlich öffentlich (Schutz über die Regeln in tools/supabase-sync.sql). Ohne Secrets bleibt der Sync ausgeblendet.
+      # Läuft vor der Versionskennung: Ein neuer Key ergibt eine neue Version.
+      - name: Sync-Projekt eintragen
+        env:
+          SYNC_URL: ${{ secrets.SYNC_URL }}
+          SYNC_ANON: ${{ secrets.SYNC_ANON }}
+        run: |
+          if [ -z "$SYNC_URL" ] && [ -z "$SYNC_ANON" ]; then echo "Keine Sync-Secrets hinterlegt – Sync bleibt ausgeblendet."; exit 0; fi
+          SYNC_URL="${SYNC_URL%/}"
+          [[ "$SYNC_URL" =~ ^https://[a-z0-9]+\.supabase\.co$ ]] || { echo "::error::SYNC_URL sieht nicht wie https://<projekt>.supabase.co aus."; exit 1; }
+          case "$SYNC_ANON" in sb_secret_*) echo "::error::SYNC_ANON enthält den SECRET key! Bitte den Publishable key (sb_publishable_…) eintragen und den Secret key bei Supabase neu erzeugen."; exit 1;; esac
+          [[ "$SYNC_ANON" =~ ^sb_publishable_[A-Za-z0-9_-]+$ ]] || { echo "::error::SYNC_ANON ist kein Publishable key (sb_publishable_…)."; exit 1; }
+          grep -q 'const SYNC_URL = "", SYNC_ANON = "";' index.html || { echo "::error::Platzhalter const SYNC_URL = \"\", SYNC_ANON = \"\"; fehlt in index.html"; exit 1; }
+          sed -i "s|const SYNC_URL = \"\", SYNC_ANON = \"\";|const SYNC_URL = \"$SYNC_URL\", SYNC_ANON = \"$SYNC_ANON\";|" index.html
+          grep -q "const SYNC_URL = \"$SYNC_URL\", SYNC_ANON = \"$SYNC_ANON\";" index.html
+          echo "Sync-Projekt eingetragen."
       # Versionskennung = Prüfsumme der index.html. Ändert sich nur, wenn sich die App wirklich ändert
       # (README- oder Skript-Commits lösen also keinen „Neue Version“-Hinweis aus).
       - name: Versionskennung setzen

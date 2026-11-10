@@ -4569,7 +4569,7 @@ INSERT INTO Konto VALUES (1,'Weingut Becker',1500.00),(2,'Klinik am Rhein',320.0
   const hash = (s) => { let h = 2166136261; for (const c of String(s)) h = Math.imul(h ^ c.charCodeAt(0), 16777619); return h >>> 0; };
 
   // ---- Zustand
-  const fresh = () => ({ v: 1, earned: 0, xp: 0, level: 1, federn: 300, tickets: 1, combo: 0, best: 0, lastLogin: null, loginClaimed: null, loginStreak: 0, calIdx: 0, calRound: 1, today: null, quests: null, owned: {}, equip: {}, char: "rabe", banner: "rabe", boosts: { xp2: 0, shield: 0 }, xp2Left: 0, shieldOn: false, pity: {}, hist: [], pulls: 0, tab: "quests" });
+  const fresh = () => ({ v: 1, earned: 0, xp: 0, level: 1, federn: 300, tickets: 1, combo: 0, best: 0, lastLogin: null, loginClaimed: null, loginStreak: 0, calIdx: 0, calRound: 1, today: null, quests: null, owned: {}, equip: {}, char: "rabe", banner: "rabe", boosts: { xp2: 0, shield: 0 }, xp2Left: 0, shieldOn: false, pity: {}, hist: [], pulls: 0, tab: "quests" }); // G.lookAt (erst beim ersten Wechsel gesetzt): Zeitpunkt der letzten Wahl von Figur/Ausrüstung, für den Abgleich zwischen Geräten
   let G = fresh(), ready = false;
   const ensure = () => { if (!ready) { ready = true; load(); } };
   function fix() {
@@ -4767,9 +4767,10 @@ INSERT INTO Konto VALUES (1,'Weingut Becker',1500.00),(2,'Klinik am Rhein',320.0
       else if (d.gmPull) pull(+d.gmPull);
       else if (d.gmInfo) showInfo(d.gmInfo);
       else if (d.gmBanner) { G.banner = d.gmBanner; save(); render(); }
-      else if (d.gmChar) { G.char = d.gmChar; save(); render(); }
-      else if (d.gmEq) { const it = IT[d.gmEq]; if (!it || !G.owned[it.id]) return; G.equip[it.char][it.slot] = it.id; save(); render(); }
+      else if (d.gmChar) { G.char = d.gmChar; G.lookAt = Date.now(); save(); render(); }
+      else if (d.gmEq) { const it = IT[d.gmEq]; if (!it || !G.owned[it.id]) return; G.equip[it.char][it.slot] = it.id; G.lookAt = Date.now(); save(); render(); }
       else if (d.gmUse) { const id = d.gmUse; if (G.boosts[id] < 1) return; G.boosts[id]--; if (id === "xp2") G.xp2Left = 10; else G.shieldOn = true; save(); toast(`${IT[id].icon} ${IT[id].name} aktiviert`); render(); }
+      if (d.gmClaim || d.gmChest !== undefined || d.gmPull || d.gmChar || d.gmEq || d.gmUse) { try { syncSoon(3000); } catch (x) {} } // Belohnungen auch ohne Lernen abgleichen
     };
     return true;
   }
@@ -4778,14 +4779,14 @@ INSERT INTO Konto VALUES (1,'Weingut Becker',1500.00),(2,'Klinik am Rhein',320.0
   function pack() {
     const own = {}; Object.keys(G.owned).forEach((id) => { const it = IT[id]; if (it && it.rar !== "S") (own[it.char] = own[it.char] || []).push(it.art); });
     const eq = {}; CHARS.forEach((c) => { eq[c] = SLOTS.map(([s]) => (IT[G.equip[c][s]] || {}).art || "").join("."); });
-    return { v: 1, x: G.earned, l: G.level, p: G.xp, f: G.federn, t: G.tickets, o: Object.fromEntries(Object.entries(own).map(([c, l]) => [c, l.join(".")])), e: eq, c: G.char, b: [G.boosts.xp2, G.boosts.shield], y: G.pity, n: G.pulls, s: [G.loginStreak, G.lastLogin, G.calIdx, G.calRound, G.best] };
+    return { v: 1, x: G.earned, l: G.level, p: G.xp, f: G.federn, t: G.tickets, o: Object.fromEntries(Object.entries(own).map(([c, l]) => [c, l.join(".")])), e: eq, c: G.char, b: [G.boosts.xp2, G.boosts.shield], y: G.pity, n: G.pulls, s: [G.loginStreak, G.lastLogin, G.calIdx, G.calRound, G.best], a: G.lookAt || 0 };
   }
   function unpack(p) {
     if (!p || typeof p !== "object") return null;
     if (p.owned) return Object.assign(fresh(), p); // ganze Sicherung
     const g = fresh(), s = p.s || [];
     Object.assign(g, { earned: +p.x || 0, level: +p.l || 1, xp: +p.p || 0, federn: +p.f || 0, tickets: +p.t || 0, char: p.c || "rabe", pity: p.y || {}, pulls: +p.n || 0, loginStreak: +s[0] || 0, lastLogin: s[1] || null, calIdx: +s[2] || 0, calRound: +s[3] || 1, best: +s[4] || 0 });
-    g.boosts = { xp2: +(p.b || [])[0] || 0, shield: +(p.b || [])[1] || 0 };
+    g.boosts = { xp2: +(p.b || [])[0] || 0, shield: +(p.b || [])[1] || 0 }; if (+p.a) g.lookAt = +p.a;
     Object.entries(p.o || {}).forEach(([c, l]) => String(l).split(".").forEach((a) => { if (IT[c + "-" + a]) g.owned[c + "-" + a] = 1; }));
     Object.entries(p.e || {}).forEach(([c, l]) => { if (!ANIMALS[c]) return; const arts = String(l).split("."); g.equip[c] = baseEquip(c); SLOTS.forEach(([sl], i) => { const id = c + "-" + arts[i]; if (arts[i] && IT[id] && IT[id].slot === sl) g.equip[c][sl] = id; }); });
     return g;
@@ -4794,12 +4795,19 @@ INSERT INTO Konto VALUES (1,'Weingut Becker',1500.00),(2,'Klinik am Rhein',320.0
     const inc = unpack(p); if (!inc) return;
     Object.keys(inc.owned || {}).forEach((id) => { if (IT[id]) G.owned[id] = 1; });           // Skins: Vereinigung
     G.boosts.xp2 = Math.max(G.boosts.xp2, +inc.boosts.xp2 || 0); G.boosts.shield = Math.max(G.boosts.shield, +inc.boosts.shield || 0);
-    if ((+inc.earned || 0) > G.earned) {                                                        // Fortschritt: der weiter fortgeschrittene Stand
+    const ahead = (+inc.earned || 0) > G.earned, incA = +inc.lookAt || 0, myA = +G.lookAt || 0;
+    if (ahead) {                                                                                 // Fortschritt: der weiter fortgeschrittene Stand
       ["earned", "xp", "level", "federn", "tickets", "pulls", "best", "loginStreak", "lastLogin", "calIdx", "calRound"].forEach((k) => { if (inc[k] != null) G[k] = inc[k]; });
       if (inc.pity) G.pity = inc.pity;
-      if (inc.char && ANIMALS[inc.char]) G.char = inc.char;
     }
-    CHARS.forEach((c) => { const ie = inc.equip && inc.equip[c], base = baseEquip(c); if (ie && SLOTS.every(([s]) => G.equip[c][s] === base[s])) SLOTS.forEach(([s]) => { if (G.owned[ie[s]]) G.equip[c][s] = ie[s]; }); });
+    if (incA > myA) {                                                                            // Figur + Ausrüstung: die zuletzt getroffene Wahl gilt auf allen Geräten
+      if (inc.char && ANIMALS[inc.char]) G.char = inc.char;
+      CHARS.forEach((c) => { const ie = inc.equip && inc.equip[c]; if (ie) SLOTS.forEach(([s]) => { const it = IT[ie[s]]; if (it && it.char === c && it.slot === s && G.owned[it.id]) G.equip[c][s] = it.id; }); });
+      G.lookAt = incA;
+    } else if (!incA && !myA) {                                                                  // ältere Stände ohne Zeitpunkt: bisheriges Verhalten
+      if (ahead && inc.char && ANIMALS[inc.char]) G.char = inc.char;
+      CHARS.forEach((c) => { const ie = inc.equip && inc.equip[c], base = baseEquip(c); if (ie && SLOTS.every(([s]) => G.equip[c][s] === base[s])) SLOTS.forEach(([s]) => { if (G.owned[ie[s]]) G.equip[c][s] = ie[s]; }); });
+    }
     fix(); save();
   }
 

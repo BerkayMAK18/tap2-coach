@@ -3703,7 +3703,7 @@ INSERT INTO Konto VALUES (1,'Weingut Becker',1500.00),(2,'Klinik am Rhein',320.0
       }
       if (!done) throw new Error("Abgleich gerade nicht möglich, versuche es gleich noch einmal.");
       const cur = syncGet(); if (!cur || cur.key !== cfg.key) return; // inzwischen getrennt
-      cur.rev = cfg.rev; cur.at = Date.now(); cur.ev = evMerge(cur.ev, ev); syncSet(cur);
+      cur.rev = cfg.rev; cur.at = Date.now(); cur.ev = evMerge(cur.ev, ev); cur.grp = id.slice(0, 4).toUpperCase(); syncSet(cur);
       SY.msg = "";
     } catch (e) {
       SY.err = e && e.name === "AbortError" ? "Der Server antwortet nicht. Dein Stand ist hier sicher gespeichert." : e && e.name === "OperationError" ? "Der Stand in der Cloud lässt sich mit diesem Schlüssel nicht öffnen." : "Abgleich fehlgeschlagen: " + ((e && e.message) || "unbekannt") + ". Dein Stand ist hier sicher gespeichert.";
@@ -3765,12 +3765,12 @@ INSERT INTO Konto VALUES (1,'Weingut Becker',1500.00),(2,'Klinik am Rhein',320.0
     const enter = `<details class="tx-paste" ${SY.inErr || !cfg ? "open" : ""}><summary class="small">${cfg ? "Mit einem anderen Code verbinden" : "Code vom anderen Gerät eingeben"}</summary><div class="row sync-row"><input type="text" id="sy-in" placeholder="z. B. K7P-4QX" autocomplete="off" autocapitalize="characters" spellcheck="false" maxlength="48"><button type="button" class="btn small" id="sy-go">Verbinden</button></div>${SY.inErr ? `<p class="tiny ${/geprüft/.test(SY.inErr) ? "muted" : "warn-text"}" id="sy-inerr">${esc(SY.inErr)}</p>` : ""}<p class="tiny muted">Installierte iPhone-App: Den Code hier in der App eintippen – der QR-Code öffnet Safari, und die App hat einen eigenen Speicher.</p></details>`;
     let body;
     if (!conf) body = "";
-    else if (!cfg) body = `<p class="small muted" style="margin-top:4px">Lerne am Laptop und am Handy mit demselben Stand – ohne Konto. Einmal verbinden, danach gleicht sich alles automatisch ab.</p>${msg}${ask}${offer}<div class="row" style="margin-top:12px"><button type="button" class="btn small primary" id="sy-on" ${SY.busy ? "disabled" : ""}>${ic("layers", "ic xs")} Sync einschalten</button></div>${enter}`;
+    else if (!cfg) body = `<p class="small muted" style="margin-top:4px">Lerne am Laptop und am Handy mit demselben Stand – ohne Konto. Einmal verbinden, danach gleicht sich alles automatisch ab.</p><p class="tiny muted">Ist schon ein anderes Gerät verbunden? Dann hier nicht neu einschalten, sondern dort „Gerät hinzufügen“ tippen und unten den Code eingeben.</p>${msg}${ask}${offer}<div class="row" style="margin-top:12px"><button type="button" class="btn small primary" id="sy-on" ${SY.busy ? "disabled" : ""}>${ic("layers", "ic xs")} Sync einschalten</button></div>${enter}`;
     else {
-      const st = SY.busy ? `<span class="small muted" id="sy-st">Gleicht ab …</span>` : SY.err ? `<span class="small warn-text" id="sy-st">${esc(SY.err)}</span>` : `<span class="app-ok" id="sy-st">${ic("check", "ic sm")} Verbunden${cfg.at ? " · abgeglichen " + syncTime(cfg.at) : ""}</span>`;
+      const st = SY.busy ? `<span class="small muted" id="sy-st">Gleicht ab …</span>` : SY.err ? `<span class="small warn-text" id="sy-st">${esc(SY.err)}</span>` : `<span class="app-ok" id="sy-st">${ic("check", "ic sm")} Verbunden${cfg.grp ? " · Gruppe " + esc(cfg.grp) : ""}${cfg.at ? " · abgeglichen " + syncTime(cfg.at) : ""}</span>`;
       const p = SY.pair, pair = !p ? "" : p.busy ? `<p class="small muted">Code wird erstellt …</p>` : p.err ? `<p class="small warn-text">${esc(p.err)}</p>`
         : p.until < Date.now() ? `<p class="small muted">Der Code ist abgelaufen.</p>`
-        : `<div class="tx-out" style="margin-top:12px">${p.svg ? `<div class="qr-wrap">${p.svg}</div>` : ""}<div class="tx-act"><span class="small muted">Code für das andere Gerät</span><b class="sync-code">${codeFmt(p.code)}</b><p class="small">Auf dem anderen Gerät: <b>Einstellungen → Geräte synchronisieren → Code eingeben</b>, oder den QR-Code mit der Kamera scannen.</p><p class="tiny muted">Gültig bis ${syncTime(p.until)} Uhr.</p></div></div>`;
+        : `<div class="tx-out" style="margin-top:12px">${p.svg ? `<div class="qr-wrap">${p.svg}</div>` : ""}<div class="tx-act"><span class="small muted">Code für das andere Gerät</span><b class="sync-code">${codeFmt(p.code)}</b><p class="small">Auf dem anderen Gerät: <b>Einstellungen → Geräte synchronisieren → Code eingeben</b>, oder den QR-Code mit der Kamera scannen.</p><p class="tiny muted">Gültig bis ${syncTime(p.until)} Uhr. Der Code dient nur zum Verbinden und ist jedes Mal neu – dein Sync-Schlüssel und die Gruppe${cfg.grp ? " " + esc(cfg.grp) : ""} bleiben gleich.</p></div></div>`;
       body = `<div class="row" style="margin-top:10px">${st}</div>${msg}${ask}
         <div class="row" style="margin-top:12px"><button type="button" class="btn small primary" id="sy-pair">${ic("layers", "ic xs")} Gerät hinzufügen</button><button type="button" class="btn small" id="sy-now" ${SY.busy ? "disabled" : ""}>${ic("again", "ic xs")} Jetzt abgleichen</button></div>${pair}
         <details class="tx-paste"><summary class="small">Schlüssel &amp; Einstellungen</summary>
@@ -3877,7 +3877,7 @@ INSERT INTO Konto VALUES (1,'Weingut Becker',1500.00),(2,'Klinik am Rhein',320.0
         ${UI.confirm === "reset" && syncGet() ? `<p class="tiny muted">Dieses Gerät wird dabei vom Sync getrennt. Der Stand in der Cloud und auf deinen anderen Geräten bleibt.</p>` : ""}
         <p class="small ${storeOk ? "muted" : "warn-text"}" id="d-msg">${storeOk ? `Zuletzt gespeichert: ${Object.keys(S.q).length} Fragen bearbeitet, ${S.runs.length} Prüfungen.` : "Dieser Browser erlaubt gerade kein Speichern, z. B. in einem privaten Fenster. Lade dir zwischendurch eine Sicherung herunter."}</p>
       </section>
-      <section class="card"><h3>Hilfe</h3><div class="row" style="margin-top:8px"><button type="button" class="btn small" data-go2="tutorial">${ic("map", "ic xs")} Tutorial öffnen</button><a class="btn small ghost" href="https://github.com/${REPO}/issues" target="_blank" rel="noopener">Gemeldete Fehler ansehen</a></div></section>`;
+      <section class="card"><h3>Hilfe</h3><p class="tiny muted">App-Version ${esc(BUILD)}</p><div class="row" style="margin-top:8px"><button type="button" class="btn small" data-go2="tutorial">${ic("map", "ic xs")} Tutorial öffnen</button><a class="btn small ghost" href="https://github.com/${REPO}/issues" target="_blank" rel="noopener">Gemeldete Fehler ansehen</a></div></section>`;
     el.querySelectorAll("[data-theme-set]").forEach((b) => b.onclick = () => { setTheme(b.dataset.themeSet); render(); });
     bindTx(el); bindSync();
     el.querySelectorAll("[data-go2]").forEach((b) => b.onclick = () => navTo(b.dataset.go2));
@@ -4441,8 +4441,8 @@ INSERT INTO Konto VALUES (1,'Weingut Becker',1500.00),(2,'Klinik am Rhein',320.0
     muschelkette: `<path d="M206 298 C226 346 298 346 318 296" fill="none" stroke="#8A6440" stroke-width="4"/>` + [[228, 330, 12], [262, 344, 17], [296, 330, 12]].map(([x, y, r]) => `<path d="M${x - r} ${y} Q${x} ${y - r * 2.2} ${x + r} ${y} Z" fill="#FFB4A2" stroke="#E07A5F" stroke-width="3"/><path d="M${x} ${y} L${x} ${y - r * 1.4} M${x} ${y} L${x - r * .6} ${y - r} M${x} ${y} L${x + r * .6} ${y - r}" stroke="#E07A5F" stroke-width="2"/>`).join(""),
     strickschal: `<path d="M190 290 C228 318 298 318 330 288 L336 318 C298 348 226 348 186 320 Z" fill="#3B6FE0"/><path d="M292 320 L310 400 L282 404 L268 328 Z" fill="#3B6FE0"/><path d="M220 314 l6 24 M250 320 l3 24 M282 318 l-2 24 M276 352 l22 -4 M280 374 l22 -4" stroke="#F6F5F3" stroke-width="7"/><path d="M284 404 l-2 12 M294 402 l0 12 M304 400 l2 12" stroke="#3B6FE0" stroke-width="4" stroke-linecap="round"/>`,
     fischkette: `<path d="M206 296 C222 344 300 344 316 294" fill="none" stroke="#5B6470" stroke-width="4"/><path d="M240 354 C252 340 278 340 290 354 C278 368 252 368 240 354Z" fill="#7FB3D5" stroke="#3B6F96" stroke-width="3"/><path d="M290 354 l16 -12 v24z" fill="#7FB3D5" stroke="#3B6F96" stroke-width="3" stroke-linejoin="round"/><circle cx="251" cy="351" r="3.5" fill="#14202A"/>`,
-    fellkragen: arc(14, (x, y, i) => `<circle cx="${x}" cy="${y}" r="16" fill="${i % 3 ? "#F1E3CF" : "#E2CFAF"}" stroke="#CDB48E" stroke-width="2"/>`),
-    polarmantel: cape("#E8F6FF", "#BDEFFF", `<circle cx="262" cy="320" r="12" fill="#7B61FF" stroke="#fff" stroke-width="3"/>`) + [[160, 420], [190, 370], [380, 410], [356, 360], [400, 452], [150, 460]].map(([x, y]) => star(x, y, 10, "#5BC0EB")).join(""),
+    fellkragen: arc(14, (x, y, i) => `<circle cx="${x}" cy="${y}" r="16" fill="${i % 3 ? "#B98A5E" : "#A47448"}" stroke="#7E5532" stroke-width="2"/>`),
+    polarmantel: cape("#1F5FAE", "#1F5FAE", "") + [[158, 430], [188, 372], [384, 418], [356, 362], [404, 458]].map(([x, y]) => star(x, y, 10, "#CFEFFF")).join("") + arc(14, (x, y, i) => `<circle cx="${x}" cy="${y}" r="15" fill="${i % 3 ? "#F7FBFF" : "#DDEFFB"}" stroke="#B9D9EE" stroke-width="2"/>`) + `<circle cx="262" cy="330" r="13" fill="#7B61FF" stroke="#fff" stroke-width="3"/>`,
     schatzkette: arc(14, (x, y) => `<circle cx="${x}" cy="${y}" r="6" fill="none" stroke="#F2B21B" stroke-width="4"/>`) + `<path d="M262 344 l24 18 -24 32 -24 -32z" fill="#E2468A" stroke="#F2B21B" stroke-width="6" stroke-linejoin="round"/><path d="M254 360 l8 -8" stroke="#fff" stroke-width="4" stroke-linecap="round"/>`
   };
   const BG = {
@@ -4484,15 +4484,15 @@ INSERT INTO Konto VALUES (1,'Weingut Becker',1500.00),(2,'Klinik am Rhein',320.0
     katze: { name: "Katze", banner: "Katzen-Kollektion", base: "rosa", a: { hat: [270, 160, -6, .95], eye: [232, 218, .95], neck: [262, 318, 1] },
       body: `<path d="M140 470 C136 380 180 316 260 306 C344 296 400 360 406 470 Z" fill="#E8863A"/><path d="M182 470 C182 400 212 346 252 332 C264 362 264 420 258 470 Z" fill="#FFE3C2"/><path d="M332 340 q20 30 16 70 M362 372 q14 26 12 60" stroke="#C4621F" stroke-width="10" fill="none" stroke-linecap="round"/><path d="M286 172 L332 80 L354 194 Z" fill="#D9722A"/><ellipse cx="268" cy="234" rx="92" ry="84" fill="#E8863A"/><path d="M204 180 L222 84 L278 158 Z" fill="#E8863A"/><path d="M216 168 L226 110 L258 156 Z" fill="#F7A8B8"/><path d="M302 162 q10 20 4 40 M328 178 q8 18 2 36 M278 158 q6 14 2 30" stroke="#C4621F" stroke-width="8" fill="none" stroke-linecap="round"/><ellipse cx="204" cy="264" rx="42" ry="30" fill="#FFE3C2"/><path d="M196 236 C162 236 150 258 166 272 C178 280 198 278 210 268 Z" fill="#FFE3C2"/><path d="M158 248 l16 -2 -7 11z" fill="#E86A8A"/><path d="M168 262 q6 10 18 6" stroke="#8A4A1E" stroke-width="3" fill="none"/><path d="M182 262 L110 250 M184 268 L112 274 M186 274 L120 294" stroke="#FFF" stroke-width="3" opacity=".9"/>`,
       eye: `<ellipse cx="232" cy="218" rx="15" ry="13" fill="#B6E36B"/><ellipse cx="230" cy="218" rx="4" ry="11" fill="#14202A"/>` },
-    hund: { name: "Hund", banner: "Hunde-Kollektion", base: "sand", a: { hat: [276, 148, -6, .95], eye: [232, 206, .9], neck: [264, 316, 1] },
-      body: `<path d="M140 470 C136 380 182 314 262 304 C346 294 402 360 408 470 Z" fill="#C98B52"/><ellipse cx="352" cy="404" rx="38" ry="48" fill="#A86E3C"/><path d="M184 470 C184 404 212 346 252 332 C266 366 266 424 258 470 Z" fill="#F3DDBF"/><path d="M190 218 C190 160 236 136 282 136 C338 136 362 182 358 236 C354 290 312 314 268 314 C230 314 200 296 192 270 Z" fill="#C98B52"/><path d="M212 220 C170 218 116 228 100 250 C96 270 112 286 140 288 C176 290 210 282 226 270 Z" fill="#E7C49A"/><ellipse cx="104" cy="250" rx="17" ry="13" fill="#2B2D42"/><path d="M118 280 q30 8 72 -4" stroke="#7A4E2A" stroke-width="4" fill="none" stroke-linecap="round"/><path d="M296 160 C342 150 366 192 354 252 C348 282 318 292 306 272 C296 242 286 200 296 160 Z" fill="#7A4E2A"/>`,
-      eye: `<circle cx="232" cy="206" r="13" fill="#2B1A10"/><circle cx="228" cy="201" r="4" fill="#fff"/>` },
+    hund: { name: "Hund", banner: "Hunde-Kollektion", base: "sand", a: { hat: [278, 146, -6, 0.95], eye: [238, 220, 0.9], neck: [262, 318, 1] },
+      body: `<path d="M140 470 C136 380 182 316 262 306 C346 296 402 360 408 470 Z" fill="#C88A50"/><path d="M318 312 C368 330 400 392 408 470 L372 470 C368 410 348 362 306 336 Z" fill="#B3753F"/><path d="M166 470 C160 408 182 352 220 326 C250 312 280 326 286 352 C298 398 290 438 276 470 Z" fill="#F1DCBC"/><path d="M192 216 C192 160 236 136 282 136 C338 136 364 182 360 236 C356 290 314 316 270 316 C232 316 202 298 194 270 Z" fill="#C88A50"/><path d="M214 214 C172 212 120 222 102 246 C96 268 112 286 142 288 C178 290 212 282 228 268 Z" fill="#F1DCBC"/><ellipse cx="106" cy="246" rx="17" ry="13" fill="#2A2522"/><ellipse cx="100" cy="242" rx="5" ry="3.5" fill="#fff" opacity=".35"/><path d="M120 280 q30 8 70 -4" stroke="#7A4E2A" stroke-width="4" fill="none" stroke-linecap="round"/><path d="M300 158 C346 148 372 190 360 252 C354 284 322 296 308 274 C296 244 288 200 300 158 Z" fill="#7B4A2B"/>`,
+      eye: `<circle cx="238" cy="220" r="13" fill="#2B1A10"/><circle cx="234" cy="215" r="4" fill="#fff"/>` },
     maus: { name: "Maus", banner: "Mäuse-Kollektion", base: "grau", a: { hat: [262, 170, -8, .85], eye: [232, 226, .85], neck: [262, 322, .95] },
       body: `<path d="M400 440 C452 430 474 380 444 356" stroke="#F4B6C2" stroke-width="10" fill="none" stroke-linecap="round"/><path d="M146 470 C142 384 186 322 262 312 C342 302 396 364 402 470 Z" fill="#A9B2BC"/><path d="M188 470 C188 410 214 352 252 338 C264 372 264 426 258 470 Z" fill="#E6EAEE"/><circle cx="314" cy="148" r="70" fill="#A9B2BC"/><circle cx="316" cy="152" r="47" fill="#F4B6C2"/><path d="M186 236 C186 180 228 160 270 160 C324 160 350 196 348 244 C346 292 308 314 266 314 C226 314 196 296 188 270 Z" fill="#A9B2BC"/><path d="M208 224 C170 230 136 246 116 262 C140 276 178 282 216 276 Z" fill="#B9C1CA"/><circle cx="117" cy="262" r="11" fill="#F28CA8"/><path d="M150 262 L94 244 M152 268 L92 270 M154 274 L98 296" stroke="#5B6470" stroke-width="3"/>`,
       eye: `<circle cx="232" cy="226" r="12" fill="#14202A"/><circle cx="228" cy="222" r="4" fill="#fff"/>` },
-    pinguin: { name: "Pinguin", banner: "Pinguin-Kollektion", base: "eisblau", a: { hat: [266, 152, -6, .95], eye: [228, 226, .85], neck: [262, 318, 1] },
-      body: `<path d="M150 470 C140 380 180 300 262 292 C350 284 404 360 404 470 Z" fill="#1F2A36"/><path d="M176 470 C170 400 196 340 240 318 C268 342 282 402 278 470 Z" fill="#F5F7FA"/><path d="M330 340 C368 362 386 412 382 458 C360 432 340 402 322 372 Z" fill="#141C25"/><path d="M180 236 C180 172 224 144 270 144 C326 144 354 186 350 240 C346 292 306 316 262 316 C216 316 182 290 180 236 Z" fill="#1F2A36"/><path d="M198 238 C196 208 220 196 246 204 C262 228 256 272 234 298 C210 290 198 266 198 238Z" fill="#F5F7FA"/><path d="M252 272 C272 274 288 294 282 316 C268 304 256 292 246 284 Z" fill="#F6B73C"/><path d="M202 236 C176 238 150 248 130 260 C156 266 184 266 206 258 Z" fill="#F28C28"/><path d="M132 260 C158 266 186 266 206 258 L204 268 C182 276 156 274 132 260Z" fill="#D9731A"/>`,
-      eye: `<circle cx="228" cy="226" r="11" fill="#14202A"/><circle cx="224" cy="222" r="3.5" fill="#fff"/>` }
+    pinguin: { name: "Pinguin", banner: "Pinguin-Kollektion", base: "eisblau", a: { hat: [268, 154, -6, 0.95], eye: [236, 214, 0.85], neck: [262, 320, 1] },
+      body: `<path d="M148 470 C138 380 178 300 262 292 C352 284 406 362 406 470 Z" fill="#22303F"/><path d="M168 470 C160 400 186 338 236 314 C276 330 296 404 290 470 Z" fill="#F6F8FB"/><path d="M178 234 C178 170 222 142 270 142 C328 142 356 186 352 240 C348 294 306 318 262 318 C214 318 180 292 178 234 Z" fill="#22303F"/><path d="M194 236 C190 196 220 176 250 180 C286 186 302 216 296 252 C292 276 278 292 256 298 C228 304 206 290 198 268 C195 258 194 248 194 236 Z" fill="#F6F8FB"/><path d="M318 330 C362 346 392 400 388 462 C384 470 374 470 370 462 C352 420 332 388 304 362 C298 346 302 332 318 330 Z" fill="#3E556E"/><path d="M322 338 C356 354 380 398 382 448" stroke="#5E7A96" stroke-width="5" fill="none" stroke-linecap="round"/><path d="M206 230 C180 232 152 242 126 258 C156 260 184 258 208 250 Z" fill="#F59A2E"/><path d="M128 258 C156 261 184 259 208 251 L206 262 C182 270 154 268 128 258 Z" fill="#D46E17"/>`,
+      eye: `<circle cx="236" cy="214" r="11" fill="#14202A"/><circle cx="232" cy="210" r="3.5" fill="#fff"/>` }
   };
   const CHARS = Object.keys(ANIMALS);
 
@@ -4795,7 +4795,8 @@ INSERT INTO Konto VALUES (1,'Weingut Becker',1500.00),(2,'Klinik am Rhein',320.0
     const inc = unpack(p); if (!inc) return;
     Object.keys(inc.owned || {}).forEach((id) => { if (IT[id]) G.owned[id] = 1; });           // Skins: Vereinigung
     G.boosts.xp2 = Math.max(G.boosts.xp2, +inc.boosts.xp2 || 0); G.boosts.shield = Math.max(G.boosts.shield, +inc.boosts.shield || 0);
-    const ahead = (+inc.earned || 0) > G.earned, incA = +inc.lookAt || 0, myA = +G.lookAt || 0;
+    const ahead = (+inc.earned || 0) > G.earned, tie = (+inc.earned || 0) === G.earned, incA = +inc.lookAt || 0, myA = +G.lookAt || 0;
+    const lookKey = (g) => g.char + "|" + CHARS.map((c) => SLOTS.map(([s]) => ((g.equip || {})[c] || {})[s] || "").join(",")).join(";");
     if (ahead) {                                                                                 // Fortschritt: der weiter fortgeschrittene Stand
       ["earned", "xp", "level", "federn", "tickets", "pulls", "best", "loginStreak", "lastLogin", "calIdx", "calRound"].forEach((k) => { if (inc[k] != null) G[k] = inc[k]; });
       if (inc.pity) G.pity = inc.pity;
@@ -4804,9 +4805,17 @@ INSERT INTO Konto VALUES (1,'Weingut Becker',1500.00),(2,'Klinik am Rhein',320.0
       if (inc.char && ANIMALS[inc.char]) G.char = inc.char;
       CHARS.forEach((c) => { const ie = inc.equip && inc.equip[c]; if (ie) SLOTS.forEach(([s]) => { const it = IT[ie[s]]; if (it && it.char === c && it.slot === s && G.owned[it.id]) G.equip[c][s] = it.id; }); });
       G.lookAt = incA;
-    } else if (!incA && !myA) {                                                                  // ältere Stände ohne Zeitpunkt: bisheriges Verhalten
-      if (ahead && inc.char && ANIMALS[inc.char]) G.char = inc.char;
-      CHARS.forEach((c) => { const ie = inc.equip && inc.equip[c], base = baseEquip(c); if (ie && SLOTS.every(([s]) => G.equip[c][s] === base[s])) SLOTS.forEach(([s]) => { if (G.owned[ie[s]]) G.equip[c][s] = ie[s]; }); });
+    } else if (!incA && !myA) {                                                                  // Stände ohne Zeitpunkt (vor dem Update gewählt):
+      // Der weiter fortgeschrittene Stand gibt Figur und Ausrüstung vor (bei Gleichstand eine feste Regel); wo er nur die Grundausstattung trägt, gilt die des anderen.
+      // So landen beide Geräte nach einem Abgleich hin und zurück beim selben Aussehen.
+      // Bei gleichem Stand entscheidet eine feste Regel (Vergleich des Aussehens), die beide Geräte gleich anwenden.
+      const lead = ahead || (tie && lookKey(inc) > lookKey(G));
+      if (lead && inc.char && ANIMALS[inc.char]) G.char = inc.char;
+      CHARS.forEach((c) => {
+        const ie = inc.equip && inc.equip[c], base = baseEquip(c); if (!ie) return;
+        const incBase = SLOTS.every(([s]) => !ie[s] || ie[s] === base[s]), myBase = SLOTS.every(([s]) => G.equip[c][s] === base[s]);
+        if ((lead && !incBase) || myBase) SLOTS.forEach(([s]) => { const it = IT[ie[s]]; if (it && it.char === c && it.slot === s && G.owned[it.id]) G.equip[c][s] = it.id; });
+      });
     }
     fix(); save();
   }

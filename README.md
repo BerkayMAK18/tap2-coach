@@ -19,7 +19,7 @@ Lern-App für die Abschlussprüfung Teil 2 (Fachinformatiker/in Anwendungsentwic
 - Code-Editor ([CodeMirror](https://codemirror.net)), SQLite ([sql.js](https://github.com/sql-js/sql.js)) und QR-Code-Erzeugung ([qrcode-generator](https://github.com/kazuhikoarase/qrcode-generator)), alle MIT-Lizenz, liegen ebenfalls im Repo (`vendor/`).
 - Übertragungs-Links enthalten nur den Lernstand (keine Namen o. Ä.) und werden nirgends gespeichert.
 - **Geräte-Sync (freiwillig):** Wer ihn in den Einstellungen einschaltet, dessen Lernstand wird im Browser verschlüsselt (AES-GCM) und so bei Supabase abgelegt. Der Server kennt weder Namen noch E-Mail noch den Schlüssel, nur eine Prüfsumme davon. Der Stand auf dem Gerät bleibt immer erhalten; „Kopie in der Cloud löschen“ entfernt die Daten vom Server.
-- **Rangliste (freiwillig):** Wer unter Belohnungen → Rangliste einen Spitznamen wählt, erscheint mit Name, Level, XP und Figur für alle sichtbar. Sonst wird nichts übertragen. „Austragen“ löscht den Eintrag sofort.
+- **Rangliste (freiwillig):** Wer unter „Rangliste“ einen Spitznamen wählt, erscheint mit Name, Level, XP und Figur für alle sichtbar. Sonst wird nichts übertragen. „Austragen“ löscht den Eintrag sofort.
 - Schriften sind lokal eingebunden (SIL Open Font License), es gibt keine Verbindung zu Google.
 
 ## Fehler gefunden?
@@ -43,8 +43,8 @@ In jeder Lernfrage gibt es oben ein Fahnen-Symbol, in jeder Übungsaufgabe den L
 - **Timer:** Übungsaufgaben starten mit der Prüfungszeit, danach läuft der Timer ins Minus
 - **Lernrunden:** enthalten nur offene und fällige Fragen (höchstens 20). Unter Lernen gibt es für ausgewählte Themen eigene Runden nur mit Fehlern, fälligen oder neuen Fragen.
 - **Geräte synchronisieren:** Einstellungen → „Sync einschalten“, auf dem zweiten Gerät den Kurzcode eingeben oder den QR-Code scannen. Danach gleichen sich die Geräte selbst ab, ohne Konto.
-- **Rangliste:** Belohnungen → Rangliste → Spitzname wählen. Sortiert nach gesammelten XP; verbundene Geräte teilen sich einen Eintrag.
-- **Belohnungen:** Figur oben rechts – XP und Level fürs Lernen (Serien ×1,5 bis ×3), Tagesquests, Login-Kalender, Schatzkammer mit 5 Tieren à 40 Skins und Garderobe. Federn gibt es nur durchs Lernen, kein Echtgeld.
+- **Rangliste:** im Menü unter „Rangliste“ einen Spitznamen wählen. Sortiert nach gesammelten XP; verbundene Geräte teilen sich einen Eintrag.
+- **Belohnungen:** Figur oben rechts – XP und Level nur für sicher richtige Antworten (Serien ×1,5 bis ×3; „unsicher“ oder „geraten“ gibt nichts und beendet die Serie), täglich 5 Quests, Login-Kalender, Schatzkammer mit 5 Tieren à 40 Skins und Garderobe. Federn gibt es nur durchs Lernen, kein Echtgeld.
 
 ## Inhalte
 

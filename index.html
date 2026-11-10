@@ -866,6 +866,7 @@ a.iconbtn { color: var(--ink); text-decoration: none; }
 .gm-toasts { position: fixed; z-index: 95; left: 50%; top: 76px; transform: translateX(-50%); display: grid; gap: 8px; width: min(420px, calc(100% - 32px)); pointer-events: none; }
 .gm-toast { background: var(--ink); color: var(--bg); border-radius: 14px; padding: 10px 14px; font-weight: 700; box-shadow: var(--sh-2); animation: gm-in 0.3s, gm-out 0.4s 2.1s forwards; }
 @keyframes gm-in { from { transform: translateY(-10px); opacity: 0; } } @keyframes gm-out { to { opacity: 0; transform: translateY(-10px); } }
+.gm-float.gm-float-off { opacity: .85; filter: grayscale(1); }
 .gm-float { position: fixed; z-index: 96; left: 50%; bottom: calc(110px + var(--nav-h)); transform: translateX(-50%); font-weight: 800; font-family: var(--display); color: var(--ok); background: var(--surface); padding: 6px 14px; border-radius: 999px; box-shadow: var(--sh-2); pointer-events: none; animation: gm-up 1.2s forwards; }
 @keyframes gm-up { 0% { opacity: 0; transform: translate(-50%, 8px); } 15% { opacity: 1; transform: translate(-50%, 0); } 100% { opacity: 0; transform: translate(-50%, -40px); } }
 .gm-confetti { position: fixed; z-index: 97; top: -10px; width: 9px; height: 14px; border-radius: 2px; pointer-events: none; animation: gm-fall 1.9s ease-in forwards; }
@@ -888,6 +889,7 @@ a.iconbtn { color: var(--ink); text-decoration: none; }
 .gm-lbgap { text-align: center; color: var(--muted); line-height: 1; }
 @media (max-width: 480px) { .gm-tabs { gap: 0; } .gm-tabs button { padding: 10px 7px; font-size: 0.88rem; } .gm-lbrow { grid-template-columns: 24px 40px minmax(0, 1fr) auto; gap: 8px; padding: 6px 8px; } .gm-lbfig svg { width: 40px; height: 40px; } }
 .gm-lbn .chip { vertical-align: 1px; }
+.gm-lbhead { display: flex; align-items: center; gap: 14px; }
 .gm-in { flex: 1; min-width: 160px; font: inherit; padding: 8px 10px; border-radius: var(--r-sm); border: 1.5px solid var(--line-2); background: var(--surface-2); color: var(--ink); }
 </style>
 </head>
@@ -899,6 +901,7 @@ a.iconbtn { color: var(--ink); text-decoration: none; }
     <button type="button" class="nav-i" data-view="lernen"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5a2 2 0 0 1 2-2h14v16H6a2 2 0 0 0-2 2V5z"/><path d="M4 19a2 2 0 0 1 2-2h14"/></svg><span>Lernen</span></button>
     <button type="button" class="nav-i" data-view="aufgaben"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20h4L19 9a2.8 2.8 0 0 0-4-4L4 16v4z"/><path d="M13.5 6.5l4 4"/></svg><span>Aufgaben</span></button>
     <button type="button" class="nav-i" data-view="pruefung"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l2.5 2.5"/><path d="M9 2h6"/></svg><span>Prüfung</span></button>
+    <button type="button" class="nav-i" data-view="rangliste"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 21h8"/><path d="M12 17v4"/><path d="M7 4h10v5a5 5 0 0 1-10 0V4z"/><path d="M17 5h3v2a3 3 0 0 1-3 3"/><path d="M7 5H4v2a3 3 0 0 0 3 3"/></svg><span>Rangliste</span></button>
     <button type="button" class="nav-i" data-view="tipps"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 18h6M10 21h4"/><path d="M12 3a6 6 0 0 0-3.5 10.9c.6.5 1 1.2 1 2V16h5v-.1c0-.8.4-1.5 1-2A6 6 0 0 0 12 3z"/></svg><span>Tipps</span></button>
   </nav>
   <div class="col">
@@ -917,6 +920,7 @@ a.iconbtn { color: var(--ink); text-decoration: none; }
       <section class="view" id="v-operatoren" hidden></section>
       <section class="view" id="v-plan" hidden></section>
       <section class="view" id="v-belohnungen" hidden></section>
+      <section class="view" id="v-rangliste" hidden></section>
     </main>
     <footer class="foot"><span>TAP2 Prüfungscoach · Dein Fortschritt wird lokal in diesem Browser gespeichert.</span></footer>
   </div>
@@ -2680,8 +2684,8 @@ CARDS_RAW.algo.push(
 
   // ---------- routing + shell
   let view = "start";
-  const VIEWS = ["start", "lernen", "aufgaben", "pruefung", "tipps", "einstellungen", "tutorial", "operatoren", "plan", "belohnungen"];
-  const VTITLE = { start: "Übersicht", lernen: "Lernen", aufgaben: "Aufgaben", pruefung: "Prüfung", tipps: "Tipps", einstellungen: "Einstellungen", tutorial: "So lernst du mit dem Coach", operatoren: "Operator-Trainer", plan: "Lernplan", belohnungen: "Belohnungen" };
+  const VIEWS = ["start", "lernen", "aufgaben", "pruefung", "tipps", "einstellungen", "tutorial", "operatoren", "plan", "belohnungen", "rangliste"];
+  const VTITLE = { start: "Übersicht", lernen: "Lernen", aufgaben: "Aufgaben", pruefung: "Prüfung", tipps: "Tipps", einstellungen: "Einstellungen", tutorial: "So lernst du mit dem Coach", operatoren: "Operator-Trainer", plan: "Lernplan", belohnungen: "Belohnungen", rangliste: "Rangliste" };
   const UI = { sess: null, topic: null, ttab: "theorie", tf: "alle", ueb: null, showSol: false, addQ: false, pk: { mode: "sim", teil: "t1" }, run: null, confirm: null, sel: [] };
   function go(v) {
     view = VIEWS.includes(v) ? v : "start";
@@ -2706,6 +2710,7 @@ CARDS_RAW.algo.push(
     $("#hud").innerHTML = `<button type="button" class="pill" data-go="start" title="Anteil der Fragen auf Grün, gelbe zählen halb">${ring(c.pct, 22, 4)}<span class="lbl">Prüfungsreife</span><b>${pctS(c.pct)}</b></button><span class="pill days">${ic("calendar")}<b>${Math.max(0, left)}</b><span class="lbl">${left === 1 ? "Tag" : "Tage"}</span></span>${gm("hudHTML") || ""}<button type="button" class="iconbtn hb" data-hud="search" aria-label="Fragen durchsuchen" title="Suchen (Taste /)">${ic("search")}</button><button type="button" class="iconbtn hb ${view === "einstellungen" ? "on" : ""}" data-go="einstellungen" aria-label="Einstellungen" title="Einstellungen">${ic("gear")}</button>`;
   }
   function rBelohnungen() { const el = $("#v-belohnungen"); if (!gm("view", el)) el.innerHTML = `<section class="card"><h3>Belohnungen sind gerade nicht verfügbar</h3><p class="small muted">Dein Lernstand ist davon nicht betroffen.</p></section>`; }
+  function rRangliste() { const el = $("#v-rangliste"); if (!gm("rangView", el)) el.innerHTML = `<section class="card"><h3>Die Rangliste ist gerade nicht verfügbar</h3><p class="small muted">Dein Lernstand ist davon nicht betroffen.</p></section>`; }
   function render() {
     VIEWS.forEach((v) => { $("#v-" + v).hidden = v !== view; });
     const navView = view === "operatoren" || view === "plan" ? "tipps" : view;
@@ -2713,7 +2718,7 @@ CARDS_RAW.algo.push(
     $("#page-title").textContent = VTITLE[view];
     document.body.classList.toggle("focus", !!(view === "lernen" && UI.sess) || !!(view === "pruefung" && UI.run && UI.run.phase === "write"));
     hud();
-    ({ start: rStart, lernen: rLernen, aufgaben: rUeb, pruefung: rPK, tipps: rTipps, einstellungen: rSettings, tutorial: rTutorial, operatoren: rOperatoren, plan: rPlan, belohnungen: rBelohnungen })[view]();
+    ({ start: rStart, lernen: rLernen, aufgaben: rUeb, pruefung: rPK, tipps: rTipps, einstellungen: rSettings, tutorial: rTutorial, operatoren: rOperatoren, plan: rPlan, belohnungen: rBelohnungen, rangliste: rRangliste })[view]();
     animRings($("#v-" + view));
   }
 
@@ -3132,14 +3137,14 @@ INSERT INTO Konto VALUES (1,'Weingut Becker',1500.00),(2,'Klinik am Rhein',320.0
     s.pick = i;
     const ok = i === q.right, [f, t] = answer(q.id, ok);
     s.res[q.id] = { ok, f, t }; s.last = null;
-    gm("answer", q, ok);
+    gm("answer", q, ok, false, f, t);
     keepSess(); render();
     const nx = $("#s-next"); if (nx) nx.focus({ preventScroll: true });
   }
   function reveal() { const s = UI.sess; s.rev = true; keepSess(); render(); const y = $("#s-yes"); if (y) y.focus({ preventScroll: true }); }
   function markGuess() { // Auswahlfrage richtig, aber geraten → morgen wieder, höchstens gelb
     const s = UI.sess, q = getQ(s.ids[s.i]); if (!q) return;
-    const r = S.q[q.id]; if (r && s.res[q.id] && s.res[q.id].ok) { r.b = 1; r.s = 1; r.d = addDays(today(), IV[1]); r.t = Date.now(); save(); s.res[q.id].t = 1; s.res[q.id].guess = true; }
+    const r = S.q[q.id]; if (r && s.res[q.id] && s.res[q.id].ok) { r.b = 1; r.s = 1; r.d = addDays(today(), IV[1]); r.t = Date.now(); save(); s.res[q.id].t = 1; s.res[q.id].guess = true; gm("guess", q); }
     sessNext();
   }
   function rateCard(ok, unsure) {
@@ -3147,7 +3152,7 @@ INSERT INTO Konto VALUES (1,'Weingut Becker',1500.00),(2,'Klinik am Rhein',320.0
     if (!q || !s.rev) return;
     const [f, t] = answer(q.id, ok, unsure);
     s.res[q.id] = { ok, f, t }; s.last = { ok, f, t, id: q.id };
-    gm("answer", q, ok);
+    gm("answer", q, ok, !!unsure, f, t);
     sessNext();
   }
   function toggleMark(id) { if (S.mark[id]) delete S.mark[id]; else S.mark[id] = 1; syncEv("m", id, !!S.mark[id]); save(); render(); }
@@ -4566,13 +4571,19 @@ INSERT INTO Konto VALUES (1,'Weingut Becker',1500.00),(2,'Klinik am Rhein',320.0
   // Skins nur anhängen, nie umbenennen – der Besitz hängt an den IDs.
   const RANKS = [[1, "Neuling"], [3, "Azubi"], [6, "Geselle"], [10, "Gelehrter"], [15, "Prüfungsprofi"], [20, "Großmeister"]];
   const CAL = [{ f: 50 }, { f: 80 }, { t: 1 }, { f: 100 }, { b: "xp2" }, { f: 150 }, { t: 3 }];
+  // Täglich 5 aus 10. Gezählt werden nur sicher richtige Antworten – keine Quest belohnt Fehler.
+  const QN = 5;
   const QPOOL = [
-    { id: "ans15", txt: "Beantworte 15 Fragen", goal: 15, key: "answered", f: 100, xp: 40 },
-    { id: "cor10", txt: "Gib 10 richtige Antworten", goal: 10, key: "correct", f: 120, xp: 50 },
-    { id: "combo5", txt: "Schaffe eine 5er-Serie", goal: 5, key: "maxCombo", f: 100, xp: 40 },
-    { id: "combo10", txt: "Schaffe eine 10er-Serie", goal: 10, key: "maxCombo", f: 200, xp: 80 },
-    { id: "acc80", txt: "Mindestens 80 % richtig (ab 10 Antworten)", goal: 10, f: 150, xp: 60, calc: (t) => (t.answered >= 10 && t.correct / t.answered >= 0.8 ? 10 : Math.min(9, t.answered)), note: (t) => (t.answered ? ` · aktuell ${Math.round(t.correct / t.answered * 100)} %` : "") },
-    { id: "sowi3", txt: "Beantworte 3 SoWi-Fragen", goal: 3, key: "sowi", f: 80, xp: 30 }
+    { id: "ans40", txt: "Beantworte 40 Fragen", goal: 40, key: "answered", f: 150, xp: 60 },
+    { id: "sure25", txt: "Gib 25 sicher richtige Antworten", goal: 25, key: "correct", f: 180, xp: 70 },
+    { id: "combo12", txt: "Schaffe eine 12er-Serie", goal: 12, key: "maxCombo", f: 220, xp: 90 },
+    { id: "combo20", txt: "Schaffe eine 20er-Serie", goal: 20, key: "maxCombo", f: 350, xp: 140 },
+    { id: "acc85", txt: "Mindestens 85 % sicher richtig (ab 30 Antworten)", goal: 30, f: 220, xp: 90, calc: (t) => (t.answered >= 30 && t.correct / t.answered >= 0.85 ? 30 : Math.min(29, t.answered)), note: (t) => (t.answered ? ` · aktuell ${Math.round(t.correct / t.answered * 100)} %` : "") },
+    { id: "sowi10", txt: "Beantworte 10 SoWi-Fragen", goal: 10, key: "sowi", f: 150, xp: 60 },
+    { id: "t2_15", txt: "Beantworte 15 Fragen aus Teil 2", goal: 15, key: "t2", f: 150, xp: 60 },
+    { id: "green8", txt: "Bringe 8 Fragen auf Grün", goal: 8, key: "green", f: 220, xp: 90 },
+    { id: "fix5", txt: "Beantworte 5 rote Fragen sicher richtig", goal: 5, key: "fixed", f: 200, xp: 80 },
+    { id: "new15", txt: "Beantworte 15 neue Fragen", goal: 15, key: "fresh", f: 150, xp: 60 }
   ];
   const need = (l) => 80 + l * 40;
   const rank = (l) => RANKS.filter(([n]) => l >= n).pop()[1];
@@ -4592,7 +4603,7 @@ INSERT INTO Konto VALUES (1,'Weingut Becker',1500.00),(2,'Klinik am Rhein',320.0
     CHARS.forEach((c) => { const e = G.equip[c] = Object.assign(baseEquip(c), G.equip[c] || {}); SLOTS.forEach(([sl]) => { if (!IT[e[sl]] || !G.owned[e[sl]] || IT[e[sl]].char !== c) e[sl] = baseEquip(c)[sl]; }); });
     if (!ANIMALS[G.char]) G.char = "rabe"; if (!ANIMALS[G.banner]) G.banner = "rabe";
     G.boosts = Object.assign({ xp2: 0, shield: 0 }, G.boosts || {}); G.pity = G.pity || {}; G.hist = Array.isArray(G.hist) ? G.hist : [];
-    if (G.quests && !G.quests.ids.every((id) => QPOOL.some((q) => q.id === id))) G.today = null;
+    if (G.quests && (!Array.isArray(G.quests.ids) || !G.quests.ids.every((id) => QPOOL.some((q) => q.id === id)))) G.quests = null; // alte Quests → neu würfeln, Tageszähler bleiben
     ["earned", "xp", "level", "federn", "tickets", "pulls"].forEach((k) => { G[k] = Math.max(k === "level" ? 1 : 0, Math.floor(+G[k] || 0)); });
   }
   function save() { try { localStorage.setItem(KEY_GAMI, JSON.stringify(G)); } catch (e) {} }
@@ -4614,15 +4625,15 @@ INSERT INTO Konto VALUES (1,'Weingut Becker',1500.00),(2,'Klinik am Rhein',320.0
 
   function rollDay() {
     const t = today();
-    if (!G.today || G.today.day !== t) {
-      G.today = { day: t, answered: 0, correct: 0, maxCombo: 0, sowi: 0 };
+    if (!G.today || G.today.day !== t) { G.today = { day: t, answered: 0, correct: 0, maxCombo: 0, sowi: 0, t2: 0, green: 0, fixed: 0, fresh: 0 }; G.quests = null; }
+    if (!G.quests || !Array.isArray(G.quests.ids) || G.quests.ids.length !== QN || !G.quests.ids.every((id) => QPOOL.some((q) => q.id === id))) {
       const pool = QPOOL.slice(); let h = hash(t); const ids = [];
-      while (ids.length < 3) { ids.push(pool.splice(h % pool.length, 1)[0].id); h = hash(t + ids.length); }
+      while (ids.length < QN) { const q = pool.splice(h % pool.length, 1)[0]; if (!(q.key === "maxCombo" && ids.some((x) => /^combo/.test(x)))) ids.push(q.id); h = hash(t + ":" + ids.length + ":" + pool.length); if (!pool.length) break; }
       G.quests = { ids, claimed: [], chest: false };
     }
   }
   const qprog = (q) => (q.calc ? q.calc(G.today) : Math.min(q.goal, G.today[q.key] || 0));
-  const claimable = () => { rollDay(); return G.loginClaimed !== today() || G.quests.ids.some((id) => { const q = QPOOL.find((x) => x.id === id); return qprog(q) >= q.goal && !G.quests.claimed.includes(id); }) || (G.quests.claimed.length === 3 && !G.quests.chest); };
+  const claimable = () => { rollDay(); return G.loginClaimed !== today() || G.quests.ids.some((id) => { const q = QPOOL.find((x) => x.id === id); return qprog(q) >= q.goal && !G.quests.claimed.includes(id); }) || (G.quests.claimed.length === G.quests.ids.length && !G.quests.chest); };
 
   // ---- Figur
   let gid = 0;
@@ -4651,20 +4662,40 @@ INSERT INTO Konto VALUES (1,'Weingut Becker',1500.00),(2,'Klinik am Rhein',320.0
     confetti();
     modal(`<div class="gm-ava-big" style="width:130px">${myFigure()}</div><h2>Level ${l}!</h2>${newRank ? `<p>Neuer Rang: <b>${rank(l)}</b></p>` : `<p class="muted">${rank(l)}</p>`}<p class="gm-gain">+100 🪶${l % 5 === 0 ? " · +1 🎟️" : ""}</p><button type="button" class="btn primary" data-gm-close>Weiter</button>`);
   }
-  function onAnswer(q, ok) {
+  // Nur „sicher gewusst“ zählt: XP, Federn, Serie und die Quests für richtige Antworten.
+  // „Unsicher“ (Wissensfrage) oder „Geraten“ (Auswahlfrage) gibt nichts und beendet die Serie – wie ein Fehler (Serien-Schild rettet sie).
+  let LAST = null;
+  const SNAP = ["earned", "xp", "level", "federn", "tickets", "combo", "best", "xp2Left", "shieldOn", "today"];
+  function onAnswer(q, ok, unsure, f, t, noSnap) {
     rollDay();
-    const st = G.today; st.answered++; if (TP[q.topic] && TP[q.topic].teil === "SoWi") st.sowi++;
+    if (!noSnap) LAST = { id: q.id, f, snap: JSON.stringify(Object.fromEntries(SNAP.map((k) => [k, G[k]]))) };
+    const st = G.today, tp = TP[q.topic], sure = ok && !unsure;
+    st.answered++;
+    if (tp && tp.teil === "SoWi") st.sowi++;
+    if (tp && tp.teil !== "SoWi" && tp.teil.includes("2")) st.t2 = (st.t2 || 0) + 1;
+    if (f === -1) st.fresh = (st.fresh || 0) + 1;
     let msg;
-    if (ok) {
+    if (sure) {
       G.combo++; st.correct++; st.maxCombo = Math.max(st.maxCombo, G.combo); G.best = Math.max(G.best, G.combo);
+      if (f === 0) st.fixed = (st.fixed || 0) + 1;
+      if (t === 2 && f !== 2) st.green = (st.green || 0) + 1;
       const m = mult(G.combo), boost = G.xp2Left > 0 ? 2 : 1; if (boost > 1) G.xp2Left--;
       const xp = Math.round(10 * m * boost); G.federn += 5; addXP(xp);
       msg = `+${xp} XP${m > 1 ? ` · ${fmtM(m)}` : ""}${boost > 1 ? " · 🧪" : ""}`;
       if ([3, 6, 10].includes(G.combo)) setTimeout(() => toast(`🔥 ${G.combo}er-Serie! Ab jetzt ${fmtM(mult(G.combo))} XP`), 150);
-    } else if (G.shieldOn && G.combo > 0) { G.shieldOn = false; setTimeout(() => toast("🛡️ Das Schild hat deine Serie gerettet"), 150); }
-    else G.combo = 0;
+    } else {
+      if (ok) msg = "Nicht sicher · keine XP";
+      if (G.shieldOn && G.combo > 0) { G.shieldOn = false; setTimeout(() => toast("🛡️ Das Schild hat deine Serie gerettet"), 150); }
+      else G.combo = 0;
+    }
     save(); lbSoon();
-    if (msg) setTimeout(() => { ensureLayer(); const f = document.createElement("div"); f.className = "gm-float"; f.textContent = msg; document.body.appendChild(f); setTimeout(() => f.remove(), 1200); }, 30);
+    if (msg) setTimeout(() => { ensureLayer(); const fl = document.createElement("div"); fl.className = "gm-float" + (sure ? "" : " gm-float-off"); fl.textContent = msg; document.body.appendChild(fl); setTimeout(() => fl.remove(), 1200); }, 30);
+  }
+  // „Geraten“ nach einer richtigen Auswahlfrage: XP und Serie dieser Antwort zurücknehmen und als unsicher werten
+  function onGuess(q) {
+    if (!LAST || LAST.id !== q.id || LAST.done) return;
+    Object.assign(G, JSON.parse(LAST.snap)); LAST.done = true;
+    onAnswer(q, true, true, LAST.f, 1, true);
   }
   function grant(it) {
     if (it.slot === "cur") { G.federn += 30; return { it, gain: "+30 🪶" }; }
@@ -4736,14 +4767,14 @@ INSERT INTO Konto VALUES (1,'Weingut Becker',1500.00),(2,'Klinik am Rhein',320.0
   // ---- Seite
   const charSel = (attr, cur, label) => `<div class="gm-sel">${CHARS.map((c) => `<button type="button" class="gm-bsel" data-gm-${attr}="${c}" aria-pressed="${c === cur}"><span class="gm-mini">${figure(c, G.equip[c])}</span>${esc(label(c))}</button>`).join("")}</div>`;
   function rQuests() {
-    const qs = G.quests.ids.map((id) => QPOOL.find((q) => q.id === id)), all = G.quests.claimed.length === 3;
+    const qs = G.quests.ids.map((id) => QPOOL.find((q) => q.id === id)), all = G.quests.claimed.length === G.quests.ids.length;
     return `<section class="card"><div class="row" style="justify-content:space-between"><h3>Tagesquests</h3><span class="small muted">neu um Mitternacht</span></div>
       ${qs.map((q) => { const p = qprog(q), done = G.quests.claimed.includes(q.id); return `<div class="gm-quest"><div><b>${esc(q.txt)}</b><div class="bar"><i style="width:${p / q.goal * 100}%"></i></div><div class="small muted">${p}/${q.goal}${q.note ? q.note(G.today) : ""} · ${q.f} 🪶 + ${q.xp} XP</div></div><button type="button" class="btn small ${p >= q.goal && !done ? "primary" : ""}" data-gm-claim="${q.id}" ${p < q.goal || done ? "disabled" : ""}>${done ? "✓ Erledigt" : "Abholen"}</button></div>`; }).join("")}
-      <div class="gm-quest"><div><b>🎁 Tagestruhe</b><div class="small muted">Alle drei Quests abholen · 150 🪶 + 1 🎟️</div></div><button type="button" class="btn small ${all && !G.quests.chest ? "primary" : ""}" data-gm-chest ${!all || G.quests.chest ? "disabled" : ""}>${G.quests.chest ? "✓ Geöffnet" : "Öffnen"}</button></div></section>
+      <div class="gm-quest"><div><b>🎁 Tagestruhe</b><div class="small muted">Alle fünf Quests abholen · 300 🪶 + 2 🎟️</div></div><button type="button" class="btn small ${all && !G.quests.chest ? "primary" : ""}" data-gm-chest ${!all || G.quests.chest ? "disabled" : ""}>${G.quests.chest ? "✓ Geöffnet" : "Öffnen"}</button></div></section>
       <section class="card"><div class="row" style="justify-content:space-between"><h3>Login-Kalender <span class="small muted">· Runde ${G.calRound}</span></h3><span class="chip">🔥 ${G.loginStreak} ${G.loginStreak === 1 ? "Tag" : "Tage"}</span></div>
       <p class="small muted">Jeder Login-Tag rückt ein Feld weiter. Nach Tag 7 beginnt die nächste Runde mit denselben Belohnungen. Ein ausgelassener Tag setzt nur die 🔥-Serie zurück.</p>
       ${calHTML(G.loginClaimed !== today() ? G.calIdx : -1)}${G.loginClaimed !== today() ? `<div class="row" style="margin-top:12px"><button type="button" class="btn primary" data-gm-showlogin>Heutigen Bonus abholen</button></div>` : ""}</section>
-      <section class="card"><h3>So bekommst du XP</h3><p class="small muted">Jede richtige Antwort in einer Lernrunde: 10 XP und 5 🪶. Serie: 3 richtig in Folge ×1,5 · 6 ×2 · 10 ×3. Ein Fehler setzt die Serie zurück (außer mit Serien-Schild). Neue Level bringen 100 🪶, alle 5 Level ein Ticket.</p></section>`;
+      <section class="card"><h3>So bekommst du XP</h3><p class="small muted">Jede sicher richtige Antwort in einer Lernrunde: 10 XP und 5 🪶. „Unsicher“ oder „Geraten“ gibt nichts. Serie: 3 sicher richtig in Folge ×1,5 · 6 ×2 · 10 ×3. Ein Fehler, „unsicher“ oder „geraten“ beendet die Serie (außer mit Serien-Schild). Neue Level bringen 100 🪶, alle 5 Level ein Ticket.</p></section>`;
   }
   function rSchatz() {
     const c = G.banner, A = ANIMALS[c], P = pityOf(c), feat = featuredOf(c);
@@ -4767,17 +4798,15 @@ INSERT INTO Konto VALUES (1,'Weingut Becker',1500.00),(2,'Klinik am Rhein',320.0
   }
   function viewHTML(el) {
     rollDay();
-    const tabs = [["quests", "Quests"], ["schatz", GACHA.name], ["garderobe", "Garderobe"], ["rang", "Rangliste"]];
+    const tabs = [["quests", "Quests"], ["schatz", GACHA.name], ["garderobe", "Garderobe"]];
     el.innerHTML = `<div class="gm-head card"><div class="gm-ava">${myFigure()}</div><div class="gm-lvl"><div class="row" style="gap:8px;align-items:baseline"><b class="gm-lv">Level ${G.level}</b><span class="muted small">${rank(G.level)}</span><span class="spacer"></span><span class="small muted num">${G.xp}/${need(G.level)} XP</span></div><div class="bar"><i style="width:${G.xp / need(G.level) * 100}%"></i></div></div><div class="gm-cur"><span class="chip">🪶 ${G.federn}</span><span class="chip">🎟️ ${G.tickets}</span><span class="chip">🔥 ${G.loginStreak}</span></div></div>
       <div class="tabs-in gm-tabs" role="tablist">${tabs.map(([k, l]) => `<button type="button" role="tab" class="${G.tab === k ? "on" : ""}" aria-selected="${G.tab === k}" data-gm-tab="${k}">${l}</button>`).join("")}</div>
-      <div class="gm-body">${G.tab === "schatz" ? rSchatz() : G.tab === "garderobe" ? rGarderobe() : G.tab === "rang" ? rRang() : rQuests()}</div>`;
-    el.onkeydown = (e) => { if (e.target && e.target.id === "gm-lb-name" && e.key === "Enter") lbJoin(e.target.value); };
+      <div class="gm-body">${G.tab === "schatz" ? rSchatz() : G.tab === "garderobe" ? rGarderobe() : rQuests()}</div>`;
     el.onclick = (e) => {
       const t = e.target.closest("button"); if (!t || t.disabled) return; const d = t.dataset;
-      if (lbClick(d)) return;
       if (d.gmTab) { G.tab = d.gmTab; save(); render(); }
       else if (d.gmClaim) { const q = QPOOL.find((x) => x.id === d.gmClaim); if (qprog(q) < q.goal || G.quests.claimed.includes(q.id)) return; G.quests.claimed.push(q.id); G.federn += q.f; addXP(q.xp); save(); toast(`Quest erledigt: +${q.f} 🪶 · +${q.xp} XP`); render(); }
-      else if (d.gmChest !== undefined) { if (G.quests.chest || G.quests.claimed.length < 3) return; G.quests.chest = true; G.federn += 150; G.tickets++; save(); confetti(40); modal(`<div style="font-size:60px">🎁</div><h2>Tagestruhe</h2><p class="gm-gain">+150 🪶 · +1 🎟️</p><button type="button" class="btn primary" data-gm-close>Super</button>`); }
+      else if (d.gmChest !== undefined) { if (G.quests.chest || G.quests.claimed.length < G.quests.ids.length) return; G.quests.chest = true; G.federn += 300; G.tickets += 2; save(); confetti(40); modal(`<div style="font-size:60px">🎁</div><h2>Tagestruhe</h2><p class="gm-gain">+150 🪶 · +1 🎟️</p><button type="button" class="btn primary" data-gm-close>Super</button>`); }
       else if (d.gmShowlogin !== undefined) showLogin();
       else if (d.gmPull) pull(+d.gmPull);
       else if (d.gmInfo) showInfo(d.gmInfo);
@@ -4841,7 +4870,7 @@ INSERT INTO Konto VALUES (1,'Weingut Becker',1500.00),(2,'Klinik am Rhein',320.0
   const KEY_LB = "tap2coach-lb", NAME_RE = /^[A-Za-z0-9ÄÖÜäöüß_.-]{3,16}$/;
   const lbGet = () => { try { const o = JSON.parse(localStorage.getItem(KEY_LB) || "null"); return o && typeof o === "object" ? o : {}; } catch (e) { return {}; } };
   const lbSet = (o) => { try { localStorage.setItem(KEY_LB, JSON.stringify(o)); } catch (e) {} };
-  const LB = { data: null, at: 0, busy: false, err: "", timer: 0, edit: false, leave: false };
+  const LB = { data: null, at: 0, busy: false, err: "", timer: 0, edit: false, leave: false, away: true };
   const lookOf = () => G.char + ":" + SLOTS.map(([s]) => (IT[G.equip[G.char][s]] || {}).art || "").join(".");
   const lookEq = (str) => { const [c, rest] = String(str || "").split(":"), ch = ANIMALS[c] ? c : "rabe", eq = baseEquip(ch); String(rest || "").split(".").forEach((a, i) => { const sl = SLOTS[i] && SLOTS[i][0], it = IT[ch + "-" + a]; if (sl && a && it && it.slot === sl) eq[sl] = it.id; }); return [ch, eq]; };
   async function lbId() {
@@ -4850,7 +4879,7 @@ INSERT INTO Konto VALUES (1,'Weingut Becker',1500.00),(2,'Klinik am Rhein',320.0
     return hexOf(await sha("tap2-lb|t|" + lb.token));
   }
   const lbBox = () => { const el = document.getElementById("gm-lbsec"); if (el) el.innerHTML = lbListHTML(); };
-  const lbRedraw = () => { if (view === "belohnungen" && G.tab === "rang") render(); };
+  const lbRedraw = () => { if (view === "rangliste") render(); };
   async function lbLoad(force) {
     if (!syncConf() || (!force && Date.now() - LB.at < 60000)) return;
     LB.at = Date.now();
@@ -4903,13 +4932,18 @@ INSERT INTO Konto VALUES (1,'Weingut Becker',1500.00),(2,'Klinik am Rhein',320.0
   }
   function rRang() {
     if (!syncConf()) return `<section class="card"><h3>Bestenliste</h3><p class="small muted">Die Bestenliste ist in dieser Version nicht verfügbar.</p></section>`;
-    setTimeout(() => lbLoad(false), 0);
+    const fresh = LB.away; LB.away = false; setTimeout(() => lbLoad(fresh || Date.now() - LB.at > 60000), 0); // beim Aufruf über das Menü frisch laden, beim Neuzeichnen nicht
     const lb = lbGet();
     const join = !lb.joined || LB.edit ? `<section class="card"><h3>${lb.joined ? "Namen ändern" : "Mitmachen"}</h3><p class="small muted">Wähle einen Spitznamen. Für alle sichtbar sind nur dein Name, dein Level, deine XP und deine Figur. Nimm bitte nicht deinen echten Namen. Du kannst dich jederzeit wieder austragen.</p><div class="row" style="margin-top:10px"><input type="text" class="gm-in" id="gm-lb-name" maxlength="16" placeholder="z. B. CodeRabe" value="${esc(lb.name || "")}" autocomplete="off" spellcheck="false" aria-label="Spitzname"><button type="button" class="btn primary small" data-gm-lbjoin ${LB.busy ? "disabled" : ""}>${lb.joined ? "Speichern" : "Mitmachen"}</button>${lb.joined ? `<button type="button" class="btn small ghost" data-gm-lbcancel>Abbrechen</button>` : ""}</div>${LB.err ? `<p class="small warn-text" style="margin-top:6px">${esc(LB.err)}</p>` : ""}</section>` : "";
     return `${join}<section class="card" id="gm-lbsec">${lbListHTML()}</section>`;
   }
+  function rangView(el) {
+    el.innerHTML = `<section class="card gm-lbhead"><div class="gm-ava">${myFigure()}</div><div><h2>Rangliste</h2><p class="small muted">Wer sammelt die meisten XP? Du bist Level ${G.level} mit ${G.earned.toLocaleString("de-DE")} XP.</p></div></section>` + rRang();
+    el.onkeydown = (e) => { if (e.target && e.target.id === "gm-lb-name" && e.key === "Enter") lbJoin(e.target.value); };
+    el.onclick = (e) => { const t = e.target.closest("button"); if (!t || t.disabled) return; lbClick(t.dataset); };
+    return true;
+  }
   function lbClick(d) {
-    if (d.gmTab === "rang") LB.at = 0; // beim Öffnen immer frisch laden
     if (d.gmLbjoin !== undefined) { const i = document.getElementById("gm-lb-name"); lbJoin(i ? i.value : ""); return true; }
     if (d.gmLbedit !== undefined) { LB.edit = true; LB.err = ""; render(); return true; }
     if (d.gmLbcancel !== undefined) { LB.edit = false; LB.err = ""; render(); return true; }
@@ -4922,10 +4956,10 @@ INSERT INTO Konto VALUES (1,'Weingut Becker',1500.00),(2,'Klinik am Rhein',320.0
   // ---- App-Anbindung (erst nach dem Laden des Lernstands initialisieren)
   return {
     init: ensure,
-    hudHTML() { ensure(); return `<button type="button" class="pill gm-pill" data-go="belohnungen" title="Belohnungen: Level ${G.level}" aria-label="Belohnungen, Level ${G.level}"><span class="gm-hava">${myFigure()}</span><b>${G.level}</b>${claimable() ? `<i class="gm-dot" aria-hidden="true"></i>` : ""}</button>`; },
+    hudHTML() { ensure(); if (view !== "rangliste") LB.away = true; return `<button type="button" class="pill gm-pill" data-go="belohnungen" title="Belohnungen: Level ${G.level}" aria-label="Belohnungen, Level ${G.level}"><span class="gm-hava">${myFigure()}</span><b>${G.level}</b>${claimable() ? `<i class="gm-dot" aria-hidden="true"></i>` : ""}</button>`; },
     chip() { ensure(); return G.combo >= 2 ? `<span class="gm-combo" title="Serie richtiger Antworten">🔥 ${G.combo}${mult(G.combo) > 1 ? " · " + fmtM(mult(G.combo)) : ""}</span>` : ""; },
-    answer(q, ok) { ensure(); onAnswer(q, ok); }, view(el) { ensure(); return viewHTML(el); }, pack() { ensure(); return pack(); }, merge(p) { ensure(); merge(p); },
-    data() { ensure(); return JSON.parse(JSON.stringify(G)); },
+    answer(q, ok, unsure, f, t) { ensure(); onAnswer(q, ok, unsure, f, t); }, guess(q) { ensure(); onGuess(q); }, view(el) { ensure(); return viewHTML(el); }, pack() { ensure(); return pack(); }, merge(p) { ensure(); merge(p); },
+    data() { ensure(); return JSON.parse(JSON.stringify(G)); }, rangView(el) { ensure(); return rangView(el); },
     boot(h) { ensure(); rollDay(); save(); if (lbGet().joined) setTimeout(lbPush, 4000); if (!h.startsWith("import=") && view !== "tutorial" && !UI.sess && !UI.run && G.loginClaimed !== today()) setTimeout(() => { if (!UI.sess && !UI.run && view !== "tutorial") showLogin(); }, 700); }
   };
   })(); } catch (e) { GAMI = null; try { console.error("Belohnungen deaktiviert:", e); } catch (x) {} }

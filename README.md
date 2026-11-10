@@ -13,7 +13,7 @@ Lern-App für die Abschlussprüfung Teil 2 (Fachinformatiker/in Anwendungsentwic
 
 ## Datenschutz
 
-- Keine Anmeldung, kein Tracking. Ohne Geräte-Sync gibt es keine Verbindung zu externen Servern.
+- Keine Anmeldung, kein Tracking. Ohne Geräte-Sync gibt es keine Verbindung zu externen Servern – außer beim Öffnen der Seite „Patch Notes“, die die Release-Liste direkt von GitHub lädt (öffentliche Daten, ohne Anmeldung).
 - Dein Lernfortschritt wird nur lokal in deinem Browser gespeichert (`localStorage`).
 - Für einen Geräte- oder Browserwechsel: Übersicht → „Sicherung herunterladen“ und auf dem anderen Gerät „Sicherung laden“.
 - Code-Editor ([CodeMirror](https://codemirror.net)), SQLite ([sql.js](https://github.com/sql-js/sql.js)) und QR-Code-Erzeugung ([qrcode-generator](https://github.com/kazuhikoarase/qrcode-generator)), alle MIT-Lizenz, liegen ebenfalls im Repo (`vendor/`).
@@ -46,6 +46,7 @@ In jeder Lernfrage gibt es oben ein Fahnen-Symbol, in jeder Übungsaufgabe den L
 - **Rangliste:** im Menü unter „Rangliste“ einen Spitznamen wählen. Sortiert nach gesammelten XP; verbundene Geräte teilen sich einen Eintrag.
 - **Belohnungen:** Figur oben rechts – XP und Level nur für sicher richtige Antworten (Serien ×1,5 bis ×3; „unsicher“ oder „geraten“ gibt nichts und beendet die Serie), täglich 5 Quests, Login-Kalender, Schatzkammer mit 5 Tieren à 40 Skins und Garderobe. Federn gibt es nur durchs Lernen, kein Echtgeld.
 - **Events:** im Menü unter „Events“ – zeitlich begrenzte Lernaktionen zu Klausuren (zurzeit LF11a und WPF Projektmanagement). Jedes Kapitel hat eine Kurz-Lektion mit Diagramm, danach Auswahl- und Klausurfragen. Sitzen 80 % je Kapitel, schaltet sich ein Abschlusstest frei (15 Fragen, ab 80 % bestanden). Die Sonderbelohnung (Baum-Shirt bzw. Titel „AZB Experte“) gibt es nur bis zum Klausurtermin. Events zählen nicht zur Prüfungsreife, geben aber XP.
+- **Patch Notes:** unten links im Menü (am Handy unter Einstellungen → Hilfe) – alle Versionen mit Datum, neueste zuerst.
 - **Titel:** in der Garderobe – lustige IT- und Azubi-Titel, freigeschaltet durch Fortschritt oder Events, sichtbar in der Rangliste.
 
 ## Inhalte

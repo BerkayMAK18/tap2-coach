@@ -563,6 +563,16 @@ th { font-size: 0.72rem; color: var(--muted); font-weight: 700; text-transform: 
 @media (max-width: 900px) { .nav-dot { top: 5px; left: calc(50% + 6px); } }
 @media (max-width: 440px) { nav.side .nav-i { font-size: 0.6rem; padding-left: 0; padding-right: 0; letter-spacing: -0.01em; } .gm-titles { grid-template-columns: 1fr 1fr; } .gm-ttl { padding: 8px 9px; } .gm-ttl b { font-size: 0.86rem; } .gm-ttl span { font-size: 0.68rem; } }
 @media (max-width: 560px) { .ev-card, .ev-hero { grid-template-columns: 84px minmax(0, 1fr); gap: 12px; } }
+.side-foot .nav-i { font-size: 0.85rem; padding: 8px 12px; }
+.pn-list { display: flex; flex-direction: column; gap: 10px; }
+.pn { border: 1.5px solid var(--line-2); border-radius: var(--r); background: var(--surface); }
+.pn > summary { list-style: none; cursor: pointer; display: flex; align-items: center; gap: 10px; padding: 12px 14px; flex-wrap: wrap; }
+.pn > summary::-webkit-details-marker { display: none; } .pn > summary .chev { margin-left: auto; transition: transform 0.2s; } .pn[open] > summary .chev { transform: rotate(180deg); }
+.pn-tag { font-family: var(--mono); font-size: 0.78rem; font-weight: 700; background: var(--blue-soft-2); border-radius: 8px; padding: 2px 8px; }
+.pn-t { font-weight: 700; flex: 1 1 240px; min-width: 0; } .pn-d { font-size: 0.82rem; color: var(--muted); white-space: nowrap; }
+.pn-b { padding: 0 16px 14px; font-size: 0.92rem; line-height: 1.55; } .pn-b h4 { margin: 12px 0 4px; font-family: var(--display); } .pn-b ul { margin: 4px 0; padding-left: 20px; } .pn-b li { margin: 3px 0; }
+.pn-new { background: var(--ok); color: #fff; border-radius: 8px; padding: 2px 7px; font-size: 0.7rem; font-weight: 800; }
+.gm-figname { font-size: 1.5rem; } .gm-figsub { margin-top: 2px; }
 .fg-hlt, .fg-hlt text { fill: var(--fg-hlt) !important; font-weight: 700; } .fg-u { text-decoration: underline; } .fg-sym { font-size: 16px; }
 
 /* ---------- keyframes */
@@ -946,6 +956,7 @@ a.iconbtn { color: var(--ink); text-decoration: none; }
     <button type="button" class="nav-i" data-view="events"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/><path d="M12 12.5l1.1 2.2 2.4.3-1.8 1.6.5 2.4-2.2-1.2-2.2 1.2.5-2.4-1.8-1.6 2.4-.3z"/></svg><span>Events</span><i class="nav-dot" aria-hidden="true" hidden></i></button>
     <button type="button" class="nav-i" data-view="rangliste"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 21h8"/><path d="M12 17v4"/><path d="M7 4h10v5a5 5 0 0 1-10 0V4z"/><path d="M17 5h3v2a3 3 0 0 1-3 3"/><path d="M7 5H4v2a3 3 0 0 0 3 3"/></svg><span>Rangliste</span></button>
     <button type="button" class="nav-i" data-view="tipps"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 18h6M10 21h4"/><path d="M12 3a6 6 0 0 0-3.5 10.9c.6.5 1 1.2 1 2V16h5v-.1c0-.8.4-1.5 1-2A6 6 0 0 0 12 3z"/></svg><span>Tipps</span></button>
+    <div class="side-foot"><button type="button" class="nav-i" data-view="patchnotes"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5M9 13h6M9 17h4"/></svg><span>Patch Notes</span></button></div>
   </nav>
   <div class="col">
     <header class="top" id="topbar">
@@ -965,6 +976,7 @@ a.iconbtn { color: var(--ink); text-decoration: none; }
       <section class="view" id="v-belohnungen" hidden></section>
       <section class="view" id="v-rangliste" hidden></section>
       <section class="view" id="v-events" hidden></section>
+      <section class="view" id="v-patchnotes" hidden></section>
     </main>
     <footer class="foot"><span>TAP2 Prüfungscoach · Dein Fortschritt wird lokal in diesem Browser gespeichert.</span></footer>
   </div>
@@ -3316,8 +3328,8 @@ CARDS_RAW.algo.push(
 
   // ---------- routing + shell
   let view = "start";
-  const VIEWS = ["start", "lernen", "aufgaben", "pruefung", "tipps", "einstellungen", "tutorial", "operatoren", "plan", "belohnungen", "rangliste", "events"];
-  const VTITLE = { start: "Übersicht", lernen: "Lernen", aufgaben: "Aufgaben", pruefung: "Prüfung", tipps: "Tipps", einstellungen: "Einstellungen", tutorial: "So lernst du mit dem Coach", operatoren: "Operator-Trainer", plan: "Lernplan", belohnungen: "Belohnungen", rangliste: "Rangliste", events: "Events" };
+  const VIEWS = ["start", "lernen", "aufgaben", "pruefung", "tipps", "einstellungen", "tutorial", "operatoren", "plan", "belohnungen", "rangliste", "events", "patchnotes"];
+  const VTITLE = { start: "Übersicht", lernen: "Lernen", aufgaben: "Aufgaben", pruefung: "Prüfung", tipps: "Tipps", einstellungen: "Einstellungen", tutorial: "So lernst du mit dem Coach", operatoren: "Operator-Trainer", plan: "Lernplan", belohnungen: "Belohnungen", rangliste: "Rangliste", events: "Events", patchnotes: "Patch Notes" };
   const UI = { sess: null, topic: null, ttab: "theorie", tf: "alle", ueb: null, showSol: false, addQ: false, pk: { mode: "sim", teil: "t1" }, run: null, confirm: null, sel: [] };
   function go(v) {
     view = VIEWS.includes(v) ? v : "start";
@@ -3351,7 +3363,7 @@ CARDS_RAW.algo.push(
     $("#page-title").textContent = VTITLE[view];
     document.body.classList.toggle("focus", !!(view === "lernen" && UI.sess) || !!(view === "pruefung" && UI.run && UI.run.phase === "write"));
     hud();
-    ({ start: rStart, lernen: rLernen, aufgaben: rUeb, pruefung: rPK, tipps: rTipps, einstellungen: rSettings, tutorial: rTutorial, operatoren: rOperatoren, plan: rPlan, belohnungen: rBelohnungen, rangliste: rRangliste, events: rEvents })[view]();
+    ({ start: rStart, lernen: rLernen, aufgaben: rUeb, pruefung: rPK, tipps: rTipps, einstellungen: rSettings, tutorial: rTutorial, operatoren: rOperatoren, plan: rPlan, belohnungen: rBelohnungen, rangliste: rRangliste, events: rEvents, patchnotes: rPatch })[view]();
     const evDot = document.querySelector('nav.side [data-view="events"] .nav-dot'); if (evDot) evDot.hidden = !EVENTS.some((e) => evOn(e) && !(gm("evInfo", e) || {}).got);
     animRings($("#v-" + view));
   }
@@ -3976,6 +3988,45 @@ INSERT INTO Konto VALUES (1,'Weingut Becker',1500.00),(2,'Klinik am Rhein',320.0
     el.querySelectorAll("[data-ev-open]").forEach((b) => b.onclick = () => { UI.ev = b.dataset.evOpen; render(); window.scrollTo({ top: 0 }); });
   }
 
+  // ---------- Patch Notes: die GitHub-Releases des Repos, neueste zuerst. Beim Öffnen frisch geladen (höchstens alle 10 Minuten),
+  // ohne Netz aus der letzten Kopie. Das Datum steht in der ersten Zeile der Notes („*Veröffentlicht am TT.MM.JJJJ*“).
+  const KEY_PN = "tap2coach-patch", PN = { busy: false, err: "" };
+  const pnGet = () => { try { const o = JSON.parse(localStorage.getItem(KEY_PN) || "null"); return o && Array.isArray(o.list) ? o : null; } catch (e) { return null; } };
+  const pnVer = (t) => String(t || "").replace(/^v/, "").split(".").map((x) => +x || 0);
+  const pnCmp = (a, b) => (b.date || "").localeCompare(a.date || "") || pnVer(b.tag).reduce((r, x, i) => r || x - (pnVer(a.tag)[i] || 0), 0);
+  function pnMd(s) { // kleines Markdown: Überschriften, Listen (auch eingerückt), fett, kursiv
+    let out = "", open = 0;
+    const inline = (t) => esc(t).replace(/\*\*(.+?)\*\*/g, "<b>$1</b>").replace(/(^|\s)\*(.+?)\*(?=\s|$)/g, "$1<i>$2</i>");
+    const close = (n) => { while (open > n) { out += "</ul>"; open--; } };
+    String(s || "").replace(/\r/g, "").split("\n").forEach((l) => {
+      const li = l.match(/^(\s*)[-*] (.*)$/);
+      if (li) { const lv = Math.floor(li[1].length / 2) + 1; while (open < lv) { out += "<ul>"; open++; } close(lv); out += "<li>" + inline(li[2]) + "</li>"; return; }
+      close(0);
+      const hd = l.match(/^#{1,4} (.*)$/); if (hd) { out += "<h4>" + inline(hd[1]) + "</h4>"; return; }
+      if (l.trim()) out += "<p>" + inline(l) + "</p>";
+    });
+    close(0); return out;
+  }
+  async function pnLoad(force) {
+    const c = pnGet(); if (PN.busy || (!force && c && Date.now() - c.at < 600000)) return;
+    PN.busy = true; PN.err = "";
+    try {
+      const r = await fetch(`https://api.github.com/repos/${REPO}/releases?per_page=100`, { headers: { Accept: "application/vnd.github+json" }, cache: "no-store" });
+      if (!r.ok) throw new Error("HTTP " + r.status);
+      const list = (await r.json()).filter((x) => x && !x.draft).map((x) => { const m = String(x.body || "").match(/Veröffentlicht am (\d{1,2})\.(\d{1,2})\.(\d{4})/); return { tag: x.tag_name, name: String(x.name || x.tag_name).replace(/^v[\d.]+\s*[–-]\s*/, ""), url: x.html_url, date: m ? `${m[3]}-${m[2].padStart(2, "0")}-${m[1].padStart(2, "0")}` : String(x.published_at || "").slice(0, 10), body: String(x.body || "").replace(/^\*Veröffentlicht am[^*]*\*\s*/, "") }; });
+      try { localStorage.setItem(KEY_PN, JSON.stringify({ at: Date.now(), list })); } catch (e) {}
+    } catch (e) { PN.err = navigator.onLine === false ? "Du bist offline – hier steht der zuletzt geladene Stand." : "GitHub ist gerade nicht erreichbar."; }
+    PN.busy = false; if (view === "patchnotes") rPatch(true);
+  }
+  function rPatch(noLoad) {
+    const el = $("#v-patchnotes"), c = pnGet(), list = c ? c.list.slice().sort(pnCmp) : [];
+    const fmt = (d) => d ? new Date(d + "T12:00:00").toLocaleDateString("de-DE", { day: "numeric", month: "long", year: "numeric" }) : "";
+    el.innerHTML = `<section class="card"><h2>Patch Notes</h2><p class="muted">Was sich in der App geändert hat – die neueste Version steht oben. Die Liste kommt direkt aus den <a href="https://github.com/${REPO}/releases" target="_blank" rel="noopener">Releases auf GitHub</a>.</p>${PN.err ? `<p class="small warn-text">${esc(PN.err)}</p>` : ""}</section>
+      ${list.length ? `<div class="pn-list">${list.map((x, i) => `<details class="pn"${i === 0 ? " open" : ""}><summary><span class="pn-tag">${esc(x.tag)}</span>${i === 0 ? '<span class="pn-new">NEU</span>' : ""}<span class="pn-t">${esc(x.name)}</span><span class="pn-d">${esc(fmt(x.date))}</span>${ic("down", "ic sm chev")}</summary><div class="pn-b">${pnMd(x.body)}<p><a href="${esc(x.url)}" target="_blank" rel="noopener">Auf GitHub ansehen</a></p></div></details>`).join("")}</div>`
+        : `<section class="card"><p class="small muted">${PN.busy || !noLoad ? "Lädt …" : "Gerade keine Patch Notes verfügbar."}</p></section>`}`;
+    if (!noLoad) pnLoad();
+  }
+
   // ---------- Übersicht
   const teilRank = (t) => ({ "Teil 1": 0, "Teil 2": 1, "Teil 1 + 2": 2, "SoWi": 3 })[t.teil] ?? 4;
   function nextTopic() {
@@ -4595,7 +4646,7 @@ INSERT INTO Konto VALUES (1,'Weingut Becker',1500.00),(2,'Klinik am Rhein',320.0
         ${UI.confirm === "reset" && syncGet() ? `<p class="tiny muted">Dieses Gerät wird dabei vom Sync getrennt. Der Stand in der Cloud und auf deinen anderen Geräten bleibt.</p>` : ""}
         <p class="small ${storeOk ? "muted" : "warn-text"}" id="d-msg">${storeOk ? `Zuletzt gespeichert: ${Object.keys(S.q).length} Fragen bearbeitet, ${S.runs.length} Prüfungen.` : "Dieser Browser erlaubt gerade kein Speichern, z. B. in einem privaten Fenster. Lade dir zwischendurch eine Sicherung herunter."}</p>
       </section>
-      <section class="card"><h3>Hilfe</h3><p class="tiny muted">App-Version ${esc(BUILD)}</p><div class="row" style="margin-top:8px"><button type="button" class="btn small" data-go2="tutorial">${ic("map", "ic xs")} Tutorial öffnen</button><a class="btn small ghost" href="https://github.com/${REPO}/issues" target="_blank" rel="noopener">Gemeldete Fehler ansehen</a></div></section>`;
+      <section class="card"><h3>Hilfe</h3><p class="tiny muted">App-Version ${esc(BUILD)}</p><div class="row" style="margin-top:8px"><button type="button" class="btn small" data-go2="tutorial">${ic("map", "ic xs")} Tutorial öffnen</button><button type="button" class="btn small" data-go2="patchnotes">Patch Notes</button><a class="btn small ghost" href="https://github.com/${REPO}/issues" target="_blank" rel="noopener">Gemeldete Fehler ansehen</a></div></section>`;
     el.querySelectorAll("[data-theme-set]").forEach((b) => b.onclick = () => { setTheme(b.dataset.themeSet); render(); });
     bindTx(el); bindSync();
     el.querySelectorAll("[data-go2]").forEach((b) => b.onclick = () => navTo(b.dataset.go2));
@@ -5564,7 +5615,7 @@ INSERT INTO Konto VALUES (1,'Weingut Becker',1500.00),(2,'Klinik am Rhein',320.0
   function rGarderobe() {
     const c = G.char, eq = G.equip[c], skins = SKINS.filter((s) => s.char === c && s.rar !== "S" && s.rar !== "EV");
     return `${charSel("char", c, (x) => ANIMALS[x].name)}
-      <section class="card" style="text-align:center"><div class="gm-ava-big">${myFigure()}</div><h2 style="margin-top:12px">${esc(ANIMALS[c].name)} · ${rank(G.level)}</h2>${G.title && TI[G.title] ? `<p class="gm-title-big">«${esc(TI[G.title].name)}»</p>` : ""}<p class="small muted">Aktive Figur – so erscheint sie oben in der Leiste · Sammlung ${skins.filter((i) => G.owned[i.id]).length}/${skins.length}</p></section>
+      <section class="card" style="text-align:center"><div class="gm-ava-big">${myFigure()}</div>${(() => { const lb = lbGet(), nick = lb.joined && lb.name ? lb.name : ""; return `<h2 class="gm-figname" style="margin-top:12px">${esc(nick || ANIMALS[c].name)}</h2><p class="gm-title-big gm-figsub">${G.title && TI[G.title] ? "«" + esc(TI[G.title].name) + "»" : esc(rank(G.level))}</p><p class="small muted">${nick ? esc(ANIMALS[c].name) + " · " : ""}Level ${G.level} · Sammlung ${skins.filter((i) => G.owned[i.id]).length}/${skins.length}${nick ? "" : ` · <a href="#rangliste">Spitznamen wählen</a>`}</p>`; })()}</section>
       ${titlesHTML()}
       <section class="card"><h3>Boosts</h3><div class="gm-tiles">${["xp2", "shield"].map((id) => { const it = IT[id], n = G.boosts[id], act = id === "xp2" ? G.xp2Left > 0 : G.shieldOn; return `<div class="gm-tile r-${it.rar} ${n || act ? "" : "locked"}"><div class="gm-icon">${it.icon}</div><div class="gm-nm">${it.name} ×${n}</div><div class="small muted">${it.desc}</div><button type="button" class="btn small" data-gm-use="${id}" ${!n || act ? "disabled" : ""}>${act ? "aktiv" : "Benutzen"}</button></div>`; }).join("")}</div></section>
       ${SLOTS.map(([slot, label]) => { const list = SKINS.filter((i) => i.char === c && i.slot === slot).sort((a, b) => RORDER.indexOf(b.rar) - RORDER.indexOf(a.rar)); return `<section class="card"><div class="row" style="justify-content:space-between"><h3>${label}</h3><span class="small muted">${list.filter((i) => i.rar !== "S" && G.owned[i.id]).length}/${list.length - 1}</span></div><div class="gm-tiles">${list.map((i) => `<button type="button" class="gm-tbtn" data-gm-eq="${i.id}" ${G.owned[i.id] ? "" : "disabled"} title="${G.owned[i.id] ? "Anziehen" : i.ev ? "Nur als Event-Belohnung erhältlich" : "Noch nicht gefunden"}">${tile(i, i.ev ? `<span class="gm-tag ev">EVENT</span>` : "", (G.owned[i.id] ? "" : "locked") + (eq[slot] === i.id ? " eq" : ""))}</button>`).join("")}</div></section>`; }).join("")}`;
@@ -5572,7 +5623,7 @@ INSERT INTO Konto VALUES (1,'Weingut Becker',1500.00),(2,'Klinik am Rhein',320.0
   function viewHTML(el) {
     rollDay(); titleCheck();
     const tabs = [["quests", "Quests"], ["schatz", GACHA.name], ["garderobe", "Garderobe"]];
-    el.innerHTML = `<div class="gm-head card"><div class="gm-ava">${myFigure()}</div><div class="gm-lvl"><div class="row" style="gap:8px;align-items:baseline"><b class="gm-lv">Level ${G.level}</b><span class="muted small">${rank(G.level)}${G.title && TI[G.title] ? " · «" + esc(TI[G.title].name) + "»" : ""}</span><span class="spacer"></span><span class="small muted num">${G.xp}/${need(G.level)} XP</span></div><div class="bar"><i style="width:${G.xp / need(G.level) * 100}%"></i></div></div><div class="gm-cur"><span class="chip">🪶 ${G.federn}</span><span class="chip">🎟️ ${G.tickets}</span><span class="chip">🔥 ${G.loginStreak}</span></div></div>
+    el.innerHTML = `<div class="gm-head card"><div class="gm-ava">${myFigure()}</div><div class="gm-lvl"><div class="row" style="gap:8px;align-items:baseline"><b class="gm-lv">Level ${G.level}</b><span class="muted small">${G.title && TI[G.title] ? "«" + esc(TI[G.title].name) + "»" : rank(G.level)}</span><span class="spacer"></span><span class="small muted num">${G.xp}/${need(G.level)} XP</span></div><div class="bar"><i style="width:${G.xp / need(G.level) * 100}%"></i></div></div><div class="gm-cur"><span class="chip">🪶 ${G.federn}</span><span class="chip">🎟️ ${G.tickets}</span><span class="chip">🔥 ${G.loginStreak}</span></div></div>
       <div class="tabs-in gm-tabs" role="tablist">${tabs.map(([k, l]) => `<button type="button" role="tab" class="${G.tab === k ? "on" : ""}" aria-selected="${G.tab === k}" data-gm-tab="${k}">${l}</button>`).join("")}</div>
       <div class="gm-body">${G.tab === "schatz" ? rSchatz() : G.tab === "garderobe" ? rGarderobe() : rQuests()}</div>`;
     el.onclick = (e) => {

@@ -38,7 +38,8 @@ function extract(html, label) {
   need.forEach((n) => { if (!D[n]) throw new Error(`${label}: ${n} fehlt`); });
   const lists = { MC: D.MC.map((m) => ({ text: m[2], topic: m[0] + "|" + m[1] })) };
   Object.entries(D.CARDS_RAW).forEach(([deck, l]) => { lists["Deck " + deck] = l.map((c) => ({ text: c[0] })); });
-  return { lists, topics: D.TOPICS.map((t) => t.id), decks: Object.keys(D.DECKS), ueb: D.UEB.map((u) => u.id), html };
+  const ev = (D.EVENTS || []).flatMap((e) => e.kap.flatMap((k) => k.q.map((x) => e.id + ":" + x[1]))); // Event-Fragen: feste IDs
+  return { lists, topics: D.TOPICS.map((t) => t.id), decks: Object.keys(D.DECKS), ueb: D.UEB.map((u) => u.id), ev, html };
 }
 
 function check(oldD, newD) {
@@ -66,6 +67,9 @@ function check(oldD, newD) {
   const t = lost(oldD.topics, newD.topics); if (t.length) errors.push(`Themen-IDs entfernt oder umbenannt: ${t.join(", ")} (eigene Fragen hängen daran).`);
   const d = lost(oldD.decks, newD.decks); if (d.length) errors.push(`Deck-Namen entfernt oder umbenannt: ${d.join(", ")}.`);
   const u = lost(oldD.ueb, newD.ueb); if (u.length) errors.push(`Aufgaben-IDs entfernt oder umbenannt: ${u.join(", ")} (Aufgabenpunkte hängen daran).`);
+  const ev = lost(oldD.ev, newD.ev); if (ev.length) errors.push(`Event-Fragen entfernt oder umbenannt: ${ev.slice(0, 5).join(", ")}${ev.length > 5 ? " …" : ""} (Event-Lernstand hängt an diesen IDs).`);
+  if (new Set(newD.ev).size !== newD.ev.length) errors.push("Doppelte Event-Frage-IDs – jede ID darf pro Event nur einmal vorkommen.");
+  if (newD.ev.length > oldD.ev.length) notes.push(`${newD.ev.length - oldD.ev.length} neue Event-Frage(n) – in Ordnung.`);
   // 3. Speicherschlüssel und Skript-Block
   if (!newD.html.includes(STORAGE_KEY)) errors.push("Der Speicherschlüssel \"tap2coach\" wurde geändert – alle Nutzer würden mit leerem Stand starten.");
   const closes = (newD.html.match(/<\/script/gi) || []).length;

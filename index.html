@@ -522,6 +522,48 @@ th { font-size: 0.72rem; color: var(--muted); font-weight: 700; text-transform: 
 .nt-hollow { fill: var(--surface); stroke: var(--ink); stroke-width: 1.5; }
 .nt-arrow-open { fill: none; stroke: var(--ink); stroke-width: 1.5; }
 .nt-arrow-fill { fill: var(--ink); }
+.qfig { margin: 18px 0 0; padding: 14px 14px 12px; border-radius: var(--r); background: var(--surface); box-shadow: inset 0 0 0 1.5px var(--line); animation: rise 0.25s cubic-bezier(.2,.8,.2,1); --fg-hl: #D9482B; --fg-hlt: #A3301A; }
+:root[data-theme="dark"] .qfig { --fg-hl: #F58A68; --fg-hlt: #F7A487; }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .qfig { --fg-hl: #F58A68; --fg-hlt: #F7A487; } }
+.qfig-h { font-size: 0.78rem; font-weight: 800; letter-spacing: 0.04em; text-transform: uppercase; color: var(--muted); }
+.qfig-s { overflow-x: auto; margin: 8px -4px 6px; padding: 4px; }
+.qfig svg { width: 100%; height: auto; display: block; margin: 0 auto; }
+@media (max-width: 640px) { .qfig-h::after { content: " · seitlich wischen"; font-weight: 600; text-transform: none; letter-spacing: 0; } }
+.qfig figcaption { font-size: 0.88rem; color: var(--muted); line-height: 1.5; }
+.fg-mo { fill: none; stroke: var(--ink); stroke-width: 1.5; stroke-linejoin: round; }
+.fg-mf { fill: var(--ink); stroke: var(--ink); stroke-width: 1; stroke-linejoin: round; }
+.fg-mt { fill: var(--surface); stroke: var(--ink); stroke-width: 1.5; stroke-linejoin: round; }
+.fg-hm.fg-mo, .fg-hm.fg-mt { stroke: var(--fg-hl); } .fg-hm.fg-mf { fill: var(--fg-hl); stroke: var(--fg-hl); }
+.fg-hl, .fg-hl line, .fg-hl circle { stroke: var(--fg-hl) !important; } .nt-line.fg-hl, .nt-dash.fg-hl { stroke-width: 2; }
+.fg-hlb { fill: var(--red-soft); stroke: var(--fg-hl); stroke-width: 2; } .fg-hlf { fill: var(--fg-hl); } .fg-bg { fill: var(--surface); }
+.gm-tag.ev { background: linear-gradient(90deg, #3E8E4E, #2FA39A); color: #fff; }
+.gm-tile.r-EV { border-color: #3E8E4E; } .r-EV, .gm-tile.r-EV .gm-rar { color: #3E8E4E; }
+.gm-titles { display: grid; grid-template-columns: repeat(auto-fill, minmax(170px, 1fr)); gap: 8px; margin-top: 10px; }
+.gm-ttl { position: relative; text-align: left; border: 2px solid var(--line-2); background: var(--surface); border-radius: 12px; padding: 9px 11px; cursor: pointer; color: var(--ink); font: inherit; display: flex; flex-direction: column; gap: 2px; }
+.gm-ttl b { font-family: var(--display); font-size: 0.95rem; } .gm-ttl.ev b { padding-right: 46px; } .gm-ttl span { font-size: 0.74rem; color: var(--muted); line-height: 1.35; }
+.gm-ttl.on { border-color: var(--blue); background: var(--blue-soft); } .gm-ttl.on b::after { content: " ✓"; color: var(--ok); }
+.gm-ttl.locked { opacity: 0.5; cursor: default; filter: grayscale(1); } .gm-ttl .gm-tag { left: auto; right: 6px; top: 7px; } .gm-ttl.ev:not(.locked) { border-color: #3E8E4E; }
+.gm-title-big { font-family: var(--display); font-weight: 800; color: var(--violet-d); margin-top: 2px; }
+:root[data-theme="dark"] .gm-title-big { color: var(--violet-m); } @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .gm-title-big { color: var(--violet-m); } }
+.ev-card, .ev-hero { display: grid; grid-template-columns: 120px minmax(0, 1fr); gap: 18px; align-items: start; } .ev-hero { grid-template-columns: 150px minmax(0, 1fr); }
+.ev-rw svg { display: block; width: 100%; height: auto; border-radius: 20px; } .ev-fig { width: 100%; border-radius: 20px; overflow: hidden; }
+.ev-tt { aspect-ratio: 1; border-radius: 20px; background: linear-gradient(135deg, var(--violet-soft), var(--blue-soft-2)); display: grid; place-content: center; text-align: center; font-size: 2.2rem; padding: 8px; } .ev-tt b { display: block; font-family: var(--display); font-size: 0.95rem; margin-top: 4px; }
+.ev-kick { font-size: 0.72rem; font-weight: 800; letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted); }
+.ev-main h2, .ev-main h3 { margin: 2px 0 4px; } .ev-main .amp-bar { margin: 10px 0 6px; } .ev-main .btn { margin-top: 8px; } .ev-main p { margin: 4px 0; }
+.ev-over { opacity: 0.7; }
+.ev-rwbox { margin: 12px 0; padding: 10px 12px; border-radius: var(--r-sm); background: var(--yellow-soft); display: flex; flex-direction: column; gap: 3px; }
+.ev-final h3, .ev-tipcard h3 { display: flex; align-items: center; gap: 8px; } .ev-final.locked .btn.primary { opacity: 0.6; }
+.ev-tips { margin: 8px 0 0; padding-left: 20px; display: grid; gap: 6px; font-size: 0.92rem; line-height: 1.5; }
+.ev-kh { display: flex; gap: 12px; align-items: center; margin-bottom: 10px; } .ev-kh h3 { margin: 0; }
+.ev-kn { width: 34px; height: 34px; border-radius: 50%; display: grid; place-items: center; background: var(--blue-soft-2); font-weight: 800; flex: none; }
+.ev-lern { margin: 12px 0; } .ev-lern summary { cursor: pointer; font-weight: 700; display: inline-flex; gap: 6px; align-items: center; }
+.ev-lern dl { margin: 10px 0 0; display: grid; gap: 10px; } .ev-lern dt { font-weight: 800; font-family: var(--display); } .ev-lern dd { margin: 2px 0 0; line-height: 1.55; font-size: 0.94rem; }
+.ev-res { margin: 12px 0; padding: 12px 14px; border-radius: var(--r-sm); display: flex; flex-direction: column; gap: 4px; } .ev-res.ok { background: var(--ok-soft); } .ev-res.bad { background: var(--bad-soft); }
+.nav-dot { position: absolute; top: 9px; left: 27px; width: 8px; height: 8px; border-radius: 50%; background: var(--red); box-shadow: 0 0 0 2px var(--surface); }
+@media (max-width: 900px) { .nav-dot { top: 5px; left: calc(50% + 6px); } }
+@media (max-width: 440px) { nav.side .nav-i { font-size: 0.6rem; padding-left: 0; padding-right: 0; letter-spacing: -0.01em; } .gm-titles { grid-template-columns: 1fr 1fr; } .gm-ttl { padding: 8px 9px; } .gm-ttl b { font-size: 0.86rem; } .gm-ttl span { font-size: 0.68rem; } }
+@media (max-width: 560px) { .ev-card, .ev-hero { grid-template-columns: 84px minmax(0, 1fr); gap: 12px; } }
+.fg-hlt, .fg-hlt text { fill: var(--fg-hlt) !important; font-weight: 700; } .fg-u { text-decoration: underline; } .fg-sym { font-size: 16px; }
 
 /* ---------- keyframes */
 @keyframes rise { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: none; } }
@@ -901,6 +943,7 @@ a.iconbtn { color: var(--ink); text-decoration: none; }
     <button type="button" class="nav-i" data-view="lernen"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5a2 2 0 0 1 2-2h14v16H6a2 2 0 0 0-2 2V5z"/><path d="M4 19a2 2 0 0 1 2-2h14"/></svg><span>Lernen</span></button>
     <button type="button" class="nav-i" data-view="aufgaben"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20h4L19 9a2.8 2.8 0 0 0-4-4L4 16v4z"/><path d="M13.5 6.5l4 4"/></svg><span>Aufgaben</span></button>
     <button type="button" class="nav-i" data-view="pruefung"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l2.5 2.5"/><path d="M9 2h6"/></svg><span>Prüfung</span></button>
+    <button type="button" class="nav-i" data-view="events"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/><path d="M12 12.5l1.1 2.2 2.4.3-1.8 1.6.5 2.4-2.2-1.2-2.2 1.2.5-2.4-1.8-1.6 2.4-.3z"/></svg><span>Events</span><i class="nav-dot" aria-hidden="true" hidden></i></button>
     <button type="button" class="nav-i" data-view="rangliste"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 21h8"/><path d="M12 17v4"/><path d="M7 4h10v5a5 5 0 0 1-10 0V4z"/><path d="M17 5h3v2a3 3 0 0 1-3 3"/><path d="M7 5H4v2a3 3 0 0 0 3 3"/></svg><span>Rangliste</span></button>
     <button type="button" class="nav-i" data-view="tipps"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 18h6M10 21h4"/><path d="M12 3a6 6 0 0 0-3.5 10.9c.6.5 1 1.2 1 2V16h5v-.1c0-.8.4-1.5 1-2A6 6 0 0 0 12 3z"/></svg><span>Tipps</span></button>
   </nav>
@@ -921,6 +964,7 @@ a.iconbtn { color: var(--ink); text-decoration: none; }
       <section class="view" id="v-plan" hidden></section>
       <section class="view" id="v-belohnungen" hidden></section>
       <section class="view" id="v-rangliste" hidden></section>
+      <section class="view" id="v-events" hidden></section>
     </main>
     <footer class="foot"><span>TAP2 Prüfungscoach · Dein Fortschritt wird lokal in diesem Browser gespeichert.</span></footer>
   </div>
@@ -2545,6 +2589,590 @@ const NOTATION = {
 </svg>` }
 };
 
+// UML-Bilder zu einzelnen Fragen. Sie erscheinen erst mit der Antwort (in der Frage würden sie die Lösung verraten).
+// Schlüssel = Frage-ID, Wert = [SVG, Erklärung]. Rot hervorgehoben ist, wonach die Frage fragt. Farben über CSS (.nt-*, .fg-*).
+const FIG = (() => {
+  const E = (s) => String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+  const H = "nt-s fg-hlt";
+  const T = (x, y, s, c, a) => `<text x="${x}" y="${y}" class="${c || "nt-s"}"${a ? ` text-anchor="${a}"` : ""}>${E(s)}</text>`;
+  const TM = (x, y, s, c) => T(x, y, s, c, "middle");
+  const lc = (o) => (o.d ? "nt-dash" : "nt-line") + (o.h ? " fg-hl" : "");
+  const mk = (m, o, end) => m ? ` marker-${end}="url(#fg-${m}${o.h ? "h" : ""})"` : "";
+  const L = (x1, y1, x2, y2, m, o = {}) => `<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" class="${lc(o)}"${mk(m, o, "end")}${mk(o.s, o, "start")}/>`;
+  const P = (pts, m, o = {}) => `<polyline points="${pts}" class="${lc(o)}"${mk(m, o, "end")}/>`;
+  const MK = [["a", "0 0 12 12", 11, 6, 11, 11, "M1,1 L11,6 L1,11", "fg-mo"], ["f", "0 0 12 12", 11, 6, 11, 11, "M1,1 L11,6 L1,11 z", "fg-mf"],
+    ["t", "0 0 14 14", 13, 7, 15, 15, "M1,1 L13,7 L1,13 z", "fg-mt"], ["d", "0 0 22 12", 1, 6, 20, 11, "M1,6 L11,1 L21,6 L11,11 z", "fg-mt"], ["D", "0 0 22 12", 1, 6, 20, 11, "M1,6 L11,1 L21,6 L11,11 z", "fg-mf"]];
+  const DEFS = "<defs>" + MK.map(([id, vb, rx, ry, w, h, d, c]) => ["", "h"].map((v) => `<marker id="fg-${id}${v}" viewBox="${vb}" refX="${rx}" refY="${ry}" markerWidth="${w}" markerHeight="${h}" markerUnits="userSpaceOnUse" orient="auto"><path d="${d}" class="${c}${v ? " fg-hm" : ""}"/></marker>`).join("")).join("") + "</defs>";
+  const SVG = (w, h, label, body) => `<svg viewBox="0 0 ${w} ${h}" style="max-width:${Math.round(w * 1.15)}px;min-width:${Math.round(w * 0.72)}px" role="img" aria-label="${E(label)}">${body}${DEFS}</svg>`;
+  const bx = (h) => h ? "fg-hlb" : "nt-box";
+  // Aktivität / Zustand
+  const act = (x, y, w, s, h) => `<rect x="${x}" y="${y}" width="${w}" height="30" rx="12" class="${bx(h)}"/>` + TM(x + w / 2, y + 19, s);
+  const dia = (cx, cy, h) => `<polygon points="${cx - 14},${cy} ${cx},${cy - 14} ${cx + 14},${cy} ${cx},${cy + 14}" class="${bx(h)}"/>`;
+  const start = (cx, cy) => `<circle cx="${cx}" cy="${cy}" r="7" class="nt-fill"/>`;
+  const fin = (cx, cy, h) => `<circle cx="${cx}" cy="${cy}" r="10" class="${bx(h)}"/><circle cx="${cx}" cy="${cy}" r="5.5" class="nt-fill"/>`;
+  const flowEnd = (cx, cy, h) => `<circle cx="${cx}" cy="${cy}" r="9" class="${bx(h)}"/><path d="M${cx - 6.4},${cy - 6.4} L${cx + 6.4},${cy + 6.4} M${cx + 6.4},${cy - 6.4} L${cx - 6.4},${cy + 6.4}" class="${lc({ h })}"/>`;
+  const bar = (x, y, w, h, hl) => `<rect x="${x}" y="${y}" width="${w}" height="${h}" class="${hl ? "fg-hlf" : "nt-fill"}"/>`;
+  const state = (x, y, w, h, s) => `<rect x="${x}" y="${y}" width="${w}" height="${h}" rx="10" class="nt-box"/>` + TM(x + w / 2, y + h / 2 + 4, s, "nt-t");
+  // Anwendungsfall
+  const actor = (cx, y, s, h) => `<g class="nt-line${h ? " fg-hl" : ""}"><circle cx="${cx}" cy="${y + 8}" r="8"/><line x1="${cx}" y1="${y + 16}" x2="${cx}" y2="${y + 38}"/><line x1="${cx - 14}" y1="${y + 24}" x2="${cx + 14}" y2="${y + 24}"/><line x1="${cx}" y1="${y + 38}" x2="${cx - 11}" y2="${y + 56}"/><line x1="${cx}" y1="${y + 38}" x2="${cx + 11}" y2="${y + 56}"/></g>` + TM(cx, y + 72, s);
+  const ucW = (s) => Math.max(52, s.length * 3.2 + 18);
+  const uc = (cx, cy, s, h, rx) => `<ellipse cx="${cx}" cy="${cy}" rx="${rx || ucW(s)}" ry="19" class="${bx(h)}"/>` + TM(cx, cy + 4, s);
+  const frame = (x, y, w, h, s, hl) => `<rect x="${x}" y="${y}" width="${w}" height="${h}" class="nt-frame2${hl ? " fg-hl" : ""}"/>` + T(x + 8, y + 17, s, hl ? "nt-t fg-hlt" : "nt-t");
+  // Klasse: Zeilen als Text oder [Text, Flags] mit u = unterstrichen (statisch), i = kursiv (abstrakt), h = hervorgehoben
+  const row = (x, y, r) => { const [s, f = ""] = Array.isArray(r) ? r : [r]; return `<text x="${x}" y="${y}" class="nt-s${f.includes("u") ? " fg-u" : ""}${f.includes("i") ? " nt-i" : ""}${f.includes("h") ? " fg-hlt" : ""}">${E(s)}</text>`; };
+  const cmpH = (rs) => rs == null ? 0 : rs.length ? rs.length * 17 + 8 : 12;
+  const clsH = (attrs, ops, o = {}) => (o.st ? 40 : 26) + cmpH(attrs) + cmpH(ops);
+  const cls = (x, y, w, name, attrs = [], ops = [], o = {}) => {
+    const hh = o.st ? 40 : 26, h = clsH(attrs, ops, o);
+    let s = `<rect x="${x}" y="${y}" width="${w}" height="${h}" class="nt-box"/>`;
+    if (o.st) s += TM(x + w / 2, y + 16, o.st, o.hs ? H : "nt-s");
+    s += TM(x + w / 2, y + (o.st ? 32 : 18), name, "nt-t" + (o.it ? " nt-i" : "") + (o.hn ? " fg-hlt" : ""));
+    let yy = y + hh;
+    [attrs, ops].forEach((rs) => { if (rs == null) return; s += `<line x1="${x}" y1="${yy}" x2="${x + w}" y2="${yy}" class="nt-line"/>`; rs.forEach((r, i) => { s += row(x + 9, yy + 17 + i * 17, r); }); yy += cmpH(rs); });
+    return s;
+  };
+  const M = (x, y, s, h, a) => `<g class="nt-card${h ? " fg-hlt" : ""}">${T(x, y, s, "", a)}</g>`;
+  // Sequenzdiagramm
+  const seq = (parts, o) => {
+    const px = parts.map((p) => p[0]); let s = "";
+    parts.forEach(([x, l, hy = 14, ey]) => { const bw = Math.max(70, l.length * 7.2 + 16); s += `<line x1="${x}" y1="${hy + 26}" x2="${x}" y2="${ey || o.end}" class="nt-dash"/><rect x="${x - bw / 2}" y="${hy}" width="${bw}" height="26" class="nt-box"/>` + TM(x, hy + 17, l, "nt-t"); });
+    (o.acts || []).forEach(([i, y1, y2]) => { s += `<rect x="${px[i] - 5}" y="${y1}" width="10" height="${y2 - y1}" class="fg-bg"/><rect x="${px[i] - 5}" y="${y1}" width="10" height="${y2 - y1}" class="nt-act"/>`; });
+    (o.frags || []).forEach((f) => {
+      const tw = f.op.length * 7.4 + 14;
+      s += `<rect x="${f.x}" y="${f.y}" width="${f.w}" height="${f.h}" class="nt-frame2${f.hl ? " fg-hl" : ""}"/><path d="M${f.x},${f.y} h${tw} v11 l-7,8 h-${tw - 7} z" class="${f.hl ? "fg-hlb" : "nt-box"}"/>` + T(f.x + 6, f.y + 14, f.op, f.hl ? "nt-t fg-hlt" : "nt-t");
+      const cx = f.cx || f.x + tw + 8;
+      if (f.cond) s += T(cx, f.y + 15, f.cond);
+      (f.div || []).forEach(([y, c]) => { s += `<line x1="${f.x}" y1="${y}" x2="${f.x + f.w}" y2="${y}" class="nt-dash2"/>` + T(f.cx || f.x + 8, y + 15, c); });
+    });
+    (o.msgs || []).forEach((m) => {
+      const r = m.b > m.a, x1 = px[m.a] + (r ? 5 : -5);
+      const x2 = m.k === "c" ? px[m.b] - Math.max(70, parts[m.b][1].length * 7.2 + 16) / 2 : px[m.b] + (r ? -5 : 5);
+      s += L(x1, m.y, x2, m.y, m.k === "s" ? "f" : "a", { d: m.k === "r" || m.k === "c", h: m.h }) + TM(m.lx || (x1 + x2) / 2, m.y - 6, m.l, m.h ? H : "nt-s");
+      if (m.tag) s += T(Math.min(x1, x2) + 8, m.y + 15, m.tag, H);
+    });
+    (o.x || []).forEach(([i, y]) => { const x = px[i]; s += `<path d="M${x - 9},${y - 9} L${x + 9},${y + 9} M${x + 9},${y - 9} L${x - 9},${y + 9}" class="nt-line fg-hl" style="stroke-width:2.5"/>`; });
+    return s;
+  };
+  const legend = (y, items) => items.map(([x, k, t, h]) => L(x, y - 4, x + 38, y - 4, k === "s" ? "f" : "a", { d: k === "r", h }) + T(x + 46, y, t, h ? H : "nt-s")).join("");
+  // Komponenten / Verteilung
+  const comp = (x, y, w, name) => `<rect x="${x}" y="${y}" width="${w}" height="56" class="nt-box"/><rect x="${x + w - 22}" y="${y + 8}" width="13" height="16" class="nt-box"/><rect x="${x + w - 26}" y="${y + 11}" width="8" height="4" class="nt-box"/><rect x="${x + w - 26}" y="${y + 18}" width="8" height="4" class="nt-box"/>` + T(x + 10, y + 21, "«component»") + T(x + 10, y + 40, name, "nt-t");
+  const ball = (cx, cy, h) => `<circle cx="${cx}" cy="${cy}" r="7" class="${bx(h)}"/>`;
+  const sock = (cx, cy, h) => `<path d="M${cx},${cy - 12} A12,12 0 0 0 ${cx},${cy + 12}" class="${lc({ h })}"/>`;
+  const node = (x, y, w, h, st, name, hl) => `<polygon points="${x},${y} ${x + 12},${y - 12} ${x + w + 12},${y - 12} ${x + w},${y}" class="nt-box"/><polygon points="${x + w},${y} ${x + w + 12},${y - 12} ${x + w + 12},${y + h - 12} ${x + w},${y + h}" class="nt-box"/><rect x="${x}" y="${y}" width="${w}" height="${h}" class="nt-box"/>` + (st ? T(x + 8, y + 16, st, hl ? H : "nt-s") : "") + T(x + 8, y + (st ? 32 : 18), name, "nt-t");
+
+  const F = {};
+  // ---------- Aktivitätsdiagramm
+  F.aktElemente = SVG(600, 222, "Die sechs Elemente des Aktivitätsdiagramms", `<g class="nt-frame"><rect x="4" y="4" width="192" height="104"/><rect x="204" y="4" width="192" height="104"/><rect x="404" y="4" width="192" height="104"/><rect x="4" y="114" width="192" height="104"/><rect x="204" y="114" width="192" height="104"/><rect x="404" y="114" width="192" height="104"/></g>` +
+    start(80, 38) + L(87, 38, 125, 38, "a") + TM(100, 84, "Startknoten", "nt-t") + TM(100, 99, "gefüllter Kreis") +
+    act(240, 23, 120, "Ware bestellen") + TM(300, 84, "Aktion", "nt-t") + TM(300, 99, "Rechteck mit runden Ecken") +
+    L(440, 38, 486, 38, "a") + dia(500, 38) + P("500,24 500,16 556,16", "a") + T(507, 12, "[ja]") + P("500,52 500,60 556,60", "a") + T(507, 73, "[nein]") + TM(500, 88, "Entscheidung", "nt-t") + TM(500, 101, "Raute, [Bedingung] an den Kanten") +
+    L(100, 124, 100, 146, "a") + bar(60, 148, 80, 6) + L(80, 154, 80, 176, "a") + L(120, 154, 120, 176, "a") + TM(100, 196, "Gabelung / Vereinigung", "nt-t") + TM(100, 210, "dicker Balken (Fork / Join)") +
+    fin(270, 152) + flowEnd(330, 152) + TM(300, 196, "Endknoten · Ablaufende", "nt-t") + TM(300, 210, "Kreis mit Punkt · Kreis mit X") +
+    `<rect x="430" y="124" width="140" height="56" class="nt-frame2"/><line x1="500" y1="124" x2="500" y2="180" class="nt-line"/><line x1="430" y1="142" x2="570" y2="142" class="nt-line"/>` + TM(465, 137, "Kunde") + TM(535, 137, "Shop") + TM(500, 196, "Partition (Swimlane)", "nt-t") + TM(500, 210, "eine Bahn je Verantwortlichem"));
+  F.aktVerzweigung = SVG(580, 175, "Aktivitätsdiagramm mit Entscheidung nach Lager prüfen", start(18, 95) + L(25, 95, 48, 95, "a") + act(50, 80, 110, "Lager prüfen") + L(160, 95, 176, 95, "a") + dia(192, 95) +
+    P("192,81 192,45 308,45", "a", { h: 1 }) + T(200, 38, "[verfügbar]", H) + P("192,109 192,145 308,145", "a", { h: 1 }) + T(200, 138, "[nicht verfügbar]", H) + T(212, 99, "Entscheidung", "nt-note") +
+    act(310, 30, 140, "Ware versenden") + act(310, 130, 140, "Ware nachbestellen") + P("450,45 480,45 480,79", "a") + P("450,145 480,145 480,111", "a") + dia(480, 95) + T(460, 99, "Zusammenführung", "nt-note", "end") + L(494, 95, 528, 95, "a") + fin(540, 95));
+  F.aktFork = SVG(580, 188, "Aktivitätsdiagramm mit Fork und Join", start(18, 95) + L(25, 95, 42, 95, "a") + act(42, 80, 125, "Bestellung erfassen") + L(167, 95, 186, 95, "a") + bar(188, 35, 6, 120, 1) +
+    L(194, 55, 226, 55, "a") + act(228, 40, 125, "Rechnung erstellen") + L(194, 135, 226, 135, "a") + act(228, 120, 125, "Ware verpacken") + L(353, 55, 384, 55, "a") + L(353, 135, 384, 135, "a") + bar(386, 35, 6, 120, 1) +
+    L(392, 95, 412, 95, "a") + act(414, 80, 110, "Ware versenden") + L(524, 95, 546, 95, "a") + fin(558, 95) + TM(191, 176, "Fork: teilt den Fluss", H) + TM(389, 176, "Join: wartet auf beide", H));
+  F.aktAblaufende = SVG(640, 185, "Aktivitätsdiagramm mit Ablaufende und Endknoten", start(18, 95) + L(25, 95, 42, 95, "a") + act(42, 80, 125, "Bestellung erfassen") + L(167, 95, 186, 95, "a") + bar(188, 35, 6, 120) +
+    L(194, 55, 226, 55, "a") + act(228, 40, 135, "Newsletter anbieten") + L(363, 55, 384, 55, "a") + flowEnd(394, 55, 1) + T(412, 59, "Ablaufende: nur dieser Zweig endet", H) +
+    L(194, 135, 226, 135, "a") + act(228, 120, 135, "Bestellung bearbeiten") + L(363, 135, 386, 135, "a") + act(388, 120, 105, "Ware versenden") + L(493, 135, 514, 135, "a") + fin(526, 135) + TM(526, 170, "Endknoten: alles endet"));
+  // ---------- Zustandsdiagramm
+  const zTrans = (aktion) => SVG(600, 138, "Zustandsübergang mit Ereignis, Bedingung und Aktion", start(18, 60) + L(25, 60, 48, 60, "a") + state(50, 40, 100, 40, "Bezahlung") + L(150, 60, 500, 60, "a", { h: 1 }) + state(502, 40, 80, 40, "Druck") +
+    T(162, 52, "bezahlen", H) + T(222, 52, "[Betrag ≥ Preis]", H) + T(334, 52, "/ " + aktion, H) + TM(189, 78, "Ereignis", "nt-note") + TM(275, 78, "Bedingung", "nt-note") + TM(400, 78, "Aktion", "nt-note") +
+    TM(300, 122, "Form: Ereignis [Bedingung] / Aktion", "nt-t"));
+  F.zWechsel = zTrans("Wechselgeld ausgeben");
+  F.zQuittung = zTrans("Quittung drucken");
+  F.zEntry = SVG(580, 168, "Zustand Heizen mit entry, do und exit", state(16, 70, 90, 40, "Bereit") + L(106, 90, 178, 90, "a") + TM(142, 82, "[Temp < Soll]") +
+    `<rect x="180" y="30" width="200" height="122" rx="10" class="nt-box"/><line x1="180" y1="62" x2="380" y2="62" class="nt-line"/>` + TM(280, 51, "Heizen", "nt-t") +
+    T(194, 86, "entry / Pumpe starten", H) + T(194, 109, "do / Temperatur regeln", H) + T(194, 132, "exit / Pumpe stoppen", H) +
+    T(394, 86, "einmal beim Betreten") + T(394, 109, "solange der Zustand aktiv ist") + T(394, 132, "einmal beim Verlassen"));
+  F.zAutomat = SVG(610, 138, "Zustandsdiagramm eines Getränkeautomaten", start(18, 60) + L(25, 60, 46, 60, "a") + state(48, 40, 90, 40, "Bereit") + L(138, 60, 258, 60, "a") + TM(198, 52, "Geld einwerfen") +
+    state(260, 40, 130, 40, "Geld eingeworfen") + L(390, 60, 500, 60, "a") + TM(445, 52, "Getränk wählen") + state(502, 40, 90, 40, "Ausgabe") + P("547,80 547,118 93,118 93,82", "a") + TM(320, 112, "Getränk entnommen"));
+  // ---------- Sequenzdiagramm
+  F.seqLogin = SVG(620, 316, "Sequenzdiagramm eines Logins mit Lebenslinien, Nachrichten und alt-Fragment", seq([[90, ":Browser"], [290, ":LoginController"], [480, ":Datenbank"]], {
+    end: 262, acts: [[0, 58, 252], [1, 64, 246], [2, 94, 126]],
+    frags: [{ x: 40, y: 140, w: 300, h: 115, op: "alt", cond: "[Passwort richtig]", div: [[198, "[sonst]"]], hl: 1, cx: 104 }],
+    msgs: [{ a: 0, b: 1, y: 70, l: "login(name, pw)", k: "s" }, { a: 1, b: 2, y: 100, l: "findeNutzer(name)", k: "s" }, { a: 2, b: 1, y: 122, l: "nutzer", k: "r" },
+      { a: 1, b: 0, y: 182, l: "Startseite", k: "r" }, { a: 1, b: 0, y: 238, l: "Fehlermeldung", k: "r" }] }) +
+    T(492, 114, "Aktivierungsbalken", H) + T(490, 210, "Lebenslinie", H) + T(40, 280, "kombiniertes Fragment (alt, opt, loop)", H) + legend(306, [[20, "s", "synchron: durchgezogen, gefüllte Spitze", 1], [330, "r", "Antwort: gestrichelt, offene Spitze", 1]]));
+  F.seqFragmente = SVG(610, 316, "Sequenzdiagramm mit loop, alt und opt", seq([[110, ":Browser"], [380, ":LoginController"]], {
+    end: 306, acts: [[0, 52, 296], [1, 74, 292]],
+    frags: [{ x: 40, y: 56, w: 420, h: 52, op: "loop(1,3)", hl: 1 }, { x: 40, y: 122, w: 420, h: 178, op: "alt", cond: "[Passwort falsch]", div: [[172, "[sonst]"]], hl: 1, cx: 126 },
+      { x: 58, y: 196, w: 384, h: 66, op: "opt", cond: "[2FA aktiv]", hl: 1, cx: 126 }],
+    msgs: [{ a: 0, b: 1, y: 94, l: "login(name, pw)", k: "s" }, { a: 1, b: 0, y: 160, l: "Fehlermeldung", k: "r" }, { a: 1, b: 0, y: 230, l: "codeAbfragen()", k: "s" }, { a: 0, b: 1, y: 252, l: "code", k: "r" }, { a: 1, b: 0, y: 288, l: "Startseite", k: "r" }] }) +
+    T(470, 84, "Wiederholung, bis zu 3×") + T(470, 150, "Alternativen, genau") + T(470, 164, "eine wird ausgeführt") + T(470, 226, "nur wenn die") + T(470, 240, "Bedingung gilt"));
+  F.seqNachrichten = SVG(630, 262, "Sequenzdiagramm mit synchroner, asynchroner, Antwort- und Erzeugungsnachricht", seq([[70, ":Controller"], [230, ":Lager"], [390, ":MailService"], [560, "r:Rechnung", 183]], {
+    end: 250, acts: [[0, 50, 240], [1, 62, 114]],
+    msgs: [{ a: 0, b: 1, y: 70, l: "pruefen()", k: "s", h: 1, tag: "synchron" }, { a: 1, b: 0, y: 110, l: "ok", k: "r", h: 1, tag: "Antwort" }, { a: 0, b: 2, y: 150, l: "sendeMail()", lx: 310, k: "a", h: 1, tag: "asynchron" }, { a: 0, b: 3, y: 196, l: "«create»", k: "c", h: 1, tag: "Erzeugung" }] }));
+  F.seqSync = SVG(470, 172, "Synchroner Aufruf im Sequenzdiagramm", seq([[90, ":Kasse"], [330, ":Zahlungsdienst"]], { end: 140, acts: [[0, 50, 132], [1, 64, 118]], msgs: [{ a: 0, b: 1, y: 72, l: "bezahlen(betrag)", k: "s", h: 1 }, { a: 1, b: 0, y: 112, l: "ergebnis", k: "r" }] }) +
+    legend(162, [[20, "s", "synchron: Aufrufer wartet", 1], [270, "r", "Antwort"]]));
+  F.seqAntwort = SVG(470, 172, "Antwortnachricht im Sequenzdiagramm", seq([[90, ":Controller"], [330, ":Lager"]], { end: 140, acts: [[0, 50, 132], [1, 64, 118]], msgs: [{ a: 0, b: 1, y: 72, l: "lagerPruefen()", k: "s" }, { a: 1, b: 0, y: 112, l: "bestand", k: "r", h: 1 }] }) +
+    legend(162, [[20, "s", "Aufruf"], [170, "r", "Antwort: gestrichelt, offene Spitze", 1]]));
+  F.seqOpt = SVG(480, 160, "opt-Fragment im Sequenzdiagramm", seq([[100, ":Bestellservice"], [360, ":MailService"]], { end: 150, acts: [[0, 50, 144], [1, 100, 128]],
+    frags: [{ x: 40, y: 66, w: 390, h: 72, op: "opt", cond: "[Kunde hat zugestimmt]", hl: 1, cx: 116 }], msgs: [{ a: 0, b: 1, y: 112, l: "sendeBestaetigung()", k: "s" }] }));
+  // ---------- Anwendungsfalldiagramm
+  const ucBez = (sys, actorN, base, incl, ext) => {
+    const bw = ucW(base); let s = actor(40, 66, actorN) + frame(110, 16, 470, ext ? 200 : 132, sys) + uc(250, 95, base) + L(56, 92, 250 - bw, 95);
+    if (incl) { const iw = ucW(incl); s += uc(570 - iw, 95, incl) + L(250 + bw, 95, 570 - 2 * iw - 2, 95, "a", { d: 1, h: 1 }) + TM((250 + bw + 570 - 2 * iw) / 2, 86, "«include»", H) + TM((250 + bw + 570 - 2 * iw) / 2, 112, "vom Basisfall weg", "nt-note"); }
+    if (ext) s += uc(250, 190, ext) + L(250, 171, 250, 116, "a", { d: 1, h: 1 }) + T(258, 140, "«extend»", H) + T(258, 155, "zum Basisfall hin", "nt-note");
+    return SVG(600, ext ? 226 : 158, "Anwendungsfalldiagramm mit include und extend", s);
+  };
+  F.ucShop = ucBez("Online-Shop", "Kunde", "Bestellen", "Anmelden", "Gutschein einlösen");
+  F.ucGutschein = ucBez("Online-Shop", "Kunde", "Bestellung aufgeben", null, "Gutschein einlösen");
+  F.ucBank = ucBez("Geldautomat", "Kunde", "Geld abheben", "Karte prüfen", null);
+  F.ucBib = SVG(640, 270, "Anwendungsfalldiagramm eines Bibliothekssystems", frame(120, 16, 420, 240, "Bibliothekssystem", 1) + T(128, 50, "Systemgrenze mit Namen", H) +
+    actor(55, 40, "Leser") + actor(55, 160, "Mitarbeiter") + actor(588, 150, "Mahnsystem") +
+    uc(300, 78, "Buch ausleihen", 0, 82) + uc(300, 148, "Buch zurückgeben", 0, 82) + uc(300, 218, "Mahnung senden", 0, 82) + uc(468, 148, "Ausweis prüfen", 0, 56) +
+    L(70, 64, 218, 78) + L(70, 64, 218, 148) + L(70, 184, 218, 148) + L(70, 184, 218, 218) + L(574, 174, 382, 218) +
+    L(366, 90, 432, 132, "a", { d: 1 }) + T(404, 104, "«include»"));
+  // ---------- Klassendiagramm
+  const VIS = [["+", "public: überall sichtbar"], ["-", "private: nur in der Klasse"], ["#", "protected: Klasse und Unterklassen"], ["~", "package: im selben Paket"]];
+  const vis = (name, attrs, ops, hl) => SVG(570, 148, "Klasse mit Sichtbarkeiten", cls(20, 18, 250, name, attrs, ops) +
+    VIS.map(([z, t], i) => `<text x="300" y="${45 + i * 24}" class="nt-t fg-sym${z === hl ? " fg-hlt" : ""}">${E(z)}</text>` + T(318, 44 + i * 24, t, z === hl ? H : "nt-s")).join(""));
+  F.visKonto = vis("Konto", ["- kontonummer: String", "# saldo: Double", "~ filiale: String"], ["+ einzahlen(betrag: Double): Double"], null);
+  F.visFahrzeug = vis("Fahrzeug", ["- kennzeichen: String", ["# kilometerstand: Integer", "h"], "~ standort: String"], ["+ fahren(km: Integer)"], "#");
+  F.visPaket = vis("Artikel", ["- preis: Double", ["~ lagerort: String", "h"], "# bestand: Integer"], ["+ getPreis(): Double"], "~");
+  F.methoden = SVG(610, 150, "Klasse Konto mit statischer und abstrakter Methode", cls(20, 20, 300, "Konto {abstract}", ["- saldo: Double"], [["+ einzahlen(betrag: Double): Double", "h"], ["+ getAnzahlKonten(): Integer", "uh"], ["+ berechneGebuehr(): Double", "ih"]], { it: 1 }) +
+    T(340, 38, "Name kursiv: abstrakte Klasse") + T(340, 86, "(parameter: Typ): Rückgabetyp", H) + T(340, 103, "unterstrichen = statisch", H) + T(340, 120, "kursiv = abstrakt", H));
+  F.statisch = SVG(580, 135, "Klasse Kunde mit statischem Attribut", cls(20, 20, 260, "Kunde", ["- name: String", ["- anzahlKunden: Integer", "uh"]], [["+ getAnzahlKunden(): Integer", "u"]]) +
+    T(300, 78, "unterstrichen = statisch", H) + T(300, 94, "gehört zur Klasse, nicht zum Objekt"));
+  const hZ = clsH([1, 2], [1]);
+  F.zahlung = SVG(600, 270, "Abstrakte Klasse, Interface, statisches Attribut und Realisierung", cls(30, 20, 210, "Zahlung", [["- anzahl: Integer", "uh"], "- betrag: Double"], [["+ ausfuehren(): Boolean", "i"]], { it: 1, hn: 1 }) +
+    cls(360, 20, 210, "Erstattbar", null, ["+ erstatten(betrag: Double)"], { st: "«interface»", hs: 1 }) + cls(195, 180, 210, "Kartenzahlung", ["- kartennummer: String"], ["+ erstatten(betrag: Double)"]) +
+    L(250, 180, 150, 20 + hZ, "t") + T(196, 160, "Vererbung", "nt-s", "end") + L(350, 180, 455, 85, "t", { d: 1, h: 1 }) + T(410, 150, "Realisierung", H) + T(418, 214, "kursiv = abstrakt", H) + T(418, 231, "unterstrichen = statisch", H));
+  F.realisierung = SVG(600, 248, "Zwei Klassen realisieren ein Interface", cls(185, 20, 230, "Zahlungsart", null, ["+ bezahlen(betrag: Double): Boolean"], { st: "«interface»" }) +
+    cls(30, 172, 220, "PayPalZahlung", [], ["+ bezahlen(betrag: Double): Boolean"]) + cls(350, 172, 220, "KartenZahlung", [], ["+ bezahlen(betrag: Double): Boolean"]) +
+    L(140, 172, 262, 85, "t", { d: 1, h: 1 }) + L(460, 172, 338, 85, "t", { d: 1, h: 1 }) + TM(300, 132, "Realisierung", H) + TM(300, 148, "gestrichelt, hohles Dreieck"));
+  const box = (x, y, w, n) => cls(x, y, w, n, [], []);
+  F.mult = SVG(600, 212, "Klassendiagramm einer Hochschule mit Multiplizitäten", box(10, 40, 105, "Studiengang") + box(185, 40, 95, "Student") + box(350, 40, 80, "Kurs") + box(500, 40, 85, "Dozent") + box(185, 150, 95, "Spind") +
+    L(115, 65, 185, 65) + L(280, 65, 350, 65) + L(430, 65, 500, 65) + L(232, 90, 232, 150) +
+    M(121, 58, "1", 1) + M(179, 58, "*", 0, "end") + M(286, 58, "*") + M(344, 58, "*", 1, "end") + M(436, 58, "*") + M(494, 58, "1..*", 1, "end") + M(240, 106, "0..1") + M(240, 144, "0..1", 1) +
+    TM(150, 82, "studiert") + TM(315, 82, "belegt") + TM(465, 82, "hält") + T(224, 128, "hat", "nt-s", "end"));
+  const pair = (l, r, lm, rm, verb) => SVG(520, 104, "Assoziation mit Multiplizitäten", box(40, 30, 120, l) + box(370, 30, 120, r) + L(160, 55, 370, 55) + M(166, 48, lm) + M(364, 48, rm, 1, "end") + TM(265, 72, verb));
+  F.multBuch = pair("Ausleihe", "Buch", "*", "1..*", "enthält");
+  F.multWagen = pair("Mitarbeiter", "Dienstwagen", "0..1", "0..1", "nutzt");
+  F.beziehungen = SVG(640, 350, "Assoziation, Komposition, Aggregation, Vererbung und Abhängigkeit", box(30, 110, 100, "Gast") + box(250, 10, 110, "Hotel") + box(250, 110, 110, "Zimmer") + box(250, 240, 110, "Suite") +
+    box(460, 10, 120, "Abteilung") + box(460, 110, 120, "Mitarbeiter") + box(445, 200, 150, "Rechnungsdrucker") + box(460, 290, 120, "Rechnung") +
+    L(130, 135, 250, 135) + TM(190, 128, "Assoziation", H) + L(305, 60, 305, 110, null, { s: "D" }) + T(314, 90, "Komposition", H) + L(305, 240, 305, 160, "t") + T(314, 205, "Vererbung", H) +
+    L(520, 60, 520, 110, null, { s: "d" }) + T(529, 90, "Aggregation", H) + L(520, 250, 520, 290, "a", { d: 1 }) + T(529, 274, "Abhängigkeit", H));
+  // ---------- Komponenten- und Verteilungsdiagramm
+  F.komponenten = SVG(620, 150, "Komponentendiagramm eines Webshops mit Schnittstellen", comp(10, 50, 140, "Shop-Frontend") + comp(240, 50, 150, "Bestellservice") + comp(470, 50, 140, "Zahlungsservice") +
+    L(240, 78, 207, 78) + ball(200, 78) + L(150, 78, 188, 78) + sock(200, 78) + TM(200, 58, "Bestellung") +
+    L(470, 78, 437, 78) + ball(430, 78, 1) + L(390, 78, 418, 78) + sock(430, 78, 1) + TM(430, 58, "Zahlung") + TM(430, 124, "Kreis = bereitgestellt (Zahlungsservice)", H) + TM(430, 140, "Halbkreis = benötigt (Bestellservice)", H));
+  F.komponenten3 = SVG(610, 180, "Komponentendiagramm mit drei Services", comp(20, 60, 150, "Bestellservice") + comp(450, 10, 150, "Zahlungsservice") + comp(450, 110, 150, "Lagerservice") +
+    L(450, 38, 422, 38) + ball(415, 38, 1) + P("170,76 300,76 300,38 403,38") + sock(415, 38, 1) + T(320, 30, "Zahlung") +
+    L(450, 138, 422, 138) + ball(415, 138, 1) + P("170,100 300,100 300,138 403,138") + sock(415, 138, 1) + T(320, 130, "Lager"));
+  const vert = (db, dbms) => SVG(724, 222, "Verteilungsdiagramm eines Webshops", node(10, 60, 140, 110, "«device»", "Client-PC") + node(22, 116, 104, 40, "", "Webbrowser") +
+    node(230, 40, 230, 165, "«device»", "Webserver") + node(244, 90, 196, 100, "«executionEnvironment»", "Tomcat", 1) + `<rect x="262" y="134" width="160" height="42" class="fg-hlb"/>` + T(272, 151, "«artifact»", H) + T(272, 168, "shop.war", "nt-t") +
+    node(524, 60, 180, 120, "«device»", db) + (dbms ? node(536, 116, 154, 52, "«executionEnvironment»", dbms) : "") +
+    L(150, 115, 230, 115, 0, { h: 1 }) + TM(190, 108, "HTTPS", H) + L(472, 115, 524, 115, 0, { h: 1 }) + TM(498, 108, "JDBC", H));
+  F.vertShop = vert("Datenbankserver", "");
+  F.vertMaria = vert("DB-Server", "MariaDB");
+
+  // ---------- Events: LF11a (Yachthafen Resort) und WPF Projektmanagement
+  const mini = (x, y, w, s) => `<rect x="${x}" y="${y}" width="${w}" height="24" rx="6" class="nt-act"/>` + TM(x + w / 2, y + 16, s);
+  F.evMod = SVG(600, 200, "Zwei Module mit hoher Bindung und loser Kopplung", `<rect x="20" y="24" width="230" height="122" rx="12" class="nt-box"/><rect x="350" y="24" width="230" height="122" rx="12" class="nt-box"/>` + T(32, 44, "Modul Buchung", "nt-t") + T(362, 44, "Modul Statistik", "nt-t") +
+    mini(36, 60, 90, "prüfen()") + mini(144, 60, 90, "buchen()") + mini(90, 108, 90, "Daten") + L(81, 84, 120, 108) + L(189, 84, 150, 108) + L(126, 72, 144, 72) +
+    mini(366, 60, 90, "zählen()") + mini(474, 60, 90, "anzeigen()") + mini(420, 108, 90, "Daten") + L(411, 84, 450, 108) + L(519, 84, 480, 108) + L(456, 72, 474, 72) +
+    L(250, 85, 283, 85) + ball(290, 85, 1) + L(350, 85, 302, 85) + sock(290, 85, 1) + TM(290, 70, "Schnittstelle", H) +
+    TM(135, 168, "hohe Bindung: alles dient einer Aufgabe", H) + TM(465, 168, "Zugriff nur über die Schnittstelle", H) + TM(300, 192, "lose Kopplung zwischen den Modulen", "nt-t"));
+  const assoc = (x1, y1, x2, y2) => L(x1, y1, x2, y2);
+  F.evAuf = SVG(705, 330, "Anwendungsfalldiagramm Liegeplatzverwaltung", frame(120, 10, 400, 312, "Liegeplatzverwaltung") +
+    actor(55, 30, "Mieter") + actor(595, 40, "Mitarbeiter") + actor(595, 178, "Planungsmitarbeiter") + L(595, 176, 595, 128, "t", { h: 1 }) + T(601, 160, "Generalisierung", H) +
+    uc(320, 50, "Belegung ansehen") + uc(220, 100, "Liegeplatz mieten") + uc(220, 190, "Verfügbarkeit prüfen") + uc(410, 140, "Liegeplatz sperren") + uc(410, 236, "Liegeplatz zuweisen") + uc(410, 296, "Liegeplatz reservieren") +
+    assoc(69, 54, 251, 46) + assoc(69, 60, 154, 96) + assoc(581, 64, 389, 50) + assoc(581, 66, 480, 136) + assoc(581, 70, 482, 230) + assoc(581, 206, 488, 292) +
+    L(220, 119, 220, 169, "a", { d: 1, h: 1 }) + T(228, 150, "«include»", H) + L(410, 217, 410, 161, "a", { d: 1, h: 1 }) + T(418, 196, "«extend»", H) +
+    `<path d="M134 214 h134 l10 10 v26 h-144 z" class="nt-box"/>` + T(142, 230, "Bedingung: vermieteter") + T(142, 244, "Platz wird gesperrt") + L(278, 232, 406, 190, 0, { d: 1 }));
+  const hK2 = clsH([1], [1]), hL = clsH([1, 2], [1, 2]);
+  F.evKla = SVG(664, 262, "Klassendiagramm Liegeplatzverwaltung mit Komposition und Aggregation", cls(232, 8, 200, "Liegeplatzverwaltung", ["- plaetze: Liegeplatz[100]"], ["+ anlegen(p: Liegeplatz): void"]) +
+    cls(232, 140, 200, "Liegeplatz", ["- nummer: string", "- status: string"], ["+ mieten(m: Mieter): void", "- istVerfuegbar(): boolean"]) +
+    cls(4, 160, 140, "Yacht", ["- name: string", "- laenge: double"], []) + cls(520, 160, 140, "Mieter", ["- name: string", "- telefon: string"], []) +
+    L(332, 8 + hK2, 332, 140, null, { s: "D", h: 1 }) + M(340, 8 + hK2 + 18, "1") + M(340, 134, "100", 1) + T(350, 118, "Komposition", H) +
+    L(232, 196, 144, 196, null, { s: "d", h: 1 }) + M(220, 188, "1", 0, "end") + M(150, 188, "1") + TM(188, 214, "Aggregation", H) +
+    L(432, 196, 520, 196, null, { s: "d", h: 1 }) + M(438, 188, "1") + M(514, 188, "1", 0, "end") + TM(476, 214, "Aggregation", H) + (hL ? "" : ""));
+  F.evAkt = SVG(420, 430, "Aktivitätsdiagramm Antwort auf eine Einladung", start(150, 20) + L(150, 27, 150, 44, "a") + act(80, 46, 140, "Einladung bekommen") + L(150, 76, 150, 94, "a") + act(60, 96, 180, "Wunsch auf Teilnahme prüfen") + L(150, 126, 150, 142, "a") + dia(150, 156) +
+    P("164,156 330,156 330,196", "a", { h: 1 }) + T(172, 148, "[Wunsch vorhanden]", H) + L(150, 170, 150, 284, "a", { h: 1 }) + T(142, 210, "[kein Wunsch", H, "end") + T(142, 224, "vorhanden]", H, "end") +
+    act(270, 198, 120, "Termin prüfen") + L(330, 228, 330, 244, "a") + dia(330, 258) + L(330, 272, 330, 302, "a", { h: 1 }) + T(337, 292, "[Termin frei]", H) + P("316,258 236,258 236,298 166,298", "a", { h: 1 }) + T(308, 250, "[Termin belegt]", H, "end") +
+    dia(150, 298) + T(84, 302, "Zusammen-", "nt-note", "end") + T(84, 315, "führung", "nt-note", "end") + L(150, 312, 150, 330, "a") + act(100, 332, 100, "absagen") + act(280, 304, 100, "zusagen") +
+    P("150,362 150,410 228,410", "a") + P("330,334 330,410 252,410", "a") + fin(240, 410));
+  const st2 = (x, y, w, s, h) => `<rect x="${x}" y="${y}" width="${w}" height="40" rx="10" class="${bx(h)}"/>` + TM(x + w / 2, y + 25, s, "nt-t");
+  F.evZus = SVG(640, 330, "Zustandsdiagramm Liegeplatz mit dem neuen Zustand reserviert", start(14, 160) + L(21, 160, 38, 160, "a") + T(6, 146, "anlegen") +
+    st2(40, 140, 120, "verfügbar") + st2(260, 30, 120, "reserviert", 1) + st2(480, 140, 120, "vermietet") + st2(260, 270, 120, "gesperrt") +
+    L(160, 152, 480, 152, "a") + TM(255, 146, "mieten") + L(480, 170, 160, 170, "a") + TM(255, 186, "kündigen") +
+    L(126, 140, 260, 54, "a", { h: 1 }) + T(176, 90, "reservieren", H, "end") + L(260, 68, 150, 140, "a", { h: 1 }) + T(214, 118, "Reservierung", H) + T(214, 132, "aufheben", H) +
+    L(380, 54, 512, 140, "a", { h: 1 }) + T(452, 88, "mieten", H) +
+    L(305, 70, 305, 270, "a", { h: 1 }) + T(299, 238, "sperren", H, "end") + L(335, 270, 335, 70, "a", { h: 1 }) + T(341, 238, "freigeben [zuvor reserviert]", H));
+  F.evSeq = SVG(640, 320, "Sequenzdiagramm Yacht abmelden mit Löschen des Objekts", seq([[80, ":Mieter"], [250, ":MeldeApp"], [420, ":Datenbank"], [570, ":Yacht", 14, 192]], {
+    end: 300, acts: [[0, 58, 290], [1, 64, 284], [2, 94, 124]], x: [[3, 192]],
+    frags: [{ x: 30, y: 142, w: 590, h: 150, op: "alt", cond: "[Daten OK]", div: [[226, "[sonst]"]], cx: 96 }],
+    msgs: [{ a: 0, b: 1, y: 72, l: "Abmeldedaten übermitteln", k: "s" }, { a: 1, b: 2, y: 100, l: "Daten überprüfen", k: "s" }, { a: 2, b: 1, y: 120, l: "Ergebnis liefern", k: "r" },
+      { a: 1, b: 3, y: 186, l: "«destroy»", k: "a", h: 1, lx: 470 }, { a: 1, b: 0, y: 212, l: "Abmeldung bestätigen", k: "r" }, { a: 1, b: 0, y: 270, l: "Abmeldung ablehnen", k: "r" }] }) + TM(570, 216, "gelöscht", H));
+  F.evEvent = SVG(620, 320, "Klassendiagramm Eventmanagement", box(16, 100, 170, "Veranstaltungsplan") + box(250, 100, 150, "Veranstaltung") + box(480, 20, 120, "Ort") + box(480, 180, 120, "Mitarbeiter") +
+    L(186, 125, 250, 125, null, { s: "D", h: 1 }) + M(194, 118, "1") + M(244, 118, "*", 1, "end") + TM(218, 168, "Komposition", H) +
+    L(400, 112, 480, 50) + M(474, 42, "1", 1, "end") + L(400, 138, 480, 200) + M(474, 194, "1..20", 1, "end") +
+    [["Hochseeangeln", 16], ["Tauchtour", 166], ["Theater", 316], ["Konzert", 466]].map(([n, x]) => box(x, 262, 130, n) + P(`${x + 65},262 ${x + 65},228 325,228`)).join("") + L(325, 228, 325, 150, "t", { h: 1 }) + T(331, 200, "Vererbung", H));
+  F.evRobo = SVG(660, 290, "Zustandsdiagramm eines autonomen Roboters", start(20, 60) + L(27, 60, 58, 60, "a") + T(6, 36, "einschalten") + st2(60, 40, 130, "Initialisierung") + L(190, 60, 248, 60, "a") + TM(219, 48, "Self-Check") + dia(264, 60) +
+    L(278, 60, 338, 60, "a") + T(284, 52, "[OK]") + st2(340, 40, 110, "Stand-By") + L(264, 74, 264, 178, "a") + T(270, 130, "[nicht OK]") + st2(200, 180, 110, "Error") +
+    L(450, 52, 558, 52, "a") + TM(504, 44, "Auftrag erhalten") + st2(560, 40, 100, "In Arbeit") + L(558, 70, 452, 70, "a") + TM(504, 86, "Auftrag erledigt") +
+    P("610,80 610,268 255,268 255,222", "a") + T(430, 262, "Fehler aufgetreten") + L(395, 80, 395, 228, "a") + T(401, 160, "abschalten") + L(310, 208, 384, 236, "a") + T(330, 240, "abschalten", "nt-s", "end") + fin(395, 240));
+  F.evDreieck = SVG(420, 236, "Magisches Dreieck aus Zeit, Kosten und Leistung", `<polygon points="210,40 70,196 350,196" class="nt-act"/>` + TM(210, 26, "Leistung / Qualität", "nt-t") + T(60, 220, "Kosten", "nt-t") + T(360, 220, "Zeit", "nt-t", "end") +
+    TM(210, 140, "Projekt", "nt-t") + TM(210, 160, "ändert sich eine Ecke,", "nt-s") + TM(210, 176, "reagieren die anderen", "nt-s"));
+  const quad = (x, y, t, s, h) => `<rect x="${x}" y="${y}" width="170" height="110" class="${h ? "fg-hlb" : "nt-box"}"/>` + TM(x + 85, y + 50, t, "nt-t") + TM(x + 85, y + 68, s);
+  F.evStake = SVG(440, 300, "Stakeholder-Matrix nach Einfluss und Interesse", quad(70, 20, "Zufriedenstellen", "früh berücksichtigen") + quad(240, 20, "Eng einbinden", "aktiv managen", 1) + quad(70, 130, "Beobachten", "bei Bedarf ansprechen") + quad(240, 130, "Informieren", "regelmäßig berichten") +
+    L(70, 240, 428, 240, "a") + L(70, 240, 70, 8, "a") + T(428, 262, "Interesse →", "nt-t", "end") + T(62, 20, "Einfluss", "nt-t", "end") + T(62, 236, "gering", "nt-note", "end") + T(70, 262, "gering", "nt-note"));
+  const GT = [["A Analyse", 0, 2], ["B Prototyp", 2, 4], ["C Feinplanung", 6, 3], ["D Techn. Spezifikation", 6, 2], ["E Programmierung", 9, 1], ["F Tests", 10, 4], ["G Abnahme", 14, 5]];
+  F.evGantt = SVG(640, 250, "Gantt-Diagramm mit sieben Vorgängen", Array.from({ length: 11 }, (_, i) => `<line x1="${160 + i * 46}" y1="28" x2="${160 + i * 46}" y2="222" class="nt-dash2"/>` + TM(160 + i * 46, 22, String(i * 2), "nt-note")).join("") +
+    GT.map(([n, s, d], i) => T(8, 50 + i * 26, n) + `<rect x="${160 + s * 23}" y="${36 + i * 26}" width="${d * 23}" height="18" rx="4" class="${i === 3 ? "nt-act" : "fg-hlb"}"/>`).join("") +
+    `<polygon points="597,206 606,215 597,224 588,215" class="fg-hlf"/>` + T(560, 242, "Abnahme erfolgt (Tag 19)", H, "end") + T(8, 242, "Rot: ohne Puffer · D hat 1 Tag Puffer", "nt-note"));
+  const nk = (x, y, ps, name, d, gp, fp, faz, fez, saz, sez, h) => `<rect x="${x}" y="${y}" width="90" height="44" class="${h ? "fg-hlb" : "nt-box"}"/><line x1="${x}" y1="${y + 22}" x2="${x + 90}" y2="${y + 22}" class="nt-line"/><line x1="${x + 22}" y1="${y}" x2="${x + 22}" y2="${y + 44}" class="nt-line"/><line x1="${x + 56}" y1="${y + 22}" x2="${x + 56}" y2="${y + 44}" class="nt-line"/>` +
+    TM(x + 11, y + 16, ps, "nt-t") + T(x + 27, y + 16, name) + TM(x + 11, y + 38, String(d)) + TM(x + 39, y + 38, String(gp), h ? H : "nt-s") + TM(x + 73, y + 38, String(fp)) +
+    T(x, y - 5, String(faz)) + T(x + 90, y - 5, String(fez), "nt-s", "end") + T(x, y + 57, String(saz)) + T(x + 90, y + 57, String(sez), "nt-s", "end");
+  F.evNetz = SVG(650, 332, "Netzplan Server-Migration mit kritischem Pfad", nk(10, 150, "A", "Analyse", 3, 0, 0, 0, 3, 0, 3, 1) + nk(145, 40, "B", "Hardware", 5, 1, 1, 3, 8, 4, 9) + nk(145, 262, "C", "Konzept", 4, 0, 0, 3, 7, 3, 7, 1) + nk(280, 262, "D", "Testumg.", 2, 0, 0, 7, 9, 7, 9, 1) +
+    nk(280, 150, "F", "Schulung", 2, 3, 3, 7, 9, 10, 12) + nk(415, 40, "E", "Install.", 3, 0, 0, 9, 12, 9, 12, 1) + nk(550, 150, "G", "Abnahme", 1, 0, 0, 12, 13, 12, 13, 1) +
+    L(100, 172, 145, 62, "a") + L(100, 172, 145, 284, "a", { h: 1 }) + L(235, 62, 415, 62, "a") + L(235, 284, 280, 284, "a", { h: 1 }) + L(235, 284, 280, 172, "a") + L(370, 284, 415, 62, "a", { h: 1 }) + L(370, 172, 550, 172, "a") + L(505, 62, 550, 172, "a", { h: 1 }) +
+    T(10, 20, "Knoten: Vorgang | Name · Dauer | GP | FP · oben FAZ/FEZ · unten SAZ/SEZ", "nt-note") + T(645, 326, "Kritischer Pfad A – C – D – E – G: 13 Tage", H, "end"));
+  const evb = (x, y, w, s, ev) => `<rect x="${x}" y="${y}" width="${w}" height="44" rx="${ev ? 22 : 4}" class="${ev ? "fg-hlb" : "nt-box"}"/>` + TM(x + w / 2, y + 27, s, "nt-t");
+  F.evScrum = SVG(650, 250, "Scrum-Ablauf mit Artefakten und Ereignissen", evb(10, 80, 120, "Product Backlog") + L(130, 102, 148, 102, "a") + evb(150, 80, 110, "Planning", 1) + L(260, 102, 278, 102, "a") + evb(280, 80, 110, "Sprint Backlog") + L(390, 102, 408, 102, "a") +
+    evb(410, 80, 110, "Sprint", 1) + `<path d="M440 76 C440 40 490 40 490 76" class="nt-line fg-hl" marker-end="url(#fg-ah)"/>` + TM(465, 34, "Daily Scrum", H) + TM(465, 146, "1–4 Wochen", "nt-note") + L(520, 102, 538, 102, "a") + evb(540, 80, 100, "Inkrement") +
+    L(590, 124, 590, 164, "a") + evb(530, 166, 110, "Review", 1) + evb(380, 166, 130, "Retrospektive", 1) + P("530,188 512,188", "a") + P("595,210 595,232 70,232 70,126", "a") + TM(330, 226, "Feedback ins Product Backlog", "nt-note") +
+    T(10, 22, "Product Owner priorisiert · Scrum Master beseitigt Hindernisse · Team liefert", "nt-s") + T(10, 44, "Rechteck = Artefakt · rund = Ereignis", "nt-note"));
+
+  const D = {
+    "ev-mod": [F.evMod, "Innen arbeitet alles eng zusammen, nach außen gibt es nur die Schnittstelle."],
+    "ev-auf": [F.evAuf, "«include» vom Basisfall weg, «extend» zum Basisfall hin, Bedingung in der Notiz. Der Planungsmitarbeiter erbt alle Fälle des Mitarbeiters."],
+    "ev-kla": [F.evKla, "Rauten sitzen beim Ganzen: gefüllt, wenn die Teile mitgelöscht werden (100 Liegeplätze), hohl, wenn sie weiterleben (Mieter, Yacht)."],
+    "ev-akt": [F.evAkt, "Jede Raute: Bedingungen in eckigen Klammern, die sich ausschließen. Treffen zwei Wege auf dieselbe Aktion, führt eine Raute sie zusammen."],
+    "ev-zus": [F.evZus, "Rot: die neuen Transitionen für „reserviert“. Belegt und die übrigen Sperr-Transitionen bleiben wie bisher."],
+    "ev-seq": [F.evSeq, "Das Löschen eines Objekts endet mit einem X auf seiner Lebenslinie. Die Abmeldung selbst ist wieder ein alt-Fragment."],
+    "ev-dreieck": [F.evDreieck, "Zeit, Kosten und Leistung lassen sich nicht unabhängig voneinander ändern."],
+    "ev-stake": [F.evStake, "Je höher Einfluss und Interesse, desto enger wird der Stakeholder eingebunden."],
+    "ev-gantt": [F.evGantt, "E startet erst nach C und D, G erst nach E und F – so ergeben sich 19 Tage."],
+    "ev-netz": [F.evNetz, "Rot: Vorgänge mit Gesamtpuffer 0. B hat 1 Tag, F 3 Tage Puffer."],
+    "ev-scrum": [F.evScrum, "Jeder Sprint endet mit einem Inkrement. Review zeigt das Produkt, Retrospektive verbessert die Zusammenarbeit."],
+    "ev:lf11a:kla5": [F.evEvent, "Die gefüllte Raute am Veranstaltungsplan: Wird er gelöscht, verschwinden alle Veranstaltungen. Die vier Arten erben von Veranstaltung."],
+    "ev:lf11a:zus6": [F.evRobo, "Nach dem Self-Check entscheidet eine Raute. Aus Stand-By und Error führt „abschalten“ zum Endzustand."],
+    "ev:lf11a:akt8": [F.evAkt, "Zwei Rauten, jeweils mit sich ausschließenden Bedingungen."],
+    "ev:lf11a:auf2": [F.evAuf, "Der include-Pfeil zeigt von „Liegeplatz mieten“ auf „Verfügbarkeit prüfen“."],
+    "ev:lf11a:auf3": [F.evAuf, "Der extend-Pfeil zeigt von „Liegeplatz zuweisen“ auf „Liegeplatz sperren“, die Bedingung steht in der Notiz."],
+    "ev:lf11a:auf4": [F.evAuf, "Generalisierung zwischen Akteuren: hohles Dreieck am allgemeineren Akteur."],
+    "ev:lf11a:kla1": [F.evKla, "Gefüllte Raute bei der Liegeplatzverwaltung, 100 bei Liegeplatz."],
+    "ev:lf11a:kla2": [F.evKla, "Hohle Rauten am Liegeplatz, weil Mieter und Yacht weiterleben."],
+    "ev:lf11a:zus2": [F.evZus, "„reserviert“ ist nur aus „verfügbar“ erreichbar."],
+    "ev:lf11a:zus3": [F.evZus, "freigeben [zuvor reserviert] führt aus „gesperrt“ zurück nach „reserviert“."],
+    "ev:lf11a:seq2": [F.evSeq, "Das X beendet die Lebenslinie von :Yacht."],
+    "ev:wpf:pm6": [F.evDreieck, "Mehr Leistung bei fester Zeit zieht an der Ecke Kosten oder Qualität."],
+    "ev:wpf:org4": [F.evStake, "Hoher Einfluss, wenig Interesse: oben links – zufriedenstellen."],
+    "ev:wpf:org5": [F.evStake, "Wenig Einfluss, hohes Interesse: unten rechts – informieren."],
+    "ev:wpf:pla8": [F.evGantt, "Der späteste Vorgänger bestimmt den Start: E nach C (Tag 9), G nach F (Tag 14)."],
+    "ev:wpf:netz7": [F.evNetz, "Oben im Knoten stehen FAZ und FEZ."],
+    "ev:wpf:netz8": [F.evNetz, "Unten stehen SAZ und SEZ, in der Mitte GP und FP."],
+    "ev:wpf:netz9": [F.evNetz, "Der rote Weg ist der längste und hat keinen Puffer."],
+    "ev:wpf:netz10": [F.evNetz, "B hat nur 1 Tag Gesamtpuffer."],
+    "k:uml0": [F.aktElemente, "Je Element zählt das Symbol. Die Raute dient auch zum Zusammenführen, das Ablaufende (Kreis mit X) beendet nur einen Zweig."],
+    "k:uml1": [F.aktVerzweigung, "Bedingungen in eckigen Klammern an jeder ausgehenden Kante. Sie schließen sich aus und decken alle Fälle ab; die zweite Raute führt die Zweige wieder zusammen."],
+    "m106": [F.aktVerzweigung, "Die Bedingungen stehen an den ausgehenden Kanten der Raute – nicht in der Aktion und nicht an der eingehenden Kante."],
+    "k:uml2": [F.aktFork, "Zwischen Fork und Join laufen beide Aktionen parallel. „Ware versenden“ startet erst, wenn beide Zweige am Join angekommen sind."],
+    "m26": [F.aktFork, "Der Fork-Balken teilt den Fluss, der Join-Balken führt ihn wieder zusammen. Eine Raute wäre eine Entscheidung (entweder – oder)."],
+    "m237": [F.aktAblaufende, "Das Ablaufende beendet nur seinen Zweig. Der Endknoten beendet die ganze Aktivität, auch noch laufende parallele Zweige."],
+    "k:uml3": [F.zWechsel, "Erst das Ereignis, dann die Bedingung in eckigen Klammern, nach dem Schrägstrich die Aktion, die beim Übergang ausgeführt wird."],
+    "m105": [F.zQuittung, "Reihenfolge merken: Ereignis [Bedingung] / Aktion – „bezahlen, wenn der Betrag reicht, dabei Quittung drucken“."],
+    "k:uml4": [F.zEntry, "entry, do und exit stehen im unteren Fach des Zustands, jeweils Schlüsselwort / Aktion."],
+    "m25": [F.zAutomat, "Ein Objekt, seine Zustände (abgerundete Rechtecke) und die Übergänge. Nachrichten zwischen mehreren Objekten wären ein Sequenzdiagramm."],
+    "k:uml5": [F.seqLogin, "Die Zeit läuft von oben nach unten. Jedes Objekt hat eine gestrichelte Lebenslinie, der Balken zeigt, wann es gerade arbeitet."],
+    "m235": [F.seqLogin, "Lebenslinien nebeneinander, Nachrichten von oben nach unten in zeitlicher Reihenfolge – genau das zeigt das Sequenzdiagramm."],
+    "k:uml6": [F.seqFragmente, "Jedes Fragment ist ein Rahmen mit Schlüsselwort oben links und Bedingung in eckigen Klammern. Fragmente dürfen verschachtelt werden."],
+    "k:uml15": [F.seqNachrichten, "Gefüllte Spitze = Aufrufer wartet, offene Spitze = wartet nicht. Gestrichelt sind Antwort und «create»; die neue Lebenslinie beginnt erst dort."],
+    "m238": [F.seqSync, "Gefüllte Spitze heißt: Die Kasse wartet, bis der Zahlungsdienst antwortet. Die Antwort kommt gestrichelt zurück."],
+    "m104": [F.seqAntwort, "Antworten sind gestrichelt mit offener Spitze und tragen oft den Rückgabewert, hier den Bestand."],
+    "m103": [F.seqOpt, "opt = Ablauf nur, wenn die Bedingung gilt. Bei zwei oder mehr sich ausschließenden Fällen nimmt man alt."],
+    "k:uml7": [F.ucShop, "«include» zeigt vom Basisfall auf den eingebundenen Fall, «extend» umgekehrt von der Erweiterung auf den Basisfall. Beide gestrichelt."],
+    "m14": [F.ucGutschein, "Optional und nur unter einer Bedingung → «extend». Der Pfeil zeigt von „Gutschein einlösen“ auf den Basisfall."],
+    "m15": [F.ucBank, "Der Basisfall „Geld abheben“ benutzt „Karte prüfen“ immer – daher zeigt der include-Pfeil von ihm weg."],
+    "k:uml8": [F.ucBib, "Akteure stehen außerhalb der Systemgrenze, Anwendungsfälle innerhalb. Am häufigsten fehlt der Name an der Systemgrenze."],
+    "k:uml9": [F.visKonto, "Attribute meist private (-), Methoden meist public (+) – das ist Kapselung."],
+    "m16": [F.visFahrzeug, "# protected: sichtbar in der Klasse und in ihren Unterklassen, z. B. in einer Klasse Lkw, die von Fahrzeug erbt."],
+    "m234": [F.visPaket, "~ package: sichtbar für alle Klassen im selben Paket."],
+    "k:uml10": [F.methoden, "Schema: Sichtbarkeit name(parameter: Typ): Rückgabetyp. Wegen der abstrakten Methode ist auch die Klasse Konto abstrakt."],
+    "m232": [F.statisch, "Statische Attribute und Methoden werden unterstrichen. Kursiv bedeutet abstrakt."],
+    "k:uml14": [F.zahlung, "Realisierung: gestrichelte Linie mit hohlem Dreieck am Interface. Vererbung: durchgezogene Linie mit hohlem Dreieck an der Oberklasse."],
+    "m233": [F.realisierung, "Gestrichelt = Realisierung eines Interfaces. Durchgezogen mit hohlem Dreieck wäre Vererbung von einer Klasse."],
+    "k:uml11": [F.mult, "Die Multiplizität steht auf der Seite des Gezählten: Ein Student hat 0..1 Spind – die 0..1 steht beim Spind."],
+    "m23": [F.multBuch, "1..* = mindestens eins, beliebig viele. Sie steht bei Buch, weil gezählt wird, wie viele Bücher eine Ausleihe enthält."],
+    "m236": [F.multWagen, "0..1 = keiner oder genau einer. Die Zahl steht beim Dienstwagen, weil gezählt wird, wie viele Dienstwagen ein Mitarbeiter hat."],
+    "k:oop18": [F.beziehungen, "Die Raute sitzt beim Ganzen (gefüllt = existenzabhängig), das Dreieck bei der Oberklasse, der gestrichelte Pfeil zeigt auf das Benutzte."],
+    "k:uml12": [F.komponenten, "Der Zahlungsservice bietet die Schnittstelle an (Kreis), der Bestellservice benötigt sie (Halbkreis, der den Kreis umgreift)."],
+    "m231": [F.komponenten3, "Bausteine mit «component» und ihre Schnittstellen: Kreis = bereitgestellt, Halbkreis = benötigt."],
+    "k:uml13": [F.vertShop, "Knoten sind Quader, Laufzeitumgebungen wie Tomcat stecken als Knoten darin, das Artefakt shop.war liegt auf Tomcat. Verbindungen mit Protokoll beschriften."],
+    "m230": [F.vertMaria, "Physische Sicht: Welche Software (Artefakt) läuft auf welchem Knoten, und wie sind die Knoten verbunden."]
+  };
+  return D;
+})();
+
+// Events: zeitlich begrenzte Lernaktionen zu Klausuren (eigene Fragen, zählen nicht zur Prüfungsreife, geben XP).
+// Frage-IDs (ev:<event>:<id>) sind fest vergeben – nie ändern oder wiederverwenden, der Lernstand hängt daran. Neue Fragen einfach ergänzen.
+const EVENTS = [
+  { id: "lf11a", kurz: "LF11a", titel: "Klausur LF11a", sub: "Modulare Softwarekomponenten planen", start: "2026-11-10", ende: "2026-12-18",
+    reward: { kind: "shirt", art: "baumshirt", name: "Baum-Shirt", txt: "Ein T-Shirt mit Baum und Schaufel – passend geschnitten für jedes deiner Tiere." },
+    info: "Lernsituation 1 aus LF11a: Modularisierung, die fünf UML-Diagramme am Fallbeispiel „Yachthafen Resort“, Entwurfsmuster und Clean Code. Die Fragen gehen teils tiefer als die IHK-Prüfung.",
+    tipps: ["Pfeilrichtungen sind die häufigste Punktfalle: «include» vom Basisfall weg, «extend» zum Basisfall hin, Vererbung zur Oberklasse.", "Rauten im Klassendiagramm sitzen immer beim Ganzen. Gefüllt heißt: Die Teile sterben mit.", "Bedingungen stehen immer in eckigen Klammern – im Aktivitäts-, Zustands- und Sequenzdiagramm.", "Bei „Beschreiben Sie“ reicht keine Aufzählung: Element, Darstellung und Bezug zum Beispiel nennen."],
+    kap: [
+      { id: "mod", titel: "Modularisierung", lern: [
+          ["Modul", "Baustein eines Softwaresystems, der eine funktional geschlossene Einheit bildet und einen Dienst über eine eindeutig spezifizierte Schnittstelle bereitstellt. Module können weitere Module enthalten – es entsteht eine Hierarchie. Grundidee: Teile und herrsche."],
+          ["Drei Ebenen", "Methode/Funktion (unterste Ebene, genau eine Aufgabe) · Klasse (in der OOP der Prototyp eines Moduls) · Softwarekomponente (fasst Klassen zu fachlichen Diensten zusammen)."],
+          ["Designregeln", "Modulgeschlossenheit: eine Aufgabe, Kommunikation nur über die Schnittstelle, interne Änderungen ohne Rückwirkung. Minimalität der Schnittstelle: nur so groß wie nötig. Hohe Modulbindung (Kohäsion) innen, geringe Modulkopplung nach außen. Testbarkeit: isoliert prüfbar."],
+          ["Vorteile", "Verständlichkeit · Wiederverwendbarkeit · Austauschbarkeit bei gleicher Schnittstelle · parallele Entwicklung im Team · isolierte Tests."],
+          ["Merksatz", "Hohe Bindung, lose Kopplung. Bindung schaut nach innen, Kopplung nach außen."]], fig: "ev-mod",
+        q: [
+          ["k", "mod1", "Die Software des „Yachthafen Resorts“ besteht aus vielen Modulen.\n\nErläutern Sie den Begriff Modul. (2 P)", "Ein Modul ist ein Baustein eines Softwaresystems, der eine funktional geschlossene Einheit bildet und einen bestimmten Dienst bereitstellt.\nDer Dienst wird ausschließlich über eine eindeutig spezifizierte Schnittstelle genutzt. Ein Modul kann selbst weitere Module (z. B. Klassen, Funktionen) enthalten.", "1 P geschlossene Einheit mit eigenem Dienst, 1 P Nutzung über definierte Schnittstelle."],
+          ["m", "mod2", "Das Modul „Liegeplatzverwaltung“ enthält nur Methoden, die gemeinsam Liegeplätze anlegen, sperren und vermieten, und nutzt dafür dieselben Daten.\n\nWelche Eigenschaft hat das Modul?", ["Eine hohe Modulbindung", "Eine hohe Modulkopplung", "Eine minimale Schnittstelle", "Eine geringe Modulbindung"], 0, "Modulbindung (Kohäsion) ist die Summe der internen Beziehungen zwischen Operationen und Daten eines Moduls – hier eng, also hoch. Kopplung beschreibt Abhängigkeiten zwischen verschiedenen Modulen."],
+          ["m", "mod3", "Das Rechnungsmodul greift direkt auf interne Variablen des Kundenmoduls zu und ruft dessen private Hilfsmethoden auf.\n\nWelches Problem entsteht dadurch?", ["Hohe Kopplung: Änderungen im Kundenmodul brechen das Rechnungsmodul", "Hohe Bindung: Das Rechnungsmodul wird dadurch zu groß und unlesbar", "Geringe Kopplung: Die Module lassen sich nicht mehr getrennt testen", "Geringe Bindung: Das Kundenmodul verliert dadurch seine Schnittstelle"], 0, "Jeder Zugriff an der Schnittstelle vorbei ist eine zusätzliche Abhängigkeit (Kopplung). Ändert sich das Innere des Kundenmoduls, ist das Rechnungsmodul betroffen – genau das soll Modulgeschlossenheit verhindern."],
+          ["k", "mod4", "Erläutern Sie die Begriffe Modulbindung und Modulkopplung und geben Sie jeweils an, welche Ausprägung angestrebt wird. (4 P)", "Modulbindung: Summe der internen Beziehungen zwischen den Operationen und Daten eines Moduls. Angestrebt wird eine hohe Bindung – alle Teile arbeiten an einer gemeinsamen Aufgabe.\nModulkopplung: Grad, wie stark verschiedene Module voneinander abhängen. Angestrebt wird eine geringe Kopplung, weil jede Abhängigkeit eine Schnittstelle mehr ist, die Fehler verursachen und den Austausch erschweren kann.", "Je 1 P Definition, je 1 P Zielrichtung mit kurzer Begründung."],
+          ["m", "mod5", "Eine interne Änderung im Modul „Buchung“ zwingt das Team, auch das Modul „Statistik“ anzupassen.\n\nWelche Designregel wurde verletzt?", ["Modulgeschlossenheit", "Minimalität der Schnittstelle", "Testbarkeit des Moduls", "Wiederverwendbarkeit"], 0, "Modulgeschlossenheit: Ein Modul erfüllt eine Aufgabe, kommuniziert nur über seine Schnittstelle, und interne Änderungen dürfen keine Rückwirkungen auf das übrige System haben."],
+          ["k", "mod6", "Nennen und erläutern Sie zwei Vorteile der Modularisierung. (4 P)", "Verständlichkeit: Die Aufteilung in Module und Untermodule macht Aufbau und Funktionsweise des Programms leichter verständlich.\nWiederverwendbarkeit: Einmal entwickelte Module werden in anderen Programmen erneut genutzt, Code muss nicht doppelt geschrieben werden.\nAustauschbarkeit: Solange die Schnittstelle gleich bleibt, kann ein Modul geändert oder ersetzt werden, ohne den Rest zu beeinflussen.\nParallele Entwicklung: Sind die Schnittstellen festgelegt, arbeiten mehrere Teams gleichzeitig an verschiedenen Modulen.", "Je Vorteil 1 P Nennung und 1 P Erläuterung. Zwei Vorteile genügen."],
+          ["m", "mod7", "Auf welcher Ebene der Modularisierung steht eine einzelne Methode wie berechneMiete()?", ["Unterste Ebene – sie soll genau eine Aufgabe erfüllen", "Mittlere Ebene – sie ist der Prototyp eines Moduls in der OOP", "Oberste Ebene – sie bildet eine eigene Softwarekomponente", "Keine Ebene – Methoden zählen nicht zu den Modulen"], 0, "Ebenen: Methode/Funktion (unterste), Klasse (Prototyp eines Moduls in der OOP), Softwarekomponente (fasst Klassen zu fachlichen Diensten zusammen)."],
+          ["m", "mod8", "Warum sollte die Schnittstelle eines Moduls nur so umfangreich wie nötig sein?", ["Sie senkt die Kopplung und die Zahl der Testfälle", "Sie erhöht die Bindung durch mehr öffentliche Methoden", "Sie beschleunigt das Programm durch kürzere Aufrufe", "Sie verbessert die Lesbarkeit durch mehr Getter"], 0, "Minimalität der Schnittstelle („Need to know“): Je weniger nach außen angeboten wird, desto weniger Abhängigkeiten entstehen und desto weniger muss getestet werden."],
+          ["m", "mod9", "Zwei Teams sollen gleichzeitig das Front-End und den Bestellservice entwickeln.\n\nWas muss dafür vorher feststehen?", ["Die Schnittstelle zwischen beiden Modulen", "Die interne Datenstruktur beider Module", "Die Reihenfolge der Aufrufe im Quellcode", "Die Namen aller privaten Hilfsklassen"], 0, "Parallele Entwicklung funktioniert, wenn die Schnittstellen definiert und bekannt sind. Das Innere der Module bleibt Sache des jeweiligen Teams."],
+          ["m", "mod10", "Wie prüft man nach der Designregel „Testbarkeit“, ob ein Modul korrekt arbeitet?", ["Isoliert mit Modultests, ohne das Gesamtsystem", "Erst im Systemtest, wenn alle Module fertig sind", "Durch ein Code-Review der aufrufenden Module", "Durch einen Abgleich mit dem Lastenheft"], 0, "Die Korrektheit eines Moduls muss auch ohne Kenntnis seiner Einbettung ins Gesamtsystem nachprüfbar sein – z. B. durch isolierte Modul- bzw. Unit-Tests."]
+        ] },
+      { id: "auf", titel: "Anwendungsfalldiagramm", lern: [
+          ["Zweck", "Zeigt das Verhalten eines Systems aus Sicht externer Benutzer: WAS das System leisten soll, nicht WIE. Ideal, um fachliche Anforderungen schnell zu überblicken."],
+          ["Elemente", "Systemgrenze (Rechteck mit Namen) · Akteur außerhalb (Strichmännchen, externes System als Rechteck) · Anwendungsfall innerhalb (Ellipse, Verb + Objekt, z. B. „Liegeplatz mieten“) · Assoziation (Linie Akteur – Anwendungsfall)."],
+          ["«include»", "Unbedingte Einbindung: Wird A ausgeführt, wird B immer mit ausgeführt. Gestrichelter Pfeil vom Basisfall zum eingebundenen Fall: „Liegeplatz mieten“ → „Verfügbarkeit prüfen“."],
+          ["«extend»", "Bedingte Erweiterung: B kann A unter einer Bedingung erweitern. Gestrichelter Pfeil von der Erweiterung zum Basisfall, die Bedingung steht in einer Notiz: „Liegeplatz zuweisen“ → „Liegeplatz sperren“ (falls ein vermieteter Platz gesperrt wird)."],
+          ["Generalisierung", "Auch zwischen Akteuren: Planungsmitarbeiter —▷ Mitarbeiter. Der speziellere Akteur darf alles, was der allgemeine darf, plus seine eigenen Fälle."]], fig: "ev-auf",
+        q: [
+          ["m", "auf1", "Wofür setzen Sie im Yachthafen-Projekt ein Anwendungsfalldiagramm ein?", ["Um zu zeigen, was das System für seine Benutzer leisten soll", "Um zu zeigen, wie die Klassen des Systems aufgebaut sind", "Um zu zeigen, in welcher Folge Objekte Nachrichten senden", "Um zu zeigen, welche Zustände ein Liegeplatz annehmen kann"], 0, "Das Anwendungsfalldiagramm beschreibt das erwartete Verhalten aus Sicht externer Beobachter – das WAS, nicht das WIE."],
+          ["m", "auf2", "„Liegeplatz mieten“ muss immer die Verfügbarkeit prüfen.\n\nWelche Beziehung und welche Pfeilrichtung sind richtig?", ["«include», Pfeil von „Liegeplatz mieten“ zu „Verfügbarkeit prüfen“", "«include», Pfeil von „Verfügbarkeit prüfen“ zu „Liegeplatz mieten“", "«extend», Pfeil von „Liegeplatz mieten“ zu „Verfügbarkeit prüfen“", "«extend», Pfeil von „Verfügbarkeit prüfen“ zu „Liegeplatz mieten“"], 0, "„Immer“ heißt «include». Der Pfeil geht vom Basisfall, der den anderen benutzt, zum eingebundenen Fall."],
+          ["m", "auf3", "Wird ein vermieteter Liegeplatz gesperrt, muss ein Mitarbeiter eventuell einen Ausweichplatz zuweisen.\n\nWie binden Sie „Liegeplatz zuweisen“ an?", ["«extend» zu „Liegeplatz sperren“, Bedingung in einer Notiz", "«include» in „Liegeplatz sperren“, Bedingung im Namen", "Generalisierung von „Liegeplatz sperren“, ohne Bedingung", "Assoziation direkt zum Akteur Mieter, ohne Bedingung"], 0, "Die Zuweisung geschieht nur unter einer Bedingung → «extend». Der Pfeil zeigt von „Liegeplatz zuweisen“ auf „Liegeplatz sperren“, die Bedingung steht in einer Notiz an der «extend»-Beziehung."],
+          ["m", "auf4", "Planungsmitarbeiter dürfen alles, was Mitarbeiter dürfen, und zusätzlich Liegeplätze reservieren und Statistiken drucken.\n\nWie modellieren Sie das am saubersten?", ["Generalisierung vom Planungsmitarbeiter zum Mitarbeiter", "«include» vom Planungsmitarbeiter zum Mitarbeiter", "Assoziation zwischen Planungsmitarbeiter und Mitarbeiter", "Zweiter Akteur, alle Linien des Mitarbeiters doppelt"], 0, "Generalisierung (durchgezogene Linie, hohles Dreieck am Mitarbeiter): Der Planungsmitarbeiter „ist ein“ Mitarbeiter und erbt dessen Anwendungsfälle. Seine Zusatzfälle bekommen eigene Assoziationen."],
+          ["m", "auf5", "Ein externes Mahnsystem greift auf das Ausleihmodul einer Bibliothek zu.\n\nWie wird es im Anwendungsfalldiagramm dargestellt?", ["Als Akteur außerhalb der Systemgrenze, oft als Rechteck", "Als Anwendungsfall innerhalb der Systemgrenze mit «system»", "Als zweite Systemgrenze, die alle Fälle umschließt", "Gar nicht, denn Akteure können nur Personen sein"], 0, "Akteure können auch externe Systeme sein. Sie stehen außerhalb der Systemgrenze – als Strichmännchen oder als Rechteck (mit «actor» bzw. «system»)."],
+          ["k", "auf6", "Ein Mitarbeiter soll im Rechnungserfassungsmodul Rechnungsdaten eingeben. Bei Bedarf kann er sie speichern sowie das spätere Rechnungsdokument ansehen und ausdrucken.\n\nBeschreiben Sie ein passendes Anwendungsfalldiagramm. (4 P)", "Systemgrenze „Rechnungserfassungsmodul“, Akteur „Mitarbeiter“ außerhalb.\nBasisfall „Rechnungsdaten eingeben“ mit Assoziation zum Mitarbeiter.\n„Rechnungsdaten speichern“ und „Rechnungsdokument ansehen“ als «extend» zu „Rechnungsdaten eingeben“ (nur bei Bedarf).\n„Rechnungsdokument ausdrucken“ als «extend» zu „Rechnungsdokument ansehen“.", "1 P Systemgrenze mit Namen und Akteur, 1 P Basisfall, 2 P «extend» mit richtiger Pfeilrichtung (zum Basisfall). Assoziationen zu allen Fällen werden ebenfalls gewertet. Alternativ: „ansehen“ als eigener Basisfall mit Assoziation, „ausdrucken“ als «extend» dazu – ebenfalls richtig."],
+          ["k", "auf7", "Schachverein: Alle Nutzer können Vereinsinfos ansehen und eine E-Mail an den Verein senden. Nichtmitglieder können online Mitglied werden – dafür müssen sie zwingend eine Bankverbindung angeben sowie Benutzername und Passwort festlegen. Mitglieder loggen sich ein und können danach kündigen, Spielergebnisse ansehen und Bankdaten ändern.\n\nNennen Sie Akteure und Beziehungen des Diagramms. (5 P)", "Akteure: „Nutzer“ (allgemein), „Nichtmitglied“ und „Mitglied“ als Spezialisierungen (Generalisierung zum Nutzer).\nNutzer: „Infos ansehen“, „E-Mail an Verein senden“.\nNichtmitglied: „Online-Mitglied werden“ «include» „Bankverbindung angeben“ und «include» „Benutzername und Passwort festlegen“.\nMitglied: „Einloggen“. „Mitgliedschaft kündigen“, „Spielergebnisse ansehen“ und „Bankdaten ändern“ setzen das Einloggen voraus (z. B. jeweils «include» „Einloggen“).", "1 P Generalisierung der Akteure, 2 P zwingende Angaben als «include», 2 P richtige Zuordnung der Login-Funktionen zum Mitglied."],
+          ["m", "auf8", "Wo stehen Akteure im Anwendungsfalldiagramm?", ["Außerhalb der Systemgrenze, verbunden über Assoziationen", "Innerhalb der Systemgrenze, neben ihren Anwendungsfällen", "Auf der Systemgrenze, damit sie zu beiden Seiten gehören", "In einer eigenen Partition wie im Aktivitätsdiagramm"], 0, "Akteure sind extern. Die Systemgrenze umschließt nur die Anwendungsfälle, für die das System später Funktionen bereitstellt."],
+          ["m", "auf9", "Welche Bezeichnung eignet sich als Anwendungsfall?", ["Liegeplatz reservieren", "Liegeplatzverwaltung", "Reservierungstabelle", "Planungsmitarbeiter"], 0, "Anwendungsfälle beschreiben eine Tätigkeit aus Nutzersicht: Verb + Objekt. „Liegeplatzverwaltung“ wäre eher die Systemgrenze, „Planungsmitarbeiter“ ein Akteur."]
+        ] },
+      { id: "kla", titel: "Klassendiagramm", lern: [
+          ["Klasse", "Rechteck mit drei Fächern: Name (Singular, groß) · Attribute name: Typ · Methoden name(param: Typ): Rückgabetyp. Sichtbarkeit: + public, - private, # protected. Get-/Set-Methoden lässt man oft weg."],
+          ["Assoziation", "Linie = „kennt“. Mit Pfeil gerichtet: A kennt B, B nicht zwingend A. An den Enden stehen Multiplizitäten: 1, 0..1, *, 1..*, 1..20, 100."],
+          ["Aggregation ◇", "Teil-Ganzes, das Teil lebt weiter. Hohle Raute beim Ganzen: Liegeplatz ◇— Mieter, Liegeplatz ◇— Yacht."],
+          ["Komposition ◆", "Teil-Ganzes, das Teil stirbt mit dem Ganzen. Gefüllte Raute beim Ganzen: Liegeplatzverwaltung ◆— 100 Liegeplatz, Veranstaltungsplan ◆— * Veranstaltung."],
+          ["Vererbung ▷", "„Ist ein“: durchgezogene Linie mit hohlem Dreieck an der Oberklasse (Kleidung → Artikel). Interface-Realisierung: gleiche Spitze, gestrichelte Linie."]], fig: "ev-kla",
+        q: [
+          ["m", "kla1", "Die Liegeplatzverwaltung erfasst alle Liegeplätze. Wird sie gelöscht, sollen auch alle Liegeplatz-Objekte aus dem Programm entfernt werden.\n\nWelche Beziehung ist richtig?", ["Komposition, gefüllte Raute an Liegeplatzverwaltung", "Komposition, gefüllte Raute an Liegeplatz", "Aggregation, hohle Raute an Liegeplatzverwaltung", "Aggregation, hohle Raute an Liegeplatz"], 0, "Teile sterben mit dem Ganzen → Komposition. Die Raute sitzt immer beim Ganzen, hier bei der Liegeplatzverwaltung."],
+          ["m", "kla2", "Mieter und Yacht gehören zeitweise zu einem Liegeplatz, existieren aber unabhängig davon weiter.\n\nWelche Beziehung modellieren Sie?", ["Aggregation mit hohler Raute am Liegeplatz", "Komposition mit gefüllter Raute am Liegeplatz", "Aggregation mit hohler Raute am Mieter", "Vererbung mit hohlem Dreieck am Liegeplatz"], 0, "Teil-Ganzes, aber die Teile leben weiter → Aggregation. Der Liegeplatz ist das Ganze und bekommt die hohle Raute."],
+          ["m", "kla3", "Die Liegeplatzverwaltung erfasst genau die 100 Liegeplätze des Resorts.\n\nWelche Multiplizität steht an der Klasse Liegeplatz?", ["100", "1..*", "0..100", "*"], 0, "Es sind genau 100 Liegeplätze, also steht 100 an Liegeplatz und 1 an der Liegeplatzverwaltung. 1..* und * hätten keine Obergrenze, 0..100 ließe auch weniger zu."],
+          ["m", "kla4", "Einer Veranstaltung werden bis zu 20 Mitarbeiter zugeordnet, die sie organisieren und durchführen.\n\nWelche Multiplizität steht an Mitarbeiter?", ["1..20", "20", "1..*", "0..1"], 0, "Mindestens ein Mitarbeiter organisiert, höchstens 20 → 1..20. „20“ hieße genau zwanzig, 1..* hätte keine Obergrenze."],
+          ["k", "kla5", "Eventmanagement: Es gibt Hochseeangeln, Tauchtouren, Theater und Konzerte. Jede Veranstaltung hat genau einen festen Ort und bis zu 20 Mitarbeiter. Ein Jahres-Veranstaltungsplan enthält beliebig viele Veranstaltungen; wird er gelöscht, sollen auch alle Veranstaltungen entfernt werden.\n\nBeschreiben Sie das Klassendiagramm (nur Klassen, Beziehungen und Multiplizitäten). (6 P)", "Vererbung: Hochseeangeln, Tauchtour, Theater, Konzert → Veranstaltung (hohles Dreieck an Veranstaltung).\nVeranstaltung – Ort: Assoziation, 1 am Ort.\nVeranstaltung – Mitarbeiter: Assoziation, 1..20 am Mitarbeiter.\nVeranstaltungsplan – Veranstaltung: Komposition, gefüllte Raute am Veranstaltungsplan, 1 am Plan, * an Veranstaltung.", "2 P Vererbung mit richtiger Pfeilrichtung, je 1 P Ort und Mitarbeiter mit Multiplizität, 2 P Komposition mit Raute am Plan und Multiplizitäten."],
+          ["m", "kla6", "In der Einkaufsliste ist Kleidung eine besondere Art von Artikel mit dem zusätzlichen Attribut größe.\n\nWie wird das gezeichnet?", ["Vererbung, hohles Dreieck an Artikel", "Vererbung, hohles Dreieck an Kleidung", "Aggregation, hohle Raute an Artikel", "Abhängigkeit, gestrichelt zu Artikel"], 0, "„Ist eine Art von“ = Vererbung. Das hohle Dreieck zeigt auf die Oberklasse Artikel."],
+          ["m", "kla7", "Eine Einkaufsliste enthält beliebig viele Artikel. Ein Artikel existiert auch ohne Einkaufsliste.\n\nWelche Notation passt?", ["Hohle Raute an Einkaufsliste, * an Artikel", "Gefüllte Raute an Einkaufsliste, * an Artikel", "Hohle Raute an Artikel, 1 an Einkaufsliste", "Gefüllte Raute an Artikel, * an Einkaufsliste"], 0, "Teil lebt weiter → Aggregation, Raute beim Ganzen (Einkaufsliste). Beliebig viele Artikel → * an Artikel."],
+          ["k", "kla8", "Die neue Klasse Liegeplatzverwaltung soll die 100 Liegeplätze halten und neben dem Konstruktor Methoden zum Anlegen, Ändern und Löschen von Liegeplätzen anbieten.\n\nNotieren Sie die Klasse in UML-Schreibweise. (3 P)", "Liegeplatzverwaltung\n- liegeplaetze: Liegeplatz[100]\n+ Liegeplatzverwaltung()\n+ anlegen(platz: Liegeplatz): void\n+ aendern(nummer: string, platz: Liegeplatz): void\n+ loeschen(nummer: string): void", "1 P Attribut für die Liegeplätze, 2 P Konstruktor und Methoden mit Sichtbarkeit, Parametern und Rückgabetyp. Andere sinnvolle Parameter sind möglich."],
+          ["k", "kla9", "Ergänzen Sie die Klasse Yacht um die Attribute Breite und Art und die Klasse Liegeplatz um Länge, Breite und Wassertiefe. Notieren Sie die Attribute mit Sichtbarkeit und Datentyp. (2 P)", "Yacht: - breite: double, - art: string\nLiegeplatz: - laenge: double, - breite: double, - wassertiefe: double", "1 P je Klasse. Sichtbarkeit wie bei den vorhandenen Attributen (in der Regel -), passende Datentypen."],
+          ["m", "kla10", "Zwischen Mieter und Yacht steht eine gerichtete Assoziation mit Pfeilspitze an Yacht.\n\nWas bedeutet das?", ["Ein Mieter kennt seine Yacht, die Yacht ihn nicht zwingend", "Die Yacht ist Teil des Mieters und wird mit ihm gelöscht", "Die Yacht erbt alle öffentlichen Methoden des Mieters", "Der Mieter greift nur über ein Interface auf die Yacht zu"], 0, "Die Pfeilspitze gibt die Navigationsrichtung an: Objekt A kennt Objekt B, aber nicht zwingend umgekehrt."],
+          ["m", "kla11", "Wie notieren Sie die private Methode istVerfuegbar(), die einen Wahrheitswert liefert?", ["- istVerfuegbar(): boolean", "+ istVerfuegbar(): boolean", "# istVerfuegbar: boolean()", "- boolean istVerfuegbar()"], 0, "UML-Schreibweise: Sichtbarkeit name(parameter: Typ): Rückgabetyp. Private = -. Die Java-Schreibweise mit Typ vorn ist keine UML."]
+        ] },
+      { id: "akt", titel: "Aktivitätsdiagramm", lern: [
+          ["Zweck", "Modelliert Abläufe (Workflows) – fachliche Prozesse, die Logik eines Anwendungsfalls oder einen Algorithmus Schritt für Schritt."],
+          ["Knoten", "Start ● · Aktion (abgerundetes Rechteck) · Kante (Pfeil) · Endknoten ◉ beendet die ganze Aktivität · Ablaufende ⊗ beendet nur einen Zweig."],
+          ["Entweder – oder", "Verzweigung (Raute): Bedingungen in eckigen Klammern an den ausgehenden Kanten, genau ein Pfad wird verfolgt (exklusives ODER). Zusammenführung (Raute) vereint die Pfade wieder. Schleife: Kante zurück zu einer früheren Aktion."],
+          ["Gleichzeitig", "Aufspaltung/Fork (Balken, ein Eingang): Stränge laufen parallel (UND). Synchronisation/Join (Balken, ein Ausgang): wartet, bis alle Stränge fertig sind."],
+          ["Partitionen", "Swimlanes ordnen jede Aktion einem Verantwortlichen zu, z. B. Kunde | Yachthafen Resort oder Band | Technik | Gastronomie."]], fig: "ev-akt",
+        q: [
+          ["m", "akt1", "Nach „Daten prüfen“ geht es entweder mit [Daten OK] oder mit [Daten nicht OK] weiter.\n\nWie viele Pfade werden dabei verfolgt?", ["Genau einer – die Verzweigung ist ein exklusives ODER", "Beide gleichzeitig – die Verzweigung ist ein logisches UND", "Beide nacheinander – erst OK, dann nicht OK", "Keiner, bis eine Zusammenführungsraute erreicht wird"], 0, "An einer Raute wird je nach Bedingung genau ein Pfad eingeschlagen. Parallelität (UND) gibt es nur mit dem Fork-Balken."],
+          ["m", "akt2", "Bei der Konzertvorbereitung beginnen Team Technik und Team Gastronomie gleichzeitig.\n\nWelches Element brauchen Sie?", ["Aufspaltung (Fork): Balken mit mehreren Ausgängen", "Verzweigung: Raute mit zwei Bedingungen", "Zusammenführung: Raute mit mehreren Eingängen", "Synchronisation (Join): Balken mit einem Ausgang"], 0, "Gleichzeitig = parallel = Fork. Die Raute wäre ein Entweder-oder."],
+          ["m", "akt3", "Die Veranstaltung darf erst beginnen, wenn der Soundcheck OK ist und der Ausschank vorbereitet ist.\n\nWelches Element steht davor?", ["Synchronisation (Join): wartet auf beide Stränge", "Zusammenführung (Merge): wartet auf den schnelleren", "Verzweigung: prüft, welcher Strang zuerst fertig ist", "Ablaufende: beendet den langsameren der Stränge"], 0, "Der Join-Balken vereint parallele Stränge und lässt erst weiter, wenn alle angekommen sind."],
+          ["m", "akt4", "Beim Soundcheck werden die Einstellungen so lange verändert, bis der Sound OK ist.\n\nWie modellieren Sie diese Wiederholung?", ["Raute nach „Soundcheck“, [nicht OK] zurück zu „Einstellungen ändern“", "Fork nach „Soundcheck“, beide Stränge laufen bis zum Ende parallel", "Ablaufende nach „Soundcheck“, danach beginnt die Aktivität neu", "Eigene Partition „Schleife“ neben den Teams Technik und Band"], 0, "Schleifen entstehen im Aktivitätsdiagramm durch eine Verzweigung, deren eine Kante zu einer früheren Aktion zurückführt."],
+          ["m", "akt5", "Wozu dienen die Partitionen (Swimlanes) im Prozess „Yachtverleih“?", ["Sie zeigen, wer eine Aktion ausführt – Kunde oder Resort", "Sie zeigen, welche Aktionen gleichzeitig laufen dürfen", "Sie trennen Aktionen mit Bedingung von solchen ohne", "Sie fassen alle Aktionen eines Tages zeitlich zusammen"], 0, "Jede Partition steht für einen Akteur, eine Rolle oder ein System und macht Verantwortlichkeiten sichtbar."],
+          ["k", "akt6", "Yachtverleih: Der Kunde gibt den Mietzeitraum an, das Resort stellt verfügbare Yachten vor, der Kunde wählt eine aus. Das Resort fordert Vertragsdaten an, der Kunde übermittelt sie, das Resort prüft sie. Sind sie nicht OK, werden sie erneut angefordert, sonst werden Vertrag und Schlüssel übergeben. Nach der Nutzung gibt der Kunde den Schlüssel zurück, das Resort prüft die Yacht. Bei Mängeln stellt es eine Mängelliste auf, die der Kunde bestätigt.\n\nBeschreiben Sie den Aufbau des Aktivitätsdiagramms. (6 P)", "Zwei Partitionen: Kunde | Yachthafen Resort.\nStart (Kunde) → „Mietzeitraum angeben“ → (Resort) „verfügbare Yachten vorstellen“ → (Kunde) „Yacht auswählen“ → (Resort) „Daten anfordern“ → (Kunde) „Daten übermitteln“ → (Resort) „Daten prüfen“.\nRaute: [Daten nicht OK] zurück zu „Daten anfordern“, [Daten OK] → „Vertrag abschließen“ → „Schlüssel übergeben“.\n(Kunde) „Yacht nutzen“ → „Schlüssel zurückgeben“ → (Resort) „Yacht überprüfen“.\nRaute: [Yacht OK] → Endknoten; [Yacht nicht OK] → „Mängelliste aufstellen“ → (Kunde) „Mängelliste bestätigen“ → Endknoten.", "1 P Partitionen, 2 P Aktionen in Reihenfolge und richtiger Bahn, 2 P beide Verzweigungen mit Bedingungen, 1 P Schleife zurück zu „Daten anfordern“."],
+          ["m", "akt7", "Welche Aussage über Endknoten und Ablaufende stimmt?", ["Der Endknoten beendet die ganze Aktivität, das Ablaufende nur einen Zweig", "Das Ablaufende beendet die ganze Aktivität, der Endknoten nur einen Zweig", "Beide beenden die ganze Aktivität, sie sehen nur verschieden aus", "Beide beenden nur einen Zweig, die Aktivität endet am Rahmen"], 0, "Endknoten (Kreis mit Punkt): Ende des Gesamtprozesses. Ablaufende (Kreis mit Kreuz): Ende eines einzelnen Zweigs."],
+          ["k", "akt8", "Antwort auf eine Einladung: Nach „Einladung bekommen“ wird der Wunsch auf Teilnahme geprüft. Ohne Wunsch wird abgesagt. Mit Wunsch wird der Termin geprüft: Ist er belegt, wird abgesagt, ist er frei, wird zugesagt.\n\nBeschreiben Sie das Aktivitätsdiagramm mit allen Bedingungen. (4 P)", "Start → „Einladung bekommen“ → „Wunsch auf Teilnahme prüfen“ → Raute:\n[kein Wunsch vorhanden] → „absagen“\n[Wunsch vorhanden] → „Termin prüfen“ → Raute: [Termin belegt] → „absagen“, [Termin frei] → „zusagen“.\nAlle Wege enden im Endknoten. Führen zwei Wege in „absagen“, steht davor eine Zusammenführungsraute.", "1 P Reihenfolge der Aktionen, 2 P beide Verzweigungen mit Bedingungen in eckigen Klammern, 1 P Ende."],
+          ["m", "akt9", "Welches Bedingungspaar an einer Raute ist korrekt?", ["[Termin frei] und [Termin belegt]", "[Termin frei] und [Wunsch vorhanden]", "(Termin frei) und (sonst)", "Termin prüfen und Termin belegt"], 0, "Bedingungen stehen in eckigen Klammern, schließen sich aus und decken alle Fälle ab. „Termin prüfen“ ist eine Aktion, keine Bedingung."]
+        ] },
+      { id: "zus", titel: "Zustandsdiagramm", lern: [
+          ["Zweck", "Beschreibt das dynamische Verhalten eines einzelnen Objekts über seine Lebensdauer: Welche Zustände hat es, und auf welche Ereignisse reagiert es? Beispiel: Liegeplatz, Rechnung, Roboter."],
+          ["Elemente", "Anfangszustand ● (genau einer, keine eingehende Transition) · Zustand (abgerundetes Rechteck, eindeutiger Name) · Endzustand ◉ · Transition (Pfeil, in den Unterlagen auch „Transaktion“ genannt) · Raute für Verzweigungen."],
+          ["Beschriftung", "Ereignis [Bedingung] / Aktion – z. B. freigeben [zuvor reserviert] oder mieten / Bestätigung senden. Das Ereignis löst aus, die Bedingung muss wahr sein, die Aktion läuft beim Übergang."],
+          ["Bezug zur Klasse", "Die Ereignisse sind oft die Methoden der Klasse: mieten(), kündigen(), sperren(), freigeben()."],
+          ["Abgrenzung", "Aktivitätsdiagramm: Ablauf von Aktionen eines Prozesses. Zustandsdiagramm: Reaktionen eines Objekts auf Ereignisse."]], fig: "ev-zus",
+        q: [
+          ["m", "zus1", "Wofür eignet sich ein Zustandsdiagramm im Yachthafen-Projekt am besten?", ["Für die Zustände eines Liegeplatzes und die Ereignisse dazwischen", "Für den Ablauf einer Vermietung mit Kunde und Resort in Bahnen", "Für die Nachrichten zwischen App und Datenbank in zeitlicher Folge", "Für die Klassen Liegeplatz, Mieter und Yacht mit Attributen"], 0, "Ein Zustandsdiagramm beschreibt ein einzelnes Objekt über seine Lebensdauer: verfügbar, reserviert, vermietet, belegt, gesperrt."],
+          ["m", "zus2", "Ein Liegeplatz darf nur reserviert werden, wenn er vorher verfügbar war.\n\nWelche Transition ist richtig?", ["Von „verfügbar“ nach „reserviert“, Ereignis reservieren", "Von „vermietet“ nach „reserviert“, Ereignis reservieren", "Von „reserviert“ nach „verfügbar“, Ereignis reservieren", "Von „gesperrt“ nach „reserviert“, Ereignis reservieren"], 0, "Die Transition beginnt im Quellzustand (verfügbar) und endet im Zielzustand (reserviert). Zurück geht es mit „Reservierung aufheben“."],
+          ["m", "zus3", "Ein gesperrter Liegeplatz, der vorher reserviert war, soll beim Freigeben wieder „reserviert“ werden.\n\nWie wird die Transition beschriftet?", ["freigeben [zuvor reserviert]", "[freigeben] zuvor reserviert", "zuvor reserviert / freigeben", "freigeben / [zuvor reserviert]"], 0, "Form: Ereignis [Bedingung] / Aktion. Das Ereignis ist freigeben, die Bedingung zuvor reserviert."],
+          ["m", "zus4", "Wie viele Anfangszustände darf ein Zustandsdiagramm auf einer Ebene haben?", ["Genau einen, ohne eingehende Transition", "Beliebig viele, je einen pro Ereignis", "Genau zwei – Start und Neustart", "Keinen, der erste Zustand genügt"], 0, "Der Anfangszustand markiert den Startpunkt der Lebensdauer. Es darf nur einen geben, und er hat keine eingehende Transition."],
+          ["m", "zus5", "Die Transitionen eines Liegeplatzes heißen mieten, kündigen, sperren und freigeben.\n\nWo finden Sie diese Begriffe meist wieder?", ["Als Methoden der Klasse Liegeplatz, z. B. mieten()", "Als Attribute der Klasse Liegeplatz, z. B. mieten: bool", "Als eigene Klassen, die von Liegeplatz erben", "Als Akteure im Anwendungsfalldiagramm"], 0, "Die Ereignisse eines Zustandsdiagramms spiegeln oft direkt die Methoden der zugehörigen Klasse wider."],
+          ["k", "zus6", "Autonomer Roboter: Nach dem Einschalten initialisiert er sich. Danach macht er einen Self-Check: Ist er OK, geht er in Stand-By, sonst in Error, wo er bis zum Abschalten bleibt. Aus Stand-By wechselt er bei einem Auftrag in In-Arbeit und nach Erledigung zurück. Tritt beim Arbeiten ein Fehler auf, wechselt er in Error. In Stand-By kann er abgeschaltet werden.\n\nBeschreiben Sie das Zustandsdiagramm. (6 P)", "Anfangszustand –einschalten→ „Initialisierung“ –Self-Check→ Raute: [OK] → „Stand-By“, [nicht OK] → „Error“.\n„Stand-By“ –Auftrag erhalten→ „In Arbeit“ –Auftrag erledigt→ „Stand-By“.\n„In Arbeit“ –Fehler aufgetreten→ „Error“.\n„Stand-By“ –abschalten→ Endzustand, „Error“ –abschalten→ Endzustand.", "1 P Start und Initialisierung, 1 P Verzweigung nach dem Self-Check mit Bedingungen, 2 P Wechsel Stand-By ↔ In Arbeit, 1 P Fehler → Error, 1 P Abschalten aus Stand-By und Error."],
+          ["k", "zus7", "Erläutern Sie die drei Bestandteile der Transitionsbeschriftung „mieten [istVerfuegbar()] / Bestätigung senden“. (3 P)", "Ereignis (Trigger) mieten: löst den Übergang aus.\nBedingung (Guard) [istVerfuegbar()]: muss wahr sein, sonst findet der Wechsel nicht statt.\nAktion / Bestätigung senden: wird während des Übergangs ausgeführt.", "Je 1 P pro Bestandteil mit Bedeutung."],
+          ["m", "zus8", "Worin unterscheiden sich Zustands- und Aktivitätsdiagramm?", ["Zustand: Reaktionen eines Objekts auf Ereignisse · Aktivität: Ablauf von Aktionen", "Zustand: Ablauf von Aktionen · Aktivität: Reaktionen eines Objekts auf Ereignisse", "Zustand: Nachrichten zwischen Objekten · Aktivität: Struktur der Klassen", "Zustand: Struktur der Klassen · Aktivität: Nachrichten zwischen Objekten"], 0, "Das Aktivitätsdiagramm zeigt, was im Prozess nacheinander passiert. Das Zustandsdiagramm zeigt, wie sich ein Objekt bei Ereignissen verändert."],
+          ["m", "zus9", "Ein vorbestelltes Buch wird zurückgegeben und ist dann „abholbereit“. Verstreicht die Abholfrist, wird es wieder „bereit“.\n\nWas ist „Frist verstrichen“ im Zustandsdiagramm?", ["Das Ereignis der Transition von „abholbereit“ nach „bereit“", "Ein eigener Zustand zwischen „abholbereit“ und „bereit“", "Die Aktion beim Betreten des Zustands „bereit“", "Der Endzustand des Buches im Ausleihprozess"], 0, "„Frist verstrichen“ ist das, was den Wechsel auslöst – also das Ereignis an der Transition."]
+        ] },
+      { id: "seq", titel: "Sequenzdiagramm", lern: [
+          ["Zweck", "Zeigt den Nachrichtenaustausch zwischen Objekten in zeitlicher Reihenfolge – die Zeit läuft von oben nach unten."],
+          ["Elemente", "Interaktionsrahmen (Name oben links) · Objekt :Klasse · Lebenslinie (gestrichelt) · Aktivierungsbalken (Objekt arbeitet) · X am Ende der Lebenslinie = Objekt wird gelöscht."],
+          ["Nachrichten", "Synchron: durchgezogen, gefüllte Spitze, Sender wartet · Asynchron: durchgezogen, offene Spitze, Sender wartet nicht · Antwort: gestrichelt, offene Spitze · «create»: gestrichelt zum Kopf des neuen Objekts."],
+          ["Fragmente", "alt = if/else (Bereiche durch gestrichelte Linie getrennt) · opt = if · loop = Wiederholung · par = parallel. Bedingungen in eckigen Klammern."],
+          ["Selbstdelegation", "Ein Objekt ruft eine eigene Methode auf: Pfeil zurück auf die eigene Lebenslinie mit leicht eingerücktem Balken – z. B. die Datenbank prüft Daten selbst."]], fig: "ev-seq",
+        q: [
+          ["m", "seq1", "Die MeldeApp fragt die Daten bei der Datenbank ab und wartet auf das Ergebnis.\n\nWelche Nachrichtenart ist das?", ["Synchron: durchgezogen, gefüllte Spitze", "Asynchron: durchgezogen, offene Spitze", "Antwort: gestrichelt, offene Spitze", "Erzeugung: gestrichelt mit «create»"], 0, "Wartet der Sender, ist die Nachricht synchron. Das Ergebnis kommt danach als gestrichelte Antwort zurück."],
+          ["m", "seq2", "Bei der Abmeldung einer Yacht wird das Yacht-Objekt gelöscht.\n\nWie stellen Sie das dar?", ["Mit einem X am Ende der Lebenslinie von :Yacht", "Mit einem durchgestrichenen Objektkopf von :Yacht", "Mit einem Endknoten unter der Lebenslinie", "Mit einer gestrichelten Antwort an :Yacht"], 0, "Die Zerstörung eines Objekts wird durch ein X auf der Lebenslinie markiert. Die Nachricht dorthin kann mit «destroy» beschriftet werden."],
+          ["m", "seq3", "An- und Abmeldung sollen wiederholt werden können, solange die Daten OK sind und der Vorgang nicht abgebrochen wird.\n\nWelches Fragment verwenden Sie?", ["loop mit der Bedingung im Kopf", "alt mit zwei getrennten Bereichen", "opt mit einer einzigen Bedingung", "par mit zwei parallelen Strängen"], 0, "Wiederholung = loop, die Bedingung steht in eckigen Klammern im Kopf, z. B. loop [Daten OK und nicht abgebrochen]."],
+          ["m", "seq4", "Der Bootsführer aktiviert die Navi-App, ohne auf eine Antwort zu warten.\n\nWie wird diese Nachricht gezeichnet?", ["Durchgezogene Linie, offene Pfeilspitze", "Durchgezogene Linie, gefüllte Pfeilspitze", "Gestrichelte Linie, offene Pfeilspitze", "Gestrichelte Linie, gefüllte Pfeilspitze"], 0, "Asynchron: durchgezogen mit offener Spitze. Gefüllt wäre synchron, gestrichelt eine Antwort."],
+          ["m", "seq5", "Die Datenbank prüft die Daten mit einer eigenen Methode, bevor sie antwortet.\n\nWie heißt das und wie sieht es aus?", ["Selbstdelegation: Pfeil zurück auf die eigene Lebenslinie", "Rekursion: zweite Lebenslinie desselben Objekts rechts daneben", "Rückgabe: gestrichelter Pfeil zurück an die MeldeApp", "Erzeugung: «create»-Pfeil auf eine neue Datenbank"], 0, "Bei der Selbstdelegation verlässt der Pfeil den Aktivierungsbalken und kehrt zu einem leicht eingerückten Balken auf derselben Lebenslinie zurück."],
+          ["m", "seq6", "Was zeigt ein Aktivierungsbalken auf einer Lebenslinie?", ["Dass das Objekt gerade eine Methode ausführt", "Dass das Objekt genau in diesem Moment erzeugt wird", "Dass das Objekt auf eine Eingabe des Benutzers wartet", "Dass das Objekt von einer anderen Klasse erbt"], 0, "Der schmale Balken zeigt, wie lange ein Objekt aktiv ist – vom Empfang der Nachricht bis zur Antwort."],
+          ["k", "seq7", "Navi-App: Der Bootsführer aktiviert die App (asynchron). Die App fragt nach dem Zielgewässer, der Bootsführer antwortet. Die App fragt Routen bei der Datenbank ab und zeigt sie an, der Bootsführer wählt eine Route. Die App holt die Navigationsdaten und zeigt sie an.\n\nNennen Sie die Nachrichten in Reihenfolge mit Sender, Empfänger und Art. (6 P)", "1. :Bootsführer → :Navi-App „App aktivieren“ (asynchron)\n2. :Navi-App → :Bootsführer „Zielgewässer abfragen“, Antwort „Ziel eingeben“\n3. :Navi-App → :Datenbank „Routen abfragen(standort, ziel)“ (synchron), Antwort „Routen liefern“ (gestrichelt)\n4. :Navi-App → :Bootsführer „Routen anzeigen“, Antwort „Route auswählen“\n5. :Navi-App → :Datenbank „Navigationsdaten abfragen(route)“, Antwort „Daten liefern“\n6. :Navi-App → :Bootsführer „Navigationsdaten anzeigen“", "1 P asynchrone Aktivierung, 3 P Reihenfolge mit richtigen Empfängern, 2 P Antworten gestrichelt. Auch die Lösung aus dem Unterricht (Anfragen und Anzeigen der App an den Bootsführer als gestrichelte Antwortpfeile) wird gewertet."],
+          ["m", "seq8", "Welches Fragment entspricht einer if-else-Verzweigung?", ["alt", "opt", "loop", "par"], 0, "alt = Alternativen mit sich ausschließenden Bedingungen (if/else). opt = nur if, loop = Schleife, par = parallel."],
+          ["k", "seq9", "Bei der Anmeldung einer Yacht übermittelt der :Mieter die Anmeldedaten an die :MeldeApp. Die App lässt sie von der :Datenbank prüfen. Sind die Daten OK, erzeugt die App ein neues Objekt :Yacht und bestätigt die Anmeldung, sonst lehnt sie ab.\n\nBeschreiben Sie das Sequenzdiagramm. (5 P)", ":Mieter → :MeldeApp „Anmeldedaten übermitteln“ (synchron)\n:MeldeApp → :Datenbank „Daten überprüfen“ (synchron), ggf. Selbstdelegation der Datenbank, Antwort „Ergebnis liefern“ (gestrichelt)\nalt-Fragment:\n[Daten OK] :MeldeApp –«create»→ :Yacht (Lebenslinie beginnt dort), Antwort „Anmeldung bestätigen“ an :Mieter\n[sonst] Antwort „Anmeldung ablehnen“ an :Mieter", "1 P Lebenslinien, 1 P synchrone Aufrufe mit Antworten, 2 P alt-Fragment mit Bedingungen, 1 P «create» zum Kopf von :Yacht."]
+        ] },
+      { id: "cc", titel: "Entwurfsmuster und Clean Code", lern: [
+          ["Entwurfsmuster", "Anpassbare, praxiserprobte Lösung für ein wiederkehrendes Entwurfsproblem – ein Bauplan, kein fertiger Algorithmus. Gemeinsame Sprache im Team."],
+          ["Kategorien", "Erzeugungsmuster: Singleton, Factory, Builder · Strukturmuster: Adapter, Bridge, Facade · Verhaltensmuster: Observer, Command, Iterator, Strategy."],
+          ["Vier Klassiker", "Singleton: privater Konstruktor, statische Instanz, getInstance() · Factory: eigene Klasse erzeugt die Objekte · Adapter: übersetzt zwischen inkompatiblen Schnittstellen · Observer: Beobachter melden sich an und werden bei Änderungen benachrichtigt."],
+          ["Clean Code", "Code für Menschen lesbar und wartbar halten. Refactoring = Struktur verbessern, ohne die Funktion zu ändern. SOLID (SRP, OCP, LSP, ISP, DIP) · KISS · DRY · YAGNI · FCoI · IHP (Information Hiding) · SoC (Separation of Concerns) · SLA (Single Level of Abstraction)."],
+          ["Gute Namen", "Keine Noise Words (Info, Data, Object, Manager) · aussprechbar · keine Falschinformation · durchsuchbar statt Magic Numbers · konsistent (immer get…, nicht mal fetch…)."]],
+        q: [
+          ["m", "cc1", "Von der Klasse Konfiguration darf es im ganzen Programm genau ein Objekt geben.\n\nWelches Entwurfsmuster passt?", ["Singleton", "Factory", "Observer", "Adapter"], 0, "Singleton: Der Konstruktor ist privat, eine statische Variable hält die einzige Instanz, getInstance() gibt sie zurück."],
+          ["k", "cc2", "Beschreiben Sie, wie das Singleton-Muster sicherstellt, dass nur ein Objekt existiert. (3 P)", "Der Konstruktor ist private – von außen kann niemand mit new ein Objekt erzeugen.\nEine statische Variable hält die einzige Instanz.\nEine statische Methode getInstance() erzeugt die Instanz beim ersten Aufruf und gibt danach immer dieselbe zurück.", "Je 1 P privater Konstruktor, statische Instanz, statische Zugriffsmethode."],
+          ["m", "cc3", "Eine Wetterstation soll eine App und eine Website automatisch informieren, sobald sich Messwerte ändern – ohne die drei eng zu koppeln.\n\nWelches Muster passt?", ["Observer", "Singleton", "Factory", "Adapter"], 0, "Observer: Die Beobachter registrieren sich beim Subjekt. Ändert es sich, ruft es notify() auf und alle Beobachter werden benachrichtigt."],
+          ["m", "cc4", "Ein altes Zahlungsmodul bietet zahle(betragCent) an, die neue Kasse erwartet bezahlen(betragEuro).\n\nWelches Muster bringt beide zusammen?", ["Adapter", "Observer", "Singleton", "Builder"], 0, "Adapter (Strukturmuster): Eine Zwischenklasse implementiert die erwartete Schnittstelle und übersetzt die Aufrufe intern – wie ein Reisestecker."],
+          ["m", "cc5", "Zu welcher Kategorie gehört das Factory-Muster?", ["Erzeugungsmuster", "Strukturmuster", "Verhaltensmuster", "Architekturmuster"], 0, "Factory, Singleton und Builder sind Erzeugungsmuster – sie regeln, wie Objekte erstellt werden."],
+          ["m", "cc6", "Die Klasse Rechnung berechnet Beträge, erzeugt PDFs und verschickt E-Mails.\n\nWelches SOLID-Prinzip ist verletzt?", ["Single Responsibility Principle", "Open Closed Principle", "Liskov Substitution Principle", "Interface Segregation Principle"], 0, "SRP: Jede Klasse hat genau eine Aufgabe bzw. einen Grund, sich zu ändern."],
+          ["m", "cc7", "Neue Zahlungsarten sollen ergänzt werden können, ohne die bestehende Klasse Kasse zu verändern.\n\nWelches Prinzip beschreibt das?", ["Open Closed Principle", "Dependency Inversion Principle", "Single Level of Abstraction", "Don't Repeat Yourself"], 0, "OCP: offen für Erweiterung, geschlossen für Änderung – z. B. über ein Interface Zahlungsart, für das neue Klassen hinzukommen."],
+          ["m", "cc8", "Die Klasse Quadrat erbt von Rechteck, wirft aber bei setBreite() eine Exception.\n\nWelches Prinzip ist verletzt?", ["Liskov Substitution Principle", "Interface Segregation Principle", "Open Closed Principle", "Keep It Simple, Stupid"], 0, "LSP: Ein Subtyp muss überall dort funktionieren, wo der Basistyp erwartet wird – er darf die Funktionalität erweitern, aber nicht einschränken."],
+          ["m", "cc9", "Derselbe Prüfcode für E-Mail-Adressen steht kopiert in fünf Klassen.\n\nGegen welches Prinzip verstößt das?", ["DRY – Don't Repeat Yourself", "KISS – Keep It Simple, Stupid", "YAGNI – You Ain't Gonna Need It", "SRP – Single Responsibility"], 0, "DRY: Redundanzen vermeiden. Die Prüfung gehört an eine Stelle, z. B. in eine eigene Methode oder Klasse."],
+          ["m", "cc10", "Wofür steht die Abkürzung IHP?", ["Information Hiding Principle", "Interface Hierarchy Principle", "Inheritance Handling Principle", "Isolated Helper Principle"], 0, "IHP: Interne Details einer Klasse verbergen und nur die Schnittstelle zeigen – das senkt die Kopplung."],
+          ["m", "cc11", "Eine Methode mischt einen fachlichen Aufruf wie berechneMiete() mit SQL-Strings und Bit-Operationen.\n\nWelches Prinzip ist verletzt?", ["Single Level of Abstraction", "Favour Composition over Inheritance", "You Ain't Gonna Need It", "Liskov Substitution Principle"], 0, "SLA: Innerhalb einer Funktion sollen nicht verschiedene Abstraktionsebenen gemischt werden."],
+          ["m", "cc12", "Welcher Klassenname folgt den Regeln aus „About Names“?", ["Mieter", "MieterInfo", "MieterDataObject", "MtrMgr"], 0, "Noise Words wie Info, Data oder Object bringen keine Information. „MtrMgr“ ist nicht aussprechbar."],
+          ["m", "cc13", "Statt if (alter > 17) steht im Code if (alter >= VOLLJAEHRIG_AB).\n\nWelche Regel wird damit umgesetzt?", ["Durchsuchbare Namen statt Magic Numbers", "Aussprechbare Namen statt Abkürzungen", "Konsistente Namen für gleiche Begriffe", "Kurze Namen für häufig genutzte Werte"], 0, "Benannte Konstanten lassen sich suchen und erklären sich selbst – eine nackte 17 nicht."],
+          ["k", "cc14", "Erläutern Sie den Begriff Refactoring und nennen Sie ein Ziel. (2 P)", "Refactoring ist eine Verbesserung der Struktur von Quellcode, ohne dass sich die Funktionalität des Programms ändert.\nZiele: bessere Lesbarkeit, Verständlichkeit und Wartbarkeit.", "1 P Struktur verbessern ohne Funktionsänderung, 1 P Ziel."],
+          ["m", "cc15", "Ein Kollege baut schon jetzt einen Export für fünf Dateiformate ein, obwohl nur CSV verlangt ist.\n\nWelches Prinzip spricht dagegen?", ["YAGNI", "DRY", "SOLID", "IHP"], 0, "YAGNI – You Ain't Gonna Need It: Nur programmieren, was jetzt gebraucht wird."],
+          ["k", "cc16", "Nennen Sie die fünf SOLID-Prinzipien mit je einer kurzen Erklärung. (5 P)", "SRP – Single Responsibility: Jede Klasse hat nur eine Aufgabe.\nOCP – Open Closed: offen für Erweiterung, geschlossen für Änderung.\nLSP – Liskov Substitution: Unterklassen müssen den Basistyp ersetzen können.\nISP – Interface Segregation: kleine, spezifische Interfaces statt eines großen.\nDIP – Dependency Inversion: gegen Abstraktionen programmieren, nicht gegen konkrete Klassen.", "Je 1 P pro Prinzip mit Erklärung."]
+        ] }
+    ] },
+  { id: "wpf", kurz: "WPF PM", titel: "Klausur WPF Projektmanagement", sub: "Intensiv-Workshop: klassisch und agil", start: "2026-11-10", ende: "2026-12-18",
+    reward: { kind: "title", id: "azb-experte", name: "AZB Experte", txt: "Der Sondertitel für alle, die den Workshop gemeistert haben – zum Anlegen in der Garderobe und sichtbar in der Rangliste." },
+    info: "Alles aus dem Workshop: Grundlagen und Standards, Lasten- und Pflichtenheft, Rollen und Stakeholder, Planung mit PSP, Gantt und Netzplan, Kosten, Risiken, Abschluss und Scrum. Ergänzt um IHK-typische Rechenaufgaben.",
+    tipps: ["Netzplan: vorwärts immer den größten FEZ der Vorgänger nehmen, rückwärts immer den kleinsten SAZ der Nachfolger.", "Kritisch ist ein Vorgang mit Gesamtpuffer 0 – der kritische Pfad läuft ohne Lücke vom Start bis zum Ende.", "Lastenheft = WAS (Auftraggeber), Pflichtenheft = WIE (Auftragnehmer). Diese Zuordnung wird fast immer gefragt.", "Meilensteine heißen Objekt + Zustand („Server installiert“), Tätigkeiten Objekt + Verb („Server installieren“)."],
+    kap: [
+      { id: "pm", titel: "Projekt und Projektmanagement", lern: [
+          ["Projekt", "Einmalig (neue Ausgangs- und Handlungsbedingungen) · zeitlich befristet (Anfang und Ende) · eigene Organisationsform (Team) · eigene Ressourcen (Menschen, Tools, Budget) · komplex und arbeitsteilig."],
+          ["Projektmanagement", "DIN 69901: Gesamtheit von Führungsaufgaben, -organisation, -techniken und -mitteln für die Abwicklung eines Projekts."],
+          ["Standards im Vergleich", "DIN 69901: Führung, Organisation, Mittel – normbasiert, deutsch geprägt · GPM/IPMA: Methoden, Verhalten, Kompetenzen – ganzheitlich, kompetenzorientiert · ISO 21500: Methoden, Lifecycle – globaler Standard, qualitätsorientiert · PMI: Wissen, Skills, Tools – international, praxisorientiert · PRINCE2: Planung, Kontrolle, Motivation – prozessorientiert, Governance."],
+          ["Magisches Dreieck", "Zeit, Kosten und Leistung/Qualität hängen zusammen. Ändert man eine Ecke, wirkt das auf die anderen: Mehr Leistung bei festem Termin kostet mehr oder geht zulasten der Qualität."]], fig: "ev-dreieck",
+        q: [
+          ["m", "pm1", "Welche der folgenden Aufgaben ist ein Projekt?", ["Einführung eines neuen Ticketsystems bis Ende März", "Tägliche Datensicherung aller Server um 2 Uhr nachts", "Monatliche Gehaltsabrechnung für alle Mitarbeiter", "Wöchentliches Einspielen von Updates auf allen PCs"], 0, "Nur die Einführung ist einmalig, befristet und braucht ein eigenes Team. Die anderen sind wiederkehrende Routineaufgaben."],
+          ["k", "pm2", "Nennen Sie vier Merkmale eines Projekts. (4 P)", "Einmaligkeit der Ausgangs- und Handlungsbedingungen\nzeitliche Befristung mit Anfang und Ende\neigene Organisationsform (Projektteam)\neigene Ressourcen (Personal, Tools, Budget)\nKomplexität und Arbeitsteilung", "Je 1 P pro Merkmal, vier genügen."],
+          ["m", "pm3", "Welcher Standard ist normbasiert, deutsch geprägt und beschreibt Projektmanagement als Gesamtheit von Führungsaufgaben, -organisation, -techniken und -mitteln?", ["DIN 69901", "PRINCE2", "PMI", "ISO 21500"], 0, "Das ist die Definition der DIN 69901."],
+          ["m", "pm4", "Welcher Ansatz gilt als prozessorientiert und stark auf Governance ausgelegt?", ["PRINCE2", "GPM / IPMA", "DIN 69901", "PMI"], 0, "PRINCE2 setzt auf Planung, Kontrolle und Motivation in festen Prozessen. GPM/IPMA ist kompetenzorientiert, PMI praxisorientiert."],
+          ["m", "pm5", "GPM / IPMA gilt als ganzheitlicher Ansatz.\n\nWorauf legt er den Schwerpunkt?", ["Methoden, Verhalten und Kompetenzen", "Normen, Formulare und Prüfprozesse", "Planung, Kontrolle und Motivation", "Wissen, Skills und Tools"], 0, "GPM/IPMA: Methoden, Verhalten, Kompetenzen. Planung, Kontrolle und Motivation steht für PRINCE2, Wissen, Skills und Tools für PMI."],
+          ["m", "pm6", "Der Kunde wünscht mitten im Projekt zusätzliche Funktionen, der Liefertermin bleibt aber fest.\n\nWas folgt nach dem magischen Dreieck?", ["Die Kosten steigen oder die Qualität sinkt", "Die Kosten sinken und die Qualität steigt", "Zeit, Kosten und Qualität bleiben unverändert", "Allein der Termin verschiebt sich automatisch"], 0, "Mehr Leistung bei gleicher Zeit lässt sich nur mit mehr Ressourcen (Kosten) oder Abstrichen bei der Qualität erreichen."],
+          ["k", "pm7", "Erläutern Sie das magische Dreieck des Projektmanagements an einem Beispiel. (3 P)", "Die drei Zielgrößen Zeit, Kosten und Leistung/Qualität hängen voneinander ab. Verändert man eine, wirkt sich das auf die anderen aus.\nBeispiel: Soll die neue App zwei Wochen früher fertig sein, braucht es mehr Entwickler (höhere Kosten) oder es werden Funktionen gestrichen (weniger Leistung).", "1 P drei Größen, 1 P Abhängigkeit, 1 P passendes Beispiel."]
+        ] },
+      { id: "anf", titel: "Lastenheft, Pflichtenheft, agil", lern: [
+          ["Lastenheft", "Vom Auftraggeber (Kunde). WAS wird benötigt? Ziele, fachliche Anforderungen, Rahmenbedingungen – ohne technische Lösung. Grundlage für Ausschreibung und Pflichtenheft. Inhalte: Einleitung, Ist-Zustand, Soll-Zustand, funktionale und nicht-funktionale Anforderungen, Rahmenbedingungen, Abnahmekriterien."],
+          ["Pflichtenheft", "Vom Auftragnehmer nach Abstimmung mit dem Auftraggeber, oft Vertragsbestandteil. WIE wird es umgesetzt? Inhalte: Bezug zum Lastenheft, Systemarchitektur, Umsetzungsdetails, funktionale Umsetzung, Testkonzept, Betrieb/Wartung/Schulung."],
+          ["Klassisch", "Wasserfall oder V-Modell: sequenziell. Anforderungen stehen vor dem Start möglichst vollständig fest, Änderungen sind teuer und laufen über einen Änderungsprozess."],
+          ["Agil", "Anforderungen ändern sich, werden iterativ beschrieben. Product Vision + Product Backlog ersetzen das Lastenheft, Sprint Backlog + Definition of Done das Pflichtenheft – Letztere aber nur für den aktuellen Sprint."]],
+        q: [
+          ["m", "anf1", "Wer erstellt das Lastenheft?", ["Der Auftraggeber", "Der Auftragnehmer", "Der Lenkungsausschuss", "Das Entwicklungsteam"], 0, "Das Lastenheft beschreibt aus Kundensicht, WAS benötigt wird. Das Pflichtenheft schreibt der Auftragnehmer."],
+          ["m", "anf2", "„Die Anwendung wird als Spring-Backend mit einer PostgreSQL-Datenbank umgesetzt.“\n\nIn welches Dokument gehört dieser Satz?", ["Pflichtenheft – er beschreibt, wie umgesetzt wird", "Lastenheft – er beschreibt, was benötigt wird", "Projektauftrag – er legt Budget und Termin fest", "Abschlussbericht – er hält die Ergebnisse fest"], 0, "Technische Lösung, Architektur und Umsetzungsdetails gehören ins Pflichtenheft."],
+          ["m", "anf3", "Welcher Inhalt gehört typischerweise in das Lastenheft?", ["Ist-Zustand mit Schwachstellen und die Abnahmekriterien", "Systemarchitektur mit Datenstrukturen und Algorithmen", "Testkonzept mit den konkreten Testfällen je Modul", "Schulungsplan und Übergabeprozess an den Betrieb"], 0, "Ist-/Soll-Zustand, Anforderungen, Rahmenbedingungen und Abnahmekriterien stehen im Lastenheft. Architektur, Testkonzept und Betrieb im Pflichtenheft."],
+          ["m", "anf4", "„Die Suche zeigt Ergebnisse in unter einer Sekunde an.“\n\nWelche Art von Anforderung ist das?", ["Nicht-funktionale Anforderung (Performance)", "Funktionale Anforderung (Suchfunktion)", "Rahmenbedingung (IT-Umgebung)", "Organisatorische Rahmenvorgabe (Termin)"], 0, "Sie beschreibt nicht, was das System tut, sondern wie gut – Performance ist eine nicht-funktionale Anforderung."],
+          ["m", "anf5", "Was ersetzt im agilen Vorgehen am ehesten das Lastenheft?", ["Product Vision und Product Backlog", "Sprint Backlog und Definition of Done", "Daily Scrum und Sprint Review", "Burndown-Chart und Inkrement"], 0, "Vision und Product Backlog beschreiben Nutzen, Ziele und grobe Anforderungen aus Kundensicht. Sprint Backlog und DoD übernehmen die Rolle des Pflichtenhefts."],
+          ["m", "anf6", "Warum sind Änderungen im klassischen Wasserfallmodell teuer?", ["Alles ist vorab geplant, Änderungen brauchen einen Änderungsprozess", "Anforderungen werden erst am Ende gesammelt und dann komplett neu geplant", "Jede Änderung muss der Scrum Master im Daily Scrum ausdrücklich freigeben", "Das Pflichtenheft darf nach dem Projektstart nicht mehr gelesen werden"], 0, "Im klassischen Vorgehen ist alles vorab geplant. Spätere Änderungen betreffen bereits erledigte Phasen und müssen formal beantragt werden."],
+          ["k", "anf7", "Vergleichen Sie Lastenheft und Pflichtenheft nach Ersteller, Inhalt und Nutzen. (6 P)", "Ersteller: Lastenheft – Auftraggeber (Kunde); Pflichtenheft – Auftragnehmer nach Abstimmung mit dem Auftraggeber.\nInhalt: Lastenheft – WAS: Ziele, fachliche Anforderungen, Rahmenbedingungen ohne technische Lösung; Pflichtenheft – WIE: technische Umsetzung der Anforderungen, Architektur, Testkonzept.\nNutzen: Lastenheft – Grundlage für Ausschreibung und Angebote; Pflichtenheft – Basis für Planung, Entwicklung und Tests, oft Vertragsbestandteil.", "Je Kriterium 2 P (beide Seiten richtig)."]
+        ] },
+      { id: "org", titel: "Rollen und Stakeholder", lern: [
+          ["Rollen", "Auftraggeber/Sponsor: genehmigt Ziele, Budget, Ressourcen; Gesamtverantwortung · Projektleiter: plant, steuert, kommuniziert, berichtet; verantwortet Ergebnis, Termine, Budget, Personal · Teilprojektleiter: steuert einen Bereich · Projektteam: setzt Arbeitspakete um · Stakeholder: liefern Anforderungen und Feedback · Lenkungsausschuss: entscheidet bei Eskalationen, priorisiert strategisch."],
+          ["Gute Organisation", "Klare Rollen, bekannte Stakeholder mit Erwartungen und Einfluss, strukturierte Kommunikation (Kommunikationsmatrix: wer informiert wen wann wie worüber), schnelle nachvollziehbare Entscheidungen, positive Projektkultur."],
+          ["Stakeholder-Analyse", "Alle Personen und Gruppen finden, die Einfluss auf das Projekt haben oder betroffen sind – um Unterstützung zu sichern und Widerstände zu verringern. Einordnung nach Einfluss und Interesse."],
+          ["Matrix", "Hoher Einfluss, hohes Interesse: eng einbinden · hoher Einfluss, wenig Interesse: zufriedenstellen · wenig Einfluss, hohes Interesse: informieren · wenig Einfluss, wenig Interesse: beobachten."]], fig: "ev-stake",
+        q: [
+          ["m", "org1", "Wer entscheidet bei Eskalationen und priorisiert strategisch?", ["Der Lenkungsausschuss", "Der Projektleiter", "Der Teilprojektleiter", "Das Projektteam"], 0, "Der Lenkungsausschuss (Steering Committee) überwacht strategisch und entscheidet, wenn der Projektleiter nicht mehr allein entscheiden kann."],
+          ["m", "org2", "Wer verantwortet Ergebnis, Termine, Budget und Personal und berichtet regelmäßig über den Stand?", ["Der Projektleiter", "Der Auftraggeber", "Ein Stakeholder", "Der Lenkungsausschuss"], 0, "Der Projektleiter plant, steuert, kommuniziert und berichtet."],
+          ["m", "org3", "Wer genehmigt Ziele, Budget und Ressourcen des Projekts?", ["Der Auftraggeber (Sponsor)", "Der Projektleiter (PL)", "Der Teilprojektleiter (TPL)", "Das Projektteam selbst"], 0, "Auftraggeber/Sponsor tragen die Gesamtverantwortung und die strategische Ausrichtung."],
+          ["m", "org4", "Die Konzern-IT muss die Server freigeben und hat damit großen Einfluss, interessiert sich aber kaum für Ihr Projekt.\n\nWie gehen Sie laut Stakeholder-Matrix vor?", ["Zufriedenstellen – Anforderungen früh berücksichtigen", "Eng einbinden – in alle Entscheidungen einbeziehen", "Informieren – regelmäßig einen Newsletter schicken", "Beobachten – nur bei Bedarf ansprechen"], 0, "Hoher Einfluss, wenig Interesse → zufriedenstellen: ihre Anforderungen kennen und früh berücksichtigen, ohne sie mit Details zu überhäufen."],
+          ["m", "org5", "Die späteren Nutzer des Systems haben großes Interesse, aber wenig Einfluss.\n\nWas ist angemessen?", ["Regelmäßig informieren, Feedback einholen", "Sie in den Lenkungsausschuss aufnehmen", "Nur beobachten und nicht kommunizieren", "Die Budgetfreigabe von ihnen einholen"], 0, "Wenig Einfluss, hohes Interesse → informieren. Ihr Feedback ist trotzdem wertvoll für die Akzeptanz."],
+          ["m", "org6", "Wozu dient eine Kommunikationsmatrix?", ["Sie legt fest, wer wen wann wie worüber informiert", "Sie zeigt, welche Arbeitspakete voneinander abhängen", "Sie bewertet Risiken nach Eintritt und Schaden", "Sie ordnet Stakeholder nach Einfluss und Interesse"], 0, "Die Kommunikationsmatrix sorgt dafür, dass Kommunikation strukturiert und offen verläuft."],
+          ["k", "org7", "Nennen Sie das Ziel einer Stakeholder-Analyse und beschreiben Sie die Einordnung in die Einfluss-Interesse-Matrix. (4 P)", "Ziel: alle Personen, Gruppen und Organisationen erkennen und steuern, die Einfluss auf das Projekt haben oder davon betroffen sind – um Unterstützung zu sichern und Widerstände zu verringern.\nMatrix mit den Achsen Einfluss und Interesse:\nhoch/hoch – eng einbinden\nhoher Einfluss, wenig Interesse – zufriedenstellen\nwenig Einfluss, hohes Interesse – informieren\nwenig/wenig – beobachten", "1 P Ziel, 1 P Achsen, 2 P sinnvolle Strategien für die Felder."]
+        ] },
+      { id: "pla", titel: "Projektplanung, PSP und Gantt", lern: [
+          ["Phasen", "Projektauftrag/-definition (Machbarkeitsstudie: technisch, wirtschaftlich …) → Planung (Meilensteine) → Durchführung (Gantt zur Steuerung) → Abschluss (Abschlussbericht)."],
+          ["Erfolgsfaktoren", "SMARTe Ziele (spezifisch, messbar, erreichbar, relevant, terminiert) · abgestimmte, nachvollziehbare Änderungen · gemischtes Team mit fachlichen und sozialen Kompetenzen · klare Rollen · Rückhalt von Vorgesetzten und Sponsor · bereitgestellte Ressourcen."],
+          ["Projektstrukturplan", "Gliedert die Gesamtaufgabe in Haupt- und Teilaufgaben bis zu Arbeitspaketen. Funktionsorientiert (Konzeption, Beschaffung, Aufbau), objektorientiert (Frontend, Backend, Datenbank) oder phasenorientiert (Analyse, Entwurf, Test)."],
+          ["Ablauf und Meilensteine", "Der Ablaufplan bringt alle Aktivitäten mit Abhängigkeiten in eine Reihenfolge. Meilensteine sind Kontrollpunkte. Tätigkeit: Objekt + Verb („Budget genehmigen lassen“) · Meilenstein: Objekt + Zustand („Budget genehmigt“)."],
+          ["Gantt", "Horizontales Balkendiagramm auf einer Zeitachse: Start, Dauer, Ende jeder Aufgabe, dazu Abhängigkeiten, Parallelität und Meilensteine. Verantwortliche benennen, Puffer einplanen."]], fig: "ev-gantt",
+        q: [
+          ["m", "pla1", "Welche Benennung ist für einen Meilenstein korrekt?", ["Server installiert", "Server installieren", "Installation des Servers", "Serverinstallation läuft"], 0, "Meilensteine werden als Objekt + Zustand benannt, Tätigkeiten als Objekt + Verb."],
+          ["m", "pla2", "Welches Projektziel ist SMART formuliert?", ["Bis 31.03. sinkt die Bearbeitungszeit pro Ticket um 20 %", "Die Bearbeitung der Tickets soll deutlich schneller werden", "Wir verbessern die Zufriedenheit unserer Kunden nachhaltig", "Bis zum Sommer wird das Ticketsystem irgendwie besser"], 0, "Nur das erste Ziel ist spezifisch, messbar (20 %), terminiert (31.03.) und damit prüfbar."],
+          ["k", "pla3", "Wofür steht die Abkürzung SMART bei Projektzielen? (5 P)", "S – specific (spezifisch, eindeutig)\nM – measurable (messbar)\nA – achievable (erreichbar)\nR – relevant (bedeutsam für das Projekt)\nT – time-bound (terminiert)", "Je 1 P pro Buchstabe."],
+          ["m", "pla4", "Ein Projektstrukturplan „IT-Installation“ ist in Konzeption, Beschaffung, Aufbau und Dokumentation gegliedert.\n\nWie ist er gegliedert?", ["Funktionsorientiert", "Objektorientiert", "Ressourcenorientiert", "Kostenorientiert"], 0, "Die Hauptaufgaben sind Funktionen bzw. Tätigkeitsbereiche – also funktionsorientiert."],
+          ["m", "pla5", "Ein Projektstrukturplan für einen Webshop ist in Frontend, Backend, Datenbank und Zahlungsmodul gegliedert.\n\nWie ist er gegliedert?", ["Objektorientiert", "Funktionsorientiert", "Phasenorientiert", "Terminorientiert"], 0, "Gegliedert wird nach den Bestandteilen (Objekten) des Produkts."],
+          ["m", "pla6", "Was ist die kleinste Einheit eines Projektstrukturplans?", ["Das Arbeitspaket", "Der Meilenstein", "Das Teilprojekt", "Der Gantt-Balken"], 0, "Der PSP gliedert in Haupt- und Teilaufgaben bis hinunter zu den Arbeitspaketen."],
+          ["m", "pla7", "In welcher Phase prüft eine Machbarkeitsstudie das Vorhaben aus technischer und wirtschaftlicher Sicht?", ["Projektdefinition", "Projektplanung", "Projektdurchführung", "Projektabschluss"], 0, "Bevor geplant wird, muss klar sein, ob das Projekt überhaupt machbar ist."],
+          ["m", "pla8", "A (2 Tage) → B (4, nach A) → C (3, nach B) und D (2, nach B) → E (1, nach C und D) → F (4, nach E) → G (5, nach E und F).\n\nWann endet G frühestens?", ["Nach 19 Tagen", "Nach 18 Tagen", "Nach 21 Tagen", "Nach 16 Tagen"], 0, "A 0–2, B 2–6, C 6–9 und D 6–8, E startet nach dem späteren Vorgänger C: 9–10, F 10–14, G startet nach F: 14–19."],
+          ["k", "pla9", "Beschreiben Sie, was ein Gantt-Diagramm zeigt und worauf man beim Erstellen achten sollte. (4 P)", "Ein Gantt-Diagramm ist ein horizontales Balkendiagramm auf einer Zeitachse. Jede Aufgabe ist ein Balken mit Start, Dauer und Ende; Abhängigkeiten (Vorgänger → Nachfolger), parallele Aktivitäten und Meilensteine werden sichtbar.\nZu beachten: Verantwortliche klar benennen, Puffer einplanen, Abhängigkeiten deutlich machen.", "2 P Darstellung, 2 P zwei Hinweise."]
+        ] },
+      { id: "netz", titel: "Netzplan", lern: [
+          ["Knoten", "Jeder Vorgang hat PS (Name) und D (Dauer), FAZ/FEZ oben, SAZ/SEZ unten, GP und FP. Die Aufgabe gibt die Anordnung vor – genau übernehmen."],
+          ["Vorwärts", "FAZ des ersten Vorgangs = 0. FEZ = FAZ + D. FAZ eines Nachfolgers = FEZ des Vorgängers – bei mehreren Vorgängern der größte FEZ."],
+          ["Rückwärts", "SEZ des letzten Vorgangs = sein FEZ. SAZ = SEZ − D. SEZ eines Vorgängers = SAZ des Nachfolgers – bei mehreren Nachfolgern der kleinste SAZ."],
+          ["Puffer", "GP = SAZ − FAZ: so weit kann sich der Vorgang verschieben, ohne das Projektende zu gefährden. FP = kleinster FAZ der Nachfolger − eigener FEZ: Verschiebung ohne Einfluss auf den direkten Nachfolger."],
+          ["Kritischer Pfad", "Alle Vorgänge mit GP = 0. Jede Verzögerung dort verschiebt das Projektende."]], fig: "ev-netz",
+        q: [
+          ["m", "netz1", "Wie berechnet man den FEZ eines Vorgangs?", ["FEZ = FAZ + Dauer", "FEZ = SAZ + Dauer", "FEZ = SEZ − Dauer", "FEZ = FAZ − Dauer"], 0, "Frühestes Ende = frühester Anfang + Dauer."],
+          ["m", "netz2", "Ein Vorgang hat zwei Vorgänger mit FEZ 8 und FEZ 9.\n\nWelcher FAZ gilt für ihn?", ["9 – der größte FEZ der Vorgänger", "8 – der kleinste FEZ der Vorgänger", "17 – die Summe beider FEZ", "8,5 – der Mittelwert beider FEZ"], 0, "Ein Vorgang kann erst beginnen, wenn alle Vorgänger fertig sind – also beim größten FEZ."],
+          ["m", "netz3", "Ein Vorgang hat zwei Nachfolger mit SAZ 7 und SAZ 10.\n\nWelcher SEZ gilt für ihn?", ["7 – der kleinste SAZ der Nachfolger", "10 – der größte SAZ der Nachfolger", "17 – die Summe beider SAZ", "3 – die Differenz beider SAZ"], 0, "Er muss spätestens fertig sein, wenn der früheste Nachfolger spätestens beginnen muss – also beim kleinsten SAZ."],
+          ["m", "netz4", "Wie berechnet sich der Gesamtpuffer eines Vorgangs?", ["GP = SAZ − FAZ", "GP = FAZ des Nachfolgers − FEZ", "GP = SEZ − SAZ", "GP = FEZ − FAZ"], 0, "GP = SAZ − FAZ (gleichwertig: SEZ − FEZ). FAZ des Nachfolgers − FEZ ist der freie Puffer, SEZ − SAZ und FEZ − FAZ sind die Dauer."],
+          ["m", "netz5", "Was bedeutet ein Gesamtpuffer von 0?", ["Der Vorgang ist kritisch, jede Verzögerung verschiebt das Ende", "Der Vorgang ist schon erledigt und muss nicht geplant werden", "Der Vorgang lässt sich beliebig nach hinten verschieben", "Der Vorgang hat keinen Vorgänger und startet bei 0"], 0, "GP = 0 heißt: kein Spielraum. Solche Vorgänge bilden den kritischen Pfad."],
+          ["m", "netz6", "Worin unterscheidet sich der freie Puffer vom Gesamtpuffer?", ["FP: ohne Einfluss auf den direkten Nachfolger · GP: ohne Einfluss auf das Projektende", "FP: ohne Einfluss auf das Projektende · GP: ohne Einfluss auf den direkten Nachfolger", "FP gilt nur für den ersten Vorgang · GP für alle übrigen Vorgänge", "FP ist immer größer als GP · GP ist immer genau null"], 0, "Den freien Puffer kann ein Vorgang nutzen, ohne dass sich ein anderer Vorgang verschiebt. Der Gesamtpuffer darf Nachfolger verschieben, solange das Projektende hält. Es gilt FP ≤ GP."],
+          ["k", "netz7", "Server-Migration (Dauer in Tagen, Vorgänger): A Analyse 3 (–) · B Hardware bestellen 5 (A) · C Konzept 4 (A) · D Testumgebung 2 (C) · E Installation 3 (B, D) · F Schulung 2 (C) · G Abnahme 1 (E, F).\n\nFühren Sie die Vorwärtsrechnung durch und geben Sie FAZ und FEZ aller Vorgänge an. (4 P)", "A: FAZ 0, FEZ 3\nB: FAZ 3, FEZ 8\nC: FAZ 3, FEZ 7\nD: FAZ 7, FEZ 9\nE: FAZ 9 (größter FEZ von B = 8 und D = 9), FEZ 12\nF: FAZ 7, FEZ 9\nG: FAZ 12 (größter FEZ von E = 12 und F = 9), FEZ 13\nProjektdauer: 13 Tage", "1 P Start bei 0, 2 P richtige Werte bei mehreren Vorgängern (E, G), 1 P alle übrigen Werte."],
+          ["k", "netz8", "Gleiches Projekt (Server-Migration, Projektende 13).\n\nBestimmen Sie SAZ, SEZ, GP und FP aller Vorgänge sowie den kritischen Pfad. (5 P)", "G: SEZ 13, SAZ 12, GP 0, FP 0\nE: SEZ 12, SAZ 9, GP 0, FP 0\nF: SEZ 12, SAZ 10, GP 3, FP 3\nD: SEZ 9, SAZ 7, GP 0, FP 0\nB: SEZ 9, SAZ 4, GP 1, FP 1\nC: SEZ 7 (kleinster SAZ von D = 7 und F = 10), SAZ 3, GP 0, FP 0\nA: SEZ 3 (kleinster SAZ von B = 4 und C = 3), SAZ 0, GP 0, FP 0\nKritischer Pfad: A – C – D – E – G", "2 P Rückwärtsrechnung mit kleinstem SAZ bei C und A, 2 P Puffer, 1 P kritischer Pfad."],
+          ["m", "netz9", "Welcher Weg ist im Projekt „Server-Migration“ (A 3, B 5 nach A, C 4 nach A, D 2 nach C, E 3 nach B und D, F 2 nach C, G 1 nach E und F) kritisch?", ["A – C – D – E – G", "A – B – E – G", "A – C – F – G", "A – B – D – E – G"], 0, "A–C–D–E–G dauert 3 + 4 + 2 + 3 + 1 = 13 Tage – der längste Weg. A–B–E–G dauert 12, A–C–F–G 10. B → D gibt es nicht."],
+          ["m", "netz10", "Im Projekt „Server-Migration“ verzögert sich die Hardware-Lieferung (B, Gesamtpuffer 1) um 2 Tage.\n\nWas passiert mit dem Projektende?", ["Es verschiebt sich um 1 Tag, weil B nur 1 Tag Puffer hat", "Es verschiebt sich um 2 Tage, weil B auf dem kritischen Pfad liegt", "Es bleibt gleich, weil B 3 Tage Puffer hat", "Es verschiebt sich um 3 Tage, weil E und G folgen"], 0, "Ein Tag Verzögerung wird vom Puffer aufgefangen, der zweite verschiebt E und G – das Projekt endet nach 14 statt 13 Tagen."],
+          ["m", "netz11", "Wie lange dauert die Server-Migration (A 3, B 5, C 4, D 2, E 3, F 2, G 1) mindestens?", ["13 Tage", "12 Tage", "15 Tage", "20 Tage"], 0, "Die Dauer bestimmt der kritische Pfad A–C–D–E–G mit 13 Tagen. 20 Tage wäre die Summe aller Vorgänge – parallele Vorgänge zählen aber nicht doppelt."]
+        ] },
+      { id: "kr", titel: "Kosten, Risiken, Abschluss", lern: [
+          ["Personalkosten intern", "Quellen: Gehaltsbuchhaltung, Kostenrechnung (Controlling), Tarifverträge. Zum Brutto kommen AG-Anteile zur Sozialversicherung, Ausfallzeiten (Urlaub, Krankheit, Weiterbildung) und Gemeinkosten. Vollkosten ≈ 1,5- bis 1,7-faches Bruttogehalt."],
+          ["Personalkosten extern", "Quellen: Angebote, Kostenvoranschläge, bestehende Lieferantenverträge, Marktvergleiche."],
+          ["Risikomanagement", "Risiko = mögliches Ereignis, das den Projekterfolg gefährdet (z. B. Lieferverzug, Personalausfall, neue Gesetze). Prozess: 1. identifizieren · 2. analysieren, bewerten, priorisieren · 3. Maßnahmen planen und umsetzen · 4. überwachen · 5. dokumentieren (Risikolog). Nicht jedes Risiko vermeiden – vorbereitet sein."],
+          ["Projektabschluss", "Lessons-Learned-Workshop (z. B. Start-Stop-Continue: anders bzw. neu machen, nicht mehr machen, weitermachen) · Projektkonten schließen, damit nichts mehr gebucht wird · neue Aufgaben für die Mitarbeitenden, gemeinsam mit dem Personalbereich."],
+          ["Nutzwertanalyse", "Entscheidungshilfe für Alternativen: Kriterien festlegen, gewichten (Summe 100 %), je Alternative Punkte vergeben, Punkte × Gewicht, Summe bilden – die höchste Summe gewinnt."]],
+        q: [
+          ["m", "kr1", "Eine Entwicklerin verdient 4.000 € brutto im Monat.\n\nMit welchen monatlichen Vollkosten sollten Sie im Projekt rechnen?", ["Etwa 6.000 bis 6.800 €", "Etwa 4.000 bis 4.400 €", "Etwa 8.000 bis 9.000 €", "Etwa 2.400 bis 2.800 €"], 0, "Vollkosten liegen meist beim 1,5- bis 1,7-fachen des Bruttogehalts: 4.000 € × 1,5 = 6.000 €, × 1,7 = 6.800 €."],
+          ["m", "kr2", "Warum liegen die Vollkosten einer Arbeitskraft deutlich über dem Bruttogehalt?", ["AG-Anteile, Ausfallzeiten und Gemeinkosten kommen dazu", "Die Lohnsteuer zahlt der Arbeitgeber noch zusätzlich", "Überstunden werden pauschal mit 50 % aufgeschlagen", "Externe Berater werden immer anteilig eingerechnet"], 0, "Arbeitgeberanteile zur Sozialversicherung, unproduktive Tage (Urlaub, Krankheit, Weiterbildung) und Overhead erhöhen die Kosten. Die Lohnsteuer ist bereits im Brutto enthalten."],
+          ["m", "kr3", "Woher bekommen Sie verlässliche Zahlen für externe Personalkosten?", ["Angebote, Kostenvoranschläge, Lieferantenverträge", "Gehaltsbuchhaltung, Kostenrechnung, Tarifverträge", "Stundenzettel des eigenen Projektteams", "Lessons-Learned-Protokolle früherer Projekte"], 0, "Gehaltsbuchhaltung und Tarifverträge sind Quellen für interne Kosten. Externe Kosten kennt man aus Angeboten, Verträgen und Marktvergleichen."],
+          ["m", "kr4", "Was ist der zweite Schritt im Risikomanagement-Prozess?", ["Risiken analysieren und bewerten", "Maßnahmen planen und umsetzen", "Risiken überwachen (Monitoring)", "Risiken im Risikolog dokumentieren"], 0, "Reihenfolge: identifizieren → analysieren/bewerten → Maßnahmen → überwachen → dokumentieren."],
+          ["k", "kr5", "Nennen Sie die fünf Schritte des Risikomanagement-Prozesses in der richtigen Reihenfolge. (5 P)", "1. Risiken identifizieren\n2. Risiken analysieren und bewerten bzw. priorisieren\n3. Maßnahmen planen und umsetzen\n4. Risiken überwachen (Monitoring)\n5. Dokumentieren (Risikolog)", "Je 1 P pro Schritt an der richtigen Stelle."],
+          ["m", "kr6", "Bei der Methode „Start-Stop-Continue“ im Lessons-Learned-Workshop steht „Stop“ für …", ["… das, was wir künftig nicht mehr machen", "… das, was wir künftig neu einführen", "… das, was wir genauso weitermachen", "… den Termin, an dem das Projekt endet"], 0, "Start = anders bzw. neu machen, Stop = nicht mehr machen, Continue = weitermachen."],
+          ["m", "kr7", "Warum werden beim Projektabschluss die Projektkonten in der Buchhaltung geschlossen?", ["Damit keine weiteren Kosten auf das Projekt gebucht werden", "Damit das Team seine Arbeitszeit nicht mehr erfassen muss", "Damit der Auftraggeber die Rechnung schneller bezahlt", "Damit die Lessons Learned vertraulich gespeichert bleiben"], 0, "So bleibt das Projektbudget eingehalten und die Kosten des Projekts sind abgeschlossen."],
+          ["m", "kr8", "Nutzwertanalyse: Das Kriterium Preis hat ein Gewicht von 40 %, Anbieter A erhält dort 8 Punkte.\n\nWie viele gewichtete Punkte sind das?", ["3,2", "8,4", "4,8", "0,32"], 0, "Gewichteter Wert = Punkte × Gewicht = 8 × 0,4 = 3,2."],
+          ["k", "kr9", "Beschreiben Sie das Vorgehen bei einer Nutzwertanalyse. (4 P)", "1. Entscheidungskriterien festlegen (z. B. Preis, Funktionsumfang, Support)\n2. Kriterien gewichten, Summe der Gewichte = 100 %\n3. Jede Alternative je Kriterium bewerten (Punkte, z. B. 1–10)\n4. Punkte × Gewicht rechnen und je Alternative aufsummieren – die höchste Summe ist die beste Wahl", "Je 1 P pro Schritt."]
+        ] },
+      { id: "scrum", titel: "Scrum", lern: [
+          ["Klassisch vs. agil", "Klassisch: alles am Anfang geplant, Änderungen schwierig, Ergebnis erst am Ende. Agil: kleine Schritte, regelmäßiges Feedback, Änderungen jederzeit möglich – man merkt früh, ob man richtig liegt."],
+          ["Grundidee", "Arbeit in Sprints von 1–4 Wochen. Am Ende jedes Sprints steht ein funktionsfähiges Teilergebnis (Inkrement), zu dem der Kunde Feedback gibt."],
+          ["Rollen", "Product Owner: vertritt Kunden- und Nutzersicht, legt fest, was entwickelt wird, priorisiert · Scrum Master: organisiert den Prozess, coacht, beseitigt Hindernisse · Entwicklungsteam: programmiert, testet, liefert – selbstorganisiert, funktionsübergreifend, ohne Teamleiter."],
+          ["Artefakte und Ereignisse", "Artefakte: Product Vision, Product Backlog (vom PO sortiert, jederzeit änderbar), Sprint Backlog, Burndown, Inkrement mit Definition of Done (laut Workshop; im Scrum Guide: Product Backlog, Sprint Backlog, Inkrement). Ereignisse: Sprint Planning, Daily Scrum, Sprint Review (Ergebnis zeigen), Sprint Retrospektive (Zusammenarbeit verbessern)."],
+          ["User Story", "Als [Rolle] möchte ich [Funktion/Ziel], damit [Nutzen]. Keine technische Beschreibung. Gute Stories sind INVEST: Independent, Negotiable, Valuable, Estimable, Small, Testable."]], fig: "ev-scrum",
+        q: [
+          ["m", "sc1", "Wie lange dauert ein Sprint in Scrum?", ["1 bis 4 Wochen", "1 bis 3 Tage", "2 bis 6 Monate", "Bis das ganze Produkt fertig ist"], 0, "Sprints sind kurze, sich wiederholende Zyklen von 1 bis 4 Wochen."],
+          ["m", "sc2", "Wer priorisiert das Product Backlog?", ["Der Product Owner", "Der Scrum Master", "Das Entwicklungsteam", "Der Lenkungsausschuss"], 0, "Der Product Owner vertritt die Kundensicht und sortiert das Backlog nach Wichtigkeit."],
+          ["m", "sc3", "Das Team wird ständig von einer Fachabteilung mit Zusatzwünschen unterbrochen.\n\nWer sorgt dafür, dass dieses Hindernis beseitigt und das Team geschützt wird?", ["Der Scrum Master – er beseitigt Hindernisse", "Der Product Owner – er nimmt die Wünsche sofort in den laufenden Sprint auf", "Das Entwicklungsteam – es arbeitet alles ab", "Der Projektleiter – er verteilt Aufgaben neu"], 0, "Der Scrum Master schützt das Team und räumt Hindernisse aus dem Weg. Einen klassischen Projektleiter gibt es in Scrum nicht."],
+          ["m", "sc4", "Was liegt am Ende jedes Sprints vor?", ["Ein funktionsfähiges Teilergebnis (Inkrement)", "Ein vollständig abgestimmtes Pflichtenheft", "Ein Abschlussbericht für den Sponsor", "Ein neu erstellter Projektstrukturplan"], 0, "Jeder Sprint liefert ein nutzbares Inkrement, das der Definition of Done entspricht."],
+          ["m", "sc5", "In welchem Ereignis verbessert das Team seine Zusammenarbeit?", ["Sprint Retrospektive", "Sprint Review", "Sprint Planning", "Daily Scrum"], 0, "Retrospektive = Rückblick auf die Arbeitsweise. Im Review wird das Produkt gezeigt, im Planning der Sprint geplant, im Daily der Tag abgestimmt."],
+          ["m", "sc6", "Was passiert im Sprint Review?", ["Das Inkrement wird gezeigt und Feedback eingeholt", "Das Team plant die Aufgaben für den nächsten Tag", "Das Team reflektiert seine eigene Zusammenarbeit", "Der Scrum Master schreibt das Product Backlog um"], 0, "Im Review stellt das Team das Ergebnis den Stakeholdern vor; das Feedback fließt ins Product Backlog."],
+          ["m", "sc7", "Welche User Story ist richtig formuliert?", ["Als Mieter möchte ich online kündigen, damit ich nicht anrufen muss", "Der Liegeplatz wird über den REST-Endpunkt DELETE /platz gekündigt", "Online-Kündigung für Liegeplätze inklusive Bestätigungsmail einbauen", "Als Entwickler lege ich eine Tabelle Kuendigung in PostgreSQL an"], 0, "Schema: Als [Rolle] möchte ich [Ziel], damit [Nutzen] – aus Anwendersicht, ohne technische Umsetzung."],
+          ["m", "sc8", "Wofür steht das „T“ in INVEST?", ["Testable – prüfbar, ob die Story erfüllt ist", "Timeboxed – die Story hat eine feste Dauer", "Technical – die Story beschreibt die Umsetzung", "Tracked – die Story steht im Burndown-Chart"], 0, "INVEST: Independent, Negotiable, Valuable, Estimable, Small, Testable."],
+          ["m", "sc9", "Die Story „Als Nutzer möchte ich das komplette Buchungssystem“ verletzt vor allem welches INVEST-Kriterium?", ["Small", "Valuable", "Negotiable", "Independent"], 0, "Die Story ist viel zu groß für einen Sprint. Sie muss in kleinere Stories zerlegt werden."],
+          ["k", "sc10", "Nennen Sie die drei Scrum-Rollen und je zwei Aufgaben. (6 P)", "Product Owner: vertritt die Kunden- und Nutzersicht, legt fest, was entwickelt wird, priorisiert das Product Backlog.\nScrum Master: organisiert den Prozess (Coach), beseitigt Hindernisse, unterstützt das Team.\nEntwicklungsteam: programmiert, testet, liefert das Inkrement – selbstorganisiert und funktionsübergreifend.", "Je Rolle 2 P (zwei passende Aufgaben)."],
+          ["m", "sc11", "Welches der folgenden Elemente ist ein Artefakt in Scrum?", ["Das Sprint Backlog", "Das Daily Scrum", "Das Sprint Review", "Der Product Owner"], 0, "Artefakte sind Ergebnisse bzw. Arbeitsmittel (Backlogs, Inkrement). Daily und Review sind Ereignisse, der Product Owner ist eine Rolle."],
+          ["k", "sc12", "Vergleichen Sie klassisches und agiles Projektmanagement anhand von drei Merkmalen. (3 P)", "Planung: klassisch alles am Anfang · agil schrittweise je Sprint.\nÄnderungen: klassisch schwierig und teuer · agil jederzeit möglich.\nErgebnis: klassisch erst am Ende sichtbar · agil nach jedem Sprint ein Inkrement mit Feedback.", "Je Merkmal 1 P (beide Seiten richtig)."],
+          ["k", "sc13", "Nennen Sie die sechs INVEST-Kriterien für gute User Stories mit ihrer Bedeutung. (6 P)", "Independent – möglichst unabhängig von anderen Stories\nNegotiable – verhandelbar, keine fertige technische Spezifikation\nValuable – bringt erkennbaren Nutzen für Anwender oder Kunden\nEstimable – Aufwand ist abschätzbar\nSmall – klein genug für einen kurzen Zeitraum\nTestable – überprüfbar, ob die Story erfüllt ist", "Je 1 P pro Kriterium mit Bedeutung."]
+        ] }
+    ] }
+];
+
+
 // Grundgerüste zum Abtippen im Editor (angehängt, damit bestehende IDs unverändert bleiben)
 CARDS_RAW.algo.push(
   ["Ein Bibliothekssystem speichert Buchnummern im unsortierten Array nummern: Integer[] mit n Elementen.\n\nEntwickeln Sie in Pseudocode die Methode sucheLinear(nummern: Integer[], gesucht: Integer): Integer, die den Index der gesuchten Nummer liefert oder -1, wenn sie nicht vorkommt. (4 P)", "sucheLinear(nummern: Integer[], gesucht: Integer): Integer\n  für i = 0 bis n - 1\n    wenn nummern[i] = gesucht dann\n      Rückgabe i\n    ende wenn\n  ende für\n  Rückgabe -1\nende sucheLinear", "Schleife über alle Elemente (1 P)\nVergleich (1 P)\nRückgabe des Index beim Treffer (1 P)\nRückgabe -1 erst nach der Schleife (1 P) – nicht im sonst-Zweig, sonst wird nur das erste Element geprüft"],
@@ -2602,9 +3230,13 @@ CARDS_RAW.algo.push(
   MC.forEach((m) => BASE_Q.push({ id: m.id, type: "mc", topic: MC_TOPIC[m.id] || m[6] || CAT_TOPIC[m[0] + "|" + m[1]] || "T01", teil: m[0], q: m[2], opts: m[3], right: m[4], why: m[5] }));
   Object.entries(CARDS_RAW).forEach(([deck, list]) => list.forEach(([f, b, n], i) => BASE_Q.push({ id: "k:" + deck + i, type: "card", topic: CARD_TOPIC["k:" + deck + i] || DECK_TOPIC[deck] || "T01", q: f, a: b, n: n || "", code: !DECKS[deck] || DECKS[deck].teil !== "SoWi" })));
   const QMAP = Object.fromEntries(BASE_Q.map((q) => [q.id, q]));
+  // Events: eigene Fragen mit IDs „ev:<event>:<frage>“. Nie in allQ – sie zählen nicht zur Prüfungsreife und erscheinen in keiner normalen Runde,
+  // Suche oder Prüfung. Ihr Lernstand liegt wie gewohnt in S.q (dadurch gesichert und synchronisiert).
+  const EVQ = {}, EVKAP = {};
+  EVENTS.forEach((e) => e.kap.forEach((k) => { const tid = "ev:" + e.id + ":" + k.id; TP[tid] = { id: tid, n: e.kurz + " · " + k.titel, teil: "Event" }; EVKAP[tid] = k.q.map((x) => { const id = "ev:" + e.id + ":" + x[1]; EVQ[id] = x[0] === "m" ? { id, type: "mc", topic: tid, q: x[2], opts: x[3], right: x[4], why: x[5], ev: e.id } : { id, type: "card", topic: tid, q: x[2], a: x[3], n: x[4] || "", code: false, ev: e.id }; return id; }); }));
   const customQ = () => Object.entries(S.custom || {}).flatMap(([t, l]) => (l || []).map((c) => ({ id: c.id, type: "card", topic: t, q: c.f, a: c.b, own: true, code: true })));
   const allQ = () => BASE_Q.concat(customQ());
-  const getQ = (id) => QMAP[id] || customQ().find((q) => q.id === id);
+  const getQ = (id) => QMAP[id] || EVQ[id] || customQ().find((q) => q.id === id);
   const topicQ = (tid) => allQ().filter((q) => q.topic === tid);
   const inTeil = (t, part) => (part === "wiso" ? t.teil === "SoWi" : t.teil !== "SoWi" && t.teil.includes(part === "t1" ? "1" : "2"));
 
@@ -2661,7 +3293,7 @@ CARDS_RAW.algo.push(
     r.d = addDays(today(), IV[r.b]);
     r.t = Date.now();
     S.q[id] = r;
-    const d = today(); S.log[d] = (S.log[d] || 0) + 1;
+    if (!String(id).startsWith("ev:")) { const d = today(); S.log[d] = (S.log[d] || 0) + 1; } // Events zählen nicht zur Lernstatistik
     save();
     return [before, r.s];
   }
@@ -2684,8 +3316,8 @@ CARDS_RAW.algo.push(
 
   // ---------- routing + shell
   let view = "start";
-  const VIEWS = ["start", "lernen", "aufgaben", "pruefung", "tipps", "einstellungen", "tutorial", "operatoren", "plan", "belohnungen", "rangliste"];
-  const VTITLE = { start: "Übersicht", lernen: "Lernen", aufgaben: "Aufgaben", pruefung: "Prüfung", tipps: "Tipps", einstellungen: "Einstellungen", tutorial: "So lernst du mit dem Coach", operatoren: "Operator-Trainer", plan: "Lernplan", belohnungen: "Belohnungen", rangliste: "Rangliste" };
+  const VIEWS = ["start", "lernen", "aufgaben", "pruefung", "tipps", "einstellungen", "tutorial", "operatoren", "plan", "belohnungen", "rangliste", "events"];
+  const VTITLE = { start: "Übersicht", lernen: "Lernen", aufgaben: "Aufgaben", pruefung: "Prüfung", tipps: "Tipps", einstellungen: "Einstellungen", tutorial: "So lernst du mit dem Coach", operatoren: "Operator-Trainer", plan: "Lernplan", belohnungen: "Belohnungen", rangliste: "Rangliste", events: "Events" };
   const UI = { sess: null, topic: null, ttab: "theorie", tf: "alle", ueb: null, showSol: false, addQ: false, pk: { mode: "sim", teil: "t1" }, run: null, confirm: null, sel: [] };
   function go(v) {
     view = VIEWS.includes(v) ? v : "start";
@@ -2696,6 +3328,7 @@ CARDS_RAW.algo.push(
   function navTo(v) {
     if (v === "lernen") { UI.topic = null; UI.sess = null; }
     if (v === "aufgaben") UI.ueb = null;
+    if (v === "events") UI.ev = null;
     if (v === "pruefung" && UI.run && UI.run.phase === "done") UI.run = null;
     UI.confirm = null;
     go(v);
@@ -2713,12 +3346,13 @@ CARDS_RAW.algo.push(
   function rRangliste() { const el = $("#v-rangliste"); if (!gm("rangView", el)) el.innerHTML = `<section class="card"><h3>Die Rangliste ist gerade nicht verfügbar</h3><p class="small muted">Dein Lernstand ist davon nicht betroffen.</p></section>`; }
   function render() {
     VIEWS.forEach((v) => { $("#v-" + v).hidden = v !== view; });
-    const navView = view === "operatoren" || view === "plan" ? "tipps" : view;
+    const navView = view === "operatoren" || view === "plan" ? "tipps" : view === "lernen" && UI.sess && UI.sess.src && UI.sess.src.ev ? "events" : view;
     document.querySelectorAll("nav.side .nav-i").forEach((b) => b.setAttribute("aria-current", b.dataset.view === navView ? "page" : "false"));
     $("#page-title").textContent = VTITLE[view];
     document.body.classList.toggle("focus", !!(view === "lernen" && UI.sess) || !!(view === "pruefung" && UI.run && UI.run.phase === "write"));
     hud();
-    ({ start: rStart, lernen: rLernen, aufgaben: rUeb, pruefung: rPK, tipps: rTipps, einstellungen: rSettings, tutorial: rTutorial, operatoren: rOperatoren, plan: rPlan, belohnungen: rBelohnungen, rangliste: rRangliste })[view]();
+    ({ start: rStart, lernen: rLernen, aufgaben: rUeb, pruefung: rPK, tipps: rTipps, einstellungen: rSettings, tutorial: rTutorial, operatoren: rOperatoren, plan: rPlan, belohnungen: rBelohnungen, rangliste: rRangliste, events: rEvents })[view]();
+    const evDot = document.querySelector('nav.side [data-view="events"] .nav-dot'); if (evDot) evDot.hidden = !EVENTS.some((e) => evOn(e) && !(gm("evInfo", e) || {}).got);
     animRings($("#v-" + view));
   }
 
@@ -3156,7 +3790,7 @@ INSERT INTO Konto VALUES (1,'Weingut Becker',1500.00),(2,'Klinik am Rhein',320.0
     sessNext();
   }
   function toggleMark(id) { if (S.mark[id]) delete S.mark[id]; else S.mark[id] = 1; syncEv("m", id, !!S.mark[id]); save(); render(); }
-  function closeSess() { const src = UI.sess && UI.sess.src; UI.sess = null; keepSess(); UI.topic = src && src.tid ? src.tid : null; render(); window.scrollTo({ top: 0 }); }
+  function closeSess() { const src = UI.sess && UI.sess.src; UI.sess = null; keepSess(); if (src && src.ev) { UI.ev = src.ev; go("events"); return; } UI.topic = src && src.tid ? src.tid : null; render(); window.scrollTo({ top: 0 }); }
   document.addEventListener("keydown", (e) => {
     if (e.target && (/INPUT|TEXTAREA|SELECT/.test(e.target.tagName) || e.target.isContentEditable)) return;
     if (e.metaKey || e.ctrlKey || e.altKey) return;
@@ -3193,6 +3827,15 @@ INSERT INTO Konto VALUES (1,'Weingut Becker',1500.00),(2,'Klinik am Rhein',320.0
   const qTask = (t) => qParts(t)[1];
   const situHTML = (sit) => esc(sit).replace(/\n?```\n?([\s\S]*?)\n?```\n?/g, (m, c) => `<pre class="situ-code">${c}</pre>`);
   const frontHTML = (t) => { const [sit, task] = qParts(t); return (sit ? `<div class="situ">${situHTML(sit)}</div>` : "") + `<div class="front">${esc(task)}</div>`; };
+  // UML-Bild zur Frage – nur zusammen mit der Antwort (FIG im Datenteil)
+  const figHTML = (q) => { const f = !q.own && FIG[q.id]; return f ? `<figure class="qfig"><div class="qfig-h">So sieht es im Diagramm aus</div><div class="qfig-s">${f[0]}</div><figcaption>${esc(f[1])}</figcaption></figure>` : ""; };
+  // Schmale Bildschirme: Diagramm so weit seitlich scrollen, dass das rot markierte Element sichtbar ist
+  function figFocus(el) {
+    const s = el.querySelector(".qfig-s"); if (!s || s.scrollWidth <= s.clientWidth + 2) return;
+    const hs = [...s.querySelectorAll(".fg-hl, .fg-hlt, .fg-hlb, .fg-hlf")]; if (!hs.length) return;
+    const b = s.getBoundingClientRect(), rs = hs.map((h) => h.getBoundingClientRect()), l = Math.min(...rs.map((r) => r.left)), r = Math.max(...rs.map((r) => r.right));
+    s.scrollLeft = Math.max(0, s.scrollLeft + (l + r) / 2 - (b.left + b.width / 2));
+  }
   const ewhHTML = (q) => (q.n ? `<div class="ewh"><span class="alab">Erwartungshorizont</span><div class="ewh-b">${esc(q.n)}</div></div>` : "");
   const rateHTML = () => `<div class="rate three"><button type="button" class="btn big no" id="s-no">${ic("x", "ic sm")} Nicht gewusst</button><button type="button" class="btn big unsure" id="s-unsure">${ic("info", "ic sm")} Unsicher</button><button type="button" class="btn big yes" id="s-yes">${ic("check", "ic sm")} Sicher gewusst</button></div><p class="kbdhelp"><span class="kbd">1</span> nicht gewusst · <span class="kbd">2</span> unsicher · <span class="kbd">3</span> sicher · „Unsicher“ kommt morgen wieder und wird noch nicht grün</p>`;
   const looksCode = (q) => q.code && /\n|SELECT |wenn |für |CREATE |\(\)/.test(q.a);
@@ -3211,14 +3854,14 @@ INSERT INTO Konto VALUES (1,'Weingut Becker',1500.00),(2,'Klinik am Rhein',320.0
     } else if (q.type === "mc") {
       const ok = s.pick === q.right;
       const ord = optOrder(s, q);
-      body = `<div class="optlist">${ord.map((i, d) => `<button type="button" class="opt ${s.pick !== null ? (i === q.right ? "right" : i === s.pick ? "wrong" : "") : ""}" data-i="${i}" ${s.pick !== null ? "disabled" : ""}><span class="k">${s.pick !== null && i === q.right ? ic("check", "ic sm") : s.pick === i ? ic("x", "ic sm") : "ABCD"[d]}</span><span>${esc(q.opts[i])}</span></button>`).join("")}</div>`;
+      body = `<div class="optlist">${ord.map((i, d) => `<button type="button" class="opt ${s.pick !== null ? (i === q.right ? "right" : i === s.pick ? "wrong" : "") : ""}" data-i="${i}" ${s.pick !== null ? "disabled" : ""}><span class="k">${s.pick !== null && i === q.right ? ic("check", "ic sm") : s.pick === i ? ic("x", "ic sm") : "ABCD"[d]}</span><span>${esc(q.opts[i])}</span></button>`).join("")}</div>${s.pick !== null ? figHTML(q) : ""}`;
       if (s.pick !== null) { const r = s.res[q.id]; foot = `<div class="feedback ${ok ? "ok" : "bad"}"><span class="fi">${ic(ok ? "check" : "x")}</span><div><div class="row" style="gap:10px"><b>${ok ? "Richtig" : "Falsch"}</b>${trans(r.f, r.t)}<span class="nexttxt">${nextTxt(q.id)}</span></div><p>${esc(q.why)}</p></div>${ok ? `<button type="button" class="btn ghost small" id="s-guess" title="Taste G">War geraten</button>` : ""}<button type="button" class="btn primary" id="s-next">${s.i + 1 < s.ids.length ? "Weiter" : "Auswertung"} ${ic("right", "ic sm")}</button></div>`; }
       else foot = `<p class="kbdhelp">Tasten <span class="kbd">1</span>–<span class="kbd">4</span> zum Antworten · <span class="kbd">Enter</span> weiter</p>`;
     } else if (CODE[q.id] && !q.own) {
       body = codeBody(s, q, CODE[q.id]);
       foot = s.rev ? `${rateHTML()}` : `<p class="kbdhelp">Im Editor: <span class="kbd">Tab</span> einrücken · <span class="kbd">Strg/Cmd</span> + <span class="kbd">Enter</span> vergleichen · <span class="kbd">Esc</span> außerhalb beendet</p>`;
     } else {
-      body = s.rev ? `${(s.own || "").trim() ? `<div class="answer-wrap own"><span class="alab">Deine Antwort</span><div class="answer">${esc(s.own)}</div></div>` : ""}<div class="answer-wrap"><span class="alab">${q.n ? "Musterlösung" : "Antwort"}</span><div class="answer ${looksCode(q) ? "mono" : ""}">${esc(q.a)}</div></div>${ewhHTML(q)}${(s.own || "").trim() ? `<p class="cmp-hint">Vergleiche: Sind alle Aspekte aus dem Erwartungshorizont drin? Passt deine Antwort zum Operator?</p>` : ""}` : `<label class="explain" for="s-own"><span class="alab">Deine Antwort – kurz in Stichpunkten</span><textarea id="s-own" rows="3" placeholder="Erst selbst formulieren, dann aufdecken (Strg/Cmd + Enter) …">${esc(s.own || "")}</textarea></label><button type="button" class="reveal" id="s-reveal">${ic("eye")}<b>Antwort zeigen</b><span>Mit deiner Antwort vergleichen – Feld leer lassen geht auch</span></button>`;
+      body = s.rev ? `${(s.own || "").trim() ? `<div class="answer-wrap own"><span class="alab">Deine Antwort</span><div class="answer">${esc(s.own)}</div></div>` : ""}<div class="answer-wrap"><span class="alab">${q.n ? "Musterlösung" : "Antwort"}</span><div class="answer ${looksCode(q) ? "mono" : ""}">${esc(q.a)}</div></div>${figHTML(q)}${ewhHTML(q)}${(s.own || "").trim() ? `<p class="cmp-hint">Vergleiche: Sind alle Aspekte aus dem Erwartungshorizont drin? Passt deine Antwort zum Operator?</p>` : ""}` : `<label class="explain" for="s-own"><span class="alab">Deine Antwort – kurz in Stichpunkten</span><textarea id="s-own" rows="3" placeholder="Erst selbst formulieren, dann aufdecken (Strg/Cmd + Enter) …">${esc(s.own || "")}</textarea></label><button type="button" class="reveal" id="s-reveal">${ic("eye")}<b>Antwort zeigen</b><span>Mit deiner Antwort vergleichen – Feld leer lassen geht auch</span></button>`;
       foot = s.rev ? `${rateHTML()}` : `<p class="kbdhelp"><span class="kbd">Leertaste</span> Antwort zeigen · <span class="kbd">Esc</span> beenden</p>`;
     }
     const lastNote = s.last ? `<div class="lastnote ${s.last.ok ? "ok" : "bad"}">${ic(s.last.ok ? "check" : "x", "ic xs")} Vorherige Frage ${s.last.ok ? "gewusst" : "nicht gewusst"} ${trans(s.last.f, s.last.t)}${s.last.id ? `<span class="nexttxt">${nextTxt(s.last.id)}</span>` : ""}</div>` : "";
@@ -3232,6 +3875,7 @@ INSERT INTO Konto VALUES (1,'Weingut Becker',1500.00),(2,'Klinik am Rhein',320.0
       </section>
       ${foot}
     </div>`;
+    figFocus(el);
     $("#s-close").onclick = closeSess;
     $("#s-mark").onclick = () => toggleMark(q.id);
     el.querySelectorAll(".opt").forEach((b) => b.onclick = () => pickMCq(+b.dataset.i));
@@ -3253,19 +3897,24 @@ INSERT INTO Konto VALUES (1,'Weingut Becker',1500.00),(2,'Klinik am Rhein',320.0
     const ok = done.filter((x) => x.r.ok).length, wrong = done.filter((x) => !x.r.ok);
     const c = counts(done.map((x) => x.q));
     const green = done.filter((x) => x.r.t === 2 && x.r.f !== 2).length;
+    const evE = s.src && s.src.ev && evById(s.src.ev);
+    if (evE && s.src.final && !s.evRes) { const sure = done.filter((x) => x.r.ok && !x.r.guess).length, r = gm("evFinal", evE, sure, done.length) || { pass: sure >= Math.ceil(done.length * 0.8) }; s.evRes = { sure, n: done.length, pass: !!r.pass, got: !!r.got, late: !!r.late }; keepSess(); }
+    if (evE && s.src.kap && !s.evKap) { s.evKap = true; keepSess(); const k = evE.kap.find((x) => x.id === s.src.kap); if (k && evKapQ(evE, k).every((q) => st(q.id) >= 1)) gm("evKap", evE, k.id); }
+    const er = s.evRes, evNote = er ? `<div class="ev-res ${er.pass ? "ok" : "bad"}"><b>Abschlusstest: ${er.sure} von ${er.n} sicher richtig (${Math.round(er.sure / Math.max(1, er.n) * 100)} %)</b><span>${er.pass ? (er.got ? "Bestanden! Deine Sonderbelohnung liegt jetzt in der Garderobe." : er.late ? "Bestanden – das Event ist aber vorbei, die Belohnung gibt es nicht mehr." : "Bestanden!") : "Noch nicht bestanden – ab 80 % klappt es. Wiederhole die Fehler und versuche es dann noch einmal."}</span></div>` : "";
     el.innerHTML = `<div class="quiz">
       <section class="card endcard">
         <span class="small muted">Runde beendet · ${esc(s.title)}</span>
         <h2>${ok} von ${done.length} gewusst</h2>
         <p class="muted">${green ? `${green} ${green === 1 ? "Frage ist" : "Fragen sind"} neu auf Grün. ` : ""}${wrong.length ? `${wrong.length} ${wrong.length === 1 ? "Frage steht" : "Fragen stehen"} auf Rot und ${wrong.length === 1 ? "kommt" : "kommen"} in der nächsten Runde zuerst.` : "Keine Fehler in dieser Runde."}</p>
-        <div>${ampBar(c, "lg")}${legend(c)}</div>
+        ${evNote}<div>${ampBar(c, "lg")}${legend(c)}</div>
         <div class="row">${wrong.length ? `<button type="button" class="btn primary" id="e-wrong">${ic("again", "ic sm")} Fehler wiederholen (${wrong.length})</button>` : ""}<button type="button" class="btn ${wrong.length ? "" : "primary"}" id="e-next">Nächste Runde</button><button type="button" class="btn ghost" id="e-done">Fertig</button></div>
       </section>
       ${wrong.length ? `<section class="card"><h3>Diese Fragen saßen noch nicht</h3>${wrong.map((x) => `<div class="review bad"><span class="ri">${ic("x")}</span><div><b>${esc(qTask(x.q.q))}</b><br><span class="small ${x.q.type === "mc" ? "" : looksCode(x.q) ? "pre mono" : "pre"}">${x.q.type === "mc" ? `Richtig: ${esc(x.q.opts[x.q.right])}${x.q.why ? " · " + esc(x.q.why) : ""}` : esc(x.q.a)}</span></div></div>`).join("")}</section>` : ""}
     </div>`;
-    const w = $("#e-wrong"); if (w) w.onclick = () => startSess(wrong.map((x) => x.q), "Fehler wiederholen", s.src);
+    const w = $("#e-wrong"); if (w) w.onclick = () => startSess(wrong.map((x) => x.q), "Fehler wiederholen", s.src && s.src.final ? Object.assign({}, s.src, { final: false }) : s.src);
     $("#e-next").onclick = () => {
       const src = s.src;
+      if (src.ev) { if (src.final) learnEvFinal(src.ev); else learnEv(src.ev, src.kap); return; }
       if (src.kind === "due" && dueList(src.tid ? topicQ(src.tid) : allQ()).length) learnList("due", src.tid);
       else if (src.kind === "sel" && src.tids) { UI.sel = src.tids.slice(); if (src.only && onlyList(src.only, selQ()).length) learnSelOnly(src.only); else learnSel(); }
       else if ((src.kind === "err" || src.kind === "new") && onlyList(src.kind, src.tid ? topicQ(src.tid) : allQ()).length) learnList(src.kind, src.tid);
@@ -3274,6 +3923,57 @@ INSERT INTO Konto VALUES (1,'Weingut Becker',1500.00),(2,'Klinik am Rhein',320.0
       else startSess(openOrder(allQ()).slice(0, ROUND), "Gemischte Runde", { kind: "mixed" });
     };
     $("#e-done").onclick = closeSess;
+  }
+
+  // ---------- Events: Klausur-Lernaktionen mit Kurz-Lektionen, eigenen Fragen und Sonderbelohnung bis zum Klausurtermin
+  const evById = (id) => EVENTS.find((e) => e.id === id);
+  const evKapQ = (e, k) => (EVKAP["ev:" + e.id + ":" + k.id] || []).map((id) => EVQ[id]);
+  const evAllQ = (e) => e.kap.flatMap((k) => evKapQ(e, k));
+  const evLeft = (e) => daysBetween(today(), e.ende);
+  const evOn = (e) => today() >= e.start && today() <= e.ende;
+  const evSure = (list) => list.filter((q) => st(q.id) >= 1).length;
+  const evReady = (e) => e.kap.every((k) => { const l = evKapQ(e, k); return evSure(l) >= Math.ceil(l.length * 0.8); });
+  const evDate = (d) => new Date(d + "T12:00:00").toLocaleDateString("de-DE", { day: "numeric", month: "long" });
+  const EV_FINAL = 15;
+  function learnEv(eid, kid) {
+    const e = evById(eid); if (!e) return;
+    if (kid) { const k = e.kap.find((x) => x.id === kid); if (k) startSess(openOrder(evKapQ(e, k)), e.kurz + " · " + k.titel, { kind: "ev", ev: e.id, kap: k.id }); return; }
+    startSess(openOrder(evAllQ(e)).slice(0, ROUND), e.kurz + " · alle Kapitel gemischt", { kind: "ev", ev: e.id });
+  }
+  function learnEvFinal(eid) { // 15 Auswahlfragen, aus jedem Kapitel mindestens zwei
+    const e = evById(eid); if (!e || !evReady(e)) return;
+    const per = e.kap.map((k) => shuffle(evKapQ(e, k).filter((q) => q.type === "mc")));
+    let pick = per.flatMap((l) => l.slice(0, 2)); pick = pick.concat(shuffle(per.flatMap((l) => l.slice(2))).slice(0, Math.max(0, EV_FINAL - pick.length))).slice(0, EV_FINAL);
+    startSess(shuffle(pick), e.kurz + " · Abschlusstest", { kind: "ev", ev: e.id, final: true });
+  }
+  const evRewardHTML = (e) => gm("evPreview", e) || `<div class="ev-tt">${e.reward.kind === "shirt" ? "👕" : "🏷️"}<b>${esc(e.reward.name)}</b></div>`;
+  function evStatus(e) { const inf = gm("evInfo", e) || {}, left = evLeft(e); return { inf, txt: inf.got ? "Belohnung erhalten" : today() < e.start ? "startet am " + evDate(e.start) : left > 0 ? `noch ${left} ${left === 1 ? "Tag" : "Tage"}` : left === 0 ? "letzter Tag" : "beendet" }; }
+  function rEvents() {
+    const el = $("#v-events"), e = UI.ev && evById(UI.ev);
+    if (!e) {
+      el.innerHTML = `<section class="card"><h2>Events</h2><p class="muted">Lernaktionen für eure Klausuren: eigene Fragenkataloge mit Kurz-Lektionen und eine Sonderbelohnung, die es nur bis zum Klausurtermin gibt. Events zählen nicht zu deiner Prüfungsreife, geben aber ganz normal XP.</p></section>
+      ${EVENTS.map((x) => { const qs = evAllQ(x), c = counts(qs), s = evStatus(x); return `<section class="card ev-card ${evOn(x) || s.inf.got ? "" : "ev-over"}"><div class="ev-rw">${evRewardHTML(x)}</div><div class="ev-main"><span class="ev-kick">${esc(x.kurz)} · ${esc(s.txt)}</span><h3>${esc(x.titel)}</h3><p class="small muted">${esc(x.sub)} · ${x.kap.length} Kapitel · ${qs.length} Fragen</p>${ampBar(c)}<p class="small"><b>Belohnung:</b> ${esc(x.reward.name)}${s.inf.got ? " ✓" : evOn(x) ? ` · nur bis ${evDate(x.ende)}` : " · nicht mehr erhältlich"}</p><button type="button" class="btn primary small" data-ev-open="${x.id}">${c.n === c.t ? "Starten" : "Weiterlernen"} ${ic("right", "ic sm")}</button></div></section>`; }).join("")}`;
+    } else {
+      const qs = evAllQ(e), c = counts(qs), s = evStatus(e), ready = evReady(e), inf = s.inf;
+      el.innerHTML = `<button type="button" class="backlink" id="ev-back">${ic("left", "ic sm")} Alle Events</button>
+      <section class="card ev-hero"><div class="ev-rw">${evRewardHTML(e)}</div><div class="ev-main"><span class="ev-kick">${esc(e.kurz)} · ${esc(s.txt)}</span><h2>${esc(e.titel)}</h2><p class="muted">${esc(e.sub)}</p><p class="small">${esc(e.info)}</p>
+        <div class="ev-rwbox"><b>Sonderbelohnung: ${esc(e.reward.name)}</b><span class="small">${esc(e.reward.txt)} ${inf.got ? "Schon erhalten." : evOn(e) ? `Nur bis ${evDate(e.ende)}: Abschlusstest mit mindestens 80 % bestehen. Dazu +300 🪶, +2 🎟️ und +200 XP.` : "Das Event ist vorbei, die Belohnung gibt es nicht mehr. Lernen kannst du weiterhin."}</span></div>
+        ${ampBar(c, "lg")}${legend(c)}</div></section>
+      <section class="card ev-final ${ready ? "" : "locked"}"><div class="row" style="justify-content:space-between"><h3>${ic("flag", "ic sm")} Abschlusstest</h3>${inf.done ? `<span class="chip">✓ bestanden</span>` : ""}</div>
+        <p class="small muted">${EV_FINAL} Auswahlfragen aus allen Kapiteln. Bestanden ab 80 % sicher richtig – „War geraten“ zählt nicht.${inf.best ? ` Bestes Ergebnis bisher: ${Math.round(inf.best * 100)} %.` : ""}</p>
+        ${ready ? "" : `<p class="small">Schaltet frei, sobald in jedem Kapitel mindestens 80 % der Fragen gelb oder grün sind.</p>`}
+        <div class="row"><button type="button" class="btn ${ready ? "primary" : ""}" id="ev-final" ${ready ? "" : "disabled"}>${inf.done ? "Noch einmal schreiben" : "Abschlusstest starten"}</button><button type="button" class="btn ghost" id="ev-mix">Alle Kapitel gemischt üben</button></div></section>
+      <section class="card ev-tipcard"><h3>${ic("bulb", "ic sm")} So holst du die Punkte</h3><ul class="ev-tips">${e.tipps.map((t) => `<li>${esc(t)}</li>`).join("")}</ul></section>
+      ${e.kap.map((k, i) => { const l = evKapQ(e, k), kc = counts(l), ok = evSure(l), need = Math.ceil(l.length * 0.8), f = k.fig && FIG[k.fig]; return `<section class="card ev-kap"><div class="ev-kh"><span class="ev-kn">${i + 1}</span><div><h3>${esc(k.titel)}</h3><span class="small muted">${l.length} Fragen · ${ok} gelb oder grün${ok >= need ? " · ✓ bereit für den Abschlusstest" : ` · noch ${need - ok} bis 80 %`}</span></div></div>${ampBar(kc)}
+        <details class="ev-lern"${kc.n === kc.t ? " open" : ""}><summary>${ic("eye", "ic sm")} Kurz erklärt</summary><dl>${k.lern.map(([hd, t]) => `<dt>${esc(hd)}</dt><dd>${esc(t)}</dd>`).join("")}</dl>${f ? `<figure class="qfig"><div class="qfig-h">Im Diagramm</div><div class="qfig-s">${f[0]}</div><figcaption>${esc(f[1])}</figcaption></figure>` : ""}</details>
+        <div class="row"><button type="button" class="btn primary small" data-ev-k="${k.id}">${kc.n === kc.t ? "Kapitel starten" : kc.open ? `Lernen · ${kc.open} offen` : "Wiederholen"}</button></div></section>`; }).join("")}`;
+      $("#ev-back").onclick = () => { UI.ev = null; render(); window.scrollTo({ top: 0 }); };
+      $("#ev-final").onclick = () => learnEvFinal(e.id);
+      $("#ev-mix").onclick = () => learnEv(e.id);
+      el.querySelectorAll("[data-ev-k]").forEach((b) => b.onclick = () => learnEv(e.id, b.dataset.evK));
+      el.querySelectorAll(".ev-lern").forEach((d) => { if (d.open) figFocus(d); d.addEventListener("toggle", () => { if (d.open) figFocus(d); }); });
+    }
+    el.querySelectorAll("[data-ev-open]").forEach((b) => b.onclick = () => { UI.ev = b.dataset.evOpen; render(); window.scrollTo({ top: 0 }); });
   }
 
   // ---------- Übersicht
@@ -4364,9 +5064,9 @@ INSERT INTO Konto VALUES (1,'Weingut Becker',1500.00),(2,'Klinik am Rhein',320.0
   try { GAMI = (() => {
   const KEY_GAMI = "tap2coach-gami";
   const GACHA = { name: "Schatzkammer", rates: { SSR: 0.01, SR: 0.10, R: 0.29, N: 0.60 }, softPity: 60, softStep: 0.06, hardPity: 80, srEvery: 10, featured: 0.5, cost1: 100, cost10: 900, refund: { N: 10, R: 30, SR: 80, SSR: 250 } };
-  const RAR = { S: "Basis", N: "Normal", R: "Selten", SR: "Episch", SSR: "Legendär" };
+  const RAR = { S: "Basis", N: "Normal", R: "Selten", SR: "Episch", SSR: "Legendär", EV: "Event" };
   const RORDER = ["SSR", "SR", "R", "N", "S"];
-  const SLOTS = [["hat", "Kopf"], ["eye", "Augen"], ["neck", "Hals"], ["bg", "Hintergrund"]];
+  const SLOTS = [["hat", "Kopf"], ["eye", "Augen"], ["neck", "Hals"], ["bg", "Hintergrund"], ["shirt", "Oberteil"]]; // neue Slots nur hinten anhängen (Reihenfolge = Format in Sync und Rangliste)
   // ================= Zeichnungen
   // Alle Accessoires sind im Koordinatensystem des Raben gezeichnet (Kopf-Anker 268/150, Auge 240/222, Hals 260/310)
   // und werden pro Tier über Anker verschoben/skaliert.
@@ -4513,6 +5213,14 @@ INSERT INTO Konto VALUES (1,'Weingut Becker',1500.00),(2,'Klinik am Rhein',320.0
       eye: `<circle cx="236" cy="214" r="11" fill="#14202A"/><circle cx="232" cy="210" r="3.5" fill="#fff"/>` }
   };
   const CHARS = Object.keys(ANIMALS);
+  // Oberteile aus Events: über den Rumpf des Tiers gelegt (Clip auf die Rumpfform), Ausschnitt unterhalb des Kopfes. [Rumpf, Mitte x, Oberkante y]
+  const TORSO = { rabe: ["M138 470 C132 372 176 300 258 288 C346 276 404 344 410 470 Z", 262, 322], katze: ["M140 470 C136 380 180 316 260 306 C344 296 400 360 406 470 Z", 264, 330], hund: ["M140 470 C136 380 182 316 262 306 C346 296 402 360 408 470 Z", 266, 330], maus: ["M146 470 C142 384 186 322 262 312 C342 302 396 364 402 470 Z", 264, 334], pinguin: ["M148 470 C138 380 178 300 262 292 C352 284 406 362 406 470 Z", 266, 330] };
+  const SHIRT = {
+    baumshirt: (c, id) => { const [tp, cx, ty] = TORSO[c] || TORSO.rabe, py = ty + 74; return `<defs><clipPath id="${id}s"><path d="${tp}"/></clipPath></defs><g clip-path="url(#${id}s)"><path d="M0 ${ty} H${cx - 46} Q${cx} ${ty + 34} ${cx + 46} ${ty} H512 V512 H0 Z" fill="#F1E8D4"/><path d="M${cx - 46} ${ty} Q${cx} ${ty + 34} ${cx + 46} ${ty}" fill="none" stroke="#CDB894" stroke-width="9" stroke-linecap="round"/><path d="M0 ${ty + 40} C60 ${ty + 60} 90 ${ty + 120} 100 512 M512 ${ty + 40} C452 ${ty + 60} 422 ${ty + 120} 412 512" fill="none" stroke="#E0D2B4" stroke-width="5"/>`
+      + `<ellipse cx="${cx}" cy="${py + 42}" rx="56" ry="10" fill="#8A5A35"/><rect x="${cx - 7}" y="${py - 4}" width="14" height="46" rx="4" fill="#7A4B2A"/><circle cx="${cx}" cy="${py - 22}" r="27" fill="#3E8E4E"/><circle cx="${cx - 23}" cy="${py - 5}" r="19" fill="#3E8E4E"/><circle cx="${cx + 23}" cy="${py - 5}" r="19" fill="#3E8E4E"/><circle cx="${cx - 8}" cy="${py - 32}" r="9" fill="#62B35E"/>`
+      + `<path d="M${cx + 58} ${py - 32} L${cx + 38} ${py + 28}" stroke="#7A4B2A" stroke-width="6" stroke-linecap="round"/><path d="M${cx + 50} ${py - 35} l16 5" stroke="#7A4B2A" stroke-width="6" stroke-linecap="round"/><path d="M${cx + 30} ${py + 20} l18 6 l-6 20 q-12 4 -19 -6 z" fill="#9AA7AE" stroke="#6E7B82" stroke-width="2"/></g>`; }
+  };
+  const EV_SHIRTS = EVENTS.filter((e) => e.reward.kind === "shirt").map((e) => ({ art: e.reward.art, name: e.reward.name, ev: e.id }));
 
   // Kollektionen: pro Slot 4 Normal · 3 Selten · 2 Episch · 1 Legendär (+ Basis „ohne“)
   const SETS = {
@@ -4554,6 +5262,7 @@ INSERT INTO Konto VALUES (1,'Weingut Becker',1500.00),(2,'Klinik am Rhein',320.0
   };
   const SKINS = [];
   CHARS.forEach((c) => SLOTS.forEach(([slot]) => {
+    if (slot === "shirt") { SKINS.push({ id: `${c}-ohne-shirt`, char: c, slot, rar: "S", art: "", name: "Ohne" }); EV_SHIRTS.forEach((s) => SKINS.push({ id: `${c}-${s.art}`, char: c, slot, rar: "EV", art: s.art, name: s.name, ev: s.ev })); return; } // nur aus Events, nie in der Schatzkammer
     if (slot === "bg") SKINS.push({ id: `${c}-basis-bg`, char: c, slot, rar: "S", art: ANIMALS[c].base, name: NAMES[ANIMALS[c].base] });
     else SKINS.push({ id: `${c}-ohne-${slot}`, char: c, slot, rar: "S", art: "", name: "Ohne" });
     ["N", "R", "SR", "SSR"].forEach((r, k) => SETS[c][slot][k].forEach((art) => SKINS.push({ id: `${c}-${art}`, char: c, slot, rar: r, art, name: NAMES[art] })));
@@ -4565,7 +5274,7 @@ INSERT INTO Konto VALUES (1,'Weingut Becker',1500.00),(2,'Klinik am Rhein',320.0
   ];
   const ITEMS = SKINS.concat(EXTRAS);
   const IT = Object.fromEntries(ITEMS.map((i) => [i.id, i]));
-  const baseEquip = (c) => ({ hat: `${c}-ohne-hat`, eye: `${c}-ohne-eye`, neck: `${c}-ohne-neck`, bg: `${c}-basis-bg` });
+  const baseEquip = (c) => ({ hat: `${c}-ohne-hat`, eye: `${c}-ohne-eye`, neck: `${c}-ohne-neck`, bg: `${c}-basis-bg`, shirt: `${c}-ohne-shirt` });
 
 
   // Skins nur anhängen, nie umbenennen – der Besitz hängt an den IDs.
@@ -4585,6 +5294,66 @@ INSERT INTO Konto VALUES (1,'Weingut Becker',1500.00),(2,'Klinik am Rhein',320.0
     { id: "fix5", txt: "Beantworte 5 rote Fragen sicher richtig", goal: 5, key: "fixed", f: 200, xp: 80 },
     { id: "new15", txt: "Beantworte 15 neue Fragen", goal: 15, key: "fresh", f: 150, xp: 60 }
   ];
+  // Titel: zum Anlegen in der Garderobe, sichtbar in der Rangliste. Freigeschaltet aus dem Fortschritt (auch rückwirkend) oder über Events.
+  // IDs nie ändern – Besitz und Rangliste hängen daran. Nur Kleinbuchstaben, Ziffern und „-“ (Format der Rangliste).
+  const cntQ = (fn) => Object.entries(S.q || {}).filter(([id, r]) => r && !id.startsWith("ev:") && fn(id, r)).length;
+  const TITLES = [
+    { id: "hello-world", name: "Hello World", how: "Die erste Frage sicher richtig beantworten", ok: () => G.earned > 0 },
+    { id: "kaffee", name: "Kaffeegetrieben", how: "7 Tage am Stück einloggen", ok: () => G.loginStreak >= 7 },
+    { id: "endlosschleife", name: "Endlosschleife", how: "Eine 20er-Serie schaffen", ok: () => G.best >= 20 },
+    { id: "junior", name: "Junior Developer", how: "Level 10 erreichen", ok: () => G.level >= 10 },
+    { id: "senior", name: "Senior Developer", how: "Level 20 erreichen", ok: () => G.level >= 20 },
+    { id: "10x", name: "10x-Entwickler", how: "Level 30 erreichen", ok: () => G.level >= 30 },
+    { id: "gruener-daumen", name: "Grüner Daumen", how: "100 Fragen auf Grün bringen", ok: () => cntQ((id, r) => r.s === 2) >= 100 },
+    { id: "paragrafenreiter", name: "Paragrafenreiter", how: "50 SoWi-Fragen auf Grün bringen", ok: () => cntQ((id, r) => r.s === 2 && QMAP[id] && TP[QMAP[id].topic] && TP[QMAP[id].topic].teil === "SoWi") >= 50 },
+    { id: "fullstack", name: "Full-Stack-Azubi", how: "In jedem Thema mindestens eine Frage auf Grün", ok: () => TOPICS.every((t) => topicQ(t.id).some((q) => st(q.id) === 2)) },
+    { id: "production", name: "Ready for Production", how: "90 % Prüfungsreife erreichen", ok: () => counts(allQ()).pct >= 0.9 },
+    { id: "simulant", name: "Prüfungssimulant", how: "Eine Prüfungssimulation abschließen", ok: () => (S.runs || []).length > 0 },
+    { id: "404", name: "404: Freizeit not found", how: "100 Fragen an einem Tag beantworten", ok: () => !!(G.today && G.today.answered >= 100) },
+    { id: "nachteule", name: "Nachteule", how: "Zwischen Mitternacht und 4 Uhr lernen", ok: () => !!(G.flags && G.flags.nacht) },
+    { id: "lootbox", name: "Lootbox-Lobbyist", how: "100-mal die Schatzkammer öffnen", ok: () => G.pulls >= 100 },
+    { id: "gluckspilz", name: "Glückspilz", how: "Ein legendäres Teil finden", ok: () => SKINS.some((s) => s.rar === "SSR" && G.owned[s.id]) },
+    { id: "garderobe", name: "Garderoben-Admin", how: "30 Skins sammeln", ok: () => SKINS.filter((s) => s.rar !== "S" && s.rar !== "EV" && G.owned[s.id]).length >= 30 },
+    { id: "works-on-my-machine", name: "Works on my machine", how: "Zwei Geräte per Sync verbinden", ok: () => !!syncGet() },
+    { id: "rangliste", name: "Ranglisten-Rookie", how: "In der Rangliste mitmachen", ok: () => !!lbGet().joined }
+  ].concat(EVENTS.filter((e) => e.reward.kind === "title").map((e) => ({ id: e.reward.id, name: e.reward.name, how: `Abschlusstest im Event „${e.kurz}“ bestehen – nur bis ${new Date(e.ende + "T12:00:00").toLocaleDateString("de-DE")}`, ev: e.id })));
+  const TI = Object.fromEntries(TITLES.map((t) => [t.id, t]));
+  function titleCheck() {
+    G.titles = G.titles || {};
+    const neu = TITLES.filter((t) => { if (!t.ok || G.titles[t.id]) return false; try { return t.ok(); } catch (e) { return false; } });
+    if (!neu.length) return;
+    neu.forEach((t) => { G.titles[t.id] = Date.now(); }); save();
+    setTimeout(() => toast(neu.length === 1 ? `🏷️ Neuer Titel: ${esc(neu[0].name)} – anlegen in der Garderobe` : `🏷️ ${neu.length} neue Titel freigeschaltet – schau in die Garderobe`), 400);
+  }
+  function titlesHTML() {
+    const have = TITLES.filter((t) => G.titles[t.id]).length;
+    return `<section class="card"><div class="row" style="justify-content:space-between"><h3>Titel</h3><span class="small muted">${have}/${TITLES.length}</span></div><p class="small muted">Dein Titel steht in der Rangliste unter deinem Namen. Grau = noch nicht freigeschaltet, darunter steht, wie du ihn bekommst.</p>
+      <div class="gm-titles"><button type="button" class="gm-ttl ${G.title ? "" : "on"}" data-gm-title=""><b>Kein Titel</b><span>In der Rangliste steht dein Rang</span></button>${TITLES.map((t) => { const own = !!G.titles[t.id]; return `<button type="button" class="gm-ttl ${own ? "" : "locked"} ${G.title === t.id ? "on" : ""} ${t.ev ? "ev" : ""}" data-gm-title="${t.id}" ${own ? "" : "disabled"}><b>${esc(t.name)}</b><span>${esc(t.how)}</span>${t.ev ? `<i class="gm-tag ev">EVENT</i>` : ""}</button>`; }).join("")}</div></section>`;
+  }
+  // ---- Events: Sonderbelohnungen, nur bis zum Klausurtermin
+  const evRec = (e) => (G.ev[e.id] = G.ev[e.id] || {});
+  const evEq = (e) => Object.assign({}, G.equip[G.char], { shirt: `${G.char}-${e.reward.art}` });
+  function evPreview(e) { return e.reward.kind === "shirt" ? `<div class="ev-fig">${figure(G.char, evEq(e))}</div>` : `<div class="ev-tt">🏷️<b>«${esc(e.reward.name)}»</b></div>`; }
+  function evKap(e, kid) { const r = evRec(e); r.kap = r.kap || {}; if (r.kap[kid]) return false; r.kap[kid] = Date.now(); G.federn += 80; addXP(40); save(); toast("📘 Kapitel gemeistert: +80 🪶 · +40 XP"); try { syncSoon(3000); } catch (x) {} lbSoon(5000); return true; }
+  function evFinal(e, sure, n) {
+    const r = evRec(e), q = n ? sure / n : 0, pass = n > 0 && q >= 0.8, on = today() >= e.start && today() <= e.ende;
+    r.best = Math.max(+r.best || 0, q); if (pass && !r.done) r.done = Date.now();
+    let got = false;
+    if (pass && on && !r.got) {
+      r.got = Date.now(); got = true;
+      if (e.reward.kind === "shirt") CHARS.forEach((c) => { if (IT[`${c}-${e.reward.art}`]) G.owned[`${c}-${e.reward.art}`] = 1; });
+      else G.titles[e.reward.id] = Date.now();
+      G.federn += 300; G.tickets += 2; const up = addXP(200, true);
+      setTimeout(() => evRewardModal(e, up), 400);
+    }
+    save(); lbSoon(5000); try { syncSoon(3000); } catch (x) {}
+    return { pass, got, late: pass && !on && !r.got };
+  }
+  function evRewardModal(e, up) {
+    const shirt = e.reward.kind === "shirt"; confetti(70);
+    modal(`<span class="gm-kicker">EVENT-BELOHNUNG · ${esc(e.kurz)}</span><div class="gm-ava-big" style="width:150px;margin-top:10px">${shirt ? figure(G.char, evEq(e)) : myFigure()}</div><h2>${esc(e.reward.name)}</h2>${shirt ? "" : `<p class="gm-title-big">«${esc(e.reward.name)}»</p>`}<p class="muted">${esc(e.reward.txt)}</p><p class="gm-gain">+300 🪶 · +2 🎟️ · +200 XP${up ? ` · Level ${G.level}!` : ""}</p><div class="row" style="justify-content:center"><button type="button" class="btn primary" data-gm-evwear>${shirt ? "Jetzt anziehen" : "Titel anlegen"}</button><button type="button" class="btn" data-gm-close>Später</button></div>`);
+    const b = layer.querySelector("[data-gm-evwear]"); if (b) b.onclick = () => { if (shirt) { const id = `${G.char}-${e.reward.art}`; if (G.owned[id]) G.equip[G.char].shirt = id; } else G.title = e.reward.id; G.lookAt = Date.now(); save(); lbSoon(3000); try { syncSoon(3000); } catch (x) {} closeModal(); };
+  }
   const need = (l) => 80 + l * 40;
   const rank = (l) => RANKS.filter(([n]) => l >= n).pop()[1];
   const mult = (c) => (c >= 10 ? 3 : c >= 6 ? 2 : c >= 3 ? 1.5 : 1);
@@ -4602,6 +5371,7 @@ INSERT INTO Konto VALUES (1,'Weingut Becker',1500.00),(2,'Klinik am Rhein',320.0
     G.equip = G.equip || {};
     CHARS.forEach((c) => { const e = G.equip[c] = Object.assign(baseEquip(c), G.equip[c] || {}); SLOTS.forEach(([sl]) => { if (!IT[e[sl]] || !G.owned[e[sl]] || IT[e[sl]].char !== c) e[sl] = baseEquip(c)[sl]; }); });
     if (!ANIMALS[G.char]) G.char = "rabe"; if (!ANIMALS[G.banner]) G.banner = "rabe";
+    if (!G.titles || typeof G.titles !== "object") G.titles = {}; if (!G.ev || typeof G.ev !== "object") G.ev = {}; if (G.title && (!TI[G.title] || !G.titles[G.title])) G.title = "";
     G.boosts = Object.assign({ xp2: 0, shield: 0 }, G.boosts || {}); G.pity = G.pity || {}; G.hist = Array.isArray(G.hist) ? G.hist : [];
     if (G.quests && (!Array.isArray(G.quests.ids) || !G.quests.ids.every((id) => QPOOL.some((q) => q.id === id)))) G.quests = null; // alte Quests → neu würfeln, Tageszähler bleiben
     ["earned", "xp", "level", "federn", "tickets", "pulls"].forEach((k) => { G[k] = Math.max(k === "level" ? 1 : 0, Math.floor(+G[k] || 0)); });
@@ -4641,7 +5411,7 @@ INSERT INTO Konto VALUES (1,'Weingut Becker',1500.00),(2,'Klinik am Rhein',320.0
     const A = ANIMALS[c], art = (s) => (IT[eq[s]] || {}).art || "";
     const id = "gm" + (++gid), bgArt = art("bg") || A.base, e = art("eye");
     const [hx, hy, hr, hs] = A.a.hat, [ex, ey, es] = A.a.eye, [nx, ny, ns] = A.a.neck;
-    return `<svg viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">${BG[bgArt](id)}${A.body}<g transform="translate(${nx} ${ny}) scale(${ns}) translate(-260 -310)">${NECK[art("neck")] || ""}</g><g transform="translate(${hx} ${hy}) rotate(${hr}) scale(${hs}) translate(-268 -150)">${HAT[art("hat")] || ""}</g>${HIDE_EYE.has(e) ? "" : A.eye}<g transform="translate(${ex} ${ey}) scale(${es}) translate(-240 -222)">${EYE[e] || ""}</g></svg>`;
+    return `<svg viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">${BG[bgArt](id)}${A.body}${SHIRT[art("shirt")] ? SHIRT[art("shirt")](c, id) : ""}<g transform="translate(${nx} ${ny}) scale(${ns}) translate(-260 -310)">${NECK[art("neck")] || ""}</g><g transform="translate(${hx} ${hy}) rotate(${hr}) scale(${hs}) translate(-268 -150)">${HAT[art("hat")] || ""}</g>${HIDE_EYE.has(e) ? "" : A.eye}<g transform="translate(${ex} ${ey}) scale(${es}) translate(-240 -222)">${EYE[e] || ""}</g></svg>`;
   }
   const myFigure = () => figure(G.char, G.equip[G.char]);
   const preview = (it) => { if (it.icon) return `<div class="gm-icon">${it.icon}</div>`; const eq = baseEquip(it.char); eq[it.slot] = it.id; return figure(it.char, eq); };
@@ -4656,7 +5426,7 @@ INSERT INTO Konto VALUES (1,'Weingut Becker',1500.00),(2,'Klinik am Rhein',320.0
   function confetti(n = 50) { if (window.matchMedia && matchMedia("(prefers-reduced-motion: reduce)").matches) return; const cols = ["#6AD2E2", "#FFD03D", "#E2468A", "#928BDE", "#3B8CF0", "#1EAD1B"]; for (let i = 0; i < n; i++) { const c = document.createElement("div"); c.className = "gm-confetti"; c.style.left = Math.random() * 100 + "vw"; c.style.background = cols[i % cols.length]; c.style.animationDelay = Math.random() * 0.4 + "s"; document.body.appendChild(c); setTimeout(() => c.remove(), 2600); } }
 
   // ---- Fortschritt
-  function addXP(n) { G.xp += n; G.earned += n; let up = 0; while (G.xp >= need(G.level)) { G.xp -= need(G.level); G.level++; up++; G.federn += 100; if (G.level % 5 === 0) G.tickets++; } if (up) setTimeout(levelUp, 500); }
+  function addXP(n, quiet) { G.xp += n; G.earned += n; let up = 0; while (G.xp >= need(G.level)) { G.xp -= need(G.level); G.level++; up++; G.federn += 100; if (G.level % 5 === 0) G.tickets++; } if (up && !quiet) setTimeout(levelUp, 500); return up; }
   function levelUp() {
     const l = G.level, newRank = RANKS.some(([n]) => n === l);
     confetti();
@@ -4688,6 +5458,8 @@ INSERT INTO Konto VALUES (1,'Weingut Becker',1500.00),(2,'Klinik am Rhein',320.0
       if (G.shieldOn && G.combo > 0) { G.shieldOn = false; setTimeout(() => toast("🛡️ Das Schild hat deine Serie gerettet"), 150); }
       else G.combo = 0;
     }
+    if (new Date().getHours() < 4) (G.flags = G.flags || {}).nacht = 1;
+    titleCheck();
     save(); lbSoon();
     if (msg) setTimeout(() => { ensureLayer(); const fl = document.createElement("div"); fl.className = "gm-float" + (sure ? "" : " gm-float-off"); fl.textContent = msg; document.body.appendChild(fl); setTimeout(() => fl.remove(), 1200); }, 30);
   }
@@ -4755,7 +5527,7 @@ INSERT INTO Konto VALUES (1,'Weingut Becker',1500.00),(2,'Klinik am Rhein',320.0
     }, 1000);
   }
   function showInfo(c) {
-    const A = ANIMALS[c], feat = featuredOf(c), skins = SKINS.filter((s) => s.char === c && s.rar !== "S");
+    const A = ANIMALS[c], feat = featuredOf(c), skins = SKINS.filter((s) => s.char === c && s.rar !== "S" && s.rar !== "EV");
     const group = (r) => { const pool = poolOf(c, r), sk = pool.filter((i) => !i.icon); return `<h3 class="gm-ih"><span class="r-${r}">${RAR[r]} · ${pct(GACHA.rates[r])}</span><span class="small muted">${sk.filter((i) => G.owned[i.id]).length}/${sk.length} gefunden · ${r === "SSR" ? `Highlight ${pct(GACHA.rates.SSR * GACHA.featured)}, je anderes ${pct(GACHA.rates.SSR * (1 - GACHA.featured) / (pool.length - 1))}` : `je Teil ${pct(GACHA.rates[r] / pool.length)}`}</span></h3><div class="gm-tiles">${sk.map((i) => tile(i, i.id === feat.id ? `<span class="gm-tag feat">HIGHLIGHT</span>` : "", (G.owned[i.id] ? "" : "locked") + (G.equip[c][i.slot] === i.id ? " eq" : ""))).join("")}</div>`; };
     modal(`<div class="gm-info"><div class="row" style="justify-content:space-between"><h2>${esc(A.banner)}</h2><button type="button" class="btn small" data-gm-close>Schließen</button></div>
       <p class="small muted">Gesammelt: ${skins.filter((s) => G.owned[s.id]).length}/${skins.length} Skins · Farbig = in deiner Garderobe, grau = noch nicht gefunden, ✓ = angezogen. Pro Slot: 4 Normal, 3 Selten, 2 Episch, 1 Legendär.</p>
@@ -4778,7 +5550,7 @@ INSERT INTO Konto VALUES (1,'Weingut Becker',1500.00),(2,'Klinik am Rhein',320.0
   }
   function rSchatz() {
     const c = G.banner, A = ANIMALS[c], P = pityOf(c), feat = featuredOf(c);
-    const can1 = G.tickets >= 1 || G.federn >= GACHA.cost1, can10 = G.tickets >= 10 || G.federn >= GACHA.cost10, toSR = GACHA.srEvery - P.sr, toSSR = GACHA.hardPity - P.ssr, skins = SKINS.filter((s) => s.char === c && s.rar !== "S");
+    const can1 = G.tickets >= 1 || G.federn >= GACHA.cost1, can10 = G.tickets >= 10 || G.federn >= GACHA.cost10, toSR = GACHA.srEvery - P.sr, toSSR = GACHA.hardPity - P.ssr, skins = SKINS.filter((s) => s.char === c && s.rar !== "S" && s.rar !== "EV");
     return `${charSel("banner", c, (x) => ANIMALS[x].banner)}
       <section class="card gm-banner"><span class="gm-kicker">${GACHA.name.toUpperCase()} · ${esc(A.banner.toUpperCase())}</span>
         <div class="gm-bgrid"><div>${tile(feat, G.owned[feat.id] ? `<span class="gm-tag">IM BESITZ</span>` : `<span class="gm-tag dup">NOCH NICHT</span>`)}</div>
@@ -4790,16 +5562,17 @@ INSERT INTO Konto VALUES (1,'Weingut Becker',1500.00),(2,'Klinik am Rhein',320.0
         <p class="small muted">Tippe auf „?“, um alle Teile dieser Kollektion zu sehen. Federn gibt es nur durchs Lernen.</p></section>`;
   }
   function rGarderobe() {
-    const c = G.char, eq = G.equip[c], skins = SKINS.filter((s) => s.char === c && s.rar !== "S");
+    const c = G.char, eq = G.equip[c], skins = SKINS.filter((s) => s.char === c && s.rar !== "S" && s.rar !== "EV");
     return `${charSel("char", c, (x) => ANIMALS[x].name)}
-      <section class="card" style="text-align:center"><div class="gm-ava-big">${myFigure()}</div><h2 style="margin-top:12px">${esc(ANIMALS[c].name)} · ${rank(G.level)}</h2><p class="small muted">Aktive Figur – so erscheint sie oben in der Leiste · Sammlung ${skins.filter((i) => G.owned[i.id]).length}/${skins.length}</p></section>
+      <section class="card" style="text-align:center"><div class="gm-ava-big">${myFigure()}</div><h2 style="margin-top:12px">${esc(ANIMALS[c].name)} · ${rank(G.level)}</h2>${G.title && TI[G.title] ? `<p class="gm-title-big">«${esc(TI[G.title].name)}»</p>` : ""}<p class="small muted">Aktive Figur – so erscheint sie oben in der Leiste · Sammlung ${skins.filter((i) => G.owned[i.id]).length}/${skins.length}</p></section>
+      ${titlesHTML()}
       <section class="card"><h3>Boosts</h3><div class="gm-tiles">${["xp2", "shield"].map((id) => { const it = IT[id], n = G.boosts[id], act = id === "xp2" ? G.xp2Left > 0 : G.shieldOn; return `<div class="gm-tile r-${it.rar} ${n || act ? "" : "locked"}"><div class="gm-icon">${it.icon}</div><div class="gm-nm">${it.name} ×${n}</div><div class="small muted">${it.desc}</div><button type="button" class="btn small" data-gm-use="${id}" ${!n || act ? "disabled" : ""}>${act ? "aktiv" : "Benutzen"}</button></div>`; }).join("")}</div></section>
-      ${SLOTS.map(([slot, label]) => { const list = SKINS.filter((i) => i.char === c && i.slot === slot).sort((a, b) => RORDER.indexOf(b.rar) - RORDER.indexOf(a.rar)); return `<section class="card"><div class="row" style="justify-content:space-between"><h3>${label}</h3><span class="small muted">${list.filter((i) => i.rar !== "S" && G.owned[i.id]).length}/${list.length - 1}</span></div><div class="gm-tiles">${list.map((i) => `<button type="button" class="gm-tbtn" data-gm-eq="${i.id}" ${G.owned[i.id] ? "" : "disabled"} title="${G.owned[i.id] ? "Anziehen" : "Noch nicht gefunden"}">${tile(i, "", (G.owned[i.id] ? "" : "locked") + (eq[slot] === i.id ? " eq" : ""))}</button>`).join("")}</div></section>`; }).join("")}`;
+      ${SLOTS.map(([slot, label]) => { const list = SKINS.filter((i) => i.char === c && i.slot === slot).sort((a, b) => RORDER.indexOf(b.rar) - RORDER.indexOf(a.rar)); return `<section class="card"><div class="row" style="justify-content:space-between"><h3>${label}</h3><span class="small muted">${list.filter((i) => i.rar !== "S" && G.owned[i.id]).length}/${list.length - 1}</span></div><div class="gm-tiles">${list.map((i) => `<button type="button" class="gm-tbtn" data-gm-eq="${i.id}" ${G.owned[i.id] ? "" : "disabled"} title="${G.owned[i.id] ? "Anziehen" : i.ev ? "Nur als Event-Belohnung erhältlich" : "Noch nicht gefunden"}">${tile(i, i.ev ? `<span class="gm-tag ev">EVENT</span>` : "", (G.owned[i.id] ? "" : "locked") + (eq[slot] === i.id ? " eq" : ""))}</button>`).join("")}</div></section>`; }).join("")}`;
   }
   function viewHTML(el) {
-    rollDay();
+    rollDay(); titleCheck();
     const tabs = [["quests", "Quests"], ["schatz", GACHA.name], ["garderobe", "Garderobe"]];
-    el.innerHTML = `<div class="gm-head card"><div class="gm-ava">${myFigure()}</div><div class="gm-lvl"><div class="row" style="gap:8px;align-items:baseline"><b class="gm-lv">Level ${G.level}</b><span class="muted small">${rank(G.level)}</span><span class="spacer"></span><span class="small muted num">${G.xp}/${need(G.level)} XP</span></div><div class="bar"><i style="width:${G.xp / need(G.level) * 100}%"></i></div></div><div class="gm-cur"><span class="chip">🪶 ${G.federn}</span><span class="chip">🎟️ ${G.tickets}</span><span class="chip">🔥 ${G.loginStreak}</span></div></div>
+    el.innerHTML = `<div class="gm-head card"><div class="gm-ava">${myFigure()}</div><div class="gm-lvl"><div class="row" style="gap:8px;align-items:baseline"><b class="gm-lv">Level ${G.level}</b><span class="muted small">${rank(G.level)}${G.title && TI[G.title] ? " · «" + esc(TI[G.title].name) + "»" : ""}</span><span class="spacer"></span><span class="small muted num">${G.xp}/${need(G.level)} XP</span></div><div class="bar"><i style="width:${G.xp / need(G.level) * 100}%"></i></div></div><div class="gm-cur"><span class="chip">🪶 ${G.federn}</span><span class="chip">🎟️ ${G.tickets}</span><span class="chip">🔥 ${G.loginStreak}</span></div></div>
       <div class="tabs-in gm-tabs" role="tablist">${tabs.map(([k, l]) => `<button type="button" role="tab" class="${G.tab === k ? "on" : ""}" aria-selected="${G.tab === k}" data-gm-tab="${k}">${l}</button>`).join("")}</div>
       <div class="gm-body">${G.tab === "schatz" ? rSchatz() : G.tab === "garderobe" ? rGarderobe() : rQuests()}</div>`;
     el.onclick = (e) => {
@@ -4813,8 +5586,9 @@ INSERT INTO Konto VALUES (1,'Weingut Becker',1500.00),(2,'Klinik am Rhein',320.0
       else if (d.gmBanner) { G.banner = d.gmBanner; save(); render(); }
       else if (d.gmChar) { G.char = d.gmChar; G.lookAt = Date.now(); save(); render(); }
       else if (d.gmEq) { const it = IT[d.gmEq]; if (!it || !G.owned[it.id]) return; G.equip[it.char][it.slot] = it.id; G.lookAt = Date.now(); save(); render(); }
+      else if (d.gmTitle !== undefined) { const id = d.gmTitle; if (id && !(G.titles || {})[id]) return; G.title = id; G.lookAt = Date.now(); save(); render(); }
       else if (d.gmUse) { const id = d.gmUse; if (G.boosts[id] < 1) return; G.boosts[id]--; if (id === "xp2") G.xp2Left = 10; else G.shieldOn = true; save(); toast(`${IT[id].icon} ${IT[id].name} aktiviert`); render(); }
-      if (d.gmClaim || d.gmChest !== undefined || d.gmPull || d.gmChar || d.gmEq || d.gmUse) { try { syncSoon(3000); } catch (x) {} lbSoon(d.gmChar || d.gmEq ? 5000 : 30000); } // Belohnungen auch ohne Lernen abgleichen
+      if (d.gmClaim || d.gmChest !== undefined || d.gmPull || d.gmChar || d.gmEq || d.gmUse || d.gmTitle !== undefined) { try { syncSoon(3000); } catch (x) {} lbSoon(d.gmChar || d.gmEq || d.gmTitle !== undefined ? 5000 : 30000); } // Belohnungen auch ohne Lernen abgleichen
     };
     return true;
   }
@@ -4823,7 +5597,7 @@ INSERT INTO Konto VALUES (1,'Weingut Becker',1500.00),(2,'Klinik am Rhein',320.0
   function pack() {
     const own = {}; Object.keys(G.owned).forEach((id) => { const it = IT[id]; if (it && it.rar !== "S") (own[it.char] = own[it.char] || []).push(it.art); });
     const eq = {}; CHARS.forEach((c) => { eq[c] = SLOTS.map(([s]) => (IT[G.equip[c][s]] || {}).art || "").join("."); });
-    return { v: 1, x: G.earned, l: G.level, p: G.xp, f: G.federn, t: G.tickets, o: Object.fromEntries(Object.entries(own).map(([c, l]) => [c, l.join(".")])), e: eq, c: G.char, b: [G.boosts.xp2, G.boosts.shield], y: G.pity, n: G.pulls, s: [G.loginStreak, G.lastLogin, G.calIdx, G.calRound, G.best], a: G.lookAt || 0 };
+    return { v: 1, x: G.earned, l: G.level, p: G.xp, f: G.federn, t: G.tickets, o: Object.fromEntries(Object.entries(own).map(([c, l]) => [c, l.join(".")])), e: eq, c: G.char, b: [G.boosts.xp2, G.boosts.shield], y: G.pity, n: G.pulls, s: [G.loginStreak, G.lastLogin, G.calIdx, G.calRound, G.best], a: G.lookAt || 0, ti: Object.keys(G.titles || {}).filter((id) => TI[id]).join("."), tt: G.title || "", ev: G.ev || {} };
   }
   function unpack(p) {
     if (!p || typeof p !== "object") return null;
@@ -4831,13 +5605,16 @@ INSERT INTO Konto VALUES (1,'Weingut Becker',1500.00),(2,'Klinik am Rhein',320.0
     const g = fresh(), s = p.s || [];
     Object.assign(g, { earned: +p.x || 0, level: +p.l || 1, xp: +p.p || 0, federn: +p.f || 0, tickets: +p.t || 0, char: p.c || "rabe", pity: p.y || {}, pulls: +p.n || 0, loginStreak: +s[0] || 0, lastLogin: s[1] || null, calIdx: +s[2] || 0, calRound: +s[3] || 1, best: +s[4] || 0 });
     g.boosts = { xp2: +(p.b || [])[0] || 0, shield: +(p.b || [])[1] || 0 }; if (+p.a) g.lookAt = +p.a;
+    g.titles = {}; String(p.ti || "").split(".").forEach((id) => { if (TI[id]) g.titles[id] = 1; }); if (p.tt != null) g.title = TI[p.tt] ? String(p.tt) : ""; g.ev = p.ev && typeof p.ev === "object" ? p.ev : {};
     Object.entries(p.o || {}).forEach(([c, l]) => String(l).split(".").forEach((a) => { if (IT[c + "-" + a]) g.owned[c + "-" + a] = 1; }));
     Object.entries(p.e || {}).forEach(([c, l]) => { if (!ANIMALS[c]) return; const arts = String(l).split("."); g.equip[c] = baseEquip(c); SLOTS.forEach(([sl], i) => { const id = c + "-" + arts[i]; if (arts[i] && IT[id] && IT[id].slot === sl) g.equip[c][sl] = id; }); });
     return g;
   }
   function merge(p) {
     const inc = unpack(p); if (!inc) return;
-    Object.keys(inc.owned || {}).forEach((id) => { if (IT[id]) G.owned[id] = 1; });           // Skins: Vereinigung
+    Object.keys(inc.owned || {}).forEach((id) => { if (IT[id]) G.owned[id] = 1; });
+    Object.keys(inc.titles || {}).forEach((id) => { if (TI[id] && !G.titles[id]) G.titles[id] = +inc.titles[id] || 1; });           // Titel: Vereinigung
+    Object.entries(inc.ev || {}).forEach(([k, r]) => { if (!r || typeof r !== "object") return; const m = G.ev[k] = G.ev[k] || {}; m.best = Math.max(+m.best || 0, +r.best || 0); ["done", "got"].forEach((f) => { if (+r[f] && (!+m[f] || +r[f] < +m[f])) m[f] = +r[f]; }); m.kap = Object.assign({}, r.kap || {}, m.kap || {}); }); // Events: nie verlieren           // Skins: Vereinigung
     G.boosts.xp2 = Math.max(G.boosts.xp2, +inc.boosts.xp2 || 0); G.boosts.shield = Math.max(G.boosts.shield, +inc.boosts.shield || 0);
     const ahead = (+inc.earned || 0) > G.earned, tie = (+inc.earned || 0) === G.earned, incA = +inc.lookAt || 0, myA = +G.lookAt || 0;
     const lookKey = (g) => g.char + "|" + CHARS.map((c) => SLOTS.map(([s]) => ((g.equip || {})[c] || {})[s] || "").join(",")).join(";");
@@ -4848,6 +5625,7 @@ INSERT INTO Konto VALUES (1,'Weingut Becker',1500.00),(2,'Klinik am Rhein',320.0
     if (incA > myA) {                                                                            // Figur + Ausrüstung: die zuletzt getroffene Wahl gilt auf allen Geräten
       if (inc.char && ANIMALS[inc.char]) G.char = inc.char;
       CHARS.forEach((c) => { const ie = inc.equip && inc.equip[c]; if (ie) SLOTS.forEach(([s]) => { const it = IT[ie[s]]; if (it && it.char === c && it.slot === s && G.owned[it.id]) G.equip[c][s] = it.id; }); });
+      if (inc.title !== undefined && (!inc.title || G.titles[inc.title])) G.title = inc.title;
       G.lookAt = incA;
     } else if (!incA && !myA) {                                                                  // Stände ohne Zeitpunkt (vor dem Update gewählt):
       // Der weiter fortgeschrittene Stand gibt Figur und Ausrüstung vor (bei Gleichstand eine feste Regel); wo er nur die Grundausstattung trägt, gilt die des anderen.
@@ -4871,8 +5649,8 @@ INSERT INTO Konto VALUES (1,'Weingut Becker',1500.00),(2,'Klinik am Rhein',320.0
   const lbGet = () => { try { const o = JSON.parse(localStorage.getItem(KEY_LB) || "null"); return o && typeof o === "object" ? o : {}; } catch (e) { return {}; } };
   const lbSet = (o) => { try { localStorage.setItem(KEY_LB, JSON.stringify(o)); } catch (e) {} };
   const LB = { data: null, at: 0, busy: false, err: "", timer: 0, edit: false, leave: false, away: true };
-  const lookOf = () => G.char + ":" + SLOTS.map(([s]) => (IT[G.equip[G.char][s]] || {}).art || "").join(".");
-  const lookEq = (str) => { const [c, rest] = String(str || "").split(":"), ch = ANIMALS[c] ? c : "rabe", eq = baseEquip(ch); String(rest || "").split(".").forEach((a, i) => { const sl = SLOTS[i] && SLOTS[i][0], it = IT[ch + "-" + a]; if (sl && a && it && it.slot === sl) eq[sl] = it.id; }); return [ch, eq]; };
+  const lookOf = () => G.char + ":" + SLOTS.map(([s]) => (IT[G.equip[G.char][s]] || {}).art || "").join(".") + (G.title && TI[G.title] ? ":" + G.title : ""); // Titel als dritter Teil – ältere Versionen ignorieren ihn
+  const lookEq = (str) => { const [c, rest, ti] = String(str || "").split(":"), ch = ANIMALS[c] ? c : "rabe", eq = baseEquip(ch); String(rest || "").split(".").forEach((a, i) => { const sl = SLOTS[i] && SLOTS[i][0], it = IT[ch + "-" + a]; if (sl && a && it && it.slot === sl) eq[sl] = it.id; }); return [ch, eq, TI[ti] ? ti : ""]; };
   async function lbId() {
     const sk = syncGet(); if (sk) return hexOf(await sha("tap2-lb|s|" + keyRaw(sk.key)));
     const lb = lbGet(); if (!lb.token) { lb.token = hexOf(crypto.getRandomValues(new Uint8Array(20))); lbSet(lb); }
@@ -4923,7 +5701,7 @@ INSERT INTO Konto VALUES (1,'Weingut Becker',1500.00),(2,'Klinik am Rhein',320.0
   function lbSoon(ms) { if (!lbGet().joined) return; clearTimeout(LB.timer); LB.timer = setTimeout(lbPush, ms == null ? 30000 : ms); }
   function lbListHTML() {
     const d = LB.data, lb = lbGet();
-    const row = (e) => { const [c, eq] = lookEq(e.look); return `<div class="gm-lbrow ${e.me ? "me" : ""} ${e.r <= 3 ? "p" + e.r : ""}"><span class="gm-lbr num">${e.r}</span><span class="gm-lbfig">${figure(c, eq)}</span><span class="gm-lbn"><b>${esc(e.name)}</b>${e.me ? ' <span class="chip">Du</span>' : ""}<span class="gm-lbl">Level ${+e.level || 1} · ${esc(rank(+e.level || 1))}</span></span><span class="gm-lbxp num">${(+e.xp || 0).toLocaleString("de-DE")} XP</span></div>`; };
+    const row = (e) => { const [c, eq, ti] = lookEq(e.look); return `<div class="gm-lbrow ${e.me ? "me" : ""} ${e.r <= 3 ? "p" + e.r : ""}"><span class="gm-lbr num">${e.r}</span><span class="gm-lbfig">${figure(c, eq)}</span><span class="gm-lbn"><b>${esc(e.name)}</b>${e.me ? ' <span class="chip">Du</span>' : ""}<span class="gm-lbl">Level ${+e.level || 1} · ${ti ? "«" + esc(TI[ti].name) + "»" : esc(rank(+e.level || 1))}</span></span><span class="gm-lbxp num">${(+e.xp || 0).toLocaleString("de-DE")} XP</span></div>`; };
     const list = !d ? `<p class="small muted">${LB.err ? esc(LB.err) : "Lädt …"}</p>`
       : !d.top.length ? `<p class="small muted">Noch niemand eingetragen – sei die erste Person!</p>`
       : d.top.map(row).join("") + (d.me && d.me.r > d.top.length ? `<div class="gm-lbgap">…</div>` + row(Object.assign({ me: true }, d.me)) : "");
@@ -4959,8 +5737,9 @@ INSERT INTO Konto VALUES (1,'Weingut Becker',1500.00),(2,'Klinik am Rhein',320.0
     hudHTML() { ensure(); if (view !== "rangliste") LB.away = true; return `<button type="button" class="pill gm-pill" data-go="belohnungen" title="Belohnungen: Level ${G.level}" aria-label="Belohnungen, Level ${G.level}"><span class="gm-hava">${myFigure()}</span><b>${G.level}</b>${claimable() ? `<i class="gm-dot" aria-hidden="true"></i>` : ""}</button>`; },
     chip() { ensure(); return G.combo >= 2 ? `<span class="gm-combo" title="Serie richtiger Antworten">🔥 ${G.combo}${mult(G.combo) > 1 ? " · " + fmtM(mult(G.combo)) : ""}</span>` : ""; },
     answer(q, ok, unsure, f, t) { ensure(); onAnswer(q, ok, unsure, f, t); }, guess(q) { ensure(); onGuess(q); }, view(el) { ensure(); return viewHTML(el); }, pack() { ensure(); return pack(); }, merge(p) { ensure(); merge(p); },
-    data() { ensure(); return JSON.parse(JSON.stringify(G)); }, rangView(el) { ensure(); return rangView(el); },
-    boot(h) { ensure(); rollDay(); save(); if (lbGet().joined) setTimeout(lbPush, 4000); if (!h.startsWith("import=") && view !== "tutorial" && !UI.sess && !UI.run && G.loginClaimed !== today()) setTimeout(() => { if (!UI.sess && !UI.run && view !== "tutorial") showLogin(); }, 700); }
+    data() { ensure(); return JSON.parse(JSON.stringify(G)); },
+    evInfo(e) { ensure(); return Object.assign({}, (G.ev || {})[e.id] || {}); }, evPreview(e) { ensure(); return evPreview(e); }, evFinal(e, s, n) { ensure(); return evFinal(e, s, n); }, evKap(e, k) { ensure(); return evKap(e, k); }, rangView(el) { ensure(); return rangView(el); },
+    boot(h) { ensure(); rollDay(); titleCheck(); save(); if (lbGet().joined) setTimeout(lbPush, 4000); if (!h.startsWith("import=") && view !== "tutorial" && !UI.sess && !UI.run && G.loginClaimed !== today()) setTimeout(() => { if (!UI.sess && !UI.run && view !== "tutorial") showLogin(); }, 700); }
   };
   })(); } catch (e) { GAMI = null; try { console.error("Belohnungen deaktiviert:", e); } catch (x) {} }
 

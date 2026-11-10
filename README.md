@@ -45,10 +45,14 @@ In jeder Lernfrage gibt es oben ein Fahnen-Symbol, in jeder Übungsaufgabe den L
 - **Geräte synchronisieren:** Einstellungen → „Sync einschalten“, auf dem zweiten Gerät den Kurzcode eingeben oder den QR-Code scannen. Danach gleichen sich die Geräte selbst ab, ohne Konto.
 - **Rangliste:** im Menü unter „Rangliste“ einen Spitznamen wählen. Sortiert nach gesammelten XP; verbundene Geräte teilen sich einen Eintrag.
 - **Belohnungen:** Figur oben rechts – XP und Level nur für sicher richtige Antworten (Serien ×1,5 bis ×3; „unsicher“ oder „geraten“ gibt nichts und beendet die Serie), täglich 5 Quests, Login-Kalender, Schatzkammer mit 5 Tieren à 40 Skins und Garderobe. Federn gibt es nur durchs Lernen, kein Echtgeld.
+- **Events:** im Menü unter „Events“ – zeitlich begrenzte Lernaktionen zu Klausuren (zurzeit LF11a und WPF Projektmanagement). Jedes Kapitel hat eine Kurz-Lektion mit Diagramm, danach Auswahl- und Klausurfragen. Sitzen 80 % je Kapitel, schaltet sich ein Abschlusstest frei (15 Fragen, ab 80 % bestanden). Die Sonderbelohnung (Baum-Shirt bzw. Titel „AZB Experte“) gibt es nur bis zum Klausurtermin. Events zählen nicht zur Prüfungsreife, geben aber XP.
+- **Titel:** in der Garderobe – lustige IT- und Azubi-Titel, freigeschaltet durch Fortschritt oder Events, sichtbar in der Rangliste.
 
 ## Inhalte
 
 Alle Aufgaben und Lösungen sind eigenständig im Stil der IHK-Prüfung formuliert. Original-Prüfungen und Lösungshinweise sind nicht enthalten.
+
+Die Event-Fragen sind eigenständig formuliert und orientieren sich an den Themen der jeweiligen Lernsituation bzw. des Workshops; Unterrichtsmaterial selbst ist nicht enthalten. Neue Events kommen als Eintrag in `EVENTS` dazu. Frage-IDs dort sind fest vergeben und dürfen nie geändert oder gelöscht werden (`check-ids` prüft das).
 
 ## Aktualisieren – ohne dass der Lernstand verloren geht
 

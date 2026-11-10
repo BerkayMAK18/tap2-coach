@@ -3638,12 +3638,19 @@ INSERT INTO Konto VALUES (1,'Weingut Becker',1500.00),(2,'Klinik am Rhein',320.0
     ["c", "r"].forEach((k) => Object.entries((b && b[k]) || {}).forEach(([id, t]) => { x[k][id] = Math.max(x[k][id] || 0, +t || 0); }));
     return x;
   }
+  // Zeitpunkt einer Antwort für den Vergleich. Über den Übertragungs-Link kommt nur der Tag mit („12:00 Uhr“ als Platzhalter, siehe txDecode):
+  // Der zählt als Tagesbeginn, damit jede echte Antwort desselben Tages gewinnt. Zeiten in der Zukunft (falsch gehende Uhr) zählen als „jetzt“.
+  function syncWhen(r) {
+    let t = +(r && r.t) || 0; const d = new Date(t);
+    if (t && d.getHours() === 12 && !d.getMinutes() && !d.getSeconds() && !d.getMilliseconds()) t -= 12 * 3600000;
+    return Math.min(t, Date.now());
+  }
   function syncMerge(L, R, ev) {
     const x = normalize(JSON.parse(JSON.stringify(L))), r = normalize(JSON.parse(JSON.stringify(R)));
     [x, r].forEach((o) => { ["q", "mark", "custom", "ueb", "log"].forEach((k) => { if (!o[k] || typeof o[k] !== "object" || Array.isArray(o[k])) o[k] = {}; }); ["runs", "errlog"].forEach((k) => { if (!Array.isArray(o[k])) o[k] = []; }); Object.keys(o.custom).forEach((t) => { if (!Array.isArray(o.custom[t])) o.custom[t] = []; }); });
     Object.entries(r.q).forEach(([id, b]) => {
       const a = x.q[id]; if (!b) return; if (!a) { x.q[id] = b; return; }
-      const newer = (b.t || 0) > (a.t || 0) || ((b.t || 0) === (a.t || 0) && (b.b || 0) > (a.b || 0));
+      const ta = syncWhen(a), tb = syncWhen(b), newer = tb > ta || (tb === ta && (b.b || 0) > (a.b || 0));
       x.q[id] = Object.assign({}, newer ? b : a, { n: Math.max(a.n || 0, b.n || 0), w: Math.max(a.w || 0, b.w || 0) });
     });
     Object.assign(x.mark, r.mark);

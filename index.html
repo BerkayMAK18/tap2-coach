@@ -876,6 +876,19 @@ a.iconbtn { color: var(--ink); text-decoration: none; }
 .sync-code { font-family: var(--mono); font-size: 2rem; letter-spacing: 0.12em; line-height: 1.1; }
 .sync-key { font-family: var(--mono); font-size: 0.82rem; word-break: break-all; background: var(--surface-2); padding: 6px 8px; border-radius: var(--r-sm); }
 #sync-card .tx-paste .row { margin-top: 8px; }
+.gm-lb { display: flex; flex-direction: column; gap: 6px; margin-top: 10px; }
+.gm-lbrow { display: grid; grid-template-columns: 30px 48px minmax(0, 1fr) auto; align-items: center; gap: 10px; padding: 6px 10px; border-radius: var(--r-sm); background: var(--surface-2); }
+.gm-lbrow.me { box-shadow: inset 0 0 0 2px var(--blue); }
+.gm-lbr { font-weight: 800; text-align: center; font-size: 1.05rem; }
+.gm-lbrow.p1 .gm-lbr { color: #E0A82E; } .gm-lbrow.p2 .gm-lbr { color: #9AA6B2; } .gm-lbrow.p3 .gm-lbr { color: #C07A45; }
+.gm-lbfig svg { width: 48px; height: 48px; border-radius: 12px; display: block; }
+.gm-lbn { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.gm-lbl { display: block; font-size: 0.74rem; color: var(--muted); }
+.gm-lbxp { font-weight: 700; white-space: nowrap; }
+.gm-lbgap { text-align: center; color: var(--muted); line-height: 1; }
+@media (max-width: 480px) { .gm-tabs { gap: 0; } .gm-tabs button { padding: 10px 7px; font-size: 0.88rem; } .gm-lbrow { grid-template-columns: 24px 40px minmax(0, 1fr) auto; gap: 8px; padding: 6px 8px; } .gm-lbfig svg { width: 40px; height: 40px; } }
+.gm-lbn .chip { vertical-align: 1px; }
+.gm-in { flex: 1; min-width: 160px; font: inherit; padding: 8px 10px; border-radius: var(--r-sm); border: 1.5px solid var(--line-2); background: var(--surface-2); color: var(--ink); }
 </style>
 </head>
 <body>
@@ -4650,7 +4663,7 @@ INSERT INTO Konto VALUES (1,'Weingut Becker',1500.00),(2,'Klinik am Rhein',320.0
       if ([3, 6, 10].includes(G.combo)) setTimeout(() => toast(`🔥 ${G.combo}er-Serie! Ab jetzt ${fmtM(mult(G.combo))} XP`), 150);
     } else if (G.shieldOn && G.combo > 0) { G.shieldOn = false; setTimeout(() => toast("🛡️ Das Schild hat deine Serie gerettet"), 150); }
     else G.combo = 0;
-    save();
+    save(); lbSoon();
     if (msg) setTimeout(() => { ensureLayer(); const f = document.createElement("div"); f.className = "gm-float"; f.textContent = msg; document.body.appendChild(f); setTimeout(() => f.remove(), 1200); }, 30);
   }
   function grant(it) {
@@ -4754,12 +4767,14 @@ INSERT INTO Konto VALUES (1,'Weingut Becker',1500.00),(2,'Klinik am Rhein',320.0
   }
   function viewHTML(el) {
     rollDay();
-    const tabs = [["quests", "Quests"], ["schatz", GACHA.name], ["garderobe", "Garderobe"]];
+    const tabs = [["quests", "Quests"], ["schatz", GACHA.name], ["garderobe", "Garderobe"], ["rang", "Rangliste"]];
     el.innerHTML = `<div class="gm-head card"><div class="gm-ava">${myFigure()}</div><div class="gm-lvl"><div class="row" style="gap:8px;align-items:baseline"><b class="gm-lv">Level ${G.level}</b><span class="muted small">${rank(G.level)}</span><span class="spacer"></span><span class="small muted num">${G.xp}/${need(G.level)} XP</span></div><div class="bar"><i style="width:${G.xp / need(G.level) * 100}%"></i></div></div><div class="gm-cur"><span class="chip">🪶 ${G.federn}</span><span class="chip">🎟️ ${G.tickets}</span><span class="chip">🔥 ${G.loginStreak}</span></div></div>
       <div class="tabs-in gm-tabs" role="tablist">${tabs.map(([k, l]) => `<button type="button" role="tab" class="${G.tab === k ? "on" : ""}" aria-selected="${G.tab === k}" data-gm-tab="${k}">${l}</button>`).join("")}</div>
-      <div class="gm-body">${G.tab === "schatz" ? rSchatz() : G.tab === "garderobe" ? rGarderobe() : rQuests()}</div>`;
+      <div class="gm-body">${G.tab === "schatz" ? rSchatz() : G.tab === "garderobe" ? rGarderobe() : G.tab === "rang" ? rRang() : rQuests()}</div>`;
+    el.onkeydown = (e) => { if (e.target && e.target.id === "gm-lb-name" && e.key === "Enter") lbJoin(e.target.value); };
     el.onclick = (e) => {
       const t = e.target.closest("button"); if (!t || t.disabled) return; const d = t.dataset;
+      if (lbClick(d)) return;
       if (d.gmTab) { G.tab = d.gmTab; save(); render(); }
       else if (d.gmClaim) { const q = QPOOL.find((x) => x.id === d.gmClaim); if (qprog(q) < q.goal || G.quests.claimed.includes(q.id)) return; G.quests.claimed.push(q.id); G.federn += q.f; addXP(q.xp); save(); toast(`Quest erledigt: +${q.f} 🪶 · +${q.xp} XP`); render(); }
       else if (d.gmChest !== undefined) { if (G.quests.chest || G.quests.claimed.length < 3) return; G.quests.chest = true; G.federn += 150; G.tickets++; save(); confetti(40); modal(`<div style="font-size:60px">🎁</div><h2>Tagestruhe</h2><p class="gm-gain">+150 🪶 · +1 🎟️</p><button type="button" class="btn primary" data-gm-close>Super</button>`); }
@@ -4770,7 +4785,7 @@ INSERT INTO Konto VALUES (1,'Weingut Becker',1500.00),(2,'Klinik am Rhein',320.0
       else if (d.gmChar) { G.char = d.gmChar; G.lookAt = Date.now(); save(); render(); }
       else if (d.gmEq) { const it = IT[d.gmEq]; if (!it || !G.owned[it.id]) return; G.equip[it.char][it.slot] = it.id; G.lookAt = Date.now(); save(); render(); }
       else if (d.gmUse) { const id = d.gmUse; if (G.boosts[id] < 1) return; G.boosts[id]--; if (id === "xp2") G.xp2Left = 10; else G.shieldOn = true; save(); toast(`${IT[id].icon} ${IT[id].name} aktiviert`); render(); }
-      if (d.gmClaim || d.gmChest !== undefined || d.gmPull || d.gmChar || d.gmEq || d.gmUse) { try { syncSoon(3000); } catch (x) {} } // Belohnungen auch ohne Lernen abgleichen
+      if (d.gmClaim || d.gmChest !== undefined || d.gmPull || d.gmChar || d.gmEq || d.gmUse) { try { syncSoon(3000); } catch (x) {} lbSoon(d.gmChar || d.gmEq ? 5000 : 30000); } // Belohnungen auch ohne Lernen abgleichen
     };
     return true;
   }
@@ -4820,6 +4835,90 @@ INSERT INTO Konto VALUES (1,'Weingut Becker',1500.00),(2,'Klinik am Rhein',320.0
     fix(); save();
   }
 
+  // ---- Bestenliste (freiwillig): sichtbar sind nur Spitzname, Level, XP und Figur. Server: tools/supabase-leaderboard.sql
+  // Die Eintrags-ID ist eine Prüfsumme des Sync-Schlüssels (dann teilen sich verbundene Geräte einen Eintrag) oder eines
+  // zufälligen Geräte-Werts. Sie wird nie angezeigt und vom Server nie herausgegeben.
+  const KEY_LB = "tap2coach-lb", NAME_RE = /^[A-Za-z0-9ÄÖÜäöüß_.-]{3,16}$/;
+  const lbGet = () => { try { const o = JSON.parse(localStorage.getItem(KEY_LB) || "null"); return o && typeof o === "object" ? o : {}; } catch (e) { return {}; } };
+  const lbSet = (o) => { try { localStorage.setItem(KEY_LB, JSON.stringify(o)); } catch (e) {} };
+  const LB = { data: null, at: 0, busy: false, err: "", timer: 0, edit: false, leave: false };
+  const lookOf = () => G.char + ":" + SLOTS.map(([s]) => (IT[G.equip[G.char][s]] || {}).art || "").join(".");
+  const lookEq = (str) => { const [c, rest] = String(str || "").split(":"), ch = ANIMALS[c] ? c : "rabe", eq = baseEquip(ch); String(rest || "").split(".").forEach((a, i) => { const sl = SLOTS[i] && SLOTS[i][0], it = IT[ch + "-" + a]; if (sl && a && it && it.slot === sl) eq[sl] = it.id; }); return [ch, eq]; };
+  async function lbId() {
+    const sk = syncGet(); if (sk) return hexOf(await sha("tap2-lb|s|" + keyRaw(sk.key)));
+    const lb = lbGet(); if (!lb.token) { lb.token = hexOf(crypto.getRandomValues(new Uint8Array(20))); lbSet(lb); }
+    return hexOf(await sha("tap2-lb|t|" + lb.token));
+  }
+  const lbBox = () => { const el = document.getElementById("gm-lbsec"); if (el) el.innerHTML = lbListHTML(); };
+  const lbRedraw = () => { if (view === "belohnungen" && G.tab === "rang") render(); };
+  async function lbLoad(force) {
+    if (!syncConf() || (!force && Date.now() - LB.at < 60000)) return;
+    LB.at = Date.now();
+    try {
+      const id = await lbId(), d = await rpc("tap2_lb_top", { p_limit: 100, p_id: id }), lb = lbGet();
+      LB.data = d && Array.isArray(d.top) ? d : { top: [], me: null, total: 0 }; if (!force) LB.err = "";
+      if (LB.data.me && (!lb.joined || lb.id !== id)) { Object.assign(lb, { joined: true, id, name: LB.data.me.name }); lbSet(lb); lbRedraw(); return; } // ein verbundenes Gerät ist schon eingetragen
+      if (!LB.data.me && lb.joined) { if (lb.id && lb.id !== id && lb.name) { lbJoin(lb.name); return; } lb.joined = false; lbSet(lb); lbRedraw(); return; } // Sync-Gruppe gewechselt → Eintrag mitnehmen; sonst gelöscht
+    } catch (e) { if (!LB.data) LB.err = "Die Bestenliste ist gerade nicht erreichbar."; }
+    lbBox();
+  }
+  async function lbJoin(name) {
+    name = String(name || "").trim();
+    if (!NAME_RE.test(name)) { LB.err = "3–16 Zeichen: Buchstaben, Ziffern, _ . -"; return lbRedraw(); }
+    LB.busy = true; LB.err = ""; lbRedraw();
+    try {
+      const id = await lbId(), lb = lbGet();
+      if (lb.id && lb.id !== id) { try { await rpc("tap2_lb_leave", { p_id: lb.id }); } catch (e) {} } // alten Eintrag nicht doppelt stehen lassen
+      const r = await rpc("tap2_lb_join", { p_id: id, p_name: name, p_xp: G.earned, p_level: G.level, p_look: lookOf() });
+      if (!r || !r.ok) { LB.err = r && r.err === "vergeben" ? "Der Name ist schon vergeben." : "Dieser Name geht nicht. 3–16 Zeichen: Buchstaben, Ziffern, _ . -"; if (lb.joined && lb.id !== id) { lb.joined = false; delete lb.id; lbSet(lb); } }
+      else { Object.assign(lb, { id, name, joined: true }); lbSet(lb); LB.edit = false; }
+    } catch (e) { LB.err = "Gerade nicht erreichbar. Versuche es später noch einmal."; }
+    LB.busy = false; LB.at = 0; await lbLoad(true); lbRedraw();
+  }
+  async function lbLeave() {
+    const lb = lbGet(); LB.busy = true; lbRedraw();
+    try { if (lb.id) await rpc("tap2_lb_leave", { p_id: lb.id }); lb.joined = false; delete lb.id; lbSet(lb); LB.err = ""; }
+    catch (e) { LB.err = "Austragen gerade nicht möglich. Versuche es später noch einmal."; }
+    LB.busy = false; LB.leave = false; LB.at = 0; await lbLoad(true); lbRedraw();
+  }
+  async function lbPush() {
+    LB.timer = 0; const lb = lbGet(); if (!lb.joined || !syncConf() || navigator.onLine === false) return;
+    try {
+      const id = await lbId(); if (lb.id !== id) return lbJoin(lb.name);
+      const r = await rpc("tap2_lb_push", { p_id: id, p_xp: G.earned, p_level: G.level, p_look: lookOf() });
+      if (r && r.gone) { lb.joined = false; lbSet(lb); }
+      else if (r && r.later) lbSoon(20000);
+      LB.at = 0;
+    } catch (e) {}
+  }
+  function lbSoon(ms) { if (!lbGet().joined) return; clearTimeout(LB.timer); LB.timer = setTimeout(lbPush, ms == null ? 30000 : ms); }
+  function lbListHTML() {
+    const d = LB.data, lb = lbGet();
+    const row = (e) => { const [c, eq] = lookEq(e.look); return `<div class="gm-lbrow ${e.me ? "me" : ""} ${e.r <= 3 ? "p" + e.r : ""}"><span class="gm-lbr num">${e.r}</span><span class="gm-lbfig">${figure(c, eq)}</span><span class="gm-lbn"><b>${esc(e.name)}</b>${e.me ? ' <span class="chip">Du</span>' : ""}<span class="gm-lbl">Level ${+e.level || 1} · ${esc(rank(+e.level || 1))}</span></span><span class="gm-lbxp num">${(+e.xp || 0).toLocaleString("de-DE")} XP</span></div>`; };
+    const list = !d ? `<p class="small muted">${LB.err ? esc(LB.err) : "Lädt …"}</p>`
+      : !d.top.length ? `<p class="small muted">Noch niemand eingetragen – sei die erste Person!</p>`
+      : d.top.map(row).join("") + (d.me && d.me.r > d.top.length ? `<div class="gm-lbgap">…</div>` + row(Object.assign({ me: true }, d.me)) : "");
+    const mine = lb.joined && !LB.edit ? `<div class="row" style="margin-top:12px"><span class="small muted">Du bist dabei als <b>${esc(lb.name || "")}</b>${d && d.me ? ` · Platz ${d.me.r} von ${d.total}` : ""}</span><span class="spacer"></span><button type="button" class="btn small ghost" data-gm-lbedit>Namen ändern</button>${LB.leave ? `<button type="button" class="btn small danger" data-gm-lbleave2 ${LB.busy ? "disabled" : ""}>Wirklich austragen</button>` : `<button type="button" class="btn small ghost" data-gm-lbleave>Austragen</button>`}</div>` : "";
+    return `<div class="row"><h3>Bestenliste</h3><span class="spacer"></span><span class="small muted">${d ? d.total + " dabei" : ""}</span></div><p class="tiny muted">Sortiert nach gesammelten XP. Wird etwa jede Minute aktualisiert.</p><div class="gm-lb">${list}</div>${mine}`;
+  }
+  function rRang() {
+    if (!syncConf()) return `<section class="card"><h3>Bestenliste</h3><p class="small muted">Die Bestenliste ist in dieser Version nicht verfügbar.</p></section>`;
+    setTimeout(() => lbLoad(false), 0);
+    const lb = lbGet();
+    const join = !lb.joined || LB.edit ? `<section class="card"><h3>${lb.joined ? "Namen ändern" : "Mitmachen"}</h3><p class="small muted">Wähle einen Spitznamen. Für alle sichtbar sind nur dein Name, dein Level, deine XP und deine Figur. Nimm bitte nicht deinen echten Namen. Du kannst dich jederzeit wieder austragen.</p><div class="row" style="margin-top:10px"><input type="text" class="gm-in" id="gm-lb-name" maxlength="16" placeholder="z. B. CodeRabe" value="${esc(lb.name || "")}" autocomplete="off" spellcheck="false" aria-label="Spitzname"><button type="button" class="btn primary small" data-gm-lbjoin ${LB.busy ? "disabled" : ""}>${lb.joined ? "Speichern" : "Mitmachen"}</button>${lb.joined ? `<button type="button" class="btn small ghost" data-gm-lbcancel>Abbrechen</button>` : ""}</div>${LB.err ? `<p class="small warn-text" style="margin-top:6px">${esc(LB.err)}</p>` : ""}</section>` : "";
+    return `${join}<section class="card" id="gm-lbsec">${lbListHTML()}</section>`;
+  }
+  function lbClick(d) {
+    if (d.gmTab === "rang") LB.at = 0; // beim Öffnen immer frisch laden
+    if (d.gmLbjoin !== undefined) { const i = document.getElementById("gm-lb-name"); lbJoin(i ? i.value : ""); return true; }
+    if (d.gmLbedit !== undefined) { LB.edit = true; LB.err = ""; render(); return true; }
+    if (d.gmLbcancel !== undefined) { LB.edit = false; LB.err = ""; render(); return true; }
+    if (d.gmLbleave !== undefined) { LB.leave = true; lbBox(); return true; }
+    if (d.gmLbleave2 !== undefined) { lbLeave(); return true; }
+    return false;
+  }
+  document.addEventListener("visibilitychange", () => { if (document.visibilityState === "hidden" && LB.timer) { clearTimeout(LB.timer); lbPush(); } });
+
   // ---- App-Anbindung (erst nach dem Laden des Lernstands initialisieren)
   return {
     init: ensure,
@@ -4827,7 +4926,7 @@ INSERT INTO Konto VALUES (1,'Weingut Becker',1500.00),(2,'Klinik am Rhein',320.0
     chip() { ensure(); return G.combo >= 2 ? `<span class="gm-combo" title="Serie richtiger Antworten">🔥 ${G.combo}${mult(G.combo) > 1 ? " · " + fmtM(mult(G.combo)) : ""}</span>` : ""; },
     answer(q, ok) { ensure(); onAnswer(q, ok); }, view(el) { ensure(); return viewHTML(el); }, pack() { ensure(); return pack(); }, merge(p) { ensure(); merge(p); },
     data() { ensure(); return JSON.parse(JSON.stringify(G)); },
-    boot(h) { ensure(); rollDay(); save(); if (!h.startsWith("import=") && view !== "tutorial" && !UI.sess && !UI.run && G.loginClaimed !== today()) setTimeout(() => { if (!UI.sess && !UI.run && view !== "tutorial") showLogin(); }, 700); }
+    boot(h) { ensure(); rollDay(); save(); if (lbGet().joined) setTimeout(lbPush, 4000); if (!h.startsWith("import=") && view !== "tutorial" && !UI.sess && !UI.run && G.loginClaimed !== today()) setTimeout(() => { if (!UI.sess && !UI.run && view !== "tutorial") showLogin(); }, 700); }
   };
   })(); } catch (e) { GAMI = null; try { console.error("Belohnungen deaktiviert:", e); } catch (x) {} }
 

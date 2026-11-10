@@ -872,6 +872,10 @@ a.iconbtn { color: var(--ink); text-decoration: none; }
 @keyframes gm-fall { to { transform: translateY(105vh) rotate(720deg); } }
 @media (max-width: 560px) { .gm-pulls { grid-template-columns: repeat(3, 1fr); } .gm-bgrid { grid-template-columns: 104px 1fr; gap: 12px; } .gm-cal div { font-size: 0.62rem; } .gm-cal div b { font-size: 0.9rem; } .gm-pill b { display: none; } .gm-pill { padding: 4px; } }
 @media (prefers-reduced-motion: reduce) { .gm-chest, .gm-pulls .gm-tile, .gm-float, .gm-toast { animation: none; } }
+.sync-row input { flex: 1; min-width: 160px; font: inherit; padding: 8px 10px; border-radius: var(--r-sm); border: 1.5px solid var(--line-2); background: var(--surface-2); color: var(--ink); }
+.sync-code { font-family: var(--mono); font-size: 2rem; letter-spacing: 0.12em; line-height: 1.1; }
+.sync-key { font-family: var(--mono); font-size: 0.82rem; word-break: break-all; background: var(--surface-2); padding: 6px 8px; border-radius: var(--r-sm); }
+#sync-card .tx-paste .row { margin-top: 8px; }
 </style>
 </head>
 <body>
@@ -2618,7 +2622,7 @@ CARDS_RAW.algo.push(
   const KEY = "tap2coach", KEY_RUN = "tap2coach-run", KEY_SESS = "tap2coach-sess";
   let storeOk = true;
   function localLoad() { try { const t = localStorage.getItem(KEY); if (t) { const o = JSON.parse(t); S = normalize(o); if (!o.v || o.v < 7) save(); } } catch (e) { storeOk = false; } }
-  function save() { try { localStorage.setItem(KEY, JSON.stringify(S)); storeOk = true; } catch (e) { storeOk = false; } }
+  function save() { try { localStorage.setItem(KEY, JSON.stringify(S)); storeOk = true; } catch (e) { storeOk = false; } try { syncSoon(); } catch (e) {} }
   function keepSess() { try { if (UI.sess) localStorage.setItem(KEY_SESS, JSON.stringify(UI.sess)); else localStorage.removeItem(KEY_SESS); } catch (e) {} }
   window.addEventListener("storage", (e) => { if (e.key === KEY && e.newValue) { try { S = normalize(JSON.parse(e.newValue)); if (!UI.sess && !UI.run) render(); else hud(); } catch (x) {} } });
 
@@ -3133,7 +3137,7 @@ INSERT INTO Konto VALUES (1,'Weingut Becker',1500.00),(2,'Klinik am Rhein',320.0
     gm("answer", q, ok);
     sessNext();
   }
-  function toggleMark(id) { if (S.mark[id]) delete S.mark[id]; else S.mark[id] = 1; save(); render(); }
+  function toggleMark(id) { if (S.mark[id]) delete S.mark[id]; else S.mark[id] = 1; syncEv("m", id, !!S.mark[id]); save(); render(); }
   function closeSess() { const src = UI.sess && UI.sess.src; UI.sess = null; keepSess(); UI.topic = src && src.tid ? src.tid : null; render(); window.scrollTo({ top: 0 }); }
   document.addEventListener("keydown", (e) => {
     if (e.target && (/INPUT|TEXTAREA|SELECT/.test(e.target.tagName) || e.target.isContentEditable)) return;
@@ -3333,6 +3337,7 @@ INSERT INTO Konto VALUES (1,'Weingut Becker',1500.00),(2,'Klinik am Rhein',320.0
   function logCause(src, ref, pts, cause) {
     S.errlog = (S.errlog || []).filter((x) => !(x.src === src && x.ref === ref && x.at === today()));
     if (cause) S.errlog.push({ at: today(), src, ref, pts, cause });
+    syncEv("e", today() + "|" + src + "|" + ref, cause ? { at: today(), src, ref, pts, cause } : null);
     save();
   }
   function errSummaryHTML() {
@@ -3565,6 +3570,255 @@ INSERT INTO Konto VALUES (1,'Weingut Becker',1500.00),(2,'Klinik am Rhein',320.0
     const rp = $("#tx-replace"); if (rp) rp.onclick = () => { txApply(UI.imp.inc, "replace"); UI.imp = { done: "Dein Stand wurde ersetzt." }; UI.tx = null; UI.sess = null; keepSess(); render(); };
     const cc = $("#tx-cancel"); if (cc) cc.onclick = () => { UI.imp = null; render(); };
   }
+  // ---------- Geräte-Sync (freiwillig): verschlüsselter Lernstand in Supabase, das Gerät bleibt führend
+  // Ohne Konto: Ein geheimer Sync-Schlüssel (nur auf den Geräten) bestimmt den Datensatz. Der Server kennt nur eine Prüfsumme davon
+  // und den im Browser verschlüsselten Stand. Abgleich heißt immer Zusammenführen (nie Ersetzen), siehe syncMerge.
+  // Einrichtung des Servers: tools/supabase-sync.sql
+  const SYNC_URL = "", SYNC_ANON = ""; // Supabase-Projekt-URL + öffentlicher anon/publishable key. Leer = Sync ist ausgeblendet.
+  const KEY_SYNC = "tap2coach-sync", KEY_SYNC_DEV = "tap2coach-sync-dev", KEY_VORSYNC = "tap2coach-vorsync";
+  const isLocalHost = /^(localhost|127\.0\.0\.1|\[::1\])$/.test(location.hostname);
+  const syncConf = () => {
+    if (SYNC_URL && SYNC_ANON) return { url: SYNC_URL, key: SYNC_ANON };
+    if (!isLocalHost) return null; // Testzugang nur lokal
+    try { const d = JSON.parse(localStorage.getItem(KEY_SYNC_DEV) || "null"); return d && d.url && d.key ? d : null; } catch (e) { return null; }
+  };
+  const syncGet = () => { try { const c = JSON.parse(localStorage.getItem(KEY_SYNC) || "null"); return c && c.key ? c : null; } catch (e) { return null; } };
+  const syncSet = (c) => { try { if (c) localStorage.setItem(KEY_SYNC, JSON.stringify(c)); else localStorage.removeItem(KEY_SYNC); } catch (e) {} };
+  const SY = { busy: false, again: false, timer: 0, quiet: false, msg: "", err: "", pair: null, ask: null, offer: null, showKey: false, confirm: null, inErr: "" };
+  const te = new TextEncoder(), td = new TextDecoder();
+  const hexOf = (b) => [...new Uint8Array(b)].map((x) => x.toString(16).padStart(2, "0")).join("");
+  const sha = async (s) => new Uint8Array(await crypto.subtle.digest("SHA-256", te.encode(s)));
+  const B32 = "0123456789ABCDEFGHJKMNPQRSTVWXYZ"; // Schlüssel: Crockford-Base32 (ohne I, L, O, U), 160 Bit
+  const PAIR_AB = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789"; // Kurzcode: ohne 0/O und 1/I
+  const keyRaw = (s) => String(s || "").toUpperCase().replace(/[^0-9A-Z]/g, "").replace(/O/g, "0").replace(/[IL]/g, "1");
+  const keyFmt = (raw) => raw.match(/.{1,4}/g).join("-");
+  const isKey = (raw) => raw.length === 32 && [...raw].every((c) => B32.includes(c));
+  function newSyncKey() { const r = crypto.getRandomValues(new Uint8Array(20)); let bits = 0, v = 0, out = ""; r.forEach((b) => { v = ((v << 8) | b) & 0xffff; bits += 8; while (bits >= 5) { out += B32[(v >>> (bits - 5)) & 31]; bits -= 5; } }); return keyFmt(out); }
+  const newPairCode = () => [...crypto.getRandomValues(new Uint8Array(6))].map((b) => PAIR_AB[b & 31]).join("");
+  const codeFmt = (c) => c.slice(0, 3) + "-" + c.slice(3);
+  async function syncIds(key) { const k = keyRaw(key); return { id: hexOf(await sha("tap2-id|" + k)), aes: await crypto.subtle.importKey("raw", await sha("tap2-enc|" + k), "AES-GCM", false, ["encrypt", "decrypt"]) }; }
+  async function seal(obj, aes) {
+    const raw = te.encode(JSON.stringify(obj)), z = await deflate(raw), body = new Uint8Array(1 + (z || raw).length);
+    body[0] = z ? 1 : 0; body.set(z || raw, 1);
+    const iv = crypto.getRandomValues(new Uint8Array(12)), ct = new Uint8Array(await crypto.subtle.encrypt({ name: "AES-GCM", iv }, aes, body));
+    return "1." + b64u.enc(iv) + "." + b64u.enc(ct);
+  }
+  async function unseal(blob, aes) {
+    const [v, iv, ct] = String(blob).split("."); if (v !== "1") throw new Error("Unbekanntes Format in der Cloud.");
+    const body = new Uint8Array(await crypto.subtle.decrypt({ name: "AES-GCM", iv: b64u.dec(iv) }, aes, b64u.dec(ct)));
+    const data = body[0] ? await deflate(body.subarray(1), true) : body.subarray(1);
+    if (!data) throw new Error("Dieser Browser kann den Stand nicht entpacken.");
+    return JSON.parse(td.decode(data));
+  }
+  async function pairKey(code) {
+    const base = await crypto.subtle.importKey("raw", te.encode(code), "PBKDF2", false, ["deriveKey"]);
+    return crypto.subtle.deriveKey({ name: "PBKDF2", salt: te.encode("tap2-pair"), iterations: 150000, hash: "SHA-256" }, base, { name: "AES-GCM", length: 256 }, false, ["encrypt", "decrypt"]);
+  }
+  async function rpc(fn, args) {
+    const c = syncConf(); if (!c) throw new Error("Sync ist nicht eingerichtet.");
+    const h = { "Content-Type": "application/json", apikey: c.key }; if (!/^sb_/.test(c.key)) h.Authorization = "Bearer " + c.key;
+    const ctl = new AbortController(), to = setTimeout(() => ctl.abort(), 15000);
+    try {
+      const r = await fetch(c.url.replace(/\/+$/, "") + "/rest/v1/rpc/" + fn, { method: "POST", headers: h, body: JSON.stringify(args), cache: "no-store", signal: ctl.signal });
+      const t = await r.text();
+      if (!r.ok) { let m = t; try { m = JSON.parse(t).message || t; } catch (e) {} const er = new Error(String(m).slice(0, 160)); er.status = r.status; throw er; }
+      return t ? JSON.parse(t) : null;
+    } finally { clearTimeout(to); }
+  }
+
+  // Zusammenführen zweier vollständiger Lernstände. Nichts geht verloren:
+  // Fragen – die neuere Antwort gilt (Zähler: Maximum) · Markierungen – vereinigt, außer ein späteres „Entfernen“ (ev.m)
+  // Eigene Fragen – vereinigt, außer gelöscht (ev.c) · Aufgabenpunkte – neuerer Eintrag · Prüfungen/Fehlerprotokoll – vereinigt · Tageszähler – Maximum
+  const canon = (o) => JSON.stringify(o, (k, v) => (v && typeof v === "object" && !Array.isArray(v) ? Object.fromEntries(Object.keys(v).sort().map((x) => [x, v[x]])) : v));
+  // ev.m Markierung [Zeit, an/aus] · ev.e Fehlerursache [Zeit, Eintrag|null] · ev.c gelöschte eigene Frage · ev.r gelöschtes Prüfungsergebnis
+  const EVK = ["m", "e", "c", "r"];
+  function evMerge(a, b) {
+    const x = {}; EVK.forEach((k) => { x[k] = Object.assign({}, a && a[k]); });
+    ["m", "e"].forEach((k) => Object.entries((b && b[k]) || {}).forEach(([id, e]) => { if (Array.isArray(e) && (!x[k][id] || e[0] > x[k][id][0])) x[k][id] = e; }));
+    ["c", "r"].forEach((k) => Object.entries((b && b[k]) || {}).forEach(([id, t]) => { x[k][id] = Math.max(x[k][id] || 0, +t || 0); }));
+    return x;
+  }
+  function syncMerge(L, R, ev) {
+    const x = normalize(JSON.parse(JSON.stringify(L))), r = normalize(JSON.parse(JSON.stringify(R)));
+    [x, r].forEach((o) => { ["q", "mark", "custom", "ueb", "log"].forEach((k) => { if (!o[k] || typeof o[k] !== "object" || Array.isArray(o[k])) o[k] = {}; }); ["runs", "errlog"].forEach((k) => { if (!Array.isArray(o[k])) o[k] = []; }); Object.keys(o.custom).forEach((t) => { if (!Array.isArray(o.custom[t])) o.custom[t] = []; }); });
+    Object.entries(r.q).forEach(([id, b]) => {
+      const a = x.q[id]; if (!b) return; if (!a) { x.q[id] = b; return; }
+      const newer = (b.t || 0) > (a.t || 0) || ((b.t || 0) === (a.t || 0) && (b.b || 0) > (a.b || 0));
+      x.q[id] = Object.assign({}, newer ? b : a, { n: Math.max(a.n || 0, b.n || 0), w: Math.max(a.w || 0, b.w || 0) });
+    });
+    Object.assign(x.mark, r.mark);
+    Object.entries(ev.m).forEach(([id, [, on]]) => { if (on) x.mark[id] = 1; else delete x.mark[id]; });
+    Object.entries(r.custom).forEach(([t, l]) => { const have = new Set((x.custom[t] || []).map((c) => c.id)); x.custom[t] = (x.custom[t] || []).concat((l || []).filter((c) => c && !have.has(c.id))); });
+    Object.keys(ev.c).forEach((id) => { Object.keys(x.custom).forEach((t) => { x.custom[t] = x.custom[t].filter((c) => c.id !== id); }); delete x.q[id]; delete x.mark[id]; });
+    Object.entries(r.ueb).forEach(([k, b]) => { const a = x.ueb[k]; if (b && (!a || (b.at || "") > (a.at || "") || ((b.at || "") === (a.at || "") && (b.n || 0) > (a.n || 0)))) x.ueb[k] = b; });
+    const rk = (y) => (y && y.ts ? "t" + y.ts : canon(y)), runs = new Set(x.runs.map(rk));
+    r.runs.forEach((y) => { if (!runs.has(rk(y))) { runs.add(rk(y)); x.runs.push(y); } });
+    x.runs = x.runs.filter((y) => !(y && y.ts && ev.r[y.ts])).sort((p, q) => (p.ts || 0) - (q.ts || 0));
+    const ek = (y) => (y ? y.at + "|" + y.src + "|" + y.ref : ""), errs = new Set(x.errlog.map(ek));
+    r.errlog.forEach((y) => { const k = ek(y); if (y && !errs.has(k)) { errs.add(k); x.errlog.push(y); } });
+    Object.entries(ev.e).forEach(([k, [, y]]) => { const i = x.errlog.findIndex((z) => ek(z) === k); if (y) { if (i >= 0) x.errlog[i] = y; else x.errlog.push(y); } else if (i >= 0) x.errlog.splice(i, 1); });
+    Object.entries(r.log).forEach(([d, n]) => { x.log[d] = Math.max(x.log[d] || 0, +n || 0); });
+    return x;
+  }
+  // Ereignisse, die ein Zusammenführen sonst rückgängig machen würde (nur solange verbunden)
+  function syncEv(kind, id, val) { const c = syncGet(); if (!c) return; c.ev = evMerge(c.ev, null); c.ev[kind][id] = kind === "m" ? [Date.now(), val ? 1 : 0] : kind === "e" ? [Date.now(), val || null] : Date.now(); syncSet(c); }
+
+  function syncSoon(ms) { if (SY.quiet || !syncGet() || !syncConf()) return; clearTimeout(SY.timer); SY.timer = setTimeout(() => { SY.timer = 0; syncNow(); }, ms == null ? 20000 : ms); }
+  function backupBeforeSync() { try { localStorage.setItem(KEY_VORSYNC, JSON.stringify({ at: new Date().toISOString(), data: localStorage.getItem(KEY), gami: localStorage.getItem("tap2coach-gami") })); } catch (e) {} }
+  async function syncNow() {
+    const cfg = syncGet(); if (!cfg || !syncConf()) return;
+    if (SY.busy) { SY.again = true; return; }
+    clearTimeout(SY.timer); SY.timer = 0;
+    if (navigator.onLine === false) { SY.err = "Offline – der Abgleich folgt, sobald du wieder Internet hast."; syncUI(); return; }
+    SY.busy = true; SY.err = ""; syncUI();
+    let changed = false;
+    try {
+      const { id, aes } = await syncIds(cfg.key);
+      let remote = await rpc("tap2_pull", { p_id: id }), ev = evMerge(cfg.ev, null), done = false;
+      for (let tries = 0; tries < 4 && !done; tries++) {
+        let rev = 0, R = null;
+        if (remote && remote.blob) { rev = +remote.rev || 0; R = await unseal(remote.blob, aes); }
+        else if ((cfg.rev || 0) > 0 || (remote && remote.gone)) { // Kopie in der Cloud wurde gelöscht: Gerät trennen, der Stand hier bleibt
+          const cur = syncGet(); if (cur && cur.key === cfg.key) syncSet(null);
+          SY.msg = "Die Kopie in der Cloud wurde gelöscht. Dieses Gerät ist nicht mehr verbunden – dein Lernstand hier bleibt vollständig erhalten."; return;
+        }
+        ev = evMerge(ev, R && R.ev);
+        if (R && R.s && typeof R.s === "object") {
+          const m = syncMerge(S, R.s, ev);
+          if (canon(m) !== canon(S)) { SY.quiet = true; S = m; save(); SY.quiet = false; changed = true; }
+        }
+        if (R && R.g) { const g0 = canon(gm("pack") || null); gm("merge", R.g); if (canon(gm("pack") || null) !== g0) changed = true; }
+        const g = gm("pack") || null;
+        if (R && R.s && canon(normalize(JSON.parse(JSON.stringify(R.s)))) === canon(S) && canon(R.g || null) === canon(g) && canon(R.ev || {}) === canon(ev)) { cfg.rev = rev; done = true; break; }
+        const res = await rpc("tap2_push", { p_id: id, p_base: rev, p_blob: await seal({ v: 1, s: S, g, ev, at: Date.now() }, aes) });
+        if (res && res.ok) { cfg.rev = +res.rev; done = true; }
+        else remote = res; // ein anderes Gerät war schneller: dessen Stand holen und erneut zusammenführen
+      }
+      if (!done) throw new Error("Abgleich gerade nicht möglich, versuche es gleich noch einmal.");
+      const cur = syncGet(); if (!cur || cur.key !== cfg.key) return; // inzwischen getrennt
+      cur.rev = cfg.rev; cur.at = Date.now(); cur.ev = evMerge(cur.ev, ev); syncSet(cur);
+      SY.msg = "";
+    } catch (e) {
+      SY.err = e && e.name === "AbortError" ? "Der Server antwortet nicht. Dein Stand ist hier sicher gespeichert." : e && e.name === "OperationError" ? "Der Stand in der Cloud lässt sich mit diesem Schlüssel nicht öffnen." : "Abgleich fehlgeschlagen: " + ((e && e.message) || "unbekannt") + ". Dein Stand ist hier sicher gespeichert.";
+    } finally {
+      SY.busy = false; SY.quiet = false;
+      if (changed) { const f = document.activeElement; if (!UI.sess && !UI.run && !(f && /INPUT|TEXTAREA|SELECT/.test(f.tagName))) render(); else hud(); }
+      syncUI();
+      if (SY.again) { SY.again = false; syncSoon(1500); }
+    }
+  }
+  async function syncStart(key) {
+    backupBeforeSync();
+    const prev = syncGet();
+    syncSet({ v: 1, key: keyFmt(keyRaw(key)), rev: 0, at: 0, ev: evMerge(prev && prev.ev, null), since: Date.now() });
+    SY.ask = null; SY.offer = null; SY.msg = ""; SY.inErr = "";
+    await syncNow();
+  }
+  async function syncPair() {
+    const cfg = syncGet(); if (!cfg) return;
+    SY.pair = { busy: true }; syncUI();
+    try {
+      let code = "", ok = false;
+      for (let i = 0; i < 3 && !ok; i++) {
+        code = newPairCode();
+        const iv = crypto.getRandomValues(new Uint8Array(12)), ct = new Uint8Array(await crypto.subtle.encrypt({ name: "AES-GCM", iv }, await pairKey(code), te.encode(cfg.key)));
+        ok = await rpc("tap2_pair_put", { p_hash: hexOf(await sha("tap2-pair|" + code)), p_payload: b64u.enc(iv) + "." + b64u.enc(ct) });
+      }
+      if (!ok) throw new Error("kein Code");
+      let svg = ""; try { await loadQR(); svg = qrSVG(txBase() + "#verbinden=" + code); } catch (e) {}
+      SY.pair = { code, svg, until: Date.now() + 10 * 60000 };
+    } catch (e) { SY.pair = { err: "Der Code konnte nicht erstellt werden. Prüfe die Internetverbindung." }; }
+    syncUI();
+  }
+  async function syncRedeem(input) {
+    const raw = keyRaw(input); SY.inErr = "";
+    if (isKey(raw)) { SY.ask = { key: keyFmt(raw) }; syncUI(); return; }
+    const code = String(input || "").toUpperCase().replace(/[^A-Z0-9]/g, "");
+    if (code.length !== 6 || ![...code].every((c) => PAIR_AB.includes(c))) { SY.inErr = "Der Code hat 6 Zeichen, z. B. K7P-4QX."; syncUI(); return; }
+    SY.inErr = "Wird geprüft …"; syncUI();
+    try {
+      const p = await rpc("tap2_pair_get", { p_hash: hexOf(await sha("tap2-pair|" + code)) });
+      if (!p) { SY.inErr = "Der Code ist abgelaufen oder falsch. Erzeuge auf dem anderen Gerät einen neuen."; syncUI(); return; }
+      const [iv, ct] = String(p).split(".");
+      const key = td.decode(await crypto.subtle.decrypt({ name: "AES-GCM", iv: b64u.dec(iv) }, await pairKey(code), b64u.dec(ct)));
+      if (!isKey(keyRaw(key))) throw new Error("format");
+      SY.inErr = ""; SY.ask = { key };
+    } catch (e) { SY.inErr = "Verbinden gerade nicht möglich. Prüfe die Internetverbindung und versuche es erneut."; }
+    syncUI();
+  }
+  const syncTime = (t) => new Date(t).toLocaleTimeString("de-DE", { hour: "2-digit", minute: "2-digit" });
+  function syncCardHTML() {
+    const conf = syncConf(), cfg = syncGet();
+    if (!conf && !isLocalHost) return "";
+    const nQ = Object.keys(S.q).length;
+    const dev = !conf ? `<div class="tx-in"><b>Testzugang (nur lokal sichtbar)</b><p class="tiny muted">Supabase-Projekt-URL und anon/publishable key. Wird nur in diesem Browser gespeichert.</p><div class="row sync-row"><input type="text" id="sy-url" placeholder="https://xxxx.supabase.co" autocomplete="off" spellcheck="false"><input type="text" id="sy-anon" placeholder="anon / publishable key" autocomplete="off" spellcheck="false"><button type="button" class="btn small" id="sy-dev">Speichern</button></div></div>` : "";
+    const ask = SY.ask ? `<div class="tx-in"><b>Dieses Gerät verbinden?</b><p class="small muted">Dein Lernstand hier (${nQ} Fragen bearbeitet) wird mit dem Stand in der Cloud zusammengeführt. Es geht nichts verloren – pro Frage gilt die neuere Antwort.${cfg ? " Dieses Gerät ist schon mit einem anderen Sync verbunden; auch dieser Stand bleibt erhalten." : ""}</p><div class="row"><button type="button" class="btn primary small" id="sy-yes">${ic("check", "ic xs")} Verbinden</button><button type="button" class="btn small ghost" id="sy-no">Abbrechen</button></div></div>` : "";
+    const offer = !cfg && !SY.ask && SY.offer ? `<div class="tx-in"><b>In deiner Sicherung steckt dein Sync-Schlüssel</b><div class="row"><button type="button" class="btn primary small" id="sy-offer">Damit verbinden</button><button type="button" class="btn small ghost" id="sy-offer-no">Nein danke</button></div></div>` : "";
+    const msg = SY.msg ? `<div class="sql-msg ok">${ic("check", "ic sm")}<div><p>${esc(SY.msg)}</p></div></div>` : "";
+    const enter = `<details class="tx-paste" ${SY.inErr || !cfg ? "open" : ""}><summary class="small">${cfg ? "Mit einem anderen Code verbinden" : "Code vom anderen Gerät eingeben"}</summary><div class="row sync-row"><input type="text" id="sy-in" placeholder="z. B. K7P-4QX" autocomplete="off" autocapitalize="characters" spellcheck="false" maxlength="48"><button type="button" class="btn small" id="sy-go">Verbinden</button></div>${SY.inErr ? `<p class="tiny ${/geprüft/.test(SY.inErr) ? "muted" : "warn-text"}" id="sy-inerr">${esc(SY.inErr)}</p>` : ""}<p class="tiny muted">Installierte iPhone-App: Den Code hier in der App eintippen – der QR-Code öffnet Safari, und die App hat einen eigenen Speicher.</p></details>`;
+    let body;
+    if (!conf) body = "";
+    else if (!cfg) body = `<p class="small muted" style="margin-top:4px">Lerne am Laptop und am Handy mit demselben Stand – ohne Konto. Einmal verbinden, danach gleicht sich alles automatisch ab.</p>${msg}${ask}${offer}<div class="row" style="margin-top:12px"><button type="button" class="btn small primary" id="sy-on" ${SY.busy ? "disabled" : ""}>${ic("layers", "ic xs")} Sync einschalten</button></div>${enter}`;
+    else {
+      const st = SY.busy ? `<span class="small muted" id="sy-st">Gleicht ab …</span>` : SY.err ? `<span class="small warn-text" id="sy-st">${esc(SY.err)}</span>` : `<span class="app-ok" id="sy-st">${ic("check", "ic sm")} Verbunden${cfg.at ? " · abgeglichen " + syncTime(cfg.at) : ""}</span>`;
+      const p = SY.pair, pair = !p ? "" : p.busy ? `<p class="small muted">Code wird erstellt …</p>` : p.err ? `<p class="small warn-text">${esc(p.err)}</p>`
+        : p.until < Date.now() ? `<p class="small muted">Der Code ist abgelaufen.</p>`
+        : `<div class="tx-out" style="margin-top:12px">${p.svg ? `<div class="qr-wrap">${p.svg}</div>` : ""}<div class="tx-act"><span class="small muted">Code für das andere Gerät</span><b class="sync-code">${codeFmt(p.code)}</b><p class="small">Auf dem anderen Gerät: <b>Einstellungen → Geräte synchronisieren → Code eingeben</b>, oder den QR-Code mit der Kamera scannen.</p><p class="tiny muted">Gültig bis ${syncTime(p.until)} Uhr.</p></div></div>`;
+      body = `<div class="row" style="margin-top:10px">${st}</div>${msg}${ask}
+        <div class="row" style="margin-top:12px"><button type="button" class="btn small primary" id="sy-pair">${ic("layers", "ic xs")} Gerät hinzufügen</button><button type="button" class="btn small" id="sy-now" ${SY.busy ? "disabled" : ""}>${ic("again", "ic xs")} Jetzt abgleichen</button></div>${pair}
+        <details class="tx-paste"><summary class="small">Schlüssel &amp; Einstellungen</summary>
+          <p class="tiny muted">Dein Sync-Schlüssel ist wie ein Passwort: Wer ihn hat, sieht deinen Lernstand. Er steckt auch in deiner Sicherungsdatei.</p>
+          <div class="row">${SY.showKey ? `<code class="sync-key">${esc(cfg.key)}</code><button type="button" class="btn small ghost" id="sy-copy">Kopieren</button>` : `<button type="button" class="btn small ghost" id="sy-show">Schlüssel anzeigen</button>`}</div>
+          <div class="row" style="margin-top:8px">${SY.confirm === "off" ? `<button type="button" class="btn small danger" id="sy-off2">Ja, trennen</button><button type="button" class="btn small ghost" id="sy-cancel">Abbrechen</button>` : SY.confirm === "del" ? `<button type="button" class="btn small danger" id="sy-del2">Ja, Cloud-Kopie löschen</button><button type="button" class="btn small ghost" id="sy-cancel">Abbrechen</button>` : `<button type="button" class="btn small ghost" id="sy-off">Dieses Gerät trennen</button><button type="button" class="btn small ghost" id="sy-del">Kopie in der Cloud löschen</button>`}</div>
+          ${SY.confirm === "off" ? `<p class="tiny muted">Dein Lernstand hier bleibt. Dieses Gerät gleicht nur nicht mehr ab.</p>` : SY.confirm === "del" ? `<p class="tiny muted">Löscht den Stand und die Tagessicherungen auf dem Server. Alle Geräte behalten ihren Stand und werden getrennt.</p>` : ""}
+          ${enter}
+        </details>`;
+    }
+    return `<section class="card" id="sync-card"><h3>Geräte synchronisieren</h3>${dev}${body}
+      ${conf ? `<p class="tiny muted" style="margin-top:10px">Datenschutz: Dein Lernstand wird im Browser verschlüsselt und so auf einem Server (Supabase) abgelegt. Ohne deinen Schlüssel kann ihn niemand lesen – auch nicht der Betreiber. Kein Name, keine E-Mail. Der Stand auf deinem Gerät bleibt immer erhalten.</p>` : ""}</section>`;
+  }
+  function syncUI() {
+    const c = $("#sync-card"); if (!c) return;
+    const inp = $("#sy-in"), val = inp ? inp.value : "", foc = !!inp && document.activeElement === inp;
+    c.outerHTML = syncCardHTML(); bindSync();
+    const n = $("#sy-in"); if (n && val) n.value = val; if (n && foc) n.focus(); // Eingabe beim Neuzeichnen behalten
+  }
+  function bindSync() {
+    const on = (id, fn) => { const b = $("#" + id); if (b) b.onclick = fn; };
+    on("sy-dev", () => { const url = $("#sy-url").value.trim(), key = $("#sy-anon").value.trim(); if (!/^https:\/\/[^/]+$/.test(url.replace(/\/+$/, "")) || key.length < 20) return; try { localStorage.setItem(KEY_SYNC_DEV, JSON.stringify({ url: url.replace(/\/+$/, ""), key })); } catch (e) {} syncUI(); });
+    on("sy-on", async () => { await syncStart(newSyncKey()); if (syncGet()) syncPair(); });
+    on("sy-go", () => { const v = $("#sy-in").value; if (v.trim()) syncRedeem(v); });
+    const inp = $("#sy-in"); if (inp) inp.onkeydown = (e) => { if (e.key === "Enter" && inp.value.trim()) syncRedeem(inp.value); };
+    on("sy-yes", () => syncStart(SY.ask.key));
+    on("sy-no", () => { SY.ask = null; syncUI(); });
+    on("sy-offer", () => { SY.ask = { key: SY.offer }; SY.offer = null; syncUI(); });
+    on("sy-offer-no", () => { SY.offer = null; syncUI(); });
+    on("sy-pair", syncPair);
+    on("sy-now", syncNow);
+    on("sy-show", () => { SY.showKey = true; syncUI(); });
+    on("sy-copy", async () => { try { await navigator.clipboard.writeText(syncGet().key); } catch (e) { prompt("Schlüssel kopieren:", syncGet().key); } });
+    on("sy-off", () => { SY.confirm = "off"; syncUI(); });
+    on("sy-del", () => { SY.confirm = "del"; syncUI(); });
+    on("sy-cancel", () => { SY.confirm = null; syncUI(); });
+    on("sy-off2", () => { syncSet(null); Object.assign(SY, { confirm: null, pair: null, showKey: false, err: "", msg: "Dieses Gerät ist getrennt. Dein Lernstand hier ist vollständig erhalten." }); syncUI(); });
+    on("sy-del2", async () => {
+      const cfg = syncGet(); if (!cfg) return;
+      try { const { id } = await syncIds(cfg.key); await rpc("tap2_delete", { p_id: id }); syncSet(null); Object.assign(SY, { confirm: null, pair: null, showKey: false, err: "", msg: "Die Kopie in der Cloud ist gelöscht und dieses Gerät getrennt. Dein Lernstand hier bleibt. Andere Geräte trennen sich beim nächsten Abgleich selbst." }); }
+      catch (e) { SY.confirm = null; SY.err = "Löschen fehlgeschlagen: " + ((e && e.message) || "unbekannt"); }
+      syncUI();
+    });
+  }
+  function syncBoot(h) {
+    if (h.startsWith("verbinden=")) { const code = h.slice(10); view = "einstellungen"; try { history.replaceState(null, "", "#einstellungen"); } catch (e) {} setTimeout(() => { render(); syncRedeem(code); }, 0); }
+    if (syncGet()) setTimeout(syncNow, 1200);
+    document.addEventListener("visibilitychange", () => {
+      const c = syncGet(); if (!c) return;
+      if (document.visibilityState === "hidden") { if (SY.timer) syncNow(); } // beim Verlassen ausstehende Änderungen hochladen
+      else if (!c.at || Date.now() - c.at > 30000) syncNow();
+    });
+    window.addEventListener("online", () => { if (syncGet()) syncNow(); });
+    setInterval(() => { if (SY.pair && SY.pair.until && SY.pair.until < Date.now() && view === "einstellungen") { SY.pair = null; syncUI(); } }, 15000);
+  }
   // ---------- Tipps (allgemein, nicht themenspezifisch)
   function rTipps() {
     const el = $("#v-tipps"), X = PK.X01;
@@ -3602,6 +3856,7 @@ INSERT INTO Konto VALUES (1,'Weingut Becker',1500.00),(2,'Klinik am Rhein',320.0
         ${!PWA.standalone && !PWA.prompt && PWA.ios ? `<p class="small muted" style="margin-top:8px">iPhone/iPad: In Safari auf <b>Teilen</b> tippen und <b>Zum Home-Bildschirm</b> wählen.</p>` : ""}
         ${!PWA.standalone && !PWA.prompt && !PWA.ios ? `<p class="small muted" style="margin-top:8px">Installieren: im Browser-Menü „App installieren“ bzw. „Zum Startbildschirm hinzufügen“ wählen.</p>` : ""}
       </section>
+      ${syncCardHTML()}
       ${txCardHTML()}
       <section class="card data-card">
         <h3>Dein Fortschritt</h3>
@@ -3610,17 +3865,18 @@ INSERT INTO Konto VALUES (1,'Weingut Becker',1500.00),(2,'Klinik am Rhein',320.0
           <button type="button" class="btn small" id="d-export">${ic("down", "ic xs")} Sicherung herunterladen</button>
           <label class="btn small" for="d-import">${ic("again", "ic xs")} Sicherung laden<input type="file" id="d-import" accept="application/json,.json" hidden></label>
           <span class="spacer"></span>
-          ${UI.confirm === "reset" ? `<button type="button" class="btn small danger" id="d-reset2">Wirklich alles löschen</button><button type="button" class="btn small ghost" id="d-cancel">Abbrechen</button>` : `<button type="button" class="btn small ghost" id="d-reset">Fortschritt zurücksetzen</button>`}
+          ${UI.confirm === "reset" ? `<button type="button" class="btn small danger" id="d-reset2">Wirklich alles löschen${syncGet() ? " (nur hier)" : ""}</button><button type="button" class="btn small ghost" id="d-cancel">Abbrechen</button>` : `<button type="button" class="btn small ghost" id="d-reset">Fortschritt zurücksetzen</button>`}
         </div>
+        ${UI.confirm === "reset" && syncGet() ? `<p class="tiny muted">Dieses Gerät wird dabei vom Sync getrennt. Der Stand in der Cloud und auf deinen anderen Geräten bleibt.</p>` : ""}
         <p class="small ${storeOk ? "muted" : "warn-text"}" id="d-msg">${storeOk ? `Zuletzt gespeichert: ${Object.keys(S.q).length} Fragen bearbeitet, ${S.runs.length} Prüfungen.` : "Dieser Browser erlaubt gerade kein Speichern, z. B. in einem privaten Fenster. Lade dir zwischendurch eine Sicherung herunter."}</p>
       </section>
       <section class="card"><h3>Hilfe</h3><div class="row" style="margin-top:8px"><button type="button" class="btn small" data-go2="tutorial">${ic("map", "ic xs")} Tutorial öffnen</button><a class="btn small ghost" href="https://github.com/${REPO}/issues" target="_blank" rel="noopener">Gemeldete Fehler ansehen</a></div></section>`;
     el.querySelectorAll("[data-theme-set]").forEach((b) => b.onclick = () => { setTheme(b.dataset.themeSet); render(); });
-    bindTx(el);
+    bindTx(el); bindSync();
     el.querySelectorAll("[data-go2]").forEach((b) => b.onclick = () => navTo(b.dataset.go2));
     const ai = $("#app-install"); if (ai) ai.onclick = async () => { const pr = PWA.prompt; PWA.prompt = null; pr.prompt(); try { await pr.userChoice; } catch (e) {} render(); };
     $("#d-export").onclick = async () => {
-      const data = JSON.stringify({ app: "tap2coach", exportiert: new Date().toISOString(), data: S, gami: gm("data") || undefined }, null, 1);
+      const data = JSON.stringify({ app: "tap2coach", exportiert: new Date().toISOString(), data: S, gami: gm("data") || undefined, sync: syncGet() ? { key: syncGet().key } : undefined }, null, 1);
       const name = "tap2-fortschritt-" + today() + ".json", msg = $("#d-msg");
       // Als Claude-Artifact läuft der Download über den Viewer, sonst (z. B. GitHub Pages) direkt über den Browser.
       let dl = null;
@@ -3644,14 +3900,14 @@ INSERT INTO Konto VALUES (1,'Weingut Becker',1500.00),(2,'Klinik am Rhein',320.0
         try {
           const o = JSON.parse(rd.result), d = o && o.data ? o.data : o;
           if (!d || typeof d !== "object" || (!d.q && !d.qstat && !d.runs)) throw new Error("format");
-          S = normalize(d); save(); if (o && o.gami) gm("merge", o.gami); UI.confirm = null; render();
+          S = normalize(d); save(); if (o && o.gami) gm("merge", o.gami); if (o && o.sync && o.sync.key && !syncGet() && syncConf()) SY.offer = o.sync.key; UI.confirm = null; render();
           $("#d-msg").textContent = "Sicherung geladen.";
         } catch (x) { $("#d-msg").textContent = "Die Datei ist keine gültige Sicherung des Coaches."; }
       };
       rd.readAsText(f);
     };
     const rs = $("#d-reset"); if (rs) rs.onclick = () => { UI.confirm = "reset"; render(); $("#d-reset2").scrollIntoView({ block: "center" }); };
-    const rs2 = $("#d-reset2"); if (rs2) rs2.onclick = () => { S = blank(); save(); UI.sess = null; UI.run = null; keepSess(); try { localStorage.removeItem(KEY_RUN); } catch (x) {} UI.confirm = null; render(); window.scrollTo({ top: 0 }); };
+    const rs2 = $("#d-reset2"); if (rs2) rs2.onclick = () => { if (syncGet()) { syncSet(null); SY.pair = null; } S = blank(); save(); UI.sess = null; UI.run = null; keepSess(); try { localStorage.removeItem(KEY_RUN); } catch (x) {} UI.confirm = null; render(); window.scrollTo({ top: 0 }); };
     const dc = $("#d-cancel"); if (dc) dc.onclick = () => { UI.confirm = null; render(); };
   }
 
@@ -3801,7 +4057,7 @@ INSERT INTO Konto VALUES (1,'Weingut Becker',1500.00),(2,'Klinik am Rhein',320.0
       };
     }
     el.querySelectorAll("[data-ask]").forEach((b) => b.onclick = () => { UI.confirm = b.dataset.ask; render(); });
-    el.querySelectorAll("[data-del]").forEach((b) => b.onclick = () => { S.custom[t.id] = (S.custom[t.id] || []).filter((x) => x.id !== b.dataset.del); delete S.q[b.dataset.del]; delete S.mark[b.dataset.del]; UI.confirm = null; save(); render(); });
+    el.querySelectorAll("[data-del]").forEach((b) => b.onclick = () => { S.custom[t.id] = (S.custom[t.id] || []).filter((x) => x.id !== b.dataset.del); syncEv("c", b.dataset.del); delete S.q[b.dataset.del]; delete S.mark[b.dataset.del]; UI.confirm = null; save(); render(); });
   }
 
   // ---------- Aufgaben (Übungsaufgaben)
@@ -3965,7 +4221,7 @@ INSERT INTO Konto VALUES (1,'Weingut Becker',1500.00),(2,'Klinik am Rhein',320.0
     $("#pk-teil").onchange = (e) => { p.teil = e.target.value; render(); };
     $("#pk-go").onclick = () => { startRun(); render(); window.scrollTo({ top: 0 }); };
     el.querySelectorAll("[data-ask]").forEach((b) => b.onclick = () => { UI.confirm = +b.dataset.ask; render(); });
-    el.querySelectorAll("[data-del]").forEach((b) => b.onclick = () => { S.runs = S.runs.filter((x) => x.ts !== +b.dataset.del); UI.confirm = null; save(); render(); });
+    el.querySelectorAll("[data-del]").forEach((b) => b.onclick = () => { S.runs = S.runs.filter((x) => x.ts !== +b.dataset.del); syncEv("r", +b.dataset.del); UI.confirm = null; save(); render(); });
   }
   function closeRun() { UI.run = null; UI.confirm = null; clearInterval(tick); try { localStorage.removeItem(KEY_RUN); } catch (e) {} render(); window.scrollTo({ top: 0 }); }
   function timerBar(r, extra) {
@@ -4560,7 +4816,8 @@ INSERT INTO Konto VALUES (1,'Weingut Becker',1500.00),(2,'Klinik am Rhein',320.0
   try { const ss = JSON.parse(localStorage.getItem(KEY_SESS) || "null"); if (ss && Array.isArray(ss.ids) && ss.i < ss.ids.length) { UI.sess = ss; view = "lernen"; } } catch (e) {}
   try { if (!h && !UI.sess && !localStorage.getItem(KEY_TUT) && !Object.keys(S.q).length) view = "tutorial"; } catch (e) {}
   render();
-  gm("boot", h);
+  gm("boot", h.startsWith("verbinden=") ? "import=" : h); // beim Verbinden keinen Login-Kalender darüberlegen
+  syncBoot(h);
 })();
 
 

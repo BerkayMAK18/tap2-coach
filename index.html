@@ -2860,7 +2860,7 @@ const FIG = (() => {
     "ev-seq": [F.evSeq, "Das Löschen eines Objekts endet mit einem X auf seiner Lebenslinie. Die Abmeldung selbst ist wieder ein alt-Fragment."],
     "ev-dreieck": [F.evDreieck, "Zeit, Kosten und Leistung lassen sich nicht unabhängig voneinander ändern."],
     "ev-stake": [F.evStake, "Je höher Einfluss und Interesse, desto enger wird der Stakeholder eingebunden."],
-    "ev-gantt": [F.evGantt, "E startet erst nach C und D, G erst nach E und F – so ergeben sich 19 Tage."],
+    "ev-gantt": [F.evGantt, "E startet erst nach C und D, G nach F – so ergeben sich 19 Tage."],
     "ev-netz": [F.evNetz, "Rot: Vorgänge mit Gesamtpuffer 0. B hat 1 Tag, F 3 Tage Puffer."],
     "ev-scrum": [F.evScrum, "Jeder Sprint endet mit einem Inkrement. Review zeigt das Produkt, Retrospektive verbessert die Zusammenarbeit."],
     "ev:lf11a:kla5": [F.evEvent, "Die gefüllte Raute am Veranstaltungsplan: Wird er gelöscht, verschwinden alle Veranstaltungen. Die vier Arten erben von Veranstaltung."],
@@ -3121,7 +3121,7 @@ const EVENTS = [
           ["m", "pla5", "Ein Projektstrukturplan für einen Webshop ist in Frontend, Backend, Datenbank und Zahlungsmodul gegliedert.\n\nWie ist er gegliedert?", ["Objektorientiert", "Funktionsorientiert", "Phasenorientiert", "Terminorientiert"], 0, "Gegliedert wird nach den Bestandteilen (Objekten) des Produkts."],
           ["m", "pla6", "Was ist die kleinste Einheit eines Projektstrukturplans?", ["Das Arbeitspaket", "Der Meilenstein", "Das Teilprojekt", "Der Gantt-Balken"], 0, "Der PSP gliedert in Haupt- und Teilaufgaben bis hinunter zu den Arbeitspaketen."],
           ["m", "pla7", "In welcher Phase prüft eine Machbarkeitsstudie das Vorhaben aus technischer und wirtschaftlicher Sicht?", ["Projektdefinition", "Projektplanung", "Projektdurchführung", "Projektabschluss"], 0, "Bevor geplant wird, muss klar sein, ob das Projekt überhaupt machbar ist."],
-          ["m", "pla8", "A (2 Tage) → B (4, nach A) → C (3, nach B) und D (2, nach B) → E (1, nach C und D) → F (4, nach E) → G (5, nach E und F).\n\nWann endet G frühestens?", ["Nach 19 Tagen", "Nach 18 Tagen", "Nach 21 Tagen", "Nach 16 Tagen"], 0, "A 0–2, B 2–6, C 6–9 und D 6–8, E startet nach dem späteren Vorgänger C: 9–10, F 10–14, G startet nach F: 14–19."],
+          ["m", "pla8", "A (2 Tage) → B (4, nach A) → C (3, nach B) und D (2, nach B) → E (1, nach C und D) → F (4, nach E) → G (5, nach F).\n\nWann endet G frühestens?", ["Nach 19 Tagen", "Nach 18 Tagen", "Nach 21 Tagen", "Nach 16 Tagen"], 0, "A 0–2, B 2–6, C 6–9 und D 6–8, E startet nach dem späteren Vorgänger C: 9–10, F 10–14, G startet nach F: 14–19."],
           ["k", "pla9", "Beschreiben Sie, was ein Gantt-Diagramm zeigt und worauf man beim Erstellen achten sollte. (4 P)", "Ein Gantt-Diagramm ist ein horizontales Balkendiagramm auf einer Zeitachse. Jede Aufgabe ist ein Balken mit Start, Dauer und Ende; Abhängigkeiten (Vorgänger → Nachfolger), parallele Aktivitäten und Meilensteine werden sichtbar.\nZu beachten: Verantwortliche klar benennen, Puffer einplanen, Abhängigkeiten deutlich machen.", "2 P Darstellung, 2 P zwei Hinweise."]
         ] },
       { id: "netz", titel: "Netzplan", lern: [

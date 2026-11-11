@@ -28,6 +28,15 @@ returns boolean language sql immutable as $$
   select p_name ~ '^[A-Za-z0-9ÄÖÜäöüß_.-]{3,16}$' and lower(p_name) not in ('admin', 'administrator', 'moderator', 'mod', 'system', 'support', 'tap2coach', 'anonymous', 'null', 'undefined');
 $$;
 
+-- Figur: Tier:Teile[:Titel]. Nur bekannte Tiere – sonst könnte ein Eintrag wie „__proto__:x“ die Anzeige bei allen stören.
+-- Neue Tiere hier ergänzen, bevor die App-Version mit ihnen veröffentlicht wird.
+create or replace function public.tap2_lb_look_ok(p_look text)
+returns boolean language sql immutable as $$
+  select p_look is null or (length(p_look) <= 200 and p_look ~ '^((rabe|katze|hund|maus|pinguin):[a-z0-9.-]*(:[a-z0-9-]+)?)?$');
+$$;
+-- Bestehende Einträge mit ungültiger Figur auf die Grundfigur zurücksetzen (Name und XP bleiben)
+update public.tap2_lb set look = '' where not public.tap2_lb_look_ok(look);
+
 -- Mitmachen bzw. Namen ändern
 create or replace function public.tap2_lb_join(p_id text, p_name text, p_xp bigint, p_level integer, p_look text)
 returns jsonb language plpgsql security definer set search_path = public as $$
@@ -35,7 +44,7 @@ declare k text := lower(btrim(p_name)); other text;
 begin
   if p_id !~ '^[0-9a-f]{64}$' then raise exception 'tap2: ungueltige id'; end if;
   if not public.tap2_lb_name_ok(btrim(p_name)) then return jsonb_build_object('ok', false, 'err', 'name'); end if;
-  if length(coalesce(p_look, '')) > 200 or p_look !~ '^[a-z0-9:._-]*$' then raise exception 'tap2: ungueltige figur'; end if;
+  if not public.tap2_lb_look_ok(p_look) then raise exception 'tap2: ungueltige figur'; end if;
   select id into other from public.tap2_lb where name_key = k;
   if other is not null and other <> p_id then return jsonb_build_object('ok', false, 'err', 'vergeben'); end if;
   if exists (select 1 from public.tap2_lb where id = p_id) then
@@ -56,7 +65,7 @@ begin
   select * into cur from public.tap2_lb where id = p_id for update;
   if not found then return jsonb_build_object('ok', false, 'gone', true); end if;
   if cur.updated_at > now() - interval '15 seconds' then return jsonb_build_object('ok', true, 'later', true); end if;
-  if length(coalesce(p_look, '')) > 200 or p_look !~ '^[a-z0-9:._-]*$' then raise exception 'tap2: ungueltige figur'; end if;
+  if not public.tap2_lb_look_ok(p_look) then raise exception 'tap2: ungueltige figur'; end if;
   dg := case when cur.day = current_date then cur.day_gain else 0 end;
   gain := least(greatest(coalesce(p_xp, 0) - cur.xp, 0), greatest(30000 - dg, 0));
   update public.tap2_lb set xp = cur.xp + gain, level = greatest(cur.level, least(greatest(coalesce(p_level, 1), 1), 10000)),

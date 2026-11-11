@@ -3228,7 +3228,7 @@ CARDS_RAW.algo.push(
     if (reduced()) return;
     el.querySelectorAll(".ring.anim .fg").forEach((c) => { const to = c.getAttribute("stroke-dashoffset"); c.style.transition = "none"; c.setAttribute("stroke-dashoffset", c.dataset.c); requestAnimationFrame(() => requestAnimationFrame(() => { c.style.transition = ""; c.setAttribute("stroke-dashoffset", to); })); });
   }
-  const gradeBadge = (n) => `<span class="g g${n}">${n}</span>`;
+  const gradeBadge = (n) => { const v = esc(n); return `<span class="g g${v}">${v}</span>`; };
 
   // ---------- content: Themen und Fragenkatalog
   const TP = Object.fromEntries(TOPICS.map((t) => [t.id, t]));
@@ -4013,7 +4013,7 @@ INSERT INTO Konto VALUES (1,'Weingut Becker',1500.00),(2,'Klinik am Rhein',320.0
     try {
       const r = await fetch(`https://api.github.com/repos/${REPO}/releases?per_page=100`, { headers: { Accept: "application/vnd.github+json" }, cache: "no-store" });
       if (!r.ok) throw new Error("HTTP " + r.status);
-      const list = (await r.json()).filter((x) => x && !x.draft).map((x) => { const m = String(x.body || "").match(/Veröffentlicht am (\d{1,2})\.(\d{1,2})\.(\d{4})/); return { tag: x.tag_name, name: String(x.name || x.tag_name).replace(/^v[\d.]+\s*[–-]\s*/, ""), url: x.html_url, date: m ? `${m[3]}-${m[2].padStart(2, "0")}-${m[1].padStart(2, "0")}` : String(x.published_at || "").slice(0, 10), body: String(x.body || "").replace(/^\*Veröffentlicht am[^*]*\*\s*/, "") }; });
+      const list = (await r.json()).filter((x) => x && !x.draft).map((x) => { const m = String(x.body || "").match(/Veröffentlicht am (\d{1,2})\.(\d{1,2})\.(\d{4})/); return { tag: x.tag_name, name: String(x.name || x.tag_name).replace(/^v[\d.]+\s*[–-]\s*/, ""), url: /^https:\/\/github\.com\//.test(String(x.html_url || "")) ? x.html_url : `https://github.com/${REPO}/releases`, date: m ? `${m[3]}-${m[2].padStart(2, "0")}-${m[1].padStart(2, "0")}` : String(x.published_at || "").slice(0, 10), body: String(x.body || "").replace(/^\*Veröffentlicht am[^*]*\*\s*/, "") }; });
       try { localStorage.setItem(KEY_PN, JSON.stringify({ at: Date.now(), list })); } catch (e) {}
     } catch (e) { PN.err = navigator.onLine === false ? "Du bist offline – hier steht der zuletzt geladene Stand." : "GitHub ist gerade nicht erreichbar."; }
     PN.busy = false; if (view === "patchnotes") rPatch(true);
@@ -4110,7 +4110,7 @@ INSERT INTO Konto VALUES (1,'Weingut Becker',1500.00),(2,'Klinik am Rhein',320.0
     save();
   }
   function errSummaryHTML() {
-    const log = S.errlog || [];
+    const log = (S.errlog || []).filter((x) => x && CAUSES[x.cause]); // unbekannte Einträge (z. B. aus fremden Sicherungen) überspringen, nie löschen
     if (!log.length) return `<section class="card"><h3>Deine Fehlerursachen</h3><p class="small muted" style="margin-top:4px">Nach Real-Klausuren und Übungsaufgaben kannst du jedem Punktverlust eine Ursache zuordnen. Hier siehst du dann, woran es am häufigsten liegt – und was dagegen hilft.</p></section>`;
     const sum = {}; log.forEach((x) => { sum[x.cause] = (sum[x.cause] || 0) + (x.pts || 0); });
     const tot = Object.values(sum).reduce((a, b) => a + b, 0) || 1, rows = Object.entries(sum).sort((a, b) => b[1] - a[1]);
@@ -4237,6 +4237,8 @@ INSERT INTO Konto VALUES (1,'Weingut Becker',1500.00),(2,'Klinik am Rhein',320.0
     const marks = new Uint8Array(Math.ceil(ids.length / 8)); ids.forEach((id, i) => { if (S.mark[id]) marks[i >> 3] |= 1 << (i & 7); });
     const meta = { a: at, n: ids.length, L, u: Object.fromEntries(Object.entries(S.ueb || {}).map(([k, v]) => [k, [v.p, v.at]])) };
     const gp = gm("pack"); if (gp) meta.g = gp;
+    const known = new Set(ids), extra = {}; Object.entries(S.q).forEach(([id, r]) => { if (known.has(id) || !r || r.s === -1 || r.s == null || !/^[A-Za-z0-9:_-]{1,60}$/.test(id)) return; const b = Math.max(0, Math.min(5, r.b != null ? r.b : r.s >= 2 ? 2 : r.s === 1 ? 1 : 0)); extra[id] = r.t ? [b, Math.max(-127, Math.min(127, dayDiff(at, iso(new Date(r.t)))))] : [b, Math.max(-127, Math.min(127, r.d ? dayDiff(at, r.d) : 0)), 1]; });
+    if (Object.keys(extra).length) meta.v = extra; // Event-Fragen (ev:…) und eigene Fragen
     if (full) { meta.r = (S.runs || []).slice(-30); meta.e = (S.errlog || []).slice(-60); meta.c = S.custom || {}; meta.l = Object.fromEntries(Object.entries(S.log || {}).slice(-40)); }
     const mj = new TextEncoder().encode(JSON.stringify(meta));
     const raw = new Uint8Array(2 + mj.length + q.length + marks.length);
@@ -4261,13 +4263,14 @@ INSERT INTO Konto VALUES (1,'Weingut Becker',1500.00),(2,'Klinik am Rhein',320.0
       const day = addDays(meta.a, off);
       qs[ids[idx]] = legacy ? { b, s: b >= 2 ? 2 : b, d: day, n: 1, w: 0 } : { b, s: b >= 2 ? 2 : b, d: addDays(day, IV[b]), t: new Date(day + "T12:00:00").getTime(), n: 1, w: 0 };
     }
+    Object.entries(meta.v && typeof meta.v === "object" ? meta.v : {}).forEach(([id, a]) => { if (!/^[A-Za-z0-9:_-]{1,60}$/.test(id) || !Array.isArray(a) || qs[id]) return; const b = Math.max(0, Math.min(5, +a[0] || 0)), day = addDays(meta.a, Math.max(-127, Math.min(127, +a[1] || 0))); qs[id] = a[2] ? { b, s: b >= 2 ? 2 : b, d: day, n: 1, w: 0 } : { b, s: b >= 2 ? 2 : b, d: addDays(day, IV[b]), t: new Date(day + "T12:00:00").getTime(), n: 1, w: 0 }; });
     const marks = {}; for (let i = 0; i < nIds; i++) if (mb[i >> 3] & (1 << (i & 7))) marks[ids[i]] = 1;
     return { at: meta.a, q: qs, mark: marks, ueb: meta.u || {}, runs: meta.r || [], errlog: meta.e || [], custom: meta.c || {}, log: meta.l || {}, full: !!meta.r, g: meta.g || null };
   }
   function txApply(inc, mode) {
     if (mode === "replace") {
       const n = blank();
-      n.q = inc.q; n.mark = inc.mark; n.ueb = Object.fromEntries(Object.entries(inc.ueb).map(([k, [p0, a0]]) => [k, { p: p0, at: a0, n: 1 }])); n.runs = inc.runs; n.errlog = inc.errlog; n.custom = inc.custom; n.log = inc.log;
+      n.q = Object.assign(Object.fromEntries(Object.entries(S.q).filter(([id]) => id.startsWith("ev:"))), inc.q); n.mark = inc.mark; // eigene Event-Stände behalten, falls der Link sie nicht enthält n.ueb = Object.fromEntries(Object.entries(inc.ueb).map(([k, [p0, a0]]) => [k, { p: p0, at: a0, n: 1 }])); n.runs = inc.runs; n.errlog = inc.errlog; n.custom = inc.custom; n.log = inc.log;
       S = normalize(n);
     } else {
       const dayOf = (r) => (r && r.t ? iso(new Date(r.t)) : "");
@@ -4791,10 +4794,10 @@ INSERT INTO Konto VALUES (1,'Weingut Becker',1500.00),(2,'Klinik am Rhein',320.0
       content = `<section class="card">
         <div class="row"><span class="small muted">Tippe eine Frage an, um dort zu starten.</span><span class="spacer"></span><button type="button" class="btn small" id="q-add">${ic("plus", "ic xs")} Eigene Frage</button></div>
         ${UI.addQ ? `<div class="addq"><label class="f" for="add-f">Frage<textarea id="add-f" rows="2" placeholder="z. B. Was ist der Unterschied zwischen PUT und PATCH?"></textarea></label><label class="f" for="add-b">Antwort<textarea id="add-b" rows="4"></textarea></label><div class="row"><button type="button" class="btn primary" id="add-save">Frage hinzufügen</button><button type="button" class="btn ghost" id="add-close">Schließen</button><span class="small muted" id="add-msg"></span></div></div>` : ""}
-        <ul class="qlist">${qs.map((q, i) => { const s = st(q.id); return `<li><button type="button" class="qrow" data-qi="${i}"><i class="amp ${s >= 0 ? "s" + s : ""}" title="${ST_LBL[s]}"></i><span class="qt">${esc(qTask(q.q))}</span>${isDue(q.id) && s > 0 ? `<span class="duechip" title="Wiederholung fällig">fällig</span>` : ""}${S.mark[q.id] ? `<span class="mk">${ic("star", "ic xs")}</span>` : ""}<span class="qty">${q.type === "mc" ? "Auswahl" : q.own ? "Eigene" : "Wissen"}</span></button>${q.own ? (UI.confirm === q.id ? `<button type="button" class="btn small danger" data-del="${q.id}">Löschen?</button>` : `<button type="button" class="iconbtn sm" data-ask="${q.id}" aria-label="Eigene Frage löschen">${ic("x", "ic xs")}</button>`) : ""}</li>`; }).join("")}</ul>
+        <ul class="qlist">${qs.map((q, i) => { const s = st(q.id); return `<li><button type="button" class="qrow" data-qi="${i}"><i class="amp ${s >= 0 ? "s" + s : ""}" title="${ST_LBL[s]}"></i><span class="qt">${esc(qTask(q.q))}</span>${isDue(q.id) && s > 0 ? `<span class="duechip" title="Wiederholung fällig">fällig</span>` : ""}${S.mark[q.id] ? `<span class="mk">${ic("star", "ic xs")}</span>` : ""}<span class="qty">${q.type === "mc" ? "Auswahl" : q.own ? "Eigene" : "Wissen"}</span></button>${q.own ? (UI.confirm === q.id ? `<button type="button" class="btn small danger" data-del="${esc(q.id)}">Löschen?</button>` : `<button type="button" class="iconbtn sm" data-ask="${esc(q.id)}" aria-label="Eigene Frage löschen">${ic("x", "ic xs")}</button>`) : ""}</li>`; }).join("")}</ul>
       </section>`;
     } else {
-      content = `<div class="ueb-list">${t.ueb.map((id) => { const u = UE[id], r = S.ueb[id], pct = r ? r.p / u.max : null; return `<button type="button" class="ueb-item t-${tcolOf(u.teil)}" data-u="${id}"><span class="id">${id}</span><span><span class="t">${esc(u.titel)}</span><br><span class="sub">${esc(u.teil)} · ${u.max} P · ca. ${u.min} Min.</span></span><span class="r">${r ? `<span class="chip ${pct >= 0.81 ? "ok" : pct >= 0.67 ? "warn" : "bad"}"><span class="d"></span>${r.p}/${u.max}</span>` : '<span class="chip">offen</span>'}</span></button>`; }).join("")}</div>`;
+      content = `<div class="ueb-list">${t.ueb.map((id) => { const u = UE[id], r = S.ueb[id], pct = r ? r.p / u.max : null; return `<button type="button" class="ueb-item t-${tcolOf(u.teil)}" data-u="${id}"><span class="id">${id}</span><span><span class="t">${esc(u.titel)}</span><br><span class="sub">${esc(u.teil)} · ${u.max} P · ca. ${u.min} Min.</span></span><span class="r">${r ? `<span class="chip ${pct >= 0.81 ? "ok" : pct >= 0.67 ? "warn" : "bad"}"><span class="d"></span>${esc(r.p)}/${u.max}</span>` : '<span class="chip">offen</span>'}</span></button>`; }).join("")}</div>`;
     }
     el.innerHTML = `
       <button type="button" class="backlink" id="t-back">${ic("left", "ic sm")} Alle Themen</button>
@@ -4850,7 +4853,7 @@ INSERT INTO Konto VALUES (1,'Weingut Becker',1500.00),(2,'Klinik am Rhein',320.0
         <p class="small muted" style="margin-top:12px">${ust === "run" ? "Löse die Aufgabe auf Papier wie in der Prüfung. Wenn du fertig bist: Stopp drücken, dann siehst du die Musterlösung." : "Löse die Aufgabe auf Papier wie in der Prüfung, erst dann die Lösung ansehen."}</p>
         ${ust === "run" ? "" : `<div class="row" style="margin-top:14px"><button type="button" class="btn ${UI.showSol ? "" : "primary"}" id="u-sol">${UI.showSol ? "Lösung ausblenden" : "Musterlösung zeigen"}</button></div>`}`}
         ${UI.showSol && ust !== "run" && (ust !== "idle" || UI.uFree) ? `<pre style="margin-top:14px">${esc(u.loesung)}</pre>
-        <div class="row" style="margin-top:14px;align-items:flex-end"><label class="f" for="u-pts">Deine Punkte (0–${u.max})<input type="number" id="u-pts" min="0" max="${u.max}" step="0.5" value="${r ? r.p : ""}"></label><button type="button" class="btn primary" id="u-save">Speichern</button>${r ? `<span class="small muted">Zuletzt ${r.p}/${u.max} am ${fmtDay(r.at)}</span>` : ""}</div>
+        <div class="row" style="margin-top:14px;align-items:flex-end"><label class="f" for="u-pts">Deine Punkte (0–${u.max})<input type="number" id="u-pts" min="0" max="${u.max}" step="0.5" value="${r ? r.p : ""}"></label><button type="button" class="btn primary" id="u-save">Speichern</button>${r ? `<span class="small muted">Zuletzt ${esc(r.p)}/${u.max} am ${fmtDay(r.at)}</span>` : ""}</div>
         ${r && r.p < u.max ? `<div class="cause-box"><span class="small muted">Fehlerprotokoll: Warum fehlen ${dec(u.max - r.p)} P?</span>${causeChips(r.cause, "data-uc")}</div>` : ""}` : ""}
         </section>`;
       $("#u-back").onclick = () => { UI.ueb = null; render(); };
@@ -4867,7 +4870,7 @@ INSERT INTO Konto VALUES (1,'Weingut Becker',1500.00),(2,'Klinik am Rhein',320.0
     UEB.forEach((u) => (groups[u.thema] = groups[u.thema] || []).push(u));
     const done = UEB.filter((u) => S.ueb[u.id]).length;
     el.innerHTML = `<div class="row" style="align-items:flex-end"><p class="lead" style="flex:1;min-width:260px">Große Aufgaben im Stil der IHK-Prüfung mit Musterlösung, so wie sie in Planen und Algorithmen drankommen. Löse sie auf Papier, vergleiche mit der Lösung und trage deine Punkte ein. Unter 70 % lohnt sich ein zweiter Versuch.</p><span class="chip">${done} von ${UEB.length} bearbeitet</span></div>
-      ${Object.entries(groups).map(([g, l]) => `<div class="ueb-group"><h3>${esc(g)}</h3><div class="ueb-list">${l.map((u) => { const r = S.ueb[u.id]; const pct = r ? r.p / u.max : null; return `<button type="button" class="ueb-item t-${tcolOf(u.teil)}" data-u="${u.id}"><span class="id">${u.id}</span><span><span class="t">${esc(u.titel)}</span><br><span class="sub">${esc(u.teil)} · ${u.max} P · ca. ${u.min} Min.</span></span><span class="r">${r ? `<span class="chip ${pct >= 0.81 ? "ok" : pct >= 0.67 ? "warn" : "bad"}"><span class="d"></span>${r.p}/${u.max}</span>` : '<span class="chip">offen</span>'}</span></button>`; }).join("")}</div></div>`).join("")}`;
+      ${Object.entries(groups).map(([g, l]) => `<div class="ueb-group"><h3>${esc(g)}</h3><div class="ueb-list">${l.map((u) => { const r = S.ueb[u.id]; const pct = r ? r.p / u.max : null; return `<button type="button" class="ueb-item t-${tcolOf(u.teil)}" data-u="${u.id}"><span class="id">${u.id}</span><span><span class="t">${esc(u.titel)}</span><br><span class="sub">${esc(u.teil)} · ${u.max} P · ca. ${u.min} Min.</span></span><span class="r">${r ? `<span class="chip ${pct >= 0.81 ? "ok" : pct >= 0.67 ? "warn" : "bad"}"><span class="d"></span>${esc(r.p)}/${u.max}</span>` : '<span class="chip">offen</span>'}</span></button>`; }).join("")}</div></div>`).join("")}`;
     el.querySelectorAll("[data-u]").forEach((b) => b.onclick = () => { UI.ueb = b.dataset.u; UI.showSol = false; UI.uFree = false; render(); window.scrollTo({ top: 0 }); });
   }
 
@@ -4990,7 +4993,7 @@ INSERT INTO Konto VALUES (1,'Weingut Becker',1500.00),(2,'Klinik am Rhein',320.0
       </div>
       <section class="card tip-link"><div class="row">${ic("bulb", "ic")}<div style="flex:1;min-width:200px"><b>Prüfungstechnik</b><br><span class="small muted">Operatoren, Zeiteinteilung und typische Punktverluste findest du unter Tipps.</span></div><button type="button" class="btn small" data-go2="tipps">Zu den Tipps</button></div></section>
       <section class="card"><div class="row"><h3>Deine Ergebnisse</h3><span class="spacer"></span><span class="small muted">${hist.length} ${hist.length === 1 ? "Durchgang" : "Durchgänge"}</span></div>
-        ${hist.length ? `<div class="res-list">${hist.map((x) => `<div class="res">${gradeBadge(x.note)}<div><div class="t">${MODE_LBL[x.mode] || x.mode} · ${TEIL[x.teil] ? TEIL[x.teil].k : esc(x.teil)}</div><div class="s">${fmtDay(x.at)}${x.detail ? " · " + esc(x.detail) : ""} · ${x.pct >= 50 ? "bestanden" : "nicht bestanden"}</div></div><span class="chip num">${x.pct} %</span>${UI.confirm === x.ts ? `<button type="button" class="btn small danger del" data-del="${x.ts}">Wirklich löschen</button>` : `<button type="button" class="iconbtn sm del" data-ask="${x.ts}" aria-label="Ergebnis löschen">${ic("x", "ic xs")}</button>`}</div>`).join("")}</div>` : `<p class="empty">Noch keine Prüfung geschrieben. Starte mit einer Simulation.</p>`}
+        ${hist.length ? `<div class="res-list">${hist.map((x) => `<div class="res">${gradeBadge(x.note)}<div><div class="t">${MODE_LBL[x.mode] || esc(x.mode)} · ${TEIL[x.teil] ? TEIL[x.teil].k : esc(x.teil)}</div><div class="s">${fmtDay(x.at)}${x.detail ? " · " + esc(x.detail) : ""} · ${x.pct >= 50 ? "bestanden" : "nicht bestanden"}</div></div><span class="chip num">${esc(x.pct)} %</span>${UI.confirm === x.ts ? `<button type="button" class="btn small danger del" data-del="${esc(x.ts)}">Wirklich löschen</button>` : `<button type="button" class="iconbtn sm del" data-ask="${esc(x.ts)}" aria-label="Ergebnis löschen">${ic("x", "ic xs")}</button>`}</div>`).join("")}</div>` : `<p class="empty">Noch keine Prüfung geschrieben. Starte mit einer Simulation.</p>`}
       </section>`;
     el.querySelectorAll("[data-mode]").forEach((b) => b.onclick = () => { p.mode = b.dataset.mode; render(); });
     el.querySelectorAll("[data-go2]").forEach((b) => b.onclick = () => navTo(b.dataset.go2));
@@ -5368,7 +5371,7 @@ INSERT INTO Konto VALUES (1,'Weingut Becker',1500.00),(2,'Klinik am Rhein',320.0
     { id: "works-on-my-machine", name: "Works on my machine", how: "Zwei Geräte per Sync verbinden", ok: () => !!syncGet() },
     { id: "rangliste", name: "Ranglisten-Rookie", how: "In der Rangliste mitmachen", ok: () => !!lbGet().joined }
   ].concat(EVENTS.filter((e) => e.reward.kind === "title").map((e) => ({ id: e.reward.id, name: e.reward.name, how: `Abschlusstest im Event „${e.kurz}“ bestehen – nur bis ${new Date(e.ende + "T12:00:00").toLocaleDateString("de-DE")}`, ev: e.id })));
-  const TI = Object.fromEntries(TITLES.map((t) => [t.id, t]));
+  const TI = Object.assign(Object.create(null), Object.fromEntries(TITLES.map((t) => [t.id, t]))); // ohne Prototyp: „constructor“ o. Ä. ist kein Titel
   function titleCheck() {
     G.titles = G.titles || {};
     const neu = TITLES.filter((t) => { if (!t.ok || G.titles[t.id]) return false; try { return t.ok(); } catch (e) { return false; } });
@@ -5379,7 +5382,7 @@ INSERT INTO Konto VALUES (1,'Weingut Becker',1500.00),(2,'Klinik am Rhein',320.0
   function titlesHTML() {
     const have = TITLES.filter((t) => G.titles[t.id]).length;
     return `<section class="card"><div class="row" style="justify-content:space-between"><h3>Titel</h3><span class="small muted">${have}/${TITLES.length}</span></div><p class="small muted">Dein Titel steht in der Rangliste unter deinem Namen. Grau = noch nicht freigeschaltet, darunter steht, wie du ihn bekommst.</p>
-      <div class="gm-titles"><button type="button" class="gm-ttl ${G.title ? "" : "on"}" data-gm-title=""><b>Kein Titel</b><span>In der Rangliste steht dein Rang</span></button>${TITLES.map((t) => { const own = !!G.titles[t.id]; return `<button type="button" class="gm-ttl ${own ? "" : "locked"} ${G.title === t.id ? "on" : ""} ${t.ev ? "ev" : ""}" data-gm-title="${t.id}" ${own ? "" : "disabled"}><b>${esc(t.name)}</b><span>${esc(t.how)}</span>${t.ev ? `<i class="gm-tag ev">EVENT</i>` : ""}</button>`; }).join("")}</div></section>`;
+      <div class="gm-titles"><button type="button" class="gm-ttl ${G.title ? "" : "on"}" data-gm-title=""><b>Kein Titel</b><span>Es wird kein Titel angezeigt</span></button>${TITLES.map((t) => { const own = !!G.titles[t.id]; return `<button type="button" class="gm-ttl ${own ? "" : "locked"} ${G.title === t.id ? "on" : ""} ${t.ev ? "ev" : ""}" data-gm-title="${t.id}" ${own ? "" : "disabled"}><b>${esc(t.name)}</b><span>${esc(t.how)}</span>${t.ev ? `<i class="gm-tag ev">EVENT</i>` : ""}</button>`; }).join("")}</div></section>`;
   }
   // ---- Events: Sonderbelohnungen, nur bis zum Klausurtermin
   const evRec = (e) => (G.ev[e.id] = G.ev[e.id] || {});
@@ -5403,7 +5406,7 @@ INSERT INTO Konto VALUES (1,'Weingut Becker',1500.00),(2,'Klinik am Rhein',320.0
   function evRewardModal(e, up) {
     const shirt = e.reward.kind === "shirt"; confetti(70);
     modal(`<span class="gm-kicker">EVENT-BELOHNUNG · ${esc(e.kurz)}</span><div class="gm-ava-big" style="width:150px;margin-top:10px">${shirt ? figure(G.char, evEq(e)) : myFigure()}</div><h2>${esc(e.reward.name)}</h2>${shirt ? "" : `<p class="gm-title-big">«${esc(e.reward.name)}»</p>`}<p class="muted">${esc(e.reward.txt)}</p><p class="gm-gain">+300 🪶 · +2 🎟️ · +200 XP${up ? ` · Level ${G.level}!` : ""}</p><div class="row" style="justify-content:center"><button type="button" class="btn primary" data-gm-evwear>${shirt ? "Jetzt anziehen" : "Titel anlegen"}</button><button type="button" class="btn" data-gm-close>Später</button></div>`);
-    const b = layer.querySelector("[data-gm-evwear]"); if (b) b.onclick = () => { if (shirt) { const id = `${G.char}-${e.reward.art}`; if (G.owned[id]) G.equip[G.char].shirt = id; } else G.title = e.reward.id; G.lookAt = Date.now(); save(); lbSoon(3000); try { syncSoon(3000); } catch (x) {} closeModal(); };
+    const b = layer.querySelector("[data-gm-evwear]"); if (b) b.onclick = () => { if (shirt) { const id = `${G.char}-${e.reward.art}`; if (G.owned[id]) G.equip[G.char].shirt = id; } else { G.title = e.reward.id; G.titleAt = Date.now(); } G.lookAt = Date.now(); save(); lbSoon(3000); try { syncSoon(3000); } catch (x) {} closeModal(); };
   }
   const need = (l) => 80 + l * 40;
   const rank = (l) => RANKS.filter(([n]) => l >= n).pop()[1];
@@ -5423,6 +5426,7 @@ INSERT INTO Konto VALUES (1,'Weingut Becker',1500.00),(2,'Klinik am Rhein',320.0
     CHARS.forEach((c) => { const e = G.equip[c] = Object.assign(baseEquip(c), G.equip[c] || {}); SLOTS.forEach(([sl]) => { if (!IT[e[sl]] || !G.owned[e[sl]] || IT[e[sl]].char !== c) e[sl] = baseEquip(c)[sl]; }); });
     if (!ANIMALS[G.char]) G.char = "rabe"; if (!ANIMALS[G.banner]) G.banner = "rabe";
     if (!G.titles || typeof G.titles !== "object") G.titles = {}; if (!G.ev || typeof G.ev !== "object") G.ev = {}; if (G.title && (!TI[G.title] || !G.titles[G.title])) G.title = "";
+    if (G.title && !G.titleAt) G.titleAt = +G.lookAt || 1; // Titel aus v2.6/2.7 (ohne eigenen Zeitpunkt): gilt ab seiner letzten Wahl
     G.boosts = Object.assign({ xp2: 0, shield: 0 }, G.boosts || {}); G.pity = G.pity || {}; G.hist = Array.isArray(G.hist) ? G.hist : [];
     if (G.quests && (!Array.isArray(G.quests.ids) || !G.quests.ids.every((id) => QPOOL.some((q) => q.id === id)))) G.quests = null; // alte Quests → neu würfeln, Tageszähler bleiben
     ["earned", "xp", "level", "federn", "tickets", "pulls"].forEach((k) => { G[k] = Math.max(k === "level" ? 1 : 0, Math.floor(+G[k] || 0)); });
@@ -5615,7 +5619,7 @@ INSERT INTO Konto VALUES (1,'Weingut Becker',1500.00),(2,'Klinik am Rhein',320.0
   function rGarderobe() {
     const c = G.char, eq = G.equip[c], skins = SKINS.filter((s) => s.char === c && s.rar !== "S" && s.rar !== "EV");
     return `${charSel("char", c, (x) => ANIMALS[x].name)}
-      <section class="card" style="text-align:center"><div class="gm-ava-big">${myFigure()}</div>${(() => { const lb = lbGet(), nick = lb.joined && lb.name ? lb.name : ""; return `<h2 class="gm-figname" style="margin-top:12px">${esc(nick || ANIMALS[c].name)}</h2><p class="gm-title-big gm-figsub">${G.title && TI[G.title] ? "«" + esc(TI[G.title].name) + "»" : esc(rank(G.level))}</p><p class="small muted">${nick ? esc(ANIMALS[c].name) + " · " : ""}Level ${G.level} · Sammlung ${skins.filter((i) => G.owned[i.id]).length}/${skins.length}${nick ? "" : ` · <a href="#rangliste">Spitznamen wählen</a>`}</p>`; })()}</section>
+      <section class="card" style="text-align:center"><div class="gm-ava-big">${myFigure()}</div>${(() => { const lb = lbGet(), nick = lb.joined && lb.name ? lb.name : ""; return `<h2 class="gm-figname" style="margin-top:12px">${esc(nick || ANIMALS[c].name)}</h2>${G.title && TI[G.title] ? `<p class="gm-title-big gm-figsub">«${esc(TI[G.title].name)}»</p>` : ""}<p class="small muted">${nick ? esc(ANIMALS[c].name) + " · " : ""}Level ${G.level} · Sammlung ${skins.filter((i) => G.owned[i.id]).length}/${skins.length}${nick ? "" : ` · <a href="#rangliste">Spitznamen wählen</a>`}</p>`; })()}</section>
       ${titlesHTML()}
       <section class="card"><h3>Boosts</h3><div class="gm-tiles">${["xp2", "shield"].map((id) => { const it = IT[id], n = G.boosts[id], act = id === "xp2" ? G.xp2Left > 0 : G.shieldOn; return `<div class="gm-tile r-${it.rar} ${n || act ? "" : "locked"}"><div class="gm-icon">${it.icon}</div><div class="gm-nm">${it.name} ×${n}</div><div class="small muted">${it.desc}</div><button type="button" class="btn small" data-gm-use="${id}" ${!n || act ? "disabled" : ""}>${act ? "aktiv" : "Benutzen"}</button></div>`; }).join("")}</div></section>
       ${SLOTS.map(([slot, label]) => { const list = SKINS.filter((i) => i.char === c && i.slot === slot).sort((a, b) => RORDER.indexOf(b.rar) - RORDER.indexOf(a.rar)); return `<section class="card"><div class="row" style="justify-content:space-between"><h3>${label}</h3><span class="small muted">${list.filter((i) => i.rar !== "S" && G.owned[i.id]).length}/${list.length - 1}</span></div><div class="gm-tiles">${list.map((i) => `<button type="button" class="gm-tbtn" data-gm-eq="${i.id}" ${G.owned[i.id] ? "" : "disabled"} title="${G.owned[i.id] ? "Anziehen" : i.ev ? "Nur als Event-Belohnung erhältlich" : "Noch nicht gefunden"}">${tile(i, i.ev ? `<span class="gm-tag ev">EVENT</span>` : "", (G.owned[i.id] ? "" : "locked") + (eq[slot] === i.id ? " eq" : ""))}</button>`).join("")}</div></section>`; }).join("")}`;
@@ -5623,7 +5627,7 @@ INSERT INTO Konto VALUES (1,'Weingut Becker',1500.00),(2,'Klinik am Rhein',320.0
   function viewHTML(el) {
     rollDay(); titleCheck();
     const tabs = [["quests", "Quests"], ["schatz", GACHA.name], ["garderobe", "Garderobe"]];
-    el.innerHTML = `<div class="gm-head card"><div class="gm-ava">${myFigure()}</div><div class="gm-lvl"><div class="row" style="gap:8px;align-items:baseline"><b class="gm-lv">Level ${G.level}</b><span class="muted small">${G.title && TI[G.title] ? "«" + esc(TI[G.title].name) + "»" : rank(G.level)}</span><span class="spacer"></span><span class="small muted num">${G.xp}/${need(G.level)} XP</span></div><div class="bar"><i style="width:${G.xp / need(G.level) * 100}%"></i></div></div><div class="gm-cur"><span class="chip">🪶 ${G.federn}</span><span class="chip">🎟️ ${G.tickets}</span><span class="chip">🔥 ${G.loginStreak}</span></div></div>
+    el.innerHTML = `<div class="gm-head card"><div class="gm-ava">${myFigure()}</div><div class="gm-lvl"><div class="row" style="gap:8px;align-items:baseline"><b class="gm-lv">Level ${G.level}</b>${G.title && TI[G.title] ? `<span class="muted small">«${esc(TI[G.title].name)}»</span>` : ""}<span class="spacer"></span><span class="small muted num">${G.xp}/${need(G.level)} XP</span></div><div class="bar"><i style="width:${G.xp / need(G.level) * 100}%"></i></div></div><div class="gm-cur"><span class="chip">🪶 ${G.federn}</span><span class="chip">🎟️ ${G.tickets}</span><span class="chip">🔥 ${G.loginStreak}</span></div></div>
       <div class="tabs-in gm-tabs" role="tablist">${tabs.map(([k, l]) => `<button type="button" role="tab" class="${G.tab === k ? "on" : ""}" aria-selected="${G.tab === k}" data-gm-tab="${k}">${l}</button>`).join("")}</div>
       <div class="gm-body">${G.tab === "schatz" ? rSchatz() : G.tab === "garderobe" ? rGarderobe() : rQuests()}</div>`;
     el.onclick = (e) => {
@@ -5637,7 +5641,7 @@ INSERT INTO Konto VALUES (1,'Weingut Becker',1500.00),(2,'Klinik am Rhein',320.0
       else if (d.gmBanner) { G.banner = d.gmBanner; save(); render(); }
       else if (d.gmChar) { G.char = d.gmChar; G.lookAt = Date.now(); save(); render(); }
       else if (d.gmEq) { const it = IT[d.gmEq]; if (!it || !G.owned[it.id]) return; G.equip[it.char][it.slot] = it.id; G.lookAt = Date.now(); save(); render(); }
-      else if (d.gmTitle !== undefined) { const id = d.gmTitle; if (id && !(G.titles || {})[id]) return; G.title = id; G.lookAt = Date.now(); save(); render(); }
+      else if (d.gmTitle !== undefined) { const id = d.gmTitle; if (id && !(G.titles || {})[id]) return; G.title = id; G.titleAt = G.lookAt = Date.now(); save(); render(); }
       else if (d.gmUse) { const id = d.gmUse; if (G.boosts[id] < 1) return; G.boosts[id]--; if (id === "xp2") G.xp2Left = 10; else G.shieldOn = true; save(); toast(`${IT[id].icon} ${IT[id].name} aktiviert`); render(); }
       if (d.gmClaim || d.gmChest !== undefined || d.gmPull || d.gmChar || d.gmEq || d.gmUse || d.gmTitle !== undefined) { try { syncSoon(3000); } catch (x) {} lbSoon(d.gmChar || d.gmEq || d.gmTitle !== undefined ? 5000 : 30000); } // Belohnungen auch ohne Lernen abgleichen
     };
@@ -5648,7 +5652,7 @@ INSERT INTO Konto VALUES (1,'Weingut Becker',1500.00),(2,'Klinik am Rhein',320.0
   function pack() {
     const own = {}; Object.keys(G.owned).forEach((id) => { const it = IT[id]; if (it && it.rar !== "S") (own[it.char] = own[it.char] || []).push(it.art); });
     const eq = {}; CHARS.forEach((c) => { eq[c] = SLOTS.map(([s]) => (IT[G.equip[c][s]] || {}).art || "").join("."); });
-    return { v: 1, x: G.earned, l: G.level, p: G.xp, f: G.federn, t: G.tickets, o: Object.fromEntries(Object.entries(own).map(([c, l]) => [c, l.join(".")])), e: eq, c: G.char, b: [G.boosts.xp2, G.boosts.shield], y: G.pity, n: G.pulls, s: [G.loginStreak, G.lastLogin, G.calIdx, G.calRound, G.best], a: G.lookAt || 0, ti: Object.keys(G.titles || {}).filter((id) => TI[id]).join("."), tt: G.title || "", ev: G.ev || {} };
+    return { v: 1, x: G.earned, l: G.level, p: G.xp, f: G.federn, t: G.tickets, o: Object.fromEntries(Object.entries(own).map(([c, l]) => [c, l.join(".")])), e: eq, c: G.char, b: [G.boosts.xp2, G.boosts.shield], y: G.pity, n: G.pulls, s: [G.loginStreak, G.lastLogin, G.calIdx, G.calRound, G.best], a: G.lookAt || 0, ti: Object.keys(G.titles || {}).filter((id) => TI[id]).join("."), tt: G.title || "", tz: G.titleAt || 0, ev: G.ev || {} };
   }
   function unpack(p) {
     if (!p || typeof p !== "object") return null;
@@ -5656,9 +5660,9 @@ INSERT INTO Konto VALUES (1,'Weingut Becker',1500.00),(2,'Klinik am Rhein',320.0
     const g = fresh(), s = p.s || [];
     Object.assign(g, { earned: +p.x || 0, level: +p.l || 1, xp: +p.p || 0, federn: +p.f || 0, tickets: +p.t || 0, char: p.c || "rabe", pity: p.y || {}, pulls: +p.n || 0, loginStreak: +s[0] || 0, lastLogin: s[1] || null, calIdx: +s[2] || 0, calRound: +s[3] || 1, best: +s[4] || 0 });
     g.boosts = { xp2: +(p.b || [])[0] || 0, shield: +(p.b || [])[1] || 0 }; if (+p.a) g.lookAt = +p.a;
-    g.titles = {}; String(p.ti || "").split(".").forEach((id) => { if (TI[id]) g.titles[id] = 1; }); if (p.tt != null) g.title = TI[p.tt] ? String(p.tt) : ""; g.ev = p.ev && typeof p.ev === "object" ? p.ev : {};
+    g.titles = {}; String(p.ti || "").split(".").forEach((id) => { if (TI[id]) g.titles[id] = 1; }); if (p.tt != null) g.title = TI[p.tt] ? String(p.tt) : ""; if (+p.tz) g.titleAt = +p.tz; else if (p.tt) g.titleAt = +p.a || 0; g.ev = p.ev && typeof p.ev === "object" ? p.ev : {};
     Object.entries(p.o || {}).forEach(([c, l]) => String(l).split(".").forEach((a) => { if (IT[c + "-" + a]) g.owned[c + "-" + a] = 1; }));
-    Object.entries(p.e || {}).forEach(([c, l]) => { if (!ANIMALS[c]) return; const arts = String(l).split("."); g.equip[c] = baseEquip(c); SLOTS.forEach(([sl], i) => { const id = c + "-" + arts[i]; if (arts[i] && IT[id] && IT[id].slot === sl) g.equip[c][sl] = id; }); });
+    Object.entries(p.e || {}).forEach(([c, l]) => { if (!ANIMALS[c]) return; const arts = String(l).split("."); g.equip[c] = baseEquip(c); SLOTS.forEach(([sl], i) => { if (i >= arts.length) { delete g.equip[c][sl]; return; } const id = c + "-" + arts[i]; if (arts[i] && IT[id] && IT[id].slot === sl) g.equip[c][sl] = id; }); });
     return g;
   }
   function merge(p) {
@@ -5667,6 +5671,7 @@ INSERT INTO Konto VALUES (1,'Weingut Becker',1500.00),(2,'Klinik am Rhein',320.0
     Object.keys(inc.titles || {}).forEach((id) => { if (TI[id] && !G.titles[id]) G.titles[id] = +inc.titles[id] || 1; });           // Titel: Vereinigung
     Object.entries(inc.ev || {}).forEach(([k, r]) => { if (!r || typeof r !== "object") return; const m = G.ev[k] = G.ev[k] || {}; m.best = Math.max(+m.best || 0, +r.best || 0); ["done", "got"].forEach((f) => { if (+r[f] && (!+m[f] || +r[f] < +m[f])) m[f] = +r[f]; }); m.kap = Object.assign({}, r.kap || {}, m.kap || {}); }); // Events: nie verlieren           // Skins: Vereinigung
     G.boosts.xp2 = Math.max(G.boosts.xp2, +inc.boosts.xp2 || 0); G.boosts.shield = Math.max(G.boosts.shield, +inc.boosts.shield || 0);
+    if (inc.title !== undefined && (+inc.titleAt || 0) > (+G.titleAt || 0) && (!inc.title || G.titles[inc.title])) { G.title = inc.title; G.titleAt = +inc.titleAt; } // Titel: die zuletzt getroffene Wahl
     const ahead = (+inc.earned || 0) > G.earned, tie = (+inc.earned || 0) === G.earned, incA = +inc.lookAt || 0, myA = +G.lookAt || 0;
     const lookKey = (g) => g.char + "|" + CHARS.map((c) => SLOTS.map(([s]) => ((g.equip || {})[c] || {})[s] || "").join(",")).join(";");
     if (ahead) {                                                                                 // Fortschritt: der weiter fortgeschrittene Stand
@@ -5676,7 +5681,6 @@ INSERT INTO Konto VALUES (1,'Weingut Becker',1500.00),(2,'Klinik am Rhein',320.0
     if (incA > myA) {                                                                            // Figur + Ausrüstung: die zuletzt getroffene Wahl gilt auf allen Geräten
       if (inc.char && ANIMALS[inc.char]) G.char = inc.char;
       CHARS.forEach((c) => { const ie = inc.equip && inc.equip[c]; if (ie) SLOTS.forEach(([s]) => { const it = IT[ie[s]]; if (it && it.char === c && it.slot === s && G.owned[it.id]) G.equip[c][s] = it.id; }); });
-      if (inc.title !== undefined && (!inc.title || G.titles[inc.title])) G.title = inc.title;
       G.lookAt = incA;
     } else if (!incA && !myA) {                                                                  // Stände ohne Zeitpunkt (vor dem Update gewählt):
       // Der weiter fortgeschrittene Stand gibt Figur und Ausrüstung vor (bei Gleichstand eine feste Regel); wo er nur die Grundausstattung trägt, gilt die des anderen.
@@ -5701,14 +5705,14 @@ INSERT INTO Konto VALUES (1,'Weingut Becker',1500.00),(2,'Klinik am Rhein',320.0
   const lbSet = (o) => { try { localStorage.setItem(KEY_LB, JSON.stringify(o)); } catch (e) {} };
   const LB = { data: null, at: 0, busy: false, err: "", timer: 0, edit: false, leave: false, away: true };
   const lookOf = () => G.char + ":" + SLOTS.map(([s]) => (IT[G.equip[G.char][s]] || {}).art || "").join(".") + (G.title && TI[G.title] ? ":" + G.title : ""); // Titel als dritter Teil – ältere Versionen ignorieren ihn
-  const lookEq = (str) => { const [c, rest, ti] = String(str || "").split(":"), ch = ANIMALS[c] ? c : "rabe", eq = baseEquip(ch); String(rest || "").split(".").forEach((a, i) => { const sl = SLOTS[i] && SLOTS[i][0], it = IT[ch + "-" + a]; if (sl && a && it && it.slot === sl) eq[sl] = it.id; }); return [ch, eq, TI[ti] ? ti : ""]; };
+  const lookEq = (str) => { const [c, rest, ti] = String(str || "").split(":"), ch = CHARS.includes(c) ? c : "rabe", eq = baseEquip(ch); String(rest || "").split(".").forEach((a, i) => { const sl = SLOTS[i] && SLOTS[i][0], it = IT[ch + "-" + a]; if (sl && a && it && it.slot === sl) eq[sl] = it.id; }); return [ch, eq, Object.prototype.hasOwnProperty.call(TI, ti) ? ti : ""]; };
   async function lbId() {
     const sk = syncGet(); if (sk) return hexOf(await sha("tap2-lb|s|" + keyRaw(sk.key)));
     const lb = lbGet(); if (!lb.token) { lb.token = hexOf(crypto.getRandomValues(new Uint8Array(20))); lbSet(lb); }
     return hexOf(await sha("tap2-lb|t|" + lb.token));
   }
   const lbBox = () => { const el = document.getElementById("gm-lbsec"); if (el) el.innerHTML = lbListHTML(); };
-  const lbRedraw = () => { if (view === "rangliste") render(); };
+  const lbRedraw = () => { if (view === "rangliste" || view === "belohnungen") render(); };
   async function lbLoad(force) {
     if (!syncConf() || (!force && Date.now() - LB.at < 60000)) return;
     LB.at = Date.now();
@@ -5752,7 +5756,7 @@ INSERT INTO Konto VALUES (1,'Weingut Becker',1500.00),(2,'Klinik am Rhein',320.0
   function lbSoon(ms) { if (!lbGet().joined) return; clearTimeout(LB.timer); LB.timer = setTimeout(lbPush, ms == null ? 30000 : ms); }
   function lbListHTML() {
     const d = LB.data, lb = lbGet();
-    const row = (e) => { const [c, eq, ti] = lookEq(e.look); return `<div class="gm-lbrow ${e.me ? "me" : ""} ${e.r <= 3 ? "p" + e.r : ""}"><span class="gm-lbr num">${e.r}</span><span class="gm-lbfig">${figure(c, eq)}</span><span class="gm-lbn"><b>${esc(e.name)}</b>${e.me ? ' <span class="chip">Du</span>' : ""}<span class="gm-lbl">Level ${+e.level || 1} · ${ti ? "«" + esc(TI[ti].name) + "»" : esc(rank(+e.level || 1))}</span></span><span class="gm-lbxp num">${(+e.xp || 0).toLocaleString("de-DE")} XP</span></div>`; };
+    const row = (e) => { const [c, eq, ti] = lookEq(e.look); return `<div class="gm-lbrow ${e.me ? "me" : ""} ${e.r <= 3 ? "p" + e.r : ""}"><span class="gm-lbr num">${e.r}</span><span class="gm-lbfig">${figure(c, eq)}</span><span class="gm-lbn"><b>${esc(e.name)}</b>${e.me ? ' <span class="chip">Du</span>' : ""}<span class="gm-lbl">Level ${+e.level || 1}${ti ? " · «" + esc(TI[ti].name) + "»" : ""}</span></span><span class="gm-lbxp num">${(+e.xp || 0).toLocaleString("de-DE")} XP</span></div>`; };
     const list = !d ? `<p class="small muted">${LB.err ? esc(LB.err) : "Lädt …"}</p>`
       : !d.top.length ? `<p class="small muted">Noch niemand eingetragen – sei die erste Person!</p>`
       : d.top.map(row).join("") + (d.me && d.me.r > d.top.length ? `<div class="gm-lbgap">…</div>` + row(Object.assign({ me: true }, d.me)) : "");
@@ -5790,7 +5794,7 @@ INSERT INTO Konto VALUES (1,'Weingut Becker',1500.00),(2,'Klinik am Rhein',320.0
     answer(q, ok, unsure, f, t) { ensure(); onAnswer(q, ok, unsure, f, t); }, guess(q) { ensure(); onGuess(q); }, view(el) { ensure(); return viewHTML(el); }, pack() { ensure(); return pack(); }, merge(p) { ensure(); merge(p); },
     data() { ensure(); return JSON.parse(JSON.stringify(G)); },
     evInfo(e) { ensure(); return Object.assign({}, (G.ev || {})[e.id] || {}); }, evPreview(e) { ensure(); return evPreview(e); }, evFinal(e, s, n) { ensure(); return evFinal(e, s, n); }, evKap(e, k) { ensure(); return evKap(e, k); }, rangView(el) { ensure(); return rangView(el); },
-    boot(h) { ensure(); rollDay(); titleCheck(); save(); if (lbGet().joined) setTimeout(lbPush, 4000); if (!h.startsWith("import=") && view !== "tutorial" && !UI.sess && !UI.run && G.loginClaimed !== today()) setTimeout(() => { if (!UI.sess && !UI.run && view !== "tutorial") showLogin(); }, 700); }
+    boot(h) { ensure(); rollDay(); titleCheck(); save(); if (lbGet().joined) setTimeout(lbPush, 4000); else if (syncGet() && syncConf()) setTimeout(() => lbLoad(true), 5000); if (!h.startsWith("import=") && view !== "tutorial" && !UI.sess && !UI.run && G.loginClaimed !== today()) setTimeout(() => { if (!UI.sess && !UI.run && view !== "tutorial") showLogin(); }, 700); }
   };
   })(); } catch (e) { GAMI = null; try { console.error("Belohnungen deaktiviert:", e); } catch (x) {} }
 

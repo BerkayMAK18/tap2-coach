@@ -11,6 +11,7 @@ import { today } from "@/lib/dates";
 import { isObj } from "@/lib/state";
 import { useProgress } from "@/store/progress";
 import { AccountCard } from "@/components/AccountCard";
+import { LiveSyncCard } from "@/components/LiveSyncCard";
 
 export const Route = createFileRoute("/einstellungen")({ component: Einstellungen });
 
@@ -49,6 +50,7 @@ function Einstellungen() {
   return (
     <div className="max-w-2xl space-y-6">
       <h1 className="text-heading-300">Einstellungen</h1>
+      <LiveSyncCard />
       <AccountCard />
       <Card className="space-y-4">
         <CardEyebrow>Sicherung</CardEyebrow>

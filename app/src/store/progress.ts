@@ -56,8 +56,10 @@ export const useProgress = create<Store>((set, get) => {
     },
     toggleMark: (id) => {
       const S = get().S, mark = { ...S.mark };
-      if (mark[id]) delete mark[id]; else mark[id] = 1;
+      const on = !mark[id];
+      if (on) mark[id] = 1; else delete mark[id];
       save({ ...S, mark });
+      void import("./livesync").then((m) => m.recordEv("m", id, on)); // Lösch-Ereignis für den Sync (wie Live-App)
     },
     replaceAll: (incoming) => {
       write(KEYS.beforeImport, { at: Date.now(), data: get().S }); // Rettung per Hand möglich

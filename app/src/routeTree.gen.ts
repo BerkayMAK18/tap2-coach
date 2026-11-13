@@ -12,6 +12,7 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as DatenschutzRouteImport } from './routes/datenschutz'
 import { Route as EinstellungenRouteImport } from './routes/einstellungen'
+import { Route as RanglisteRouteImport } from './routes/rangliste'
 import { Route as TutorRouteImport } from './routes/tutor'
 import { Route as LernenIndexRouteImport } from './routes/lernen.index'
 import { Route as LernenRundeRouteImport } from './routes/lernen.runde'
@@ -29,6 +30,11 @@ const DatenschutzRoute = DatenschutzRouteImport.update({
 const EinstellungenRoute = EinstellungenRouteImport.update({
   id: '/einstellungen',
   path: '/einstellungen',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const RanglisteRoute = RanglisteRouteImport.update({
+  id: '/rangliste',
+  path: '/rangliste',
   getParentRoute: () => rootRouteImport,
 } as any)
 const TutorRoute = TutorRouteImport.update({
@@ -51,6 +57,7 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/datenschutz': typeof DatenschutzRoute
   '/einstellungen': typeof EinstellungenRoute
+  '/rangliste': typeof RanglisteRoute
   '/tutor': typeof TutorRoute
   '/lernen/runde': typeof LernenRundeRoute
   '/lernen/': typeof LernenIndexRoute
@@ -59,6 +66,7 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/datenschutz': typeof DatenschutzRoute
   '/einstellungen': typeof EinstellungenRoute
+  '/rangliste': typeof RanglisteRoute
   '/tutor': typeof TutorRoute
   '/lernen/runde': typeof LernenRundeRoute
   '/lernen': typeof LernenIndexRoute
@@ -68,6 +76,7 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/datenschutz': typeof DatenschutzRoute
   '/einstellungen': typeof EinstellungenRoute
+  '/rangliste': typeof RanglisteRoute
   '/tutor': typeof TutorRoute
   '/lernen/runde': typeof LernenRundeRoute
   '/lernen/': typeof LernenIndexRoute
@@ -78,6 +87,7 @@ export interface FileRouteTypes {
     | '/'
     | '/datenschutz'
     | '/einstellungen'
+    | '/rangliste'
     | '/tutor'
     | '/lernen/runde'
     | '/lernen/'
@@ -86,6 +96,7 @@ export interface FileRouteTypes {
     | '/'
     | '/datenschutz'
     | '/einstellungen'
+    | '/rangliste'
     | '/tutor'
     | '/lernen/runde'
     | '/lernen'
@@ -94,6 +105,7 @@ export interface FileRouteTypes {
     | '/'
     | '/datenschutz'
     | '/einstellungen'
+    | '/rangliste'
     | '/tutor'
     | '/lernen/runde'
     | '/lernen/'
@@ -103,6 +115,7 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   DatenschutzRoute: typeof DatenschutzRoute
   EinstellungenRoute: typeof EinstellungenRoute
+  RanglisteRoute: typeof RanglisteRoute
   TutorRoute: typeof TutorRoute
   LernenRundeRoute: typeof LernenRundeRoute
   LernenIndexRoute: typeof LernenIndexRoute
@@ -129,6 +142,13 @@ declare module '@tanstack/react-router' {
       path: '/einstellungen'
       fullPath: '/einstellungen'
       preLoaderRoute: typeof EinstellungenRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/rangliste': {
+      id: '/rangliste'
+      path: '/rangliste'
+      fullPath: '/rangliste'
+      preLoaderRoute: typeof RanglisteRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/tutor': {
@@ -159,6 +179,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   DatenschutzRoute: DatenschutzRoute,
   EinstellungenRoute: EinstellungenRoute,
+  RanglisteRoute: RanglisteRoute,
   TutorRoute: TutorRoute,
   LernenRundeRoute: LernenRundeRoute,
   LernenIndexRoute: LernenIndexRoute,

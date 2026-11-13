@@ -22,7 +22,7 @@ const NAV = [
   { to: null, label: "Aufgaben", icon: ClipboardList },
   { to: null, label: "Prüfung", icon: Timer },
   { to: null, label: "Events", icon: PartyPopper },
-  { to: null, label: "Rangliste", icon: Trophy },
+  { to: "/rangliste", label: "Rangliste", icon: Trophy },
   { to: null, label: "Tipps", icon: Lightbulb },
 ] as const;
 

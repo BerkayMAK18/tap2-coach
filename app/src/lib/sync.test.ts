@@ -42,3 +42,16 @@ describe("Zusammenführen", () => {
     expect(mergeStates(a, b, ctx).q.m1).toEqual(mergeStates(b, a, ctx).q.m1);
   });
 });
+
+import { evMerge, syncWhen } from "./sync-merge";
+describe("Regeln wie Live-App", () => {
+  it("entfernte Markierung kommt durch Zusammenführen nicht zurück", () => {
+    const a = blank(), b = blank(); b.mark.m1 = 1;
+    const ev = evMerge(null, { m: { m1: [Date.now(), 0] } });
+    expect(mergeStates(a, b, ctx, ev).mark).toEqual({});
+  });
+  it("Platzhalter-Uhrzeit 12:00 aus Links zählt als Tagesbeginn", () => {
+    const noon = new Date(2026, 10, 10, 12, 0, 0, 0).getTime();
+    expect(syncWhen({ s: 1, t: noon })).toBe(noon - 12 * 3600000);
+  });
+});

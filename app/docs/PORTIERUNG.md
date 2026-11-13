@@ -63,6 +63,7 @@ Bewusste Unterschiede:
   Event-Runden) führen auf deren Seite; sie öffnen dort noch nicht die konkrete Aufgabe bzw. Simulation.
 
 Gefunden, gehört zum Grundgerüst: Tailwind erzeugte eine Utility `.ring` (1-px-Schatten) und überlagerte die
-Ring-Klasse der Live-App – in `styles.css` ausgeschlossen (`@source not inline("ring")`). Offen im Grundgerüst:
-Fußzeile (`footer.foot`) fehlt, Monospace-Schrift (AppMono) zeigt Fettdruck im Editor schwächer als JetBrains Mono.
+Ring-Klasse der Live-App – in `styles.css` ausgeschlossen (`@source not inline("ring")`). Fußzeile (`footer.foot`) ergänzt; mit
+Geräte-Sync lautet ihr Text „… in diesem Browser gespeichert und verschlüsselt mit deinen Geräten abgeglichen“
+(bewusst anders als „nur lokal“, weil dann eine verschlüsselte Kopie auf dem Server liegt). Offen im Grundgerüst: Monospace-Schrift (AppMono) zeigt Fettdruck im Editor schwächer als JetBrains Mono.
 

@@ -16,6 +16,8 @@ import { gm, setGamiContext, useGamiTick } from "@/legacy/gami-env";
 import { Ic, Ring, pctS } from "@/ui-main";
 import { NAV_FOOT, NAV_MAIN, VTITLE } from "@/ui-main/nav";
 import { useProgress } from "@/store/progress";
+import { useLiveSync } from "@/store/livesync";
+import { useAccount } from "@/store/account";
 import { Suche } from "@/components/lernen/Suche";
 import { openSearch, takeBoot, useSearchHotkey } from "@/components/lernen/ui";
 
@@ -69,11 +71,19 @@ function Shell() {
           </div>
         </header>
         <main className="content"><section className="view"><Outlet /></section></main>
+        <Foot />
       </div>
       <UpdatePrompt />
       <Suche />
     </div>
   );
+}
+
+/** Fußzeile wie in der Live-App. Abweichung mit Grund: Mit Geräte-Sync (Live-Sync oder Konto) liegt zusätzlich eine
+ *  verschlüsselte Kopie auf dem Server – dann nennt der Text das, statt „nur lokal“ zu behaupten. */
+function Foot() {
+  const live = useLiveSync((s) => !!s.cfg), acc = useAccount((s) => !!s.cfg);
+  return <footer className="foot"><span>TAP2 Prüfungscoach · {live || acc ? "Dein Fortschritt wird in diesem Browser gespeichert und verschlüsselt mit deinen Geräten abgeglichen." : "Dein Fortschritt wird lokal in diesem Browser gespeichert."}</span></footer>;
 }
 
 function NavBtn({ n, current }: { n: { view: string; svg: string; label: string }; current: boolean }) {

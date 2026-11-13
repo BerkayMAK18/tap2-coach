@@ -12,7 +12,8 @@
 
 @font-face { font-family: "AppText"; src: url("./fonts/dm-sans-latin.woff2") format("woff2"); font-weight: 400 700; font-display: swap; }
 @font-face { font-family: "AppHead"; src: url("./fonts/plus-jakarta-sans-latin.woff2") format("woff2"); font-weight: 500 800; font-display: swap; }
-@font-face { font-family: "AppMono"; src: url("./fonts/jetbrains-mono-latin.woff2") format("woff2"); font-weight: 400 700; font-display: swap; }
+/* Nur 400 wie in der Live-App: die Datei hat keinen echten Fettschnitt, der Browser erzeugt fett selbst (sonst bleibt fett normal). */
+@font-face { font-family: "AppMono"; src: url("./fonts/jetbrains-mono-latin.woff2") format("woff2"); font-weight: 400; font-display: swap; }
 
 :root {
   /* Kernfarben */

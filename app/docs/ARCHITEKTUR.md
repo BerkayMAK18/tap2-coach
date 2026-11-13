@@ -35,13 +35,13 @@ Die neue App **liest** die Live-Inhalte nur (Export-Skript), sie schreibt nie in
     damit die übernommenen Seiten unverändert importieren können (`@/ui`).
   - `src/theme/tokens.css`: eigene Farbwerte (aus der Live-App) und freie Schriften (SIL OFL).
   - Klassennamen wurden per `sed` umbenannt, z. B. `darkGreen → ink`, `bi-<farbe> → tone-<farbe>`.
-- **Anmeldung:** `src/routes/auth.tsx` nutzt `supabase.auth.signInWithOAuth({ provider: "github" })`
-  plus E-Mail/Passwort aus der Vorlage.
+- **Anmeldung:** nur GitHub über `supabase.auth.signInWithOAuth({ provider: "github" })` mit PKCE.
+  E-Mail/Passwort und `/reset-password` der Vorlage sind entfernt.
 - **KI:** `src/lib/ai-provider.server.ts` ersetzt das Gateway mit derselben Schnittstelle
   (`generateResponse`, `generateImage`). Aktuell ein Platzhalter, der „nicht angebunden“ meldet.
 - **Laufzeiten:** Pyodide und sql.js werden nicht mehr eingecheckt, sondern von
   `scripts/copy-runtimes.mjs` aus `node_modules` kopiert (vor `dev` und `build`).
-- **Umgebungsvariablen:** `LOVABLE_CRON_SECRET → CRON_SECRET`, `LOVABLE_DB_MIGRATION_URL → DB_MIGRATION_URL`.
+- **Entfernt, weil ungenutzt:** Admin-Client mit `service_role`, Cron-Authentifizierung, drizzle-kit (Schema wird per SQL eingespielt).
 - **Favicon:** Lovable-Logo entfernt, Rabe-Icon der Live-App.
 
 ## Aufbau
@@ -85,8 +85,12 @@ Aktualisieren nach Änderungen an der Live-App: `npm run catalog:export`.
 - Lernen soll ohne Konto möglich sein (Phase 1: Lernstand lokal, Konto nur für Sync).
   **Stand Phase 0:** Die übernommenen Seiten unter `src/routes/_authenticated/` verlangen noch eine Anmeldung.
 - Anmeldung über GitHub (Supabase Auth). Alle Tabellen sind per Row Level Security auf `user_id` beschränkt.
-- KI-Tutor und Wissensgraph zunächst nur für freigeschaltete GitHub-IDs (`TUTOR_ALLOWED_GITHUB_IDS`,
-  geprüft serverseitig in `assertTutorAllowed`). Der KI-Schlüssel liegt nur als Cloudflare-Secret vor.
+- KI-Funktionen nur für freigeschaltete Supabase-Nutzer-IDs (`TUTOR_ALLOWED_USER_IDS`, serverseitig in
+  `assertTutorAllowed`; nicht die GitHub-ID aus `user_metadata`, die Nutzer selbst ändern können). Der KI-Schlüssel liegt nur als Cloudflare-Secret vor.
+
+## Sicherheit
+
+Checkliste und Übersicht der Schutzmaßnahmen: `docs/ENTWICKLUNG.md` → „Sicherheit“.
 
 ## Phasenplan
 

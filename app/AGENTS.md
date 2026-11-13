@@ -3,7 +3,7 @@
 - This app lives on branch `dev` only; never touch the live app (`../index.html`, branch `main`). See `docs/ARCHITEKTUR.md`.
 - Styling uses Tailwind v4 via `@tailwindcss/vite`, loading `tailwind.config.ts` through `@config` in `src/styles.css`; colors come from `src/theme/tokens.css`. UI components come from `@/ui` (own kit). Never add company design systems, proprietary fonts or brand assets — the repo is public.
 - Catalog content lives in `src/content/catalogs/` (schema 1, see docs). Item ids are stable progress keys and must never be renumbered.
-- AI provider is `src/lib/ai-provider.server.ts`; tutor access is server-side allowlisted by GitHub user id.
+- AI provider is `src/lib/ai-provider.server.ts`; AI access is server-side allowlisted by Supabase user id (`TUTOR_ALLOWED_USER_IDS`, fail-closed). Security checklist: `docs/ENTWICKLUNG.md`.
 - AI tutor logic lives in `src/lib/agent.server.ts` (server-only, imported dynamically inside server functions in `src/lib/learn.functions.ts`) so prompts and model calls never reach the browser.
 - The tutor returns one strict JSON turn (reply, phase, plan, learner model, propositions, optional diagram/demo); keep the provider schema and runtime tutor contract in sync.
 - Persist each tutor task and its self-contained Markdown material inside the associated message using the shared quest codec; legacy messages remain readable so reopening never loses task context.

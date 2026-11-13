@@ -10,8 +10,8 @@
  *
  * Phase 3 (geplant):
  * - Anbieter: Claude API (Anthropic) über `fetch`, Schlüssel als Cloudflare-Secret `ANTHROPIC_API_KEY`.
- * - Zugriff nur für freigeschaltete Konten: GitHub-Nutzer-IDs in `TUTOR_ALLOWED_GITHUB_IDS`
- *   (kommagetrennt), geprüft in `assertTutorAllowed` bevor ein Modell aufgerufen wird.
+ * - Zugriff nur für freigeschaltete Konten: Supabase-Nutzer-IDs in `TUTOR_ALLOWED_USER_IDS`
+ *   (kommagetrennt). Bereits aktiv: jede KI-Server-Funktion ruft `assertTutorAllowed` zuerst auf.
  * - Tageslimit pro Konto, damit Kosten planbar bleiben.
  * - Antwortformat in das bestehende Responses-Format übersetzen (output[].content[].text), damit
  *   `tutorTurnSchema` & Co. weiter greifen.
@@ -24,12 +24,22 @@ export class TutorNotConfiguredError extends Error {
   }
 }
 
-/** Freigabeliste prüfen (Phase 3). Erwartet die GitHub-Nutzer-ID aus dem Supabase-Profil. */
-export function assertTutorAllowed(githubUserId: string | null | undefined): void {
-  const allowed = (process.env["TUTOR_ALLOWED_GITHUB_IDS"] ?? "").split(",").map((s) => s.trim()).filter(Boolean);
-  if (!githubUserId || !allowed.includes(String(githubUserId))) {
-    throw new Error("Der KI-Tutor ist für dein Konto noch nicht freigeschaltet.");
-  }
+/**
+ * Freigabeliste für KI-Funktionen (Tutor, Bewertung, Notizen-Import).
+ *
+ * Geprüft wird die Supabase-Nutzer-ID (`sub` aus dem geprüften JWT). Bewusst NICHT die GitHub-ID aus
+ * `user_metadata`: Die kann jeder Nutzer selbst per `supabase.auth.updateUser({ data })` ändern.
+ * Eigene ID finden: in der App angemeldet → Supabase-Dashboard → Authentication → Users.
+ *
+ * Fail-closed: Ist `TUTOR_ALLOWED_USER_IDS` leer oder nicht gesetzt, ist niemand freigeschaltet.
+ */
+export function isTutorAllowed(userId: string | null | undefined): boolean {
+  const allowed = (process.env["TUTOR_ALLOWED_USER_IDS"] ?? "").split(",").map((s) => s.trim()).filter(Boolean);
+  return !!userId && allowed.includes(userId);
+}
+
+export function assertTutorAllowed(userId: string | null | undefined): void {
+  if (!isTutorAllowed(userId)) throw new Error("Der KI-Tutor ist für dein Konto noch nicht freigeschaltet.");
 }
 
 // Schnittstelle wie in der Vorlage; Typen bewusst offen, bis der Anbieter feststeht.

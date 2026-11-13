@@ -67,7 +67,9 @@ function createSupabaseClient() {
       fetch: createSupabaseFetch(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY),
     },
     auth: {
-      // Sitzung im Browser-Speicher (Standard von supabase-js)
+      // Sitzung im Browser-Speicher (Standard von supabase-js).
+      // PKCE: der OAuth-Rückweg enthält nur einen einmaligen Code, kein Token in der URL.
+      flowType: "pkce",
       persistSession: true,
       autoRefreshToken: true,
     },

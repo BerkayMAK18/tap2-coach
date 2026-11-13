@@ -91,8 +91,8 @@ function SessionPage() {
       const attachments: Attachment[] = [];
       for (const f of p.files) {
         if (!u.user) throw new Error('Melde dich erneut an, um Dateien zu senden.');
-        const path = `${u.user.id}/${sessionId}/${crypto.randomUUID()}-${f.name.replace(/[^\w.-]/g, "_")}`;
-        const { error } = await supabase.storage.from("attachments").upload(path, f, { contentType: f.type || "application/octet-stream" });
+        const path = `${u.user.id}/${sessionId}/${crypto.randomUUID()}-${f.name.replace(/[^\w.-]/g, "_").slice(-120)}`;
+        const { error } = await supabase.storage.from("attachments").upload(path, f, { contentType: f.type || "text/plain" });
         if (error) throw new Error(`Upload failed for ${f.name}`);
         attachments.push({ path, name: f.name, type: f.type || "application/octet-stream" });
       }
@@ -351,14 +351,14 @@ function AssistantMessage({ content, images, demo, sources }: { content: string;
           <Button variant="ghost" size="sm" onClick={() => setShowDemo((s) => !s)}>
             {showDemo ? "Beispiel ausblenden" : "Beispiel zeigen"}
           </Button>
-          {showDemo && <iframe title="Interaktives Lernbeispiel" sandbox="allow-scripts" srcDoc={demo} className="h-96 w-full rounded-sm border-2 border-ink bg-white" />}
+          {showDemo && <iframe title="Interaktives Lernbeispiel" sandbox="allow-scripts" referrerPolicy="no-referrer" srcDoc={withDemoCsp(demo)} className="h-96 w-full rounded-sm border-2 border-ink bg-white" />}
         </div>
       )}
       {sources.length > 0 && (
         <div className="space-y-1">
           <p className="font-text text-body-100 font-bold text-slate">Quellen</p>
           <ul className="space-y-1">
-            {sources.slice(0, 6).map((s) => (
+            {sources.filter((s) => isHttpUrl(s.url)).slice(0, 6).map((s) => (
               <li key={s.url}>
                 <a href={s.url} target="_blank" rel="noreferrer" className="font-text text-body-200 text-ink underline">
                   {s.title || s.url}
@@ -394,4 +394,28 @@ function UserMessage({ content, thinking, confidence, attachments, urls }: { con
       </div>
     </article>
   );
+}
+
+/*
+ * Sicherheit für KI-generierte Inhalte:
+ * - Demo-HTML läuft im sandboxed iframe ohne allow-same-origin (eigene, leere Origin: kein Zugriff auf
+ *   Sitzung, Cookies oder localStorage der App). Die vorangestellte CSP verbietet zusätzlich jeden
+ *   Netzwerkzugriff, Formulare und Navigation – die Demo kann also nichts nach außen senden.
+ * - Quellen-Links nur mit http(s), damit keine javascript:/data:-Links gerendert werden.
+ */
+const DEMO_CSP = `<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; img-src data: blob:; font-src data:; form-action 'none'; base-uri 'none'">`;
+
+/** CSP direkt nach dem Doctype einfügen (davor würde die Seite im Quirks-Modus rendern). */
+function withDemoCsp(html: string): string {
+  const m = /^\s*<!doctype[^>]*>/i.exec(html);
+  return m ? m[0] + DEMO_CSP + html.slice(m[0].length) : DEMO_CSP + html;
+}
+
+function isHttpUrl(url: string): boolean {
+  try {
+    const u = new URL(url);
+    return u.protocol === "https:" || u.protocol === "http:";
+  } catch {
+    return false;
+  }
 }

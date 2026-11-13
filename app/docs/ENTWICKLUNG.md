@@ -90,3 +90,10 @@ Der Free-Plan erlaubt nur 2 aktive Projekte. Die neue App nutzt deshalb **das Li
    die Cloudflare-Adresse als Redirect-URLs.
 3. Danach (nächste Session): `app/supabase/` SQL für `app_*`, Login in der App, E2E-Sync, Rangliste, Konto löschen,
    dann Tutor Stufe 2 (`docs/TUTOR.md`).
+
+### Stand 13.11.2026 (eingerichtet)
+- Dev-App: **https://tap2-coach-dev.akdemir-berkay.workers.dev** (Cloudflare Workers, baut automatisch bei jedem Push auf `dev`,
+  Root `/app`, `npm run build`, `npx wrangler deploy`, `NODE_VERSION=22`; Konfiguration `app/wrangler.jsonc`).
+- Supabase (Live-Projekt): GitHub-Login an, Registrierung an, E-Mail/Telefon/anonym aus.
+  Site URL = Dev-App; Redirect URLs: `https://tap2-coach-dev.akdemir-berkay.workers.dev/**`, `http://localhost:8080/**`.
+- GitHub-OAuth-App „TAP2 Coach (dev)“ angelegt (Secret nur in Supabase).

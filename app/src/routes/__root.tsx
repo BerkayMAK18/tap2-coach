@@ -96,15 +96,15 @@ function NavBtn({ n, current }: { n: { view: string; svg: string; label: string 
   );
 }
 
-/** Neue Version: nie automatisch neu laden (könnte eine Lernrunde unterbrechen) – wie in der Live-App. */
+/** Neue Version: nie automatisch neu laden (könnte eine Lernrunde unterbrechen) – Hinweis im Markup der Live-App (#upd). */
 function UpdatePrompt() {
   const { needRefresh: [need, setNeed], updateServiceWorker } = useRegisterSW();
   if (!need) return null;
   return (
-    <div className="toast" role="status">
+    <div className="upd" id="upd" role="status" aria-live="polite">
       <span>Neue Version verfügbar. Dein Lernstand bleibt erhalten.</span>
-      <button type="button" className="btn small primary" onClick={() => updateServiceWorker(true)}>Neu laden</button>
-      <button type="button" className="btn small ghost" onClick={() => setNeed(false)}>Später</button>
+      <button type="button" className="btn small primary" id="upd-go" onClick={() => updateServiceWorker(true)}>Neu laden</button>
+      <button type="button" className="iconbtn sm" id="upd-x" aria-label="Hinweis schließen" onClick={() => setNeed(false)}><Ic name="x" /></button>
     </div>
   );
 }

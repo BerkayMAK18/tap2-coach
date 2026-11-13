@@ -71,7 +71,7 @@ function Datenschutz() {
             <li>Rechtsgrundlage: Bereitstellung der von dir gewünschten Funktion (Art. 6 Abs. 1 lit. b DSGVO).</li>
             <li>Für die Anmeldung selbst ist GitHub, Inc. (USA) eigenständig verantwortlich; es gilt die Datenschutzerklärung von GitHub.</li>
             <li>Dein Anmelde-Token liegt im lokalen Speicher deines Browsers (technisch notwendig).</li>
-            <li>Du kannst dein Konto jederzeit in den Einstellungen löschen. Dabei werden Kontodaten, verschlüsselte Sicherung und Ranglisten-Eintrag sofort entfernt.</li>
+            <li>Die verschlüsselte Sicherung löschst du jederzeit selbst in den Einstellungen („Cloud-Kopie löschen“). Die Löschung des Kontos selbst kannst du über die oben genannte Kontaktmöglichkeit verlangen; ein Knopf dafür folgt.</li>
           </ul>
         </Section>
       )}

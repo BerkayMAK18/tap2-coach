@@ -10,6 +10,7 @@ export const KEYS = {
   state: "tap2coach",
   session: "tap2coach-sess",
   beforeImport: "tap2coach-vor-import",
+  appSync: "tap2coach-app-sync", // { key, rev } – Sync-Schlüssel nur auf diesem Gerät
 } as const;
 
 /**
@@ -17,9 +18,10 @@ export const KEYS = {
  * so beschreibt er immer genau das, was die App tatsächlich tut (Art. 13 DSGVO).
  * Beim Freischalten einer Funktion: Schalter setzen, Hinweis prüfen, docs/DATENSCHUTZ.md aktualisieren.
  */
+const SUPABASE_ON = Boolean(import.meta.env.VITE_SUPABASE_URL && import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY);
 export const FEATURES = {
-  account: false, // Anmeldung mit GitHub (Supabase Auth)
-  sync: false, // Ende-zu-Ende-verschlüsselte Sicherung/Sync im Konto
+  account: SUPABASE_ON, // Anmeldung mit GitHub (Supabase Auth) – an, sobald die Build-Variablen gesetzt sind
+  sync: SUPABASE_ON, // Ende-zu-Ende-verschlüsselte Sicherung/Sync im Konto
   leaderboard: false, // Rangliste mit selbst gewähltem Benutzernamen (Einwilligung)
   patchNotes: false, // Release-Liste von der GitHub-API
   tutor: false, // KI-Tutor – nur für freigeschaltete Konten (Admin), für andere unsichtbar

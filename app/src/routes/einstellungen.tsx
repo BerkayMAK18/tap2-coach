@@ -10,6 +10,7 @@ import { Button, Card, CardEyebrow, ConfirmDialog, InlineError } from "@/ui";
 import { today } from "@/lib/dates";
 import { isObj } from "@/lib/state";
 import { useProgress } from "@/store/progress";
+import { AccountCard } from "@/components/AccountCard";
 
 export const Route = createFileRoute("/einstellungen")({ component: Einstellungen });
 
@@ -48,6 +49,7 @@ function Einstellungen() {
   return (
     <div className="max-w-2xl space-y-6">
       <h1 className="text-heading-300">Einstellungen</h1>
+      <AccountCard />
       <Card className="space-y-4">
         <CardEyebrow>Sicherung</CardEyebrow>
         <p className="text-body-300">Dein Lernstand liegt nur in diesem Browser. Sichere ihn regelmäßig – oder lade hier eine Sicherung aus der bisherigen App.</p>

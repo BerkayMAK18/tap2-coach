@@ -1,0 +1,20 @@
+/* Eigene Tokens und Schriften – siehe src/theme/tokens.css */
+@import "./theme/tokens.css";
+
+@import "tailwindcss";
+@config "../tailwind.config.ts";
+
+@layer base {
+  body {
+    @apply bg-canvas text-ink font-text;
+  }
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-head;
+  }
+}
+
+.code-editor .cm-editor { min-height: var(--space-20); font-family: inherit; font-size: inherit; }
+.code-editor .cm-content { padding: var(--space-4); }
+.code-editor .cm-gutters { background-color: hsl(var(--muted)); color: hsl(var(--muted-foreground)); border-color: hsl(var(--border)); }
+.code-editor .cm-cursor { border-left-color: hsl(var(--foreground)); }
+.code-editor .cm-focused { outline-color: hsl(var(--ring)); }

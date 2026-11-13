@@ -1,0 +1,19 @@
+# TAP2-focused learning app
+- [x] Document the app's purpose, features, learning principles, scope, and repository orientation in README.md.
+- [x] Compare LearnHarness methodology and architecture with current code; document gaps and prioritized future acceptance criteria in docs/learnharness-abgleich.md.
+- [x] Add persistent dark mode.
+- [x] Add executable Python and SQL editors to relevant learning modules and code questions.
+- [x] Replace exercises navigation and recent sessions with an adaptive topic-based plan, grouped Teil 1 / Teil 2 / Beides / SoWi.
+- [x] Focus curriculum and tutor on application development, using uploaded guide as reference without publishing PDFs.
+- [x] Reset only the requesting learner's knowledge graph (6 nodes removed; 0 remain).
+- [x] Test learning plan rules and signed-in flows; commit changes.
+- [x] Complete evidence-based AI grading, diagnostic tutor phases, adaptive plans, and graph handoff.
+- [x] Test phase and evidence rules and the signed-in grading → tutor → graph flow.
+- [x] Put tutor and graph first; separate the detailed curriculum and searchable conversation history.
+- [x] Resume existing topic learning paths instead of restarting; verify saved conversations after reload.
+- [x] Keep the current tutor task beside the answer with a Quest tab and matching exam-style tables/diagrams.
+- [x] Verify saved tasks, legacy conversations, and the signed-in tutor flow.
+- [x] Separate assignment and chat visually; replace ambiguous navigation icons with visible labels and verify the saved conversation.
+- [x] Replace expanding menu with a compact icon sidebar; keep Tutor focused and archive read-only.
+- [x] Turn curriculum into learning sources with private text/file additions passed as tutor reference material.
+- [x] Show TAP2 category nodes even without learner evidence; verify source saving and navigation.

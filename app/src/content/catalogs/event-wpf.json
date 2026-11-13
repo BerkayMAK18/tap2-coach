@@ -1,0 +1,1024 @@
+{
+  "schema": 1,
+  "id": "wpf",
+  "kurz": "WPF PM",
+  "titel": "Klausur WPF Projektmanagement",
+  "sub": "Intensiv-Workshop: klassisch und agil",
+  "start": "2026-11-10",
+  "ende": "2026-12-18",
+  "reward": {
+    "kind": "title",
+    "id": "azb-experte",
+    "name": "AZB Experte",
+    "txt": "Der Sondertitel für alle, die den Workshop gemeistert haben – zum Anlegen in der Garderobe und sichtbar in der Rangliste."
+  },
+  "info": "Alles aus dem Workshop: Grundlagen und Standards, Lasten- und Pflichtenheft, Rollen und Stakeholder, Planung mit PSP, Gantt und Netzplan, Kosten, Risiken, Abschluss und Scrum. Ergänzt um IHK-typische Rechenaufgaben.",
+  "tipps": [
+    "Netzplan: vorwärts immer den größten FEZ der Vorgänger nehmen, rückwärts immer den kleinsten SAZ der Nachfolger.",
+    "Kritisch ist ein Vorgang mit Gesamtpuffer 0 – der kritische Pfad läuft ohne Lücke vom Start bis zum Ende.",
+    "Lastenheft = WAS (Auftraggeber), Pflichtenheft = WIE (Auftragnehmer). Diese Zuordnung wird fast immer gefragt.",
+    "Meilensteine heißen Objekt + Zustand („Server installiert“), Tätigkeiten Objekt + Verb („Server installieren“)."
+  ],
+  "art": "event",
+  "enabled": false,
+  "tags": [
+    "FIAE",
+    "Event",
+    "WPF PM"
+  ],
+  "kapitel": [
+    {
+      "id": "pm",
+      "titel": "Projekt und Projektmanagement",
+      "lern": [
+        [
+          "Projekt",
+          "Einmalig (neue Ausgangs- und Handlungsbedingungen) · zeitlich befristet (Anfang und Ende) · eigene Organisationsform (Team) · eigene Ressourcen (Menschen, Tools, Budget) · komplex und arbeitsteilig."
+        ],
+        [
+          "Projektmanagement",
+          "DIN 69901: Gesamtheit von Führungsaufgaben, -organisation, -techniken und -mitteln für die Abwicklung eines Projekts."
+        ],
+        [
+          "Standards im Vergleich",
+          "DIN 69901: Führung, Organisation, Mittel – normbasiert, deutsch geprägt · GPM/IPMA: Methoden, Verhalten, Kompetenzen – ganzheitlich, kompetenzorientiert · ISO 21500: Methoden, Lifecycle – globaler Standard, qualitätsorientiert · PMI: Wissen, Skills, Tools – international, praxisorientiert · PRINCE2: Planung, Kontrolle, Motivation – prozessorientiert, Governance."
+        ],
+        [
+          "Magisches Dreieck",
+          "Zeit, Kosten und Leistung/Qualität hängen zusammen. Ändert man eine Ecke, wirkt das auf die anderen: Mehr Leistung bei festem Termin kostet mehr oder geht zulasten der Qualität."
+        ]
+      ],
+      "fig": "ev-dreieck",
+      "items": [
+        {
+          "id": "ev:wpf:pm1",
+          "topic": "pm",
+          "type": "mc",
+          "q": "Welche der folgenden Aufgaben ist ein Projekt?",
+          "options": [
+            "Einführung eines neuen Ticketsystems bis Ende März",
+            "Tägliche Datensicherung aller Server um 2 Uhr nachts",
+            "Monatliche Gehaltsabrechnung für alle Mitarbeiter",
+            "Wöchentliches Einspielen von Updates auf allen PCs"
+          ],
+          "correct": 0,
+          "note": "Nur die Einführung ist einmalig, befristet und braucht ein eigenes Team. Die anderen sind wiederkehrende Routineaufgaben."
+        },
+        {
+          "id": "ev:wpf:pm2",
+          "topic": "pm",
+          "type": "card",
+          "q": "Nennen Sie vier Merkmale eines Projekts. (4 P)",
+          "a": "Einmaligkeit der Ausgangs- und Handlungsbedingungen\nzeitliche Befristung mit Anfang und Ende\neigene Organisationsform (Projektteam)\neigene Ressourcen (Personal, Tools, Budget)\nKomplexität und Arbeitsteilung",
+          "note": "Je 1 P pro Merkmal, vier genügen."
+        },
+        {
+          "id": "ev:wpf:pm3",
+          "topic": "pm",
+          "type": "mc",
+          "q": "Welcher Standard ist normbasiert, deutsch geprägt und beschreibt Projektmanagement als Gesamtheit von Führungsaufgaben, -organisation, -techniken und -mitteln?",
+          "options": [
+            "DIN 69901",
+            "PRINCE2",
+            "PMI",
+            "ISO 21500"
+          ],
+          "correct": 0,
+          "note": "Das ist die Definition der DIN 69901."
+        },
+        {
+          "id": "ev:wpf:pm4",
+          "topic": "pm",
+          "type": "mc",
+          "q": "Welcher Ansatz gilt als prozessorientiert und stark auf Governance ausgelegt?",
+          "options": [
+            "PRINCE2",
+            "GPM / IPMA",
+            "DIN 69901",
+            "PMI"
+          ],
+          "correct": 0,
+          "note": "PRINCE2 setzt auf Planung, Kontrolle und Motivation in festen Prozessen. GPM/IPMA ist kompetenzorientiert, PMI praxisorientiert."
+        },
+        {
+          "id": "ev:wpf:pm5",
+          "topic": "pm",
+          "type": "mc",
+          "q": "GPM / IPMA gilt als ganzheitlicher Ansatz.\n\nWorauf legt er den Schwerpunkt?",
+          "options": [
+            "Methoden, Verhalten und Kompetenzen",
+            "Normen, Formulare und Prüfprozesse",
+            "Planung, Kontrolle und Motivation",
+            "Wissen, Skills und Tools"
+          ],
+          "correct": 0,
+          "note": "GPM/IPMA: Methoden, Verhalten, Kompetenzen. Planung, Kontrolle und Motivation steht für PRINCE2, Wissen, Skills und Tools für PMI."
+        },
+        {
+          "id": "ev:wpf:pm6",
+          "topic": "pm",
+          "type": "mc",
+          "q": "Der Kunde wünscht mitten im Projekt zusätzliche Funktionen, der Liefertermin bleibt aber fest.\n\nWas folgt nach dem magischen Dreieck?",
+          "options": [
+            "Die Kosten steigen oder die Qualität sinkt",
+            "Die Kosten sinken und die Qualität steigt",
+            "Zeit, Kosten und Qualität bleiben unverändert",
+            "Allein der Termin verschiebt sich automatisch"
+          ],
+          "correct": 0,
+          "note": "Mehr Leistung bei gleicher Zeit lässt sich nur mit mehr Ressourcen (Kosten) oder Abstrichen bei der Qualität erreichen."
+        },
+        {
+          "id": "ev:wpf:pm7",
+          "topic": "pm",
+          "type": "card",
+          "q": "Erläutern Sie das magische Dreieck des Projektmanagements an einem Beispiel. (3 P)",
+          "a": "Die drei Zielgrößen Zeit, Kosten und Leistung/Qualität hängen voneinander ab. Verändert man eine, wirkt sich das auf die anderen aus.\nBeispiel: Soll die neue App zwei Wochen früher fertig sein, braucht es mehr Entwickler (höhere Kosten) oder es werden Funktionen gestrichen (weniger Leistung).",
+          "note": "1 P drei Größen, 1 P Abhängigkeit, 1 P passendes Beispiel."
+        }
+      ]
+    },
+    {
+      "id": "anf",
+      "titel": "Lastenheft, Pflichtenheft, agil",
+      "lern": [
+        [
+          "Lastenheft",
+          "Vom Auftraggeber (Kunde). WAS wird benötigt? Ziele, fachliche Anforderungen, Rahmenbedingungen – ohne technische Lösung. Grundlage für Ausschreibung und Pflichtenheft. Inhalte: Einleitung, Ist-Zustand, Soll-Zustand, funktionale und nicht-funktionale Anforderungen, Rahmenbedingungen, Abnahmekriterien."
+        ],
+        [
+          "Pflichtenheft",
+          "Vom Auftragnehmer nach Abstimmung mit dem Auftraggeber, oft Vertragsbestandteil. WIE wird es umgesetzt? Inhalte: Bezug zum Lastenheft, Systemarchitektur, Umsetzungsdetails, funktionale Umsetzung, Testkonzept, Betrieb/Wartung/Schulung."
+        ],
+        [
+          "Klassisch",
+          "Wasserfall oder V-Modell: sequenziell. Anforderungen stehen vor dem Start möglichst vollständig fest, Änderungen sind teuer und laufen über einen Änderungsprozess."
+        ],
+        [
+          "Agil",
+          "Anforderungen ändern sich, werden iterativ beschrieben. Product Vision + Product Backlog ersetzen das Lastenheft, Sprint Backlog + Definition of Done das Pflichtenheft – Letztere aber nur für den aktuellen Sprint."
+        ]
+      ],
+      "items": [
+        {
+          "id": "ev:wpf:anf1",
+          "topic": "anf",
+          "type": "mc",
+          "q": "Wer erstellt das Lastenheft?",
+          "options": [
+            "Der Auftraggeber",
+            "Der Auftragnehmer",
+            "Der Lenkungsausschuss",
+            "Das Entwicklungsteam"
+          ],
+          "correct": 0,
+          "note": "Das Lastenheft beschreibt aus Kundensicht, WAS benötigt wird. Das Pflichtenheft schreibt der Auftragnehmer."
+        },
+        {
+          "id": "ev:wpf:anf2",
+          "topic": "anf",
+          "type": "mc",
+          "q": "„Die Anwendung wird als Spring-Backend mit einer PostgreSQL-Datenbank umgesetzt.“\n\nIn welches Dokument gehört dieser Satz?",
+          "options": [
+            "Pflichtenheft – er beschreibt, wie umgesetzt wird",
+            "Lastenheft – er beschreibt, was benötigt wird",
+            "Projektauftrag – er legt Budget und Termin fest",
+            "Abschlussbericht – er hält die Ergebnisse fest"
+          ],
+          "correct": 0,
+          "note": "Technische Lösung, Architektur und Umsetzungsdetails gehören ins Pflichtenheft."
+        },
+        {
+          "id": "ev:wpf:anf3",
+          "topic": "anf",
+          "type": "mc",
+          "q": "Welcher Inhalt gehört typischerweise in das Lastenheft?",
+          "options": [
+            "Ist-Zustand mit Schwachstellen und die Abnahmekriterien",
+            "Systemarchitektur mit Datenstrukturen und Algorithmen",
+            "Testkonzept mit den konkreten Testfällen je Modul",
+            "Schulungsplan und Übergabeprozess an den Betrieb"
+          ],
+          "correct": 0,
+          "note": "Ist-/Soll-Zustand, Anforderungen, Rahmenbedingungen und Abnahmekriterien stehen im Lastenheft. Architektur, Testkonzept und Betrieb im Pflichtenheft."
+        },
+        {
+          "id": "ev:wpf:anf4",
+          "topic": "anf",
+          "type": "mc",
+          "q": "„Die Suche zeigt Ergebnisse in unter einer Sekunde an.“\n\nWelche Art von Anforderung ist das?",
+          "options": [
+            "Nicht-funktionale Anforderung (Performance)",
+            "Funktionale Anforderung (Suchfunktion)",
+            "Rahmenbedingung (IT-Umgebung)",
+            "Organisatorische Rahmenvorgabe (Termin)"
+          ],
+          "correct": 0,
+          "note": "Sie beschreibt nicht, was das System tut, sondern wie gut – Performance ist eine nicht-funktionale Anforderung."
+        },
+        {
+          "id": "ev:wpf:anf5",
+          "topic": "anf",
+          "type": "mc",
+          "q": "Was ersetzt im agilen Vorgehen am ehesten das Lastenheft?",
+          "options": [
+            "Product Vision und Product Backlog",
+            "Sprint Backlog und Definition of Done",
+            "Daily Scrum und Sprint Review",
+            "Burndown-Chart und Inkrement"
+          ],
+          "correct": 0,
+          "note": "Vision und Product Backlog beschreiben Nutzen, Ziele und grobe Anforderungen aus Kundensicht. Sprint Backlog und DoD übernehmen die Rolle des Pflichtenhefts."
+        },
+        {
+          "id": "ev:wpf:anf6",
+          "topic": "anf",
+          "type": "mc",
+          "q": "Warum sind Änderungen im klassischen Wasserfallmodell teuer?",
+          "options": [
+            "Alles ist vorab geplant, Änderungen brauchen einen Änderungsprozess",
+            "Anforderungen werden erst am Ende gesammelt und dann komplett neu geplant",
+            "Jede Änderung muss der Scrum Master im Daily Scrum ausdrücklich freigeben",
+            "Das Pflichtenheft darf nach dem Projektstart nicht mehr gelesen werden"
+          ],
+          "correct": 0,
+          "note": "Im klassischen Vorgehen ist alles vorab geplant. Spätere Änderungen betreffen bereits erledigte Phasen und müssen formal beantragt werden."
+        },
+        {
+          "id": "ev:wpf:anf7",
+          "topic": "anf",
+          "type": "card",
+          "q": "Vergleichen Sie Lastenheft und Pflichtenheft nach Ersteller, Inhalt und Nutzen. (6 P)",
+          "a": "Ersteller: Lastenheft – Auftraggeber (Kunde); Pflichtenheft – Auftragnehmer nach Abstimmung mit dem Auftraggeber.\nInhalt: Lastenheft – WAS: Ziele, fachliche Anforderungen, Rahmenbedingungen ohne technische Lösung; Pflichtenheft – WIE: technische Umsetzung der Anforderungen, Architektur, Testkonzept.\nNutzen: Lastenheft – Grundlage für Ausschreibung und Angebote; Pflichtenheft – Basis für Planung, Entwicklung und Tests, oft Vertragsbestandteil.",
+          "note": "Je Kriterium 2 P (beide Seiten richtig)."
+        }
+      ]
+    },
+    {
+      "id": "org",
+      "titel": "Rollen und Stakeholder",
+      "lern": [
+        [
+          "Rollen",
+          "Auftraggeber/Sponsor: genehmigt Ziele, Budget, Ressourcen; Gesamtverantwortung · Projektleiter: plant, steuert, kommuniziert, berichtet; verantwortet Ergebnis, Termine, Budget, Personal · Teilprojektleiter: steuert einen Bereich · Projektteam: setzt Arbeitspakete um · Stakeholder: liefern Anforderungen und Feedback · Lenkungsausschuss: entscheidet bei Eskalationen, priorisiert strategisch."
+        ],
+        [
+          "Gute Organisation",
+          "Klare Rollen, bekannte Stakeholder mit Erwartungen und Einfluss, strukturierte Kommunikation (Kommunikationsmatrix: wer informiert wen wann wie worüber), schnelle nachvollziehbare Entscheidungen, positive Projektkultur."
+        ],
+        [
+          "Stakeholder-Analyse",
+          "Alle Personen und Gruppen finden, die Einfluss auf das Projekt haben oder betroffen sind – um Unterstützung zu sichern und Widerstände zu verringern. Einordnung nach Einfluss und Interesse."
+        ],
+        [
+          "Matrix",
+          "Hoher Einfluss, hohes Interesse: eng einbinden · hoher Einfluss, wenig Interesse: zufriedenstellen · wenig Einfluss, hohes Interesse: informieren · wenig Einfluss, wenig Interesse: beobachten."
+        ]
+      ],
+      "fig": "ev-stake",
+      "items": [
+        {
+          "id": "ev:wpf:org1",
+          "topic": "org",
+          "type": "mc",
+          "q": "Wer entscheidet bei Eskalationen und priorisiert strategisch?",
+          "options": [
+            "Der Lenkungsausschuss",
+            "Der Projektleiter",
+            "Der Teilprojektleiter",
+            "Das Projektteam"
+          ],
+          "correct": 0,
+          "note": "Der Lenkungsausschuss (Steering Committee) überwacht strategisch und entscheidet, wenn der Projektleiter nicht mehr allein entscheiden kann."
+        },
+        {
+          "id": "ev:wpf:org2",
+          "topic": "org",
+          "type": "mc",
+          "q": "Wer verantwortet Ergebnis, Termine, Budget und Personal und berichtet regelmäßig über den Stand?",
+          "options": [
+            "Der Projektleiter",
+            "Der Auftraggeber",
+            "Ein Stakeholder",
+            "Der Lenkungsausschuss"
+          ],
+          "correct": 0,
+          "note": "Der Projektleiter plant, steuert, kommuniziert und berichtet."
+        },
+        {
+          "id": "ev:wpf:org3",
+          "topic": "org",
+          "type": "mc",
+          "q": "Wer genehmigt Ziele, Budget und Ressourcen des Projekts?",
+          "options": [
+            "Der Auftraggeber (Sponsor)",
+            "Der Projektleiter (PL)",
+            "Der Teilprojektleiter (TPL)",
+            "Das Projektteam selbst"
+          ],
+          "correct": 0,
+          "note": "Auftraggeber/Sponsor tragen die Gesamtverantwortung und die strategische Ausrichtung."
+        },
+        {
+          "id": "ev:wpf:org4",
+          "topic": "org",
+          "type": "mc",
+          "q": "Die Konzern-IT muss die Server freigeben und hat damit großen Einfluss, interessiert sich aber kaum für Ihr Projekt.\n\nWie gehen Sie laut Stakeholder-Matrix vor?",
+          "options": [
+            "Zufriedenstellen – Anforderungen früh berücksichtigen",
+            "Eng einbinden – in alle Entscheidungen einbeziehen",
+            "Informieren – regelmäßig einen Newsletter schicken",
+            "Beobachten – nur bei Bedarf ansprechen"
+          ],
+          "correct": 0,
+          "note": "Hoher Einfluss, wenig Interesse → zufriedenstellen: ihre Anforderungen kennen und früh berücksichtigen, ohne sie mit Details zu überhäufen."
+        },
+        {
+          "id": "ev:wpf:org5",
+          "topic": "org",
+          "type": "mc",
+          "q": "Die späteren Nutzer des Systems haben großes Interesse, aber wenig Einfluss.\n\nWas ist angemessen?",
+          "options": [
+            "Regelmäßig informieren, Feedback einholen",
+            "Sie in den Lenkungsausschuss aufnehmen",
+            "Nur beobachten und nicht kommunizieren",
+            "Die Budgetfreigabe von ihnen einholen"
+          ],
+          "correct": 0,
+          "note": "Wenig Einfluss, hohes Interesse → informieren. Ihr Feedback ist trotzdem wertvoll für die Akzeptanz."
+        },
+        {
+          "id": "ev:wpf:org6",
+          "topic": "org",
+          "type": "mc",
+          "q": "Wozu dient eine Kommunikationsmatrix?",
+          "options": [
+            "Sie legt fest, wer wen wann wie worüber informiert",
+            "Sie zeigt, welche Arbeitspakete voneinander abhängen",
+            "Sie bewertet Risiken nach Eintritt und Schaden",
+            "Sie ordnet Stakeholder nach Einfluss und Interesse"
+          ],
+          "correct": 0,
+          "note": "Die Kommunikationsmatrix sorgt dafür, dass Kommunikation strukturiert und offen verläuft."
+        },
+        {
+          "id": "ev:wpf:org7",
+          "topic": "org",
+          "type": "card",
+          "q": "Nennen Sie das Ziel einer Stakeholder-Analyse und beschreiben Sie die Einordnung in die Einfluss-Interesse-Matrix. (4 P)",
+          "a": "Ziel: alle Personen, Gruppen und Organisationen erkennen und steuern, die Einfluss auf das Projekt haben oder davon betroffen sind – um Unterstützung zu sichern und Widerstände zu verringern.\nMatrix mit den Achsen Einfluss und Interesse:\nhoch/hoch – eng einbinden\nhoher Einfluss, wenig Interesse – zufriedenstellen\nwenig Einfluss, hohes Interesse – informieren\nwenig/wenig – beobachten",
+          "note": "1 P Ziel, 1 P Achsen, 2 P sinnvolle Strategien für die Felder."
+        }
+      ]
+    },
+    {
+      "id": "pla",
+      "titel": "Projektplanung, PSP und Gantt",
+      "lern": [
+        [
+          "Phasen",
+          "Projektauftrag/-definition (Machbarkeitsstudie: technisch, wirtschaftlich …) → Planung (Meilensteine) → Durchführung (Gantt zur Steuerung) → Abschluss (Abschlussbericht)."
+        ],
+        [
+          "Erfolgsfaktoren",
+          "SMARTe Ziele (spezifisch, messbar, erreichbar, relevant, terminiert) · abgestimmte, nachvollziehbare Änderungen · gemischtes Team mit fachlichen und sozialen Kompetenzen · klare Rollen · Rückhalt von Vorgesetzten und Sponsor · bereitgestellte Ressourcen."
+        ],
+        [
+          "Projektstrukturplan",
+          "Gliedert die Gesamtaufgabe in Haupt- und Teilaufgaben bis zu Arbeitspaketen. Funktionsorientiert (Konzeption, Beschaffung, Aufbau), objektorientiert (Frontend, Backend, Datenbank) oder phasenorientiert (Analyse, Entwurf, Test)."
+        ],
+        [
+          "Ablauf und Meilensteine",
+          "Der Ablaufplan bringt alle Aktivitäten mit Abhängigkeiten in eine Reihenfolge. Meilensteine sind Kontrollpunkte. Tätigkeit: Objekt + Verb („Budget genehmigen lassen“) · Meilenstein: Objekt + Zustand („Budget genehmigt“)."
+        ],
+        [
+          "Gantt",
+          "Horizontales Balkendiagramm auf einer Zeitachse: Start, Dauer, Ende jeder Aufgabe, dazu Abhängigkeiten, Parallelität und Meilensteine. Verantwortliche benennen, Puffer einplanen."
+        ]
+      ],
+      "fig": "ev-gantt",
+      "items": [
+        {
+          "id": "ev:wpf:pla1",
+          "topic": "pla",
+          "type": "mc",
+          "q": "Welche Benennung ist für einen Meilenstein korrekt?",
+          "options": [
+            "Server installiert",
+            "Server installieren",
+            "Installation des Servers",
+            "Serverinstallation läuft"
+          ],
+          "correct": 0,
+          "note": "Meilensteine werden als Objekt + Zustand benannt, Tätigkeiten als Objekt + Verb."
+        },
+        {
+          "id": "ev:wpf:pla2",
+          "topic": "pla",
+          "type": "mc",
+          "q": "Welches Projektziel ist SMART formuliert?",
+          "options": [
+            "Bis 31.03. sinkt die Bearbeitungszeit pro Ticket um 20 %",
+            "Die Bearbeitung der Tickets soll deutlich schneller werden",
+            "Wir verbessern die Zufriedenheit unserer Kunden nachhaltig",
+            "Bis zum Sommer wird das Ticketsystem irgendwie besser"
+          ],
+          "correct": 0,
+          "note": "Nur das erste Ziel ist spezifisch, messbar (20 %), terminiert (31.03.) und damit prüfbar."
+        },
+        {
+          "id": "ev:wpf:pla3",
+          "topic": "pla",
+          "type": "card",
+          "q": "Wofür steht die Abkürzung SMART bei Projektzielen? (5 P)",
+          "a": "S – specific (spezifisch, eindeutig)\nM – measurable (messbar)\nA – achievable (erreichbar)\nR – relevant (bedeutsam für das Projekt)\nT – time-bound (terminiert)",
+          "note": "Je 1 P pro Buchstabe."
+        },
+        {
+          "id": "ev:wpf:pla4",
+          "topic": "pla",
+          "type": "mc",
+          "q": "Ein Projektstrukturplan „IT-Installation“ ist in Konzeption, Beschaffung, Aufbau und Dokumentation gegliedert.\n\nWie ist er gegliedert?",
+          "options": [
+            "Funktionsorientiert",
+            "Objektorientiert",
+            "Ressourcenorientiert",
+            "Kostenorientiert"
+          ],
+          "correct": 0,
+          "note": "Die Hauptaufgaben sind Funktionen bzw. Tätigkeitsbereiche – also funktionsorientiert."
+        },
+        {
+          "id": "ev:wpf:pla5",
+          "topic": "pla",
+          "type": "mc",
+          "q": "Ein Projektstrukturplan für einen Webshop ist in Frontend, Backend, Datenbank und Zahlungsmodul gegliedert.\n\nWie ist er gegliedert?",
+          "options": [
+            "Objektorientiert",
+            "Funktionsorientiert",
+            "Phasenorientiert",
+            "Terminorientiert"
+          ],
+          "correct": 0,
+          "note": "Gegliedert wird nach den Bestandteilen (Objekten) des Produkts."
+        },
+        {
+          "id": "ev:wpf:pla6",
+          "topic": "pla",
+          "type": "mc",
+          "q": "Was ist die kleinste Einheit eines Projektstrukturplans?",
+          "options": [
+            "Das Arbeitspaket",
+            "Der Meilenstein",
+            "Das Teilprojekt",
+            "Der Gantt-Balken"
+          ],
+          "correct": 0,
+          "note": "Der PSP gliedert in Haupt- und Teilaufgaben bis hinunter zu den Arbeitspaketen."
+        },
+        {
+          "id": "ev:wpf:pla7",
+          "topic": "pla",
+          "type": "mc",
+          "q": "In welcher Phase prüft eine Machbarkeitsstudie das Vorhaben aus technischer und wirtschaftlicher Sicht?",
+          "options": [
+            "Projektdefinition",
+            "Projektplanung",
+            "Projektdurchführung",
+            "Projektabschluss"
+          ],
+          "correct": 0,
+          "note": "Bevor geplant wird, muss klar sein, ob das Projekt überhaupt machbar ist."
+        },
+        {
+          "id": "ev:wpf:pla8",
+          "topic": "pla",
+          "type": "mc",
+          "q": "A (2 Tage) → B (4, nach A) → C (3, nach B) und D (2, nach B) → E (1, nach C und D) → F (4, nach E) → G (5, nach F).\n\nWann endet G frühestens?",
+          "options": [
+            "Nach 19 Tagen",
+            "Nach 18 Tagen",
+            "Nach 21 Tagen",
+            "Nach 16 Tagen"
+          ],
+          "correct": 0,
+          "note": "A 0–2, B 2–6, C 6–9 und D 6–8, E startet nach dem späteren Vorgänger C: 9–10, F 10–14, G startet nach F: 14–19."
+        },
+        {
+          "id": "ev:wpf:pla9",
+          "topic": "pla",
+          "type": "card",
+          "q": "Beschreiben Sie, was ein Gantt-Diagramm zeigt und worauf man beim Erstellen achten sollte. (4 P)",
+          "a": "Ein Gantt-Diagramm ist ein horizontales Balkendiagramm auf einer Zeitachse. Jede Aufgabe ist ein Balken mit Start, Dauer und Ende; Abhängigkeiten (Vorgänger → Nachfolger), parallele Aktivitäten und Meilensteine werden sichtbar.\nZu beachten: Verantwortliche klar benennen, Puffer einplanen, Abhängigkeiten deutlich machen.",
+          "note": "2 P Darstellung, 2 P zwei Hinweise."
+        }
+      ]
+    },
+    {
+      "id": "netz",
+      "titel": "Netzplan",
+      "lern": [
+        [
+          "Knoten",
+          "Jeder Vorgang hat PS (Name) und D (Dauer), FAZ/FEZ oben, SAZ/SEZ unten, GP und FP. Die Aufgabe gibt die Anordnung vor – genau übernehmen."
+        ],
+        [
+          "Vorwärts",
+          "FAZ des ersten Vorgangs = 0. FEZ = FAZ + D. FAZ eines Nachfolgers = FEZ des Vorgängers – bei mehreren Vorgängern der größte FEZ."
+        ],
+        [
+          "Rückwärts",
+          "SEZ des letzten Vorgangs = sein FEZ. SAZ = SEZ − D. SEZ eines Vorgängers = SAZ des Nachfolgers – bei mehreren Nachfolgern der kleinste SAZ."
+        ],
+        [
+          "Puffer",
+          "GP = SAZ − FAZ: so weit kann sich der Vorgang verschieben, ohne das Projektende zu gefährden. FP = kleinster FAZ der Nachfolger − eigener FEZ: Verschiebung ohne Einfluss auf den direkten Nachfolger."
+        ],
+        [
+          "Kritischer Pfad",
+          "Alle Vorgänge mit GP = 0. Jede Verzögerung dort verschiebt das Projektende."
+        ]
+      ],
+      "fig": "ev-netz",
+      "items": [
+        {
+          "id": "ev:wpf:netz1",
+          "topic": "netz",
+          "type": "mc",
+          "q": "Wie berechnet man den FEZ eines Vorgangs?",
+          "options": [
+            "FEZ = FAZ + Dauer",
+            "FEZ = SAZ + Dauer",
+            "FEZ = SEZ − Dauer",
+            "FEZ = FAZ − Dauer"
+          ],
+          "correct": 0,
+          "note": "Frühestes Ende = frühester Anfang + Dauer."
+        },
+        {
+          "id": "ev:wpf:netz2",
+          "topic": "netz",
+          "type": "mc",
+          "q": "Ein Vorgang hat zwei Vorgänger mit FEZ 8 und FEZ 9.\n\nWelcher FAZ gilt für ihn?",
+          "options": [
+            "9 – der größte FEZ der Vorgänger",
+            "8 – der kleinste FEZ der Vorgänger",
+            "17 – die Summe beider FEZ",
+            "8,5 – der Mittelwert beider FEZ"
+          ],
+          "correct": 0,
+          "note": "Ein Vorgang kann erst beginnen, wenn alle Vorgänger fertig sind – also beim größten FEZ."
+        },
+        {
+          "id": "ev:wpf:netz3",
+          "topic": "netz",
+          "type": "mc",
+          "q": "Ein Vorgang hat zwei Nachfolger mit SAZ 7 und SAZ 10.\n\nWelcher SEZ gilt für ihn?",
+          "options": [
+            "7 – der kleinste SAZ der Nachfolger",
+            "10 – der größte SAZ der Nachfolger",
+            "17 – die Summe beider SAZ",
+            "3 – die Differenz beider SAZ"
+          ],
+          "correct": 0,
+          "note": "Er muss spätestens fertig sein, wenn der früheste Nachfolger spätestens beginnen muss – also beim kleinsten SAZ."
+        },
+        {
+          "id": "ev:wpf:netz4",
+          "topic": "netz",
+          "type": "mc",
+          "q": "Wie berechnet sich der Gesamtpuffer eines Vorgangs?",
+          "options": [
+            "GP = SAZ − FAZ",
+            "GP = FAZ des Nachfolgers − FEZ",
+            "GP = SEZ − SAZ",
+            "GP = FEZ − FAZ"
+          ],
+          "correct": 0,
+          "note": "GP = SAZ − FAZ (gleichwertig: SEZ − FEZ). FAZ des Nachfolgers − FEZ ist der freie Puffer, SEZ − SAZ und FEZ − FAZ sind die Dauer."
+        },
+        {
+          "id": "ev:wpf:netz5",
+          "topic": "netz",
+          "type": "mc",
+          "q": "Was bedeutet ein Gesamtpuffer von 0?",
+          "options": [
+            "Der Vorgang ist kritisch, jede Verzögerung verschiebt das Ende",
+            "Der Vorgang ist schon erledigt und muss nicht geplant werden",
+            "Der Vorgang lässt sich beliebig nach hinten verschieben",
+            "Der Vorgang hat keinen Vorgänger und startet bei 0"
+          ],
+          "correct": 0,
+          "note": "GP = 0 heißt: kein Spielraum. Solche Vorgänge bilden den kritischen Pfad."
+        },
+        {
+          "id": "ev:wpf:netz6",
+          "topic": "netz",
+          "type": "mc",
+          "q": "Worin unterscheidet sich der freie Puffer vom Gesamtpuffer?",
+          "options": [
+            "FP: ohne Einfluss auf den direkten Nachfolger · GP: ohne Einfluss auf das Projektende",
+            "FP: ohne Einfluss auf das Projektende · GP: ohne Einfluss auf den direkten Nachfolger",
+            "FP gilt nur für den ersten Vorgang · GP für alle übrigen Vorgänge",
+            "FP ist immer größer als GP · GP ist immer genau null"
+          ],
+          "correct": 0,
+          "note": "Den freien Puffer kann ein Vorgang nutzen, ohne dass sich ein anderer Vorgang verschiebt. Der Gesamtpuffer darf Nachfolger verschieben, solange das Projektende hält. Es gilt FP ≤ GP."
+        },
+        {
+          "id": "ev:wpf:netz7",
+          "topic": "netz",
+          "type": "card",
+          "q": "Server-Migration (Dauer in Tagen, Vorgänger): A Analyse 3 (–) · B Hardware bestellen 5 (A) · C Konzept 4 (A) · D Testumgebung 2 (C) · E Installation 3 (B, D) · F Schulung 2 (C) · G Abnahme 1 (E, F).\n\nFühren Sie die Vorwärtsrechnung durch und geben Sie FAZ und FEZ aller Vorgänge an. (4 P)",
+          "a": "A: FAZ 0, FEZ 3\nB: FAZ 3, FEZ 8\nC: FAZ 3, FEZ 7\nD: FAZ 7, FEZ 9\nE: FAZ 9 (größter FEZ von B = 8 und D = 9), FEZ 12\nF: FAZ 7, FEZ 9\nG: FAZ 12 (größter FEZ von E = 12 und F = 9), FEZ 13\nProjektdauer: 13 Tage",
+          "note": "1 P Start bei 0, 2 P richtige Werte bei mehreren Vorgängern (E, G), 1 P alle übrigen Werte."
+        },
+        {
+          "id": "ev:wpf:netz8",
+          "topic": "netz",
+          "type": "card",
+          "q": "Ein Team plant eine Server-Migration.\n\nVorgänge (Dauer in Tagen, Vorgänger):\nA Analyse 3, –\nB Hardware bestellen 5, A\nC Konzept 4, A\nD Testumgebung 2, C\nE Installation 3, B und D\nF Schulung 2, C\nG Abnahme 1, E und F\n\nDie Vorwärtsrechnung ist schon erledigt:\nVorgang | FAZ | FEZ\nA | 0 | 3\nB | 3 | 8\nC | 3 | 7\nD | 7 | 9\nE | 9 | 12\nF | 7 | 9\nG | 12 | 13\n\nBerechnen Sie SAZ, SEZ, Gesamtpuffer und freien Puffer aller Vorgänge und geben Sie den kritischen Pfad an. (5 P)",
+          "a": "Vorgang | FAZ | FEZ | SAZ | SEZ | GP | FP\nA | 0 | 3 | 0 | 3 | 0 | 0\nB | 3 | 8 | 4 | 9 | 1 | 1\nC | 3 | 7 | 3 | 7 | 0 | 0\nD | 7 | 9 | 7 | 9 | 0 | 0\nE | 9 | 12 | 9 | 12 | 0 | 0\nF | 7 | 9 | 10 | 12 | 3 | 3\nG | 12 | 13 | 12 | 13 | 0 | 0\n\nRückwärts mit mehreren Nachfolgern: SEZ von C = kleinster SAZ von D (7) und F (10) = 7. SEZ von A = kleinster SAZ von B (4) und C (3) = 3.\nKritischer Pfad: A – C – D – E – G, Projektdauer 13 Tage.",
+          "note": "2 P Rückwärtsrechnung (kleinster SAZ bei C und A), 2 P Gesamt- und freie Puffer, 1 P kritischer Pfad."
+        },
+        {
+          "id": "ev:wpf:netz9",
+          "topic": "netz",
+          "type": "mc",
+          "q": "Welcher Weg ist im Projekt „Server-Migration“ (A 3, B 5 nach A, C 4 nach A, D 2 nach C, E 3 nach B und D, F 2 nach C, G 1 nach E und F) kritisch?",
+          "options": [
+            "A – C – D – E – G",
+            "A – B – E – G",
+            "A – C – F – G",
+            "A – B – D – E – G"
+          ],
+          "correct": 0,
+          "note": "A–C–D–E–G dauert 3 + 4 + 2 + 3 + 1 = 13 Tage – der längste Weg. A–B–E–G dauert 12, A–C–F–G 10. B → D gibt es nicht."
+        },
+        {
+          "id": "ev:wpf:netz10",
+          "topic": "netz",
+          "type": "mc",
+          "q": "Ein Team plant eine Server-Migration.\n\nVorgänge (Dauer in Tagen, Vorgänger):\nA Analyse 3, –\nB Hardware bestellen 5, A\nC Konzept 4, A\nD Testumgebung 2, C\nE Installation 3, B und D\nF Schulung 2, C\nG Abnahme 1, E und F\n\nDie Hardware-Lieferung (B) verzögert sich um 2 Tage. Was passiert mit dem Projektende?",
+          "options": [
+            "Es verschiebt sich um 1 Tag, weil B nur 1 Tag Puffer hat",
+            "Es verschiebt sich um 2 Tage, weil B auf dem kritischen Pfad liegt",
+            "Es bleibt gleich, weil B 3 Tage Puffer hat",
+            "Es verschiebt sich um 3 Tage, weil E und G folgen"
+          ],
+          "correct": 0,
+          "note": "Ohne Verzug endet das Projekt nach 13 Tagen (kritischer Pfad A – C – D – E – G). B liegt nicht darauf: FEZ 8, SEZ 9, also 1 Tag Gesamtpuffer. Ein Tag Verzug wird aufgefangen, der zweite verschiebt E und G – das Projekt endet nach 14 statt 13 Tagen."
+        },
+        {
+          "id": "ev:wpf:netz11",
+          "topic": "netz",
+          "type": "mc",
+          "q": "Ein Team plant eine Server-Migration.\n\nVorgänge (Dauer in Tagen, Vorgänger):\nA Analyse 3, –\nB Hardware bestellen 5, A\nC Konzept 4, A\nD Testumgebung 2, C\nE Installation 3, B und D\nF Schulung 2, C\nG Abnahme 1, E und F\n\nWie lange dauert das Projekt mindestens?",
+          "options": [
+            "13 Tage",
+            "12 Tage",
+            "15 Tage",
+            "20 Tage"
+          ],
+          "correct": 0,
+          "note": "Die Dauer bestimmt der längste Weg: A – C – D – E – G = 3 + 4 + 2 + 3 + 1 = 13 Tage. A – B – E – G dauert 12, A – C – F – G 10 Tage. 20 Tage wäre die Summe aller Vorgänge – parallele Vorgänge zählen aber nicht doppelt."
+        }
+      ]
+    },
+    {
+      "id": "kr",
+      "titel": "Kosten, Risiken, Abschluss",
+      "lern": [
+        [
+          "Personalkosten intern",
+          "Quellen: Gehaltsbuchhaltung, Kostenrechnung (Controlling), Tarifverträge. Zum Brutto kommen AG-Anteile zur Sozialversicherung, Ausfallzeiten (Urlaub, Krankheit, Weiterbildung) und Gemeinkosten. Vollkosten ≈ 1,5- bis 1,7-faches Bruttogehalt."
+        ],
+        [
+          "Personalkosten extern",
+          "Quellen: Angebote, Kostenvoranschläge, bestehende Lieferantenverträge, Marktvergleiche."
+        ],
+        [
+          "Risikomanagement",
+          "Risiko = mögliches Ereignis, das den Projekterfolg gefährdet (z. B. Lieferverzug, Personalausfall, neue Gesetze). Prozess: 1. identifizieren · 2. analysieren, bewerten, priorisieren · 3. Maßnahmen planen und umsetzen · 4. überwachen · 5. dokumentieren (Risikolog). Nicht jedes Risiko vermeiden – vorbereitet sein."
+        ],
+        [
+          "Projektabschluss",
+          "Lessons-Learned-Workshop (z. B. Start-Stop-Continue: anders bzw. neu machen, nicht mehr machen, weitermachen) · Projektkonten schließen, damit nichts mehr gebucht wird · neue Aufgaben für die Mitarbeitenden, gemeinsam mit dem Personalbereich."
+        ],
+        [
+          "Nutzwertanalyse",
+          "Entscheidungshilfe für Alternativen: Kriterien festlegen, gewichten (Summe 100 %), je Alternative Punkte vergeben, Punkte × Gewicht, Summe bilden – die höchste Summe gewinnt."
+        ]
+      ],
+      "items": [
+        {
+          "id": "ev:wpf:kr1",
+          "topic": "kr",
+          "type": "mc",
+          "q": "Eine Entwicklerin verdient 4.000 € brutto im Monat.\n\nMit welchen monatlichen Vollkosten sollten Sie im Projekt rechnen?",
+          "options": [
+            "Etwa 6.000 bis 6.800 €",
+            "Etwa 4.000 bis 4.400 €",
+            "Etwa 8.000 bis 9.000 €",
+            "Etwa 2.400 bis 2.800 €"
+          ],
+          "correct": 0,
+          "note": "Vollkosten liegen meist beim 1,5- bis 1,7-fachen des Bruttogehalts: 4.000 € × 1,5 = 6.000 €, × 1,7 = 6.800 €."
+        },
+        {
+          "id": "ev:wpf:kr2",
+          "topic": "kr",
+          "type": "mc",
+          "q": "Warum liegen die Vollkosten einer Arbeitskraft deutlich über dem Bruttogehalt?",
+          "options": [
+            "AG-Anteile, Ausfallzeiten und Gemeinkosten kommen dazu",
+            "Die Lohnsteuer zahlt der Arbeitgeber noch zusätzlich",
+            "Überstunden werden pauschal mit 50 % aufgeschlagen",
+            "Externe Berater werden immer anteilig eingerechnet"
+          ],
+          "correct": 0,
+          "note": "Arbeitgeberanteile zur Sozialversicherung, unproduktive Tage (Urlaub, Krankheit, Weiterbildung) und Overhead erhöhen die Kosten. Die Lohnsteuer ist bereits im Brutto enthalten."
+        },
+        {
+          "id": "ev:wpf:kr3",
+          "topic": "kr",
+          "type": "mc",
+          "q": "Woher bekommen Sie verlässliche Zahlen für externe Personalkosten?",
+          "options": [
+            "Angebote, Kostenvoranschläge, Lieferantenverträge",
+            "Gehaltsbuchhaltung, Kostenrechnung, Tarifverträge",
+            "Stundenzettel des eigenen Projektteams",
+            "Lessons-Learned-Protokolle früherer Projekte"
+          ],
+          "correct": 0,
+          "note": "Gehaltsbuchhaltung und Tarifverträge sind Quellen für interne Kosten. Externe Kosten kennt man aus Angeboten, Verträgen und Marktvergleichen."
+        },
+        {
+          "id": "ev:wpf:kr4",
+          "topic": "kr",
+          "type": "mc",
+          "q": "Was ist der zweite Schritt im Risikomanagement-Prozess?",
+          "options": [
+            "Risiken analysieren und bewerten",
+            "Maßnahmen planen und umsetzen",
+            "Risiken überwachen (Monitoring)",
+            "Risiken im Risikolog dokumentieren"
+          ],
+          "correct": 0,
+          "note": "Reihenfolge: identifizieren → analysieren/bewerten → Maßnahmen → überwachen → dokumentieren."
+        },
+        {
+          "id": "ev:wpf:kr5",
+          "topic": "kr",
+          "type": "card",
+          "q": "Nennen Sie die fünf Schritte des Risikomanagement-Prozesses in der richtigen Reihenfolge. (5 P)",
+          "a": "1. Risiken identifizieren\n2. Risiken analysieren und bewerten bzw. priorisieren\n3. Maßnahmen planen und umsetzen\n4. Risiken überwachen (Monitoring)\n5. Dokumentieren (Risikolog)",
+          "note": "Je 1 P pro Schritt an der richtigen Stelle."
+        },
+        {
+          "id": "ev:wpf:kr6",
+          "topic": "kr",
+          "type": "mc",
+          "q": "Bei der Methode „Start-Stop-Continue“ im Lessons-Learned-Workshop steht „Stop“ für …",
+          "options": [
+            "… das, was wir künftig nicht mehr machen",
+            "… das, was wir künftig neu einführen",
+            "… das, was wir genauso weitermachen",
+            "… den Termin, an dem das Projekt endet"
+          ],
+          "correct": 0,
+          "note": "Start = anders bzw. neu machen, Stop = nicht mehr machen, Continue = weitermachen."
+        },
+        {
+          "id": "ev:wpf:kr7",
+          "topic": "kr",
+          "type": "mc",
+          "q": "Warum werden beim Projektabschluss die Projektkonten in der Buchhaltung geschlossen?",
+          "options": [
+            "Damit keine weiteren Kosten auf das Projekt gebucht werden",
+            "Damit das Team seine Arbeitszeit nicht mehr erfassen muss",
+            "Damit der Auftraggeber die Rechnung schneller bezahlt",
+            "Damit die Lessons Learned vertraulich gespeichert bleiben"
+          ],
+          "correct": 0,
+          "note": "So bleibt das Projektbudget eingehalten und die Kosten des Projekts sind abgeschlossen."
+        },
+        {
+          "id": "ev:wpf:kr8",
+          "topic": "kr",
+          "type": "mc",
+          "q": "Nutzwertanalyse: Das Kriterium Preis hat ein Gewicht von 40 %, Anbieter A erhält dort 8 Punkte.\n\nWie viele gewichtete Punkte sind das?",
+          "options": [
+            "3,2",
+            "8,4",
+            "4,8",
+            "0,32"
+          ],
+          "correct": 0,
+          "note": "Gewichteter Wert = Punkte × Gewicht = 8 × 0,4 = 3,2."
+        },
+        {
+          "id": "ev:wpf:kr9",
+          "topic": "kr",
+          "type": "card",
+          "q": "Beschreiben Sie das Vorgehen bei einer Nutzwertanalyse. (4 P)",
+          "a": "1. Entscheidungskriterien festlegen (z. B. Preis, Funktionsumfang, Support)\n2. Kriterien gewichten, Summe der Gewichte = 100 %\n3. Jede Alternative je Kriterium bewerten (Punkte, z. B. 1–10)\n4. Punkte × Gewicht rechnen und je Alternative aufsummieren – die höchste Summe ist die beste Wahl",
+          "note": "Je 1 P pro Schritt."
+        }
+      ]
+    },
+    {
+      "id": "scrum",
+      "titel": "Scrum",
+      "lern": [
+        [
+          "Klassisch vs. agil",
+          "Klassisch: alles am Anfang geplant, Änderungen schwierig, Ergebnis erst am Ende. Agil: kleine Schritte, regelmäßiges Feedback, Änderungen jederzeit möglich – man merkt früh, ob man richtig liegt."
+        ],
+        [
+          "Grundidee",
+          "Arbeit in Sprints von 1–4 Wochen. Am Ende jedes Sprints steht ein funktionsfähiges Teilergebnis (Inkrement), zu dem der Kunde Feedback gibt."
+        ],
+        [
+          "Rollen",
+          "Product Owner: vertritt Kunden- und Nutzersicht, legt fest, was entwickelt wird, priorisiert · Scrum Master: organisiert den Prozess, coacht, beseitigt Hindernisse · Entwicklungsteam: programmiert, testet, liefert – selbstorganisiert, funktionsübergreifend, ohne Teamleiter."
+        ],
+        [
+          "Artefakte und Ereignisse",
+          "Artefakte: Product Vision, Product Backlog (vom PO sortiert, jederzeit änderbar), Sprint Backlog, Burndown, Inkrement mit Definition of Done (laut Workshop; im Scrum Guide: Product Backlog, Sprint Backlog, Inkrement). Ereignisse: Sprint Planning, Daily Scrum, Sprint Review (Ergebnis zeigen), Sprint Retrospektive (Zusammenarbeit verbessern)."
+        ],
+        [
+          "User Story",
+          "Als [Rolle] möchte ich [Funktion/Ziel], damit [Nutzen]. Keine technische Beschreibung. Gute Stories sind INVEST: Independent, Negotiable, Valuable, Estimable, Small, Testable."
+        ]
+      ],
+      "fig": "ev-scrum",
+      "items": [
+        {
+          "id": "ev:wpf:sc1",
+          "topic": "scrum",
+          "type": "mc",
+          "q": "Wie lange dauert ein Sprint in Scrum?",
+          "options": [
+            "1 bis 4 Wochen",
+            "1 bis 3 Tage",
+            "2 bis 6 Monate",
+            "Bis das ganze Produkt fertig ist"
+          ],
+          "correct": 0,
+          "note": "Sprints sind kurze, sich wiederholende Zyklen von 1 bis 4 Wochen."
+        },
+        {
+          "id": "ev:wpf:sc2",
+          "topic": "scrum",
+          "type": "mc",
+          "q": "Wer priorisiert das Product Backlog?",
+          "options": [
+            "Der Product Owner",
+            "Der Scrum Master",
+            "Das Entwicklungsteam",
+            "Der Lenkungsausschuss"
+          ],
+          "correct": 0,
+          "note": "Der Product Owner vertritt die Kundensicht und sortiert das Backlog nach Wichtigkeit."
+        },
+        {
+          "id": "ev:wpf:sc3",
+          "topic": "scrum",
+          "type": "mc",
+          "q": "Das Team wird ständig von einer Fachabteilung mit Zusatzwünschen unterbrochen.\n\nWer sorgt dafür, dass dieses Hindernis beseitigt und das Team geschützt wird?",
+          "options": [
+            "Der Scrum Master – er beseitigt Hindernisse",
+            "Der Product Owner – er nimmt die Wünsche sofort in den laufenden Sprint auf",
+            "Das Entwicklungsteam – es arbeitet alles ab",
+            "Der Projektleiter – er verteilt Aufgaben neu"
+          ],
+          "correct": 0,
+          "note": "Der Scrum Master schützt das Team und räumt Hindernisse aus dem Weg. Einen klassischen Projektleiter gibt es in Scrum nicht."
+        },
+        {
+          "id": "ev:wpf:sc4",
+          "topic": "scrum",
+          "type": "mc",
+          "q": "Was liegt am Ende jedes Sprints vor?",
+          "options": [
+            "Ein funktionsfähiges Teilergebnis (Inkrement)",
+            "Ein vollständig abgestimmtes Pflichtenheft",
+            "Ein Abschlussbericht für den Sponsor",
+            "Ein neu erstellter Projektstrukturplan"
+          ],
+          "correct": 0,
+          "note": "Jeder Sprint liefert ein nutzbares Inkrement, das der Definition of Done entspricht."
+        },
+        {
+          "id": "ev:wpf:sc5",
+          "topic": "scrum",
+          "type": "mc",
+          "q": "In welchem Ereignis verbessert das Team seine Zusammenarbeit?",
+          "options": [
+            "Sprint Retrospektive",
+            "Sprint Review",
+            "Sprint Planning",
+            "Daily Scrum"
+          ],
+          "correct": 0,
+          "note": "Retrospektive = Rückblick auf die Arbeitsweise. Im Review wird das Produkt gezeigt, im Planning der Sprint geplant, im Daily der Tag abgestimmt."
+        },
+        {
+          "id": "ev:wpf:sc6",
+          "topic": "scrum",
+          "type": "mc",
+          "q": "Was passiert im Sprint Review?",
+          "options": [
+            "Das Inkrement wird gezeigt und Feedback eingeholt",
+            "Das Team plant die Aufgaben für den nächsten Tag",
+            "Das Team reflektiert seine eigene Zusammenarbeit",
+            "Der Scrum Master schreibt das Product Backlog um"
+          ],
+          "correct": 0,
+          "note": "Im Review stellt das Team das Ergebnis den Stakeholdern vor; das Feedback fließt ins Product Backlog."
+        },
+        {
+          "id": "ev:wpf:sc7",
+          "topic": "scrum",
+          "type": "mc",
+          "q": "Welche User Story ist richtig formuliert?",
+          "options": [
+            "Als Mieter möchte ich online kündigen, damit ich nicht anrufen muss",
+            "Der Liegeplatz wird über den REST-Endpunkt DELETE /platz gekündigt",
+            "Online-Kündigung für Liegeplätze inklusive Bestätigungsmail einbauen",
+            "Als Entwickler lege ich eine Tabelle Kuendigung in PostgreSQL an"
+          ],
+          "correct": 0,
+          "note": "Schema: Als [Rolle] möchte ich [Ziel], damit [Nutzen] – aus Anwendersicht, ohne technische Umsetzung."
+        },
+        {
+          "id": "ev:wpf:sc8",
+          "topic": "scrum",
+          "type": "mc",
+          "q": "Wofür steht das „T“ in INVEST?",
+          "options": [
+            "Testable – prüfbar, ob die Story erfüllt ist",
+            "Timeboxed – die Story hat eine feste Dauer",
+            "Technical – die Story beschreibt die Umsetzung",
+            "Tracked – die Story steht im Burndown-Chart"
+          ],
+          "correct": 0,
+          "note": "INVEST: Independent, Negotiable, Valuable, Estimable, Small, Testable."
+        },
+        {
+          "id": "ev:wpf:sc9",
+          "topic": "scrum",
+          "type": "mc",
+          "q": "Die Story „Als Nutzer möchte ich das komplette Buchungssystem“ verletzt vor allem welches INVEST-Kriterium?",
+          "options": [
+            "Small",
+            "Valuable",
+            "Negotiable",
+            "Independent"
+          ],
+          "correct": 0,
+          "note": "Die Story ist viel zu groß für einen Sprint. Sie muss in kleinere Stories zerlegt werden."
+        },
+        {
+          "id": "ev:wpf:sc10",
+          "topic": "scrum",
+          "type": "card",
+          "q": "Nennen Sie die drei Scrum-Rollen und je zwei Aufgaben. (6 P)",
+          "a": "Product Owner: vertritt die Kunden- und Nutzersicht, legt fest, was entwickelt wird, priorisiert das Product Backlog.\nScrum Master: organisiert den Prozess (Coach), beseitigt Hindernisse, unterstützt das Team.\nEntwicklungsteam: programmiert, testet, liefert das Inkrement – selbstorganisiert und funktionsübergreifend.",
+          "note": "Je Rolle 2 P (zwei passende Aufgaben)."
+        },
+        {
+          "id": "ev:wpf:sc11",
+          "topic": "scrum",
+          "type": "mc",
+          "q": "Welches der folgenden Elemente ist ein Artefakt in Scrum?",
+          "options": [
+            "Das Sprint Backlog",
+            "Das Daily Scrum",
+            "Das Sprint Review",
+            "Der Product Owner"
+          ],
+          "correct": 0,
+          "note": "Artefakte sind Ergebnisse bzw. Arbeitsmittel (Backlogs, Inkrement). Daily und Review sind Ereignisse, der Product Owner ist eine Rolle."
+        },
+        {
+          "id": "ev:wpf:sc12",
+          "topic": "scrum",
+          "type": "card",
+          "q": "Vergleichen Sie klassisches und agiles Projektmanagement anhand von drei Merkmalen. (3 P)",
+          "a": "Planung: klassisch alles am Anfang · agil schrittweise je Sprint.\nÄnderungen: klassisch schwierig und teuer · agil jederzeit möglich.\nErgebnis: klassisch erst am Ende sichtbar · agil nach jedem Sprint ein Inkrement mit Feedback.",
+          "note": "Je Merkmal 1 P (beide Seiten richtig)."
+        },
+        {
+          "id": "ev:wpf:sc13",
+          "topic": "scrum",
+          "type": "card",
+          "q": "Nennen Sie die sechs INVEST-Kriterien für gute User Stories mit ihrer Bedeutung. (6 P)",
+          "a": "Independent – möglichst unabhängig von anderen Stories\nNegotiable – verhandelbar, keine fertige technische Spezifikation\nValuable – bringt erkennbaren Nutzen für Anwender oder Kunden\nEstimable – Aufwand ist abschätzbar\nSmall – klein genug für einen kurzen Zeitraum\nTestable – überprüfbar, ob die Story erfüllt ist",
+          "note": "Je 1 P pro Kriterium mit Bedeutung."
+        }
+      ]
+    }
+  ]
+}

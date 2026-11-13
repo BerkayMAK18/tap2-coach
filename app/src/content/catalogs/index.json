@@ -1,0 +1,26 @@
+{
+  "schema": 1,
+  "quelle": "index.html (Live-App)",
+  "kataloge": [
+    {
+      "id": "lf11a",
+      "datei": "event-lf11a.json",
+      "titel": "Klausur LF11a",
+      "kurz": "LF11a",
+      "art": "event",
+      "enabled": true,
+      "ende": "2026-12-18",
+      "fragen": 73
+    },
+    {
+      "id": "wpf",
+      "datei": "event-wpf.json",
+      "titel": "Klausur WPF Projektmanagement",
+      "kurz": "WPF PM",
+      "art": "event",
+      "enabled": false,
+      "ende": "2026-12-18",
+      "fragen": 63
+    }
+  ]
+}

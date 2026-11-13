@@ -67,9 +67,10 @@ function Einstellungen() {
         <p className="text-body-300">Dein Lernstand liegt nur in diesem Browser. Hier kannst du ihn vollständig löschen. Lade vorher eine Sicherung herunter, wenn du ihn später noch brauchst.</p>
         <div className="flex flex-wrap items-center gap-3">
           <Button variant="destructive" onClick={() => setAskReset(true)}><Trash2 className="h-4 w-4" />Lernstand zurücksetzen</Button>
-          <Link to="/datenschutz" className="text-body-200 underline">Datenschutzhinweis</Link>
         </div>
       </Card>
+      {/* Datenschutzhinweis dezent ganz unten (Wunsch 13.11.2026), über das Zahnrad von jeder Seite erreichbar */}
+      <p className="text-center text-body-100 text-slate"><Link to="/datenschutz" className="underline hover:text-ink">Datenschutz</Link></p>
       <ConfirmDialog
         open={askReset}
         onOpenChange={setAskReset}

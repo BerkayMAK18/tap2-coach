@@ -10,6 +10,7 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as DatenschutzRouteImport } from './routes/datenschutz'
 import { Route as EinstellungenRouteImport } from './routes/einstellungen'
 import { Route as LernenIndexRouteImport } from './routes/lernen.index'
 import { Route as LernenRundeRouteImport } from './routes/lernen.runde'
@@ -17,6 +18,11 @@ import { Route as LernenRundeRouteImport } from './routes/lernen.runde'
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DatenschutzRoute = DatenschutzRouteImport.update({
+  id: '/datenschutz',
+  path: '/datenschutz',
   getParentRoute: () => rootRouteImport,
 } as any)
 const EinstellungenRoute = EinstellungenRouteImport.update({
@@ -37,12 +43,14 @@ const LernenRundeRoute = LernenRundeRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/datenschutz': typeof DatenschutzRoute
   '/einstellungen': typeof EinstellungenRoute
   '/lernen/runde': typeof LernenRundeRoute
   '/lernen/': typeof LernenIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/datenschutz': typeof DatenschutzRoute
   '/einstellungen': typeof EinstellungenRoute
   '/lernen/runde': typeof LernenRundeRoute
   '/lernen': typeof LernenIndexRoute
@@ -50,20 +58,29 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/datenschutz': typeof DatenschutzRoute
   '/einstellungen': typeof EinstellungenRoute
   '/lernen/runde': typeof LernenRundeRoute
   '/lernen/': typeof LernenIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/einstellungen' | '/lernen/runde' | '/lernen/'
+  fullPaths:
+    '/' | '/datenschutz' | '/einstellungen' | '/lernen/runde' | '/lernen/'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/einstellungen' | '/lernen/runde' | '/lernen'
-  id: '__root__' | '/' | '/einstellungen' | '/lernen/runde' | '/lernen/'
+  to: '/' | '/datenschutz' | '/einstellungen' | '/lernen/runde' | '/lernen'
+  id:
+    | '__root__'
+    | '/'
+    | '/datenschutz'
+    | '/einstellungen'
+    | '/lernen/runde'
+    | '/lernen/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  DatenschutzRoute: typeof DatenschutzRoute
   EinstellungenRoute: typeof EinstellungenRoute
   LernenRundeRoute: typeof LernenRundeRoute
   LernenIndexRoute: typeof LernenIndexRoute
@@ -76,6 +93,13 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/datenschutz': {
+      id: '/datenschutz'
+      path: '/datenschutz'
+      fullPath: '/datenschutz'
+      preLoaderRoute: typeof DatenschutzRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/einstellungen': {
@@ -104,6 +128,7 @@ declare module '@tanstack/react-router' {
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  DatenschutzRoute: DatenschutzRoute,
   EinstellungenRoute: EinstellungenRoute,
   LernenRundeRoute: LernenRundeRoute,
   LernenIndexRoute: LernenIndexRoute,

@@ -23,6 +23,8 @@ type Store = {
   toggleMark: (id: string) => void;
   /** Ganzen Stand ersetzen (Sicherung laden). Der bisherige Stand wird vorher zurückgelegt. */
   replaceAll: (incoming: unknown) => void;
+  /** Lernstand und laufende Runde in diesem Browser löschen (Datenschutz: Recht auf Löschung, lokal). */
+  resetAll: () => void;
   startSession: (title: string, ids: string[]) => void;
   setSession: (s: Session | null) => void;
 };
@@ -59,6 +61,7 @@ export const useProgress = create<Store>((set, get) => {
       write(KEYS.beforeImport, { at: Date.now(), data: get().S }); // Rettung per Hand möglich
       save(normalize(incoming, NORMALIZE_CTX));
     },
+    resetAll: () => { [KEYS.state, KEYS.session, KEYS.beforeImport].forEach((k) => write(k, null)); set({ S: blank(), sess: null, storeOk: true }); },
     startSession: (title, ids) => { const sess = { title, ids, i: 0, res: {} }; write(KEYS.session, sess); set({ sess }); },
     setSession: (sess) => { write(KEYS.session, sess); set({ sess }); },
   };

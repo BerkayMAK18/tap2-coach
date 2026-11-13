@@ -35,7 +35,10 @@ function Shell() {
       <aside className="hidden md:flex md:flex-col md:gap-1 md:border-r md:bg-card md:p-4 md:sticky md:top-0 md:h-dvh">
         <Link to="/" className="mb-4 flex items-center gap-2 px-2"><Logo size={28} /></Link>
         {NAV.map((n) => <NavItem key={n.label} {...n} />)}
-        <div className="mt-auto"><NavItem to="/einstellungen" label="Einstellungen" icon={Settings} /></div>
+        <div className="mt-auto space-y-1">
+          <NavItem to="/einstellungen" label="Einstellungen" icon={Settings} />
+          <Link to="/datenschutz" className="block px-3 py-1 text-body-100 text-slate hover:text-ink">Datenschutz</Link>
+        </div>
       </aside>
       <div className="flex min-w-0 flex-col pb-20 md:pb-0">
         <header className="sticky top-0 z-10 flex items-center gap-3 border-b bg-canvas/90 px-4 py-3 backdrop-blur md:px-8">

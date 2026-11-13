@@ -107,14 +107,29 @@ app/
 
 Jeder Bereich ist ein eigenes Modul (Route + Logik in `lib/` + Tests) und kann unabhängig portiert werden.
 
+## Entscheidungen vom 13.11.2026 (Abend)
+
+- **Design und Bedienung exakt wie die Live-App.** Das Stylesheet der Live-App wird zum Design-System der neuen App,
+  die React-Komponenten erzeugen dasselbe Markup (gleiche Klassen). Einzige Änderung: Die Tintenfarbe `#08312A`
+  der Live-App (Boehringer-Markenfarbe) wird durch einen neutralen Ton ersetzt (Standard: `#172033`, eine Zeile in
+  den Tokens). Der bisherige eigene UI-Baukasten (`src/ui`) wird schrittweise ersetzt.
+- **Gamification/Gacha vollständig** als eigenes Modul (`tap2coach-gami`, gleiches Format).
+- **Optionales Konto mit GitHub** (Supabase, Frankfurt) für Sicherung, Sync und Rangliste – Lernen ohne Konto bleibt.
+- **Datenschutz:** Der Lernstand im Konto ist Ende-zu-Ende-verschlüsselt, der Betreiber kann ihn nicht lesen;
+  Rangliste nur mit selbst gewähltem Benutzernamen und Einwilligung. Details: `docs/DATENSCHUTZ.md`.
+- **KI-Tutor als Premium-Funktion**, vorerst nur für den Admin (`app_metadata.role = 'admin'`), für andere unsichtbar,
+  umgesetzt als Supabase Edge Function. Bezahl-Option später.
+
 ## Phasenplan
 
 | Phase | Inhalt | Stand |
 | --- | --- | --- |
 | 0 | Gerüst aus learnlab, eigenes Design, Katalogformat | erledigt, Stack am 13.11. auf statische PWA umgestellt |
-| 1 | Free-Version mit Funktionsgleichheit zur Live-App (Tabelle oben) | **in Arbeit**: Kern (Lernen) fertig |
+| 1a | Design der Live-App übernehmen, Datenschutzhinweis | **in Arbeit**: Datenschutzhinweis fertig |
+| 1b | Funktionsgleichheit inkl. Gamification/Gacha (Tabelle oben) | in Arbeit: Lernen fertig |
+| 1c | Konto (GitHub), E2E-Sync, Rangliste mit Benutzername, Konto löschen | offen (braucht Supabase-Dev-Projekt + GitHub-OAuth-App) |
 | 2 | Katalog-Bibliothek (Suche/Filter, mehrere Kataloge), TAP1, Lehrjahr → Lernfeld, Klausurkalender | offen |
-| 3 | KI-Tutor als eigenes Modul (Worker + Claude API, nur Freigabeliste), optional Konten | offen |
+| 3 | KI-Tutor (Premium, nur Admin) als Supabase Edge Function | offen (braucht Claude-API-Key) |
 | 4 | Neue App ersetzt die Live-App (gleiche Origin, Lernstände bleiben) | offen |
 
 ## Sicherheit

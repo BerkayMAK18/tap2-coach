@@ -4,8 +4,8 @@
  * mitgeschrieben, sobald das Belohnungs-Modul portiert ist. Geladene Dateien laufen durch normalize().
  */
 import { useRef, useState } from "react";
-import { createFileRoute } from "@tanstack/react-router";
-import { Download, Upload } from "lucide-react";
+import { Link, createFileRoute } from "@tanstack/react-router";
+import { Download, Trash2, Upload } from "lucide-react";
 import { Button, Card, CardEyebrow, ConfirmDialog, InlineError } from "@/ui";
 import { today } from "@/lib/dates";
 import { isObj } from "@/lib/state";
@@ -14,7 +14,8 @@ import { useProgress } from "@/store/progress";
 export const Route = createFileRoute("/einstellungen")({ component: Einstellungen });
 
 function Einstellungen() {
-  const { S, storeOk, replaceAll } = useProgress();
+  const { S, storeOk, replaceAll, resetAll } = useProgress();
+  const [askReset, setAskReset] = useState(false);
   const file = useRef<HTMLInputElement>(null);
   const [pending, setPending] = useState<unknown>(null);
   const [msg, setMsg] = useState<string | null>(null);
@@ -61,6 +62,23 @@ function Einstellungen() {
         {msg && <p role="status" className="text-body-200">{msg}</p>}
         {err && <InlineError>{err}</InlineError>}
       </Card>
+      <Card className="space-y-3">
+        <CardEyebrow>Daten und Datenschutz</CardEyebrow>
+        <p className="text-body-300">Dein Lernstand liegt nur in diesem Browser. Hier kannst du ihn vollständig löschen. Lade vorher eine Sicherung herunter, wenn du ihn später noch brauchst.</p>
+        <div className="flex flex-wrap items-center gap-3">
+          <Button variant="destructive" onClick={() => setAskReset(true)}><Trash2 className="h-4 w-4" />Lernstand zurücksetzen</Button>
+          <Link to="/datenschutz" className="text-body-200 underline">Datenschutzhinweis</Link>
+        </div>
+      </Card>
+      <ConfirmDialog
+        open={askReset}
+        onOpenChange={setAskReset}
+        title="Lernstand wirklich löschen?"
+        description="Alle Antworten, Markierungen, eigenen Karten und Ergebnisse in diesem Browser werden gelöscht. Das lässt sich nicht rückgängig machen."
+        confirmLabel="Endgültig löschen"
+        tone="destructive"
+        onConfirm={() => { resetAll(); setAskReset(false); setMsg("Lernstand gelöscht."); }}
+      />
       <ConfirmDialog
         open={pending != null}
         onOpenChange={(o) => { if (!o) setPending(null); }}

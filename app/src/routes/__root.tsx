@@ -61,6 +61,7 @@ function Shell() {
           </div>
         </header>
         <main className="content"><section className="view"><Outlet /></section></main>
+        <footer className="foot"><span>TAP2 Prüfungscoach · Dein Fortschritt wird lokal in diesem Browser gespeichert.</span></footer>
       </div>
       <UpdatePrompt />
     </div>
@@ -82,10 +83,10 @@ function UpdatePrompt() {
   const { needRefresh: [need, setNeed], updateServiceWorker } = useRegisterSW();
   if (!need) return null;
   return (
-    <div className="toast" role="status">
+    <div className="upd" id="upd" role="status" aria-live="polite">
       <span>Neue Version verfügbar. Dein Lernstand bleibt erhalten.</span>
-      <button type="button" className="btn small primary" onClick={() => updateServiceWorker(true)}>Neu laden</button>
-      <button type="button" className="btn small ghost" onClick={() => setNeed(false)}>Später</button>
+      <button type="button" className="btn small primary" id="upd-go" onClick={() => updateServiceWorker(true)}>Neu laden</button>
+      <button type="button" className="iconbtn sm" id="upd-x" aria-label="Hinweis schließen" onClick={() => setNeed(false)}><Ic name="x" /></button>
     </div>
   );
 }

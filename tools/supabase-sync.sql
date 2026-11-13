@@ -31,10 +31,15 @@ create table if not exists public.tap2_pair (
   expires_at timestamptz not null
 );
 
+-- Fehlversuche beim Einlösen von Kurzcodes (Bremse gegen Durchprobieren). Nur Zeitpunkte, keine Daten.
+create table if not exists public.tap2_pair_fail (at timestamptz not null default now());
+create index if not exists tap2_pair_fail_at on public.tap2_pair_fail (at);
+
 alter table public.tap2_sync      enable row level security;
+alter table public.tap2_pair_fail enable row level security;
 alter table public.tap2_sync_hist enable row level security;
 alter table public.tap2_pair      enable row level security;
-revoke all on public.tap2_sync, public.tap2_sync_hist, public.tap2_pair from anon, authenticated;
+revoke all on public.tap2_sync, public.tap2_sync_hist, public.tap2_pair, public.tap2_pair_fail from anon, authenticated;
 
 -- Lernstand holen
 create or replace function public.tap2_pull(p_id text)
@@ -56,6 +61,11 @@ begin
     -- Schutz gegen Missbrauch des öffentlichen Schlüssels: Gesamtgröße begrenzen (Free Tier: 500 MB)
     if (select coalesce(sum(length(blob)), 0) from public.tap2_sync) + (select coalesce(sum(length(blob)), 0) from public.tap2_sync_hist) > 300000000 then
       raise exception 'tap2: speicher voll';
+    end if;
+    -- Bremse: höchstens 60 neue Sync-Stände pro Stunde (für alle zusammen). Ein Angreifer kann den Speicher
+    -- so nicht in kurzer Zeit füllen; echte Nutzer merken davon nichts.
+    if (select count(*) from public.tap2_sync where rev = 1 and updated_at > now() - interval '1 hour') >= 60 then
+      raise exception 'tap2: gerade zu viele neue verbindungen, bitte spaeter erneut';
     end if;
     insert into public.tap2_sync(id, rev, blob) values (p_id, 1, p_blob);
     return jsonb_build_object('ok', true, 'rev', 1);
@@ -97,9 +107,18 @@ create or replace function public.tap2_pair_get(p_hash text)
 returns text language plpgsql security definer set search_path = public as $$
 declare v text;
 begin
+  -- Bremse gegen Durchprobieren: Nach 300 Fehlversuchen in 10 Minuten (alle zusammen) wird gar nicht mehr gesucht.
+  -- Bei 32^6 ≈ 1 Mrd. möglichen Codes ist ein Treffer dann praktisch ausgeschlossen.
+  if (select count(*) from public.tap2_pair_fail where at > now() - interval '10 minutes') >= 300 then
+    raise exception 'tap2: zu viele versuche, bitte in ein paar minuten erneut';
+  end if;
   update public.tap2_pair set uses = uses + 1
     where code_hash = p_hash and expires_at > now() and uses < 5
     returning payload into v;
+  if v is null then
+    insert into public.tap2_pair_fail default values;
+    delete from public.tap2_pair_fail where at < now() - interval '1 hour';
+  end if;
   return v;
 end $$;
 

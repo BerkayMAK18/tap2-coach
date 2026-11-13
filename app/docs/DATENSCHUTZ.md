@@ -28,8 +28,10 @@ diesen Hinweis und dieses Dokument mitpflegen.**
 | Patch Notes (optional) | IP an GitHub | GitHub (USA, DPF) | Art. 6 (1) f | GitHub | – |
 | KI-Tutor (nur Admin) | Eingaben des Admins | Anthropic (USA) | – (nur eigene Daten des Betreibers) | Anthropic | nach Anbieter |
 
-AV = Auftragsverarbeitung. **Zu erledigen:** Auftragsverarbeitungsvertrag (DPA) mit Supabase im Dashboard
-abschließen (Organization → Legal Documents) und Cloudflare-DPA akzeptieren (Teil der Cloudflare-Bedingungen).
+AV = Auftragsverarbeitung. **Supabase:** Der DPA ist Teil der Terms of Service und gilt automatisch für alle
+Organisationen (geprüft am 13.11.2026 unter Organization → Settings → Legal Documents, „View DPA“). Eine Kopie als
+PDF für die eigenen Unterlagen ablegen (Rechenschaftspflicht, Art. 5 Abs. 2 DSGVO) – nicht im Repo.
+**Cloudflare:** DPA ist ebenfalls Teil der Cloudflare-Bedingungen.
 
 ## Technische Umsetzung
 
@@ -67,9 +69,10 @@ abschließen (Organization → Legal Documents) und Cloudflare-DPA akzeptieren (
 
 ## Offene Punkte vor der Veröffentlichung
 
-- [ ] Verantwortlicher und Kontaktadresse in `src/config.ts` (`CONTROLLER`) eintragen.
-- [ ] DPA mit Supabase abschließen, Cloudflare-DPA prüfen.
+- [x] Verantwortlicher und Kontakt (über GitHub) in `src/config.ts` (`CONTROLLER`) eingetragen.
+- [x] DPA Supabase: automatisch über die Terms of Service; Kopie als PDF privat ablegen.
+- [ ] Optional: eigene Kontakt-E-Mail nur für die App (GitHub hat keine privaten Nachrichten).
 - [ ] Supabase: E-Mail-Provider und anonyme Anmeldung aus, nur GitHub an.
-- [ ] Impressum: Für ein privates, kostenloses Angebot in der Regel nicht vorgeschrieben (§ 5 DDG gilt für
-      geschäftsmäßige, meist entgeltliche Dienste). Spätestens mit einer Bezahl-Option Pflicht.
-- [ ] Live-App (`main`): denselben Hinweis als Seite ergänzen (dort fehlt bisher ein Hinweis in der App).
+- [x] Impressum: entfällt, solange die App kostenlos ist (§ 5 DDG gilt für geschäftsmäßige, meist entgeltliche
+      Dienste). Mit einer Premium-/Bezahl-Option Pflicht.
+- [x] Live-App (`main`): Datenschutzhinweis als Seite ergänzt (v2.7.5).

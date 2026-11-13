@@ -32,5 +32,5 @@ Ablauf wie LearnHarness: **Diagnose → Plan → Erklären → Transfer → Erke
 5. **Datenschutz:** Abschnitt „KI-Tutor“ im Hinweis aktivieren (`FEATURES.tutor`). Für eine spätere Bezahl-Option:
    Einwilligung zur Übermittlung an Anthropic (USA), DPA, Impressum.
 
-**Voraussetzungen von dir:** Supabase-Dev-Projekt, GitHub-OAuth-App, Claude-API-Key, Admin-Rolle für dein Konto
+**Voraussetzungen von dir:** Live-Supabase-Projekt wird mitbenutzt (Option B, docs/ENTWICKLUNG.md), GitHub-OAuth-App, Claude-API-Key, Admin-Rolle für dein Konto
 (einmalig per SQL: `update auth.users set raw_app_meta_data = raw_app_meta_data || '{"role":"admin"}' where id = '<deine-id>';`).

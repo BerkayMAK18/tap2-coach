@@ -10,10 +10,15 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as AufgabenRouteImport } from './routes/aufgaben'
 import { Route as BelohnungenRouteImport } from './routes/belohnungen'
 import { Route as DatenschutzRouteImport } from './routes/datenschutz'
 import { Route as EinstellungenRouteImport } from './routes/einstellungen'
+import { Route as EventsRouteImport } from './routes/events'
+import { Route as PatchnotesRouteImport } from './routes/patchnotes'
+import { Route as PruefungRouteImport } from './routes/pruefung'
 import { Route as RanglisteRouteImport } from './routes/rangliste'
+import { Route as TippsRouteImport } from './routes/tipps'
 import { Route as TutorRouteImport } from './routes/tutor'
 import { Route as LernenIndexRouteImport } from './routes/lernen.index'
 import { Route as LernenRundeRouteImport } from './routes/lernen.runde'
@@ -21,6 +26,11 @@ import { Route as LernenRundeRouteImport } from './routes/lernen.runde'
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AufgabenRoute = AufgabenRouteImport.update({
+  id: '/aufgaben',
+  path: '/aufgaben',
   getParentRoute: () => rootRouteImport,
 } as any)
 const BelohnungenRoute = BelohnungenRouteImport.update({
@@ -38,9 +48,29 @@ const EinstellungenRoute = EinstellungenRouteImport.update({
   path: '/einstellungen',
   getParentRoute: () => rootRouteImport,
 } as any)
+const EventsRoute = EventsRouteImport.update({
+  id: '/events',
+  path: '/events',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PatchnotesRoute = PatchnotesRouteImport.update({
+  id: '/patchnotes',
+  path: '/patchnotes',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PruefungRoute = PruefungRouteImport.update({
+  id: '/pruefung',
+  path: '/pruefung',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const RanglisteRoute = RanglisteRouteImport.update({
   id: '/rangliste',
   path: '/rangliste',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TippsRoute = TippsRouteImport.update({
+  id: '/tipps',
+  path: '/tipps',
   getParentRoute: () => rootRouteImport,
 } as any)
 const TutorRoute = TutorRouteImport.update({
@@ -61,20 +91,30 @@ const LernenRundeRoute = LernenRundeRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/aufgaben': typeof AufgabenRoute
   '/belohnungen': typeof BelohnungenRoute
   '/datenschutz': typeof DatenschutzRoute
   '/einstellungen': typeof EinstellungenRoute
+  '/events': typeof EventsRoute
+  '/patchnotes': typeof PatchnotesRoute
+  '/pruefung': typeof PruefungRoute
   '/rangliste': typeof RanglisteRoute
+  '/tipps': typeof TippsRoute
   '/tutor': typeof TutorRoute
   '/lernen/runde': typeof LernenRundeRoute
   '/lernen/': typeof LernenIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/aufgaben': typeof AufgabenRoute
   '/belohnungen': typeof BelohnungenRoute
   '/datenschutz': typeof DatenschutzRoute
   '/einstellungen': typeof EinstellungenRoute
+  '/events': typeof EventsRoute
+  '/patchnotes': typeof PatchnotesRoute
+  '/pruefung': typeof PruefungRoute
   '/rangliste': typeof RanglisteRoute
+  '/tipps': typeof TippsRoute
   '/tutor': typeof TutorRoute
   '/lernen/runde': typeof LernenRundeRoute
   '/lernen': typeof LernenIndexRoute
@@ -82,10 +122,15 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/aufgaben': typeof AufgabenRoute
   '/belohnungen': typeof BelohnungenRoute
   '/datenschutz': typeof DatenschutzRoute
   '/einstellungen': typeof EinstellungenRoute
+  '/events': typeof EventsRoute
+  '/patchnotes': typeof PatchnotesRoute
+  '/pruefung': typeof PruefungRoute
   '/rangliste': typeof RanglisteRoute
+  '/tipps': typeof TippsRoute
   '/tutor': typeof TutorRoute
   '/lernen/runde': typeof LernenRundeRoute
   '/lernen/': typeof LernenIndexRoute
@@ -94,30 +139,45 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/aufgaben'
     | '/belohnungen'
     | '/datenschutz'
     | '/einstellungen'
+    | '/events'
+    | '/patchnotes'
+    | '/pruefung'
     | '/rangliste'
+    | '/tipps'
     | '/tutor'
     | '/lernen/runde'
     | '/lernen/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/aufgaben'
     | '/belohnungen'
     | '/datenschutz'
     | '/einstellungen'
+    | '/events'
+    | '/patchnotes'
+    | '/pruefung'
     | '/rangliste'
+    | '/tipps'
     | '/tutor'
     | '/lernen/runde'
     | '/lernen'
   id:
     | '__root__'
     | '/'
+    | '/aufgaben'
     | '/belohnungen'
     | '/datenschutz'
     | '/einstellungen'
+    | '/events'
+    | '/patchnotes'
+    | '/pruefung'
     | '/rangliste'
+    | '/tipps'
     | '/tutor'
     | '/lernen/runde'
     | '/lernen/'
@@ -125,10 +185,15 @@ export interface FileRouteTypes {
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AufgabenRoute: typeof AufgabenRoute
   BelohnungenRoute: typeof BelohnungenRoute
   DatenschutzRoute: typeof DatenschutzRoute
   EinstellungenRoute: typeof EinstellungenRoute
+  EventsRoute: typeof EventsRoute
+  PatchnotesRoute: typeof PatchnotesRoute
+  PruefungRoute: typeof PruefungRoute
   RanglisteRoute: typeof RanglisteRoute
+  TippsRoute: typeof TippsRoute
   TutorRoute: typeof TutorRoute
   LernenRundeRoute: typeof LernenRundeRoute
   LernenIndexRoute: typeof LernenIndexRoute
@@ -141,6 +206,13 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/aufgaben': {
+      id: '/aufgaben'
+      path: '/aufgaben'
+      fullPath: '/aufgaben'
+      preLoaderRoute: typeof AufgabenRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/belohnungen': {
@@ -164,11 +236,39 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof EinstellungenRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/events': {
+      id: '/events'
+      path: '/events'
+      fullPath: '/events'
+      preLoaderRoute: typeof EventsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/patchnotes': {
+      id: '/patchnotes'
+      path: '/patchnotes'
+      fullPath: '/patchnotes'
+      preLoaderRoute: typeof PatchnotesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/pruefung': {
+      id: '/pruefung'
+      path: '/pruefung'
+      fullPath: '/pruefung'
+      preLoaderRoute: typeof PruefungRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/rangliste': {
       id: '/rangliste'
       path: '/rangliste'
       fullPath: '/rangliste'
       preLoaderRoute: typeof RanglisteRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/tipps': {
+      id: '/tipps'
+      path: '/tipps'
+      fullPath: '/tipps'
+      preLoaderRoute: typeof TippsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/tutor': {
@@ -197,10 +297,15 @@ declare module '@tanstack/react-router' {
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AufgabenRoute: AufgabenRoute,
   BelohnungenRoute: BelohnungenRoute,
   DatenschutzRoute: DatenschutzRoute,
   EinstellungenRoute: EinstellungenRoute,
+  EventsRoute: EventsRoute,
+  PatchnotesRoute: PatchnotesRoute,
+  PruefungRoute: PruefungRoute,
   RanglisteRoute: RanglisteRoute,
+  TippsRoute: TippsRoute,
   TutorRoute: TutorRoute,
   LernenRundeRoute: LernenRundeRoute,
   LernenIndexRoute: LernenIndexRoute,

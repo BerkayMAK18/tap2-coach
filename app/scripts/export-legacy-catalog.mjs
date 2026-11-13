@@ -37,7 +37,7 @@ const start = lines.findIndex((l, i) => i > 10 && l.trim() === "<script>");
 const end = lines.findIndex((l, i) => i > start && l.startsWith("(function () {"));
 if (start < 0 || end < 0) throw new Error("Datenteil in index.html nicht gefunden (Struktur geändert?)");
 const dataCode = lines.slice(start + 1, end).join("\n");
-const D = vm.runInNewContext(dataCode + "\n;({ DECKS, CARDS_RAW, SQL_SCHEMA, UEB, CATS, MC, OPEN, TOPICS, CARD_TOPIC, MC_TOPIC, PAKETE, NOTATION, FIG, EVENTS });", {});
+const D = vm.runInNewContext(dataCode + "\n;({ ICONS, DECKS, CARDS_RAW, SQL_SCHEMA, UEB, CATS, MC, OPEN, TOPICS, CARD_TOPIC, MC_TOPIC, PAKETE, NOTATION, FIG, EVENTS });", {});
 const sourceHash = createHash("sha256").update(dataCode).digest("hex").slice(0, 12);
 
 // ---- Kernkatalog: gleiche Ableitung wie BASE_Q in der Live-App
@@ -71,6 +71,8 @@ const tap2 = {
   open,
   notation: D.NOTATION,
   figs,
+  // Icon-Pfade der Live-App (für <Ic/>, gleiche Optik) – inkl. der später im Code ergänzten (ICONS.x = '…')
+  icons: { ...D.ICONS, ...Object.fromEntries([...lines.join("\n").matchAll(/ICONS\.([a-z0-9]+) = '([^']*)';/g)].map((m) => [m[1], m[2]])) },
   questions,
 };
 

@@ -90,6 +90,7 @@ export const Tap2Catalog = z.object({
   open: z.array(OpenQuestion),
   notation: z.record(z.string(), z.unknown()),
   figs: z.record(z.string(), Figure),
+  icons: z.record(z.string(), z.string()),
   questions: z.array(Question),
 });
 export type Tap2Catalog = z.infer<typeof Tap2Catalog>;

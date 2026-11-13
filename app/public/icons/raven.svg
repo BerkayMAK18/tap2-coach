@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <!-- TAP2 Coach: Rabe mit Zylinder und Monokel -->
+  <rect width="512" height="512" rx="112" fill="#6AD2E2"/>
+  <!-- Körper mit Flügel -->
+  <path d="M138 470 C132 372 176 300 258 288 C346 276 404 344 410 470 Z" fill="#0B2A33"/>
+  <path d="M296 322 C356 340 388 404 392 470 L352 470 C346 414 326 372 286 346 Z" fill="#17414D"/>
+  <!-- Kopf -->
+  <path d="M176 238 C176 168 222 140 268 140 C324 140 356 184 352 238 C348 294 306 318 262 318 C214 318 176 292 176 238 Z" fill="#0B2A33"/>
+  <!-- zottige Kehlfedern -->
+  <path d="M190 262 L206 300 L214 278 L228 318 L238 290 L254 330 L262 300 L280 322 L268 270 Z" fill="#0B2A33"/>
+  <!-- kräftiger, leicht gebogener Schnabel -->
+  <path d="M196 204 C150 206 112 226 74 266 C120 262 160 262 202 272 Z" fill="#0B2A33"/>
+  <path d="M74 266 C120 262 160 262 202 272 L200 254 C160 252 118 256 74 266 Z" fill="#17414D"/>
+  <!-- Zylinder, leicht schräg -->
+  <g transform="rotate(-8 268 150)">
+    <rect x="176" y="148" width="184" height="22" rx="11" fill="#08312A"/>
+    <rect x="206" y="38" width="124" height="120" rx="10" fill="#08312A"/>
+    <rect x="206" y="122" width="124" height="24" fill="#FFD03D"/>
+  </g>
+  <!-- Auge mit Monokel -->
+  <circle cx="240" cy="222" r="15" fill="#F6F5F3"/>
+  <circle cx="236" cy="222" r="8" fill="#0B2A33"/>
+  <circle cx="240" cy="222" r="31" fill="none" stroke="#FFD03D" stroke-width="10"/>
+  <!-- Monokelkette -->
+  <path d="M262 246 C284 282 286 318 300 352" fill="none" stroke="#FFD03D" stroke-width="6" stroke-linecap="round"/>
+</svg>

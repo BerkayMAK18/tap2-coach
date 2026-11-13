@@ -58,6 +58,9 @@ app/
 │  ├─ lib/
 │  │  ├─ state.ts (+test)         Lernstand-Format = Live-App v7, Migration, Absicherung von Fremddaten
 │  │  ├─ srs.ts (+test)           Wiederholungs-Engine (Leitner) und Runden-Logik wie in der Live-App
+│  │  ├─ lernen.ts, plan.ts (+test) Runden zusammenstellen, „Als Nächstes“, Lernplan
+│  │  ├─ search.ts, sql.ts (+test) Suche über alle Fragen, SQL ausführen und vergleichen
+│  │  ├─ editor.ts                Code-Editor (CodeMirror), nur bei Bedarf geladen
 │  │  └─ dates.ts, utils.ts
 │  ├─ store/progress.ts           Lernstand + laufende Runde (localStorage, mehrere Tabs)
 │  ├─ ui/                         UI-Baukasten
@@ -87,15 +90,15 @@ app/
 
 | Bereich | Live | Neu | Hinweis |
 | --- | --- | --- | --- |
-| Übersicht (Countdown, Reife je Teil, Fällige, nächstes Thema) | ✓ | ✓ | vereinfacht |
+| Übersicht (Countdown, Reife je Teil, Lernplan heute, Gezielt üben) | ✓ | ✓ | 1:1 (PORTIERUNG.md) |
 | Lernen: Themen, Runden (20 Fragen, Einstreuen), Fällig/Fehler/Markiert/Zufall, Mehrfachauswahl | ✓ | ✓ | |
-| Theorie aus Lernpaketen | ✓ | ✓ | Kern + typische Fallen |
+| Theorie aus Lernpaketen | ✓ | ✓ | 1:1 inkl. Timer, Notation, Ziele |
 | Abbildungen in Antworten | ✓ | ✓ | |
 | Sicherung laden/speichern (gleiches Format) | ✓ | ✓ | inkl. Rücklage des alten Stands |
 | Offline/PWA, Hinweis „Neue Version“ | ✓ | ✓ | |
-| Suche | ✓ | – | |
-| Eigene Karten anlegen/löschen | ✓ | – | werden bereits angezeigt und importiert |
-| SQL-Karten ausführen (sql.js, Vergleich mit Musterlösung) | ✓ | – | |
+| Suche | ✓ | ✓ | `lib/search.ts` |
+| Eigene Karten anlegen/löschen | ✓ | ✓ | Löschen mit Sync-Ereignis |
+| SQL-Karten ausführen (sql.js, Vergleich mit Musterlösung), Code-Editor | ✓ | ✓ | `lib/sql.ts`, `lib/editor.ts`, eigene Chunks |
 | Aufgaben (20 Übungsaufgaben, Timer, Punkte, Fehlerursachen) | ✓ | – | Daten im Katalog vorhanden |
 | Prüfung (Simulation, Real-Klausur, Noten, „Bereit für eine 1“) | ✓ | – | Daten vorhanden |
 | Tipps, Operator-Trainer, Lernplan, Tutorial | ✓ | – | Operator-Daten liegen noch in der App-Logik |

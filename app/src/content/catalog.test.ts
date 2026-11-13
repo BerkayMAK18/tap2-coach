@@ -42,6 +42,14 @@ describe("Kataloge", () => {
     });
   });
 
+  it("SQL- und Code-Karten verweisen auf vorhandene Karten, Notationshilfen existieren", () => {
+    const ids = new Set(core.questions.map((q) => q.id));
+    Object.keys(core.codeLang).forEach((id) => expect(ids.has(id), id).toBe(true));
+    Object.keys(core.sqlDb.cards).forEach((id) => expect(core.codeLang[id], id).toBe("sql"));
+    expect(core.sqlDb.tables.map((t) => t[0])).toEqual(["Kunde", "Artikel", "Bestellung", "Position", "Mitarbeiter", "Konto"]);
+    core.pakete.forEach((p) => { if (p.svg) expect(core.notation[p.svg], p.id).toBeTruthy(); });
+  });
+
   it("WPF ist deaktiviert, LF11a aktiv", () => {
     expect(events.find((e) => e.id === "wpf")?.enabled).toBe(false);
     expect(events.find((e) => e.id === "lf11a")?.enabled).toBe(true);

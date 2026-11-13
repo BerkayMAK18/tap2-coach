@@ -1,7 +1,7 @@
 /** Wiederholungs-Engine: Regeln wie in der Live-App. */
 import { describe, expect, it } from "vitest";
 import { addDays, today } from "./dates";
-import { answer, counts, openOrder, prio } from "./srs";
+import { answer, counts, guess, nextTxt, openOrder, prio } from "./srs";
 import { blank } from "./state";
 
 describe("answer", () => {
@@ -24,6 +24,17 @@ describe("answer", () => {
   it("Events zählen nicht zur Tagesstatistik", () => {
     expect(answer(blank(), "ev:lf11a:mod1", true).logDay).toBeNull();
     expect(answer(blank(), "m1", true).logDay).toBe(today());
+  });
+});
+
+describe("War geraten / nächste Wiederholung", () => {
+  it("geraten → Box 1, gelb, morgen wieder (auch wenn die Frage vorher grün war)", () => {
+    const S = blank(); S.q.m1 = answer(S, "m1", true).q; S.q.m1 = answer(S, "m1", true).q;
+    expect(guess(S.q.m1)).toMatchObject({ s: 1, b: 1, d: addDays(today(), 1), n: 2 });
+  });
+  it("Text der nächsten Wiederholung wie in der Live-App", () => {
+    const S = blank(); S.q.a = { s: 0, d: today() }; S.q.b = { s: 1, d: addDays(today(), 1) }; S.q.c = { s: 2, d: addDays(today(), 7) };
+    expect(["a", "b", "c", "neu"].map((id) => nextTxt(S, id))).toEqual(["heute noch einmal", "wieder morgen", "wieder in 7 Tagen", ""]);
   });
 });
 

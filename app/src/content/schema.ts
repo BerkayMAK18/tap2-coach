@@ -59,6 +59,7 @@ export const Paket = z.object({
   kern: z.array(z.union([z.tuple([z.string(), z.string()]), z.tuple([z.string(), z.string(), z.string()])])), // [Titel, Text, optional Codebeispiel]
   fallen: z.array(z.string()).optional(),
   ziele: z.array(z.string()).optional(),
+  svg: z.string().optional(), // Schlüssel der Notationshilfe (notation)
   decks: z.array(z.string()).optional(),
   ueb: z.array(z.string()).optional(),
   quiz: z.unknown().optional(),
@@ -71,6 +72,17 @@ export type Aufgabe = z.infer<typeof Aufgabe>;
 
 export const OpenQuestion = z.object({ id: z.string(), teil: z.string(), cat: z.string(), p: z.number(), q: z.string(), a: z.string() }).passthrough();
 export type OpenQuestion = z.infer<typeof OpenQuestion>;
+
+/** Notationshilfe zu einem Lernpaket (eigenes SVG aus dem Katalog). */
+export const Notation = z.object({ titel: z.string(), svg: z.string(), hinweis: z.string() });
+export type Notation = z.infer<typeof Notation>;
+
+/** SQL-Karte: sol = ausführbare Musterlösung (Ergebnisvergleich), pre = Vorbereitung, check = Abfrage für den Zustand danach,
+ *  checkT = Überschrift dazu, note/free = Hinweis, norun = nicht ausführbar (Begründung). */
+export const SqlCard = z.object({ sol: z.string().optional(), pre: z.string().optional(), check: z.string().optional(), checkT: z.string().optional(), note: z.string().optional(), free: z.string().optional(), norun: z.string().optional() });
+export type SqlCard = z.infer<typeof SqlCard>;
+export const SqlDb = z.object({ seed: z.string(), tables: z.array(z.tuple([z.string(), z.string()])), cards: z.record(z.string(), SqlCard), note: z.string() });
+export type SqlDb = z.infer<typeof SqlDb>;
 
 export const Figure = z.object({ svg: z.string().startsWith("<svg"), caption: z.string() });
 
@@ -88,9 +100,11 @@ export const Tap2Catalog = z.object({
   pakete: z.array(Paket),
   ueb: z.array(Aufgabe),
   open: z.array(OpenQuestion),
-  notation: z.record(z.string(), z.unknown()),
+  notation: z.record(z.string(), Notation),
   figs: z.record(z.string(), Figure),
   icons: z.record(z.string(), z.string()),
+  sqlDb: SqlDb,
+  codeLang: z.record(z.string(), z.enum(["pseudo", "sql"])),
   questions: z.array(Question),
 });
 export type Tap2Catalog = z.infer<typeof Tap2Catalog>;

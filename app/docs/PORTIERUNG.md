@@ -22,7 +22,7 @@ mit Tests. Erst danach neue Funktionen. Referenz ist immer `../index.html` auf `
 | Modul | Ansichten (Live-App) | Stand |
 | --- | --- | --- |
 | Grundgerüst | Seitenleiste, Kopfzeile (Ring, Tage, Figur, Suche, Einstellungen), Hell/Dunkel | in Arbeit |
-| Lernen | Übersicht (rStart), Lernen (Themen, Themenseite, Runde rSess), Suche, SQL-/Code-Karten, eigene Karten | Logik da, Markup offen |
+| Lernen | Übersicht (rStart), Lernen (Themen, Themenseite, Runde rSess), Suche, SQL-/Code-Karten, eigene Karten | **fertig (1:1)**, Abnahme 13.11.2026 (siehe unten) |
 | Aufgaben | rUeb (20 Aufgaben, Timer, Punkte, Fehlerursachen) | offen |
 | Prüfung | rPK (Simulation, Real-Klausur, Bewertung wie ein Prüfer, Ergebnisse, „Bereit für eine 1“) | offen |
 | Events | rEvents (Kapitel, Lernkarten, Abschlusstest, Belohnung) | offen |
@@ -39,3 +39,30 @@ mit Tests. Erst danach neue Funktionen. Referenz ist immer `../index.html` auf `
 - Inhalte (Fragen, Aufgaben, Lernpakete, Events, Abbildungen, Icons) kommen aus `src/content/generated/`; fehlt etwas
   (z. B. Operator-Drills, SQL-Beispieldatenbank, Tipps-Texte, die in der Live-App in der Logik stehen), wird es im
   Export-Skript ergänzt – nie von Hand kopiert.
+
+## Abnahmen
+
+### Lernen (13.11.2026, Branch `port/lernen`)
+
+Live-App (`main`, lokal) und Dev-App nebeneinander mit demselben Test-Lernstand (34 beantwortete Fragen, 2 markiert,
+1 eigene Karte). Verglichen wurde das erzeugte Markup jeder Ansicht (Elemente, Klassen, Texte, Attribute, Styles) –
+**identisch** für: Übersicht · Themenliste (Filter, Mehrfachauswahl, Auswahlleiste) · Themenseite (Theorie mit Timer
+und Notation, Fragen mit „Eigene Frage“ und Lösch-Bestätigung, Aufgaben) · Lernrunde (Auswahlfrage vor/nach dem
+Aufdecken, nach der Antwort, „War geraten“; Wissensfrage mit eigener Antwort, aufgedeckt, „Vorherige Frage …“;
+Code-Karte; SQL-Karte mit Ausführen, Musterlösungs-Vergleich, Tabellen ansehen, Aufdecken) · Rundenende · Suche
+(leer, Treffer in Themen/Fragen/Aufgaben, keine Treffer, eigene Karten). Lernstand nach denselben Klicks gleich
+(z. B. „War geraten“ → Box 1, gelb, morgen). Desktop und Handy (375 px) per Screenshot geprüft, keine Konsolenfehler,
+Produktions-Build mit SQL (WebAssembly) und Editor getestet.
+
+Bewusste Unterschiede:
+- Reihenfolge der Antwortoptionen ist (wie in der Live-App) zufällig.
+- CodeMirror ist eine neuere Version: Editor-internes Markup weicht ab, Optik und Tastenkürzel gleich.
+- Suche: Pfeil ↓/Enter im Suchfeld springen zum ersten Treffer. In der Live-App blockiert der globale Tasten-Handler
+  diese Tasten (stopPropagation in der Capture-Phase) – hier behoben, sonst gleich.
+- Links in noch nicht portierte Bereiche (Aufgaben, Tutorial/Lernplan/Operator-Trainer → Tipps, Prüfungssimulation,
+  Event-Runden) führen auf deren Seite; sie öffnen dort noch nicht die konkrete Aufgabe bzw. Simulation.
+
+Gefunden, gehört zum Grundgerüst: Tailwind erzeugte eine Utility `.ring` (1-px-Schatten) und überlagerte die
+Ring-Klasse der Live-App – in `styles.css` ausgeschlossen (`@source not inline("ring")`). Offen im Grundgerüst:
+Fußzeile (`footer.foot`) fehlt, Monospace-Schrift (AppMono) zeigt Fettdruck im Editor schwächer als JetBrains Mono.
+

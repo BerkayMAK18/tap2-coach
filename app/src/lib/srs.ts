@@ -5,7 +5,7 @@
  * „Unsicher richtig“ setzt auf Box 1, falsch auf Box 0. Grün ab Box 2.
  * Alle Funktionen sind rein (bekommen den Lernstand übergeben) und in srs.test.ts getestet.
  */
-import { addDays, shuffle, today } from "./dates";
+import { addDays, daysBetween, shuffle, today } from "./dates";
 import type { QRec, State } from "./state";
 import type { Question } from "@/content/schema";
 
@@ -25,6 +25,13 @@ export function answer(S: State, id: string, ok: boolean, unsure = false): { q: 
   r.t = Date.now();
   return { q: r, logDay: id.startsWith("ev:") ? null : today() }; // Events zählen nicht zur Lernstatistik
 }
+
+/** „War geraten“: Auswahlfrage richtig, aber geraten → morgen wieder, höchstens gelb (markGuess in der Live-App). */
+export const guess = (r: QRec): QRec => ({ ...r, b: 1, s: 1, d: addDays(today(), IV[1]), t: Date.now() });
+/** Tage bis zur nächsten Wiederholung (null = noch nie beantwortet). */
+export const dueIn = (S: State, id: string) => { const r = S.q[id]; return r && r.d ? daysBetween(today(), r.d) : null; };
+/** „heute noch einmal“, „wieder morgen“, „wieder in 3 Tagen“ */
+export const nextTxt = (S: State, id: string) => { const d = dueIn(S, id); return d == null ? "" : d <= 0 ? "heute noch einmal" : d === 1 ? "wieder morgen" : `wieder in ${d} Tagen`; };
 
 export type Counts = { g: number; y: number; r: number; n: number; t: number; pct: number; open: number };
 export function counts(S: State, list: Pick<Question, "id">[]): Counts {

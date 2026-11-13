@@ -27,12 +27,11 @@ export const FEATURES = {
 
 /**
  * Verantwortlicher nach Art. 4 Nr. 7 DSGVO – Pflichtangabe im Datenschutzhinweis.
- * TODO vor der Veröffentlichung: echten Namen und eine erreichbare Kontaktadresse eintragen
- * (keine Firmenadresse; z. B. eigene E-Mail oder Kontaktformular).
+ * Kontakt bewusst über das GitHub-Profil (keine Firmenadresse). Kommt später eine eigene E-Mail dazu, hier ergänzen.
  */
 export const CONTROLLER = {
-  name: "[Name eintragen]",
-  contact: "[E-Mail-Adresse eintragen]",
+  name: "Berkay Akdemir",
+  contact: "über GitHub: github.com/BerkayMAK18",
 } as const;
 
 /** Stand des Datenschutzhinweises – bei jeder inhaltlichen Änderung anpassen. */

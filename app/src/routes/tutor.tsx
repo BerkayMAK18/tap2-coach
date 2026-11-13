@@ -14,6 +14,7 @@ import { buildGraph, type GraphNode, type Level } from "@/lib/graph";
 import { shuffle } from "@/lib/dates";
 import { useProgress } from "@/store/progress";
 import { TutorBridge } from "@/components/TutorBridge";
+import { TutorChat } from "@/components/TutorChat";
 
 const PREMIUM_KEY = "tap2coach-premium";
 export const isPremium = () => { try { return localStorage.getItem(PREMIUM_KEY) === "1"; } catch { return false; } };
@@ -64,7 +65,8 @@ function Tutor() {
           : <p className="text-body-200 text-slate">Noch keine wiederholten Fehler.</p>}
         {g.errors.length > 0 && <button className="text-body-200 underline" onClick={() => { startSession("Tutor: Fehlerschwerpunkte", g.errors.map((e) => e.id)); navigate({ to: "/lernen/runde" }); }}>Diese Fragen jetzt üben</button>}
       </Card>
-      <TutorBridge g={g} />
+      <TutorChat g={g} />
+      <details className="rounded-lg border p-3"><summary className="cursor-pointer text-body-200 text-slate">Alternative ohne API: über ein Claude-Projekt (Kopieren)</summary><div className="mt-3"><TutorBridge g={g} /></div></details>
     </div>
   );
 }

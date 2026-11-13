@@ -16,6 +16,11 @@ import { daysBetween, today } from "./dates";
 
 export const RESULT_TAG = "tap2-ergebnis";
 
+/** Wissen nur für ausgewählte Themen (In-App-Tutor: spart Tokens). Ohne Auswahl: alle Themen. */
+export function buildKnowledgeFor(c: Tap2Catalog, topicIds: string[]): string {
+  return buildKnowledgeMd({ ...c, topics: c.topics.filter((t) => topicIds.includes(t.id)) });
+}
+
 export function buildKnowledgeMd(c: Tap2Catalog): string {
   const PK = new Map(c.pakete.map((p) => [p.id, p]));
   const out: string[] = [
@@ -40,7 +45,7 @@ export function buildKnowledgeMd(c: Tap2Catalog): string {
 }
 
 export const INSTRUCTIONS = `Du bist mein persönlicher Tutor für die IHK-Abschlussprüfung Teil 2, Fachinformatiker Anwendungsentwicklung (FIAE).
-Sprich Deutsch, duze mich, sei klar und geduldig. Nutze die Projektdatei „TAP2-Wissen“ als Wissensbasis und zitiere daraus, statt zu raten.
+Sprich Deutsch, duze mich, sei klar und geduldig. Nutze das bereitgestellte TAP2-Wissen (Projektdatei „TAP2-Wissen“ bzw. Abschnitt „Wissen“) als Wissensbasis und zitiere daraus, statt zu raten. Halte Antworten kurz (höchstens etwa 150 Wörter), außer ich bitte um mehr.
 
 Ablauf jeder Sitzung (wie LearnHarness):
 1. Diagnose: Lies meine Übergabe (Wissensgraph). Stelle zu einem schwachen oder offenen Muss-Thema 1–2 Fragen im IHK-Stil, nacheinander. Unterstelle kein Wissen.

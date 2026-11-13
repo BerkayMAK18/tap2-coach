@@ -15,6 +15,14 @@ import { useProgress } from "@/store/progress";
 
 const KEY = "tap2coach-tutor";
 type Store = { insights: Insight[]; miscon: Misconception[] };
+export const loadTutorStore = (): Store => load();
+/** Ergebnis-Block übernehmen: Erkenntnisse speichern, Übungsrunde zu den Themen vorbereiten. Gibt Themen + Meldung zurück. */
+export function applyTutorResult(text: string): { ueben: string[]; msg: string } {
+  const r = parseResult(text, new Set(TOPICS.map((t) => t.id)));
+  const cur = load(), next = { insights: [...cur.insights, ...r.verstanden].slice(-100), miscon: [...cur.miscon, ...r.fehlvorstellungen].slice(-50) };
+  saveStore(next);
+  return { ueben: r.ueben, msg: `Übernommen: ${r.verstanden.length} Erkenntnisse, ${r.fehlvorstellungen.length} Fehlvorstellungen.` };
+}
 const load = (): Store => { try { const o = JSON.parse(localStorage.getItem(KEY) || "null"); return { insights: Array.isArray(o?.insights) ? o.insights : [], miscon: Array.isArray(o?.miscon) ? o.miscon : [] }; } catch { return { insights: [], miscon: [] }; } };
 const saveStore = (s: Store) => { try { localStorage.setItem(KEY, JSON.stringify(s)); } catch { /* privat */ } };
 

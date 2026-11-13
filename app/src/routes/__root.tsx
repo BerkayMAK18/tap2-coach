@@ -3,7 +3,9 @@
  * Hinweis auf neue Versionen (Service Worker). Noch nicht portierte Bereiche sind als „bald“ markiert –
  * Stand der Portierung: docs/ARCHITEKTUR.md → „Portierung aus der Live-App“.
  */
-import { Link, Outlet, createRootRoute } from "@tanstack/react-router";
+import { Link, Outlet, createRootRoute, useLocation, useNavigate } from "@tanstack/react-router";
+import { useEffect } from "react";
+import { gm, setGamiContext, useGamiTick } from "@/legacy/gami-env";
 import { BookOpen, CalendarDays, ClipboardList, Home, Lightbulb, PartyPopper, Settings, Timer, Trophy } from "lucide-react";
 import { useRegisterSW } from "virtual:pwa-register/react";
 import { Button, Logo } from "@/ui";
@@ -21,13 +23,22 @@ const NAV = [
   { to: "/lernen", label: "Lernen", icon: BookOpen },
   { to: null, label: "Aufgaben", icon: ClipboardList },
   { to: null, label: "Prüfung", icon: Timer },
-  { to: null, label: "Events", icon: PartyPopper },
+  { to: null, label: "Events", icon: CalendarDays },
+  { to: "/belohnungen", label: "Belohnungen", icon: PartyPopper },
   { to: "/rangliste", label: "Rangliste", icon: Trophy },
   { to: null, label: "Tipps", icon: Lightbulb },
 ] as const;
 
+let booted = false;
 function Shell() {
   const S = useProgress((s) => s.S);
+  const sess = useProgress((s) => s.sess);
+  const loc = useLocation(), navigate = useNavigate();
+  useGamiTick((t) => t.n); // neu zeichnen, wenn sich Belohnungen ändern
+  const view = loc.pathname === "/" ? "start" : loc.pathname.split("/")[1];
+  setGamiContext(view, { sess, run: null });
+  useEffect(() => { if (!booted) { booted = true; gm("init"); gm("boot", ""); } }, []);
+  const hud = gm("hudHTML") as string | undefined;
   const reife = counts(S, allQ(S)).pct;
   const left = daysBetween(today(), EXAM_DAY);
   return (
@@ -40,7 +51,8 @@ function Shell() {
       <div className="flex min-w-0 flex-col pb-20 md:pb-0">
         <header className="sticky top-0 z-10 flex items-center gap-3 border-b bg-canvas/90 px-4 py-3 backdrop-blur md:px-8">
           <Link to="/" className="md:hidden" aria-label="Übersicht"><Logo size={24} className="[&_span]:hidden" /></Link>
-          <span className="ml-auto rounded-full border bg-card px-3 py-1 text-body-200" title="Prüfungsreife: grün zählt voll, gelb halb"><span className="hidden sm:inline">Prüfungsreife </span><b>{Math.round(reife * 100)} %</b></span>
+          {hud && <span className="mainui ml-auto" onClick={() => void navigate({ to: "/belohnungen" })} dangerouslySetInnerHTML={{ __html: hud /* vom Original-Modul erzeugt, intern escaped */ }} />}
+          <span className={cn("rounded-full border bg-card px-3 py-1 text-body-200", !hud && "ml-auto")} title="Prüfungsreife: grün zählt voll, gelb halb"><span className="hidden sm:inline">Prüfungsreife </span><b>{Math.round(reife * 100)} %</b></span>
           <span className="flex items-center gap-1 rounded-full border bg-card px-3 py-1 text-body-200"><CalendarDays className="h-4 w-4" aria-hidden="true" /><span className="whitespace-nowrap">{left > 0 ? `${left} ${left === 1 ? "Tag" : "Tage"}` : "Prüfung"}</span></span>
           <Link to="/einstellungen" className="md:hidden rounded-full p-2 hover:bg-muted" aria-label="Einstellungen"><Settings className="h-5 w-5" /></Link>
         </header>

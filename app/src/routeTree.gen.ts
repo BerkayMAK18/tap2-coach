@@ -10,6 +10,7 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as BelohnungenRouteImport } from './routes/belohnungen'
 import { Route as DatenschutzRouteImport } from './routes/datenschutz'
 import { Route as EinstellungenRouteImport } from './routes/einstellungen'
 import { Route as RanglisteRouteImport } from './routes/rangliste'
@@ -20,6 +21,11 @@ import { Route as LernenRundeRouteImport } from './routes/lernen.runde'
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const BelohnungenRoute = BelohnungenRouteImport.update({
+  id: '/belohnungen',
+  path: '/belohnungen',
   getParentRoute: () => rootRouteImport,
 } as any)
 const DatenschutzRoute = DatenschutzRouteImport.update({
@@ -55,6 +61,7 @@ const LernenRundeRoute = LernenRundeRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/belohnungen': typeof BelohnungenRoute
   '/datenschutz': typeof DatenschutzRoute
   '/einstellungen': typeof EinstellungenRoute
   '/rangliste': typeof RanglisteRoute
@@ -64,6 +71,7 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/belohnungen': typeof BelohnungenRoute
   '/datenschutz': typeof DatenschutzRoute
   '/einstellungen': typeof EinstellungenRoute
   '/rangliste': typeof RanglisteRoute
@@ -74,6 +82,7 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/belohnungen': typeof BelohnungenRoute
   '/datenschutz': typeof DatenschutzRoute
   '/einstellungen': typeof EinstellungenRoute
   '/rangliste': typeof RanglisteRoute
@@ -85,6 +94,7 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/belohnungen'
     | '/datenschutz'
     | '/einstellungen'
     | '/rangliste'
@@ -94,6 +104,7 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/belohnungen'
     | '/datenschutz'
     | '/einstellungen'
     | '/rangliste'
@@ -103,6 +114,7 @@ export interface FileRouteTypes {
   id:
     | '__root__'
     | '/'
+    | '/belohnungen'
     | '/datenschutz'
     | '/einstellungen'
     | '/rangliste'
@@ -113,6 +125,7 @@ export interface FileRouteTypes {
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  BelohnungenRoute: typeof BelohnungenRoute
   DatenschutzRoute: typeof DatenschutzRoute
   EinstellungenRoute: typeof EinstellungenRoute
   RanglisteRoute: typeof RanglisteRoute
@@ -128,6 +141,13 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/belohnungen': {
+      id: '/belohnungen'
+      path: '/belohnungen'
+      fullPath: '/belohnungen'
+      preLoaderRoute: typeof BelohnungenRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/datenschutz': {
@@ -177,6 +197,7 @@ declare module '@tanstack/react-router' {
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  BelohnungenRoute: BelohnungenRoute,
   DatenschutzRoute: DatenschutzRoute,
   EinstellungenRoute: EinstellungenRoute,
   RanglisteRoute: RanglisteRoute,

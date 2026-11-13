@@ -14,6 +14,7 @@ import type { Question } from "@/content/schema";
 import { st } from "@/lib/srs";
 import { cn } from "@/lib/utils";
 import { useProgress } from "@/store/progress";
+import { gm } from "@/legacy/gami-env";
 
 export const Route = createFileRoute("/lernen/runde")({ component: Runde });
 
@@ -30,7 +31,12 @@ function Runde() {
 
   const q = getQ(S, sess.ids[sess.i]);
   const next = (result: "ok" | "unsure" | "wrong") => {
-    if (q) answer(q.id, result !== "wrong", result === "unsure");
+    if (q) {
+      const f = st(useProgress.getState().S, q.id);
+      answer(q.id, result !== "wrong", result === "unsure");
+      const t = st(useProgress.getState().S, q.id);
+      gm("answer", q, result !== "wrong", result === "unsure", f, t); // XP, Serie, Quests – Regeln der Live-App
+    }
     setSession({ ...sess, i: sess.i + 1, res: { ...sess.res, [sess.ids[sess.i]]: result } });
     setStep({ shown: false, pick: null, guess: false });
     window.scrollTo({ top: 0 });

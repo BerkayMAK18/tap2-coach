@@ -15,6 +15,7 @@ import { canon, evMerge, mergeStates, type Ev } from "@/lib/sync-merge";
 import { normalize } from "@/lib/state";
 import { supabase } from "@/lib/supabase";
 import { useProgress } from "./progress";
+import { gm } from "@/legacy/gami-env";
 
 const KEY_SYNC = "tap2coach-sync", KEY_VORSYNC = "tap2coach-vorsync", KEY_GAMI = "tap2coach-gami";
 // Belohnungen aus der Cloud im kompakten Sync-Format (gm("pack")) – getrennt von tap2coach-gami (volles Format der Live-App)
@@ -71,8 +72,11 @@ export const useLiveSync = create<Store>((set, get) => ({
         let S = useProgress.getState().S;
         if (R?.s && typeof R.s === "object") { const m = mergeStates(S, R.s, NORMALIZE_CTX, ev); if (canon(m) !== canon(S)) { useProgress.getState().applySynced(m); S = m; } }
         // Belohnungen: unverändert aus der Cloud übernehmen (Belohnungs-Modul folgt), lokal ablegen für später
-        const g = R?.g ?? (() => { try { return JSON.parse(localStorage.getItem(KEY_GAMI_CLOUD) || "null"); } catch { return null; } })();
-        if (R?.g) { try { localStorage.setItem(KEY_GAMI_CLOUD, JSON.stringify(R.g)); } catch { /* privat */ } }
+        // Belohnungen wie in der Live-App: Cloud-Stand einmischen (merge), dann den eigenen Stand packen (pack)
+        if (R?.g) gm("merge", R.g);
+        const packed = gm("pack");
+        const g = packed ?? R?.g ?? (() => { try { return JSON.parse(localStorage.getItem(KEY_GAMI_CLOUD) || "null"); } catch { return null; } })(); // Rückfall, falls das Modul ausfällt
+        if (!packed && R?.g) { try { localStorage.setItem(KEY_GAMI_CLOUD, JSON.stringify(R.g)); } catch { /* privat */ } }
         if (R?.s && canon(normalize(structuredClone(R.s), NORMALIZE_CTX)) === canon(S) && canon(R.g ?? null) === canon(g ?? null) && canon(R.ev ?? {}) === canon(ev)) { cfg.rev = rev; done = true; break; }
         const res = (await supabase.rpc("tap2_push", { p_id: id, p_base: rev, p_blob: await seal({ v: 1, s: S, g: g ?? null, ev, at: Date.now() }, aes) })).data as { ok?: boolean; rev?: number; blob?: string } | null;
         if (res?.ok) { cfg.rev = +(res.rev ?? 0); done = true; } else remote = res;

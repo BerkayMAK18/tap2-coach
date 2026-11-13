@@ -13,7 +13,9 @@ import type { State } from "@/lib/state";
 
 // Die Kataloge werden in catalog.test.ts gegen das Zod-Schema geprüft; hier reicht die Typzusicherung.
 export const TAP2 = tap2Raw as unknown as Tap2Catalog;
-export const EVENTS = ([lf11aRaw, wpfRaw] as unknown as EventCatalog[]).filter((e) => e.enabled);
+/** Alle Events, auch deaktivierte – das Belohnungs-Modul braucht sie, damit Titel/Shirts daraus gültig bleiben. */
+export const ALL_EVENTS = [lf11aRaw, wpfRaw] as unknown as EventCatalog[];
+export const EVENTS = ALL_EVENTS.filter((e) => e.enabled);
 
 export const TOPICS: Topic[] = TAP2.topics;
 export const TP: Record<string, Topic> = Object.fromEntries(TOPICS.map((t) => [t.id, t]));

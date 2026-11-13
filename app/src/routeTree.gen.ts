@@ -10,157 +10,63 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
-import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
-import { Route as AuthRouteImport } from './routes/auth'
-import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated/dashboard'
-import { Route as AuthenticatedGraphRouteImport } from './routes/_authenticated/graph'
-import { Route as AuthenticatedLernplanRouteImport } from './routes/_authenticated/lernplan'
-import { Route as AuthenticatedVerlaufRouteImport } from './routes/_authenticated/verlauf'
-import { Route as AuthenticatedAufgabenIndexRouteImport } from './routes/_authenticated/aufgaben/index'
-import { Route as AuthenticatedAufgabenIdRouteImport } from './routes/_authenticated/aufgaben/$id'
-import { Route as AuthenticatedModulTopicIdRouteImport } from './routes/_authenticated/modul.$topicId'
-import { Route as AuthenticatedSessionSessionIdRouteImport } from './routes/_authenticated/session.$sessionId'
+import { Route as EinstellungenRouteImport } from './routes/einstellungen'
+import { Route as LernenIndexRouteImport } from './routes/lernen.index'
+import { Route as LernenRundeRouteImport } from './routes/lernen.runde'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
-const AuthenticatedRouteRoute = AuthenticatedRouteRouteImport.update({
-  id: '/_authenticated',
+const EinstellungenRoute = EinstellungenRouteImport.update({
+  id: '/einstellungen',
+  path: '/einstellungen',
   getParentRoute: () => rootRouteImport,
 } as any)
-const AuthRoute = AuthRouteImport.update({
-  id: '/auth',
-  path: '/auth',
+const LernenIndexRoute = LernenIndexRouteImport.update({
+  id: '/lernen/',
+  path: '/lernen/',
   getParentRoute: () => rootRouteImport,
 } as any)
-const AuthenticatedDashboardRoute = AuthenticatedDashboardRouteImport.update({
-  id: '/dashboard',
-  path: '/dashboard',
-  getParentRoute: () => AuthenticatedRouteRoute,
+const LernenRundeRoute = LernenRundeRouteImport.update({
+  id: '/lernen/runde',
+  path: '/lernen/runde',
+  getParentRoute: () => rootRouteImport,
 } as any)
-const AuthenticatedGraphRoute = AuthenticatedGraphRouteImport.update({
-  id: '/graph',
-  path: '/graph',
-  getParentRoute: () => AuthenticatedRouteRoute,
-} as any)
-const AuthenticatedLernplanRoute = AuthenticatedLernplanRouteImport.update({
-  id: '/lernplan',
-  path: '/lernplan',
-  getParentRoute: () => AuthenticatedRouteRoute,
-} as any)
-const AuthenticatedVerlaufRoute = AuthenticatedVerlaufRouteImport.update({
-  id: '/verlauf',
-  path: '/verlauf',
-  getParentRoute: () => AuthenticatedRouteRoute,
-} as any)
-const AuthenticatedAufgabenIndexRoute =
-  AuthenticatedAufgabenIndexRouteImport.update({
-    id: '/aufgaben/',
-    path: '/aufgaben/',
-    getParentRoute: () => AuthenticatedRouteRoute,
-  } as any)
-const AuthenticatedAufgabenIdRoute = AuthenticatedAufgabenIdRouteImport.update({
-  id: '/aufgaben/$id',
-  path: '/aufgaben/$id',
-  getParentRoute: () => AuthenticatedRouteRoute,
-} as any)
-const AuthenticatedModulTopicIdRoute =
-  AuthenticatedModulTopicIdRouteImport.update({
-    id: '/modul/$topicId',
-    path: '/modul/$topicId',
-    getParentRoute: () => AuthenticatedRouteRoute,
-  } as any)
-const AuthenticatedSessionSessionIdRoute =
-  AuthenticatedSessionSessionIdRouteImport.update({
-    id: '/session/$sessionId',
-    path: '/session/$sessionId',
-    getParentRoute: () => AuthenticatedRouteRoute,
-  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
-  '/auth': typeof AuthRoute
-  '/dashboard': typeof AuthenticatedDashboardRoute
-  '/graph': typeof AuthenticatedGraphRoute
-  '/lernplan': typeof AuthenticatedLernplanRoute
-  '/verlauf': typeof AuthenticatedVerlaufRoute
-  '/aufgaben/$id': typeof AuthenticatedAufgabenIdRoute
-  '/modul/$topicId': typeof AuthenticatedModulTopicIdRoute
-  '/session/$sessionId': typeof AuthenticatedSessionSessionIdRoute
-  '/aufgaben/': typeof AuthenticatedAufgabenIndexRoute
+  '/einstellungen': typeof EinstellungenRoute
+  '/lernen/runde': typeof LernenRundeRoute
+  '/lernen/': typeof LernenIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
-  '/auth': typeof AuthRoute
-  '/dashboard': typeof AuthenticatedDashboardRoute
-  '/graph': typeof AuthenticatedGraphRoute
-  '/lernplan': typeof AuthenticatedLernplanRoute
-  '/verlauf': typeof AuthenticatedVerlaufRoute
-  '/aufgaben/$id': typeof AuthenticatedAufgabenIdRoute
-  '/modul/$topicId': typeof AuthenticatedModulTopicIdRoute
-  '/session/$sessionId': typeof AuthenticatedSessionSessionIdRoute
-  '/aufgaben': typeof AuthenticatedAufgabenIndexRoute
+  '/einstellungen': typeof EinstellungenRoute
+  '/lernen/runde': typeof LernenRundeRoute
+  '/lernen': typeof LernenIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
-  '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
-  '/auth': typeof AuthRoute
-  '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
-  '/_authenticated/graph': typeof AuthenticatedGraphRoute
-  '/_authenticated/lernplan': typeof AuthenticatedLernplanRoute
-  '/_authenticated/verlauf': typeof AuthenticatedVerlaufRoute
-  '/_authenticated/aufgaben/$id': typeof AuthenticatedAufgabenIdRoute
-  '/_authenticated/modul/$topicId': typeof AuthenticatedModulTopicIdRoute
-  '/_authenticated/session/$sessionId': typeof AuthenticatedSessionSessionIdRoute
-  '/_authenticated/aufgaben/': typeof AuthenticatedAufgabenIndexRoute
+  '/einstellungen': typeof EinstellungenRoute
+  '/lernen/runde': typeof LernenRundeRoute
+  '/lernen/': typeof LernenIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths:
-    | '/'
-    | '/auth'
-    | '/dashboard'
-    | '/graph'
-    | '/lernplan'
-    | '/verlauf'
-    | '/aufgaben/$id'
-    | '/modul/$topicId'
-    | '/session/$sessionId'
-    | '/aufgaben/'
+  fullPaths: '/' | '/einstellungen' | '/lernen/runde' | '/lernen/'
   fileRoutesByTo: FileRoutesByTo
-  to:
-    | '/'
-    | '/auth'
-    | '/dashboard'
-    | '/graph'
-    | '/lernplan'
-    | '/verlauf'
-    | '/aufgaben/$id'
-    | '/modul/$topicId'
-    | '/session/$sessionId'
-    | '/aufgaben'
-  id:
-    | '__root__'
-    | '/'
-    | '/_authenticated'
-    | '/auth'
-    | '/_authenticated/dashboard'
-    | '/_authenticated/graph'
-    | '/_authenticated/lernplan'
-    | '/_authenticated/verlauf'
-    | '/_authenticated/aufgaben/$id'
-    | '/_authenticated/modul/$topicId'
-    | '/_authenticated/session/$sessionId'
-    | '/_authenticated/aufgaben/'
+  to: '/' | '/einstellungen' | '/lernen/runde' | '/lernen'
+  id: '__root__' | '/' | '/einstellungen' | '/lernen/runde' | '/lernen/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
-  AuthenticatedRouteRoute: typeof AuthenticatedRouteRouteWithChildren
-  AuthRoute: typeof AuthRoute
+  EinstellungenRoute: typeof EinstellungenRoute
+  LernenRundeRoute: typeof LernenRundeRoute
+  LernenIndexRoute: typeof LernenIndexRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -172,119 +78,36 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/_authenticated': {
-      id: '/_authenticated'
-      path: ''
-      fullPath: '/'
-      preLoaderRoute: typeof AuthenticatedRouteRouteImport
+    '/einstellungen': {
+      id: '/einstellungen'
+      path: '/einstellungen'
+      fullPath: '/einstellungen'
+      preLoaderRoute: typeof EinstellungenRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/auth': {
-      id: '/auth'
-      path: '/auth'
-      fullPath: '/auth'
-      preLoaderRoute: typeof AuthRouteImport
+    '/lernen/': {
+      id: '/lernen/'
+      path: '/lernen'
+      fullPath: '/lernen/'
+      preLoaderRoute: typeof LernenIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/_authenticated/dashboard': {
-      id: '/_authenticated/dashboard'
-      path: '/dashboard'
-      fullPath: '/dashboard'
-      preLoaderRoute: typeof AuthenticatedDashboardRouteImport
-      parentRoute: typeof AuthenticatedRouteRoute
-    }
-    '/_authenticated/graph': {
-      id: '/_authenticated/graph'
-      path: '/graph'
-      fullPath: '/graph'
-      preLoaderRoute: typeof AuthenticatedGraphRouteImport
-      parentRoute: typeof AuthenticatedRouteRoute
-    }
-    '/_authenticated/lernplan': {
-      id: '/_authenticated/lernplan'
-      path: '/lernplan'
-      fullPath: '/lernplan'
-      preLoaderRoute: typeof AuthenticatedLernplanRouteImport
-      parentRoute: typeof AuthenticatedRouteRoute
-    }
-    '/_authenticated/verlauf': {
-      id: '/_authenticated/verlauf'
-      path: '/verlauf'
-      fullPath: '/verlauf'
-      preLoaderRoute: typeof AuthenticatedVerlaufRouteImport
-      parentRoute: typeof AuthenticatedRouteRoute
-    }
-    '/_authenticated/aufgaben/': {
-      id: '/_authenticated/aufgaben/'
-      path: '/aufgaben'
-      fullPath: '/aufgaben/'
-      preLoaderRoute: typeof AuthenticatedAufgabenIndexRouteImport
-      parentRoute: typeof AuthenticatedRouteRoute
-    }
-    '/_authenticated/aufgaben/$id': {
-      id: '/_authenticated/aufgaben/$id'
-      path: '/aufgaben/$id'
-      fullPath: '/aufgaben/$id'
-      preLoaderRoute: typeof AuthenticatedAufgabenIdRouteImport
-      parentRoute: typeof AuthenticatedRouteRoute
-    }
-    '/_authenticated/modul/$topicId': {
-      id: '/_authenticated/modul/$topicId'
-      path: '/modul/$topicId'
-      fullPath: '/modul/$topicId'
-      preLoaderRoute: typeof AuthenticatedModulTopicIdRouteImport
-      parentRoute: typeof AuthenticatedRouteRoute
-    }
-    '/_authenticated/session/$sessionId': {
-      id: '/_authenticated/session/$sessionId'
-      path: '/session/$sessionId'
-      fullPath: '/session/$sessionId'
-      preLoaderRoute: typeof AuthenticatedSessionSessionIdRouteImport
-      parentRoute: typeof AuthenticatedRouteRoute
+    '/lernen/runde': {
+      id: '/lernen/runde'
+      path: '/lernen/runde'
+      fullPath: '/lernen/runde'
+      preLoaderRoute: typeof LernenRundeRouteImport
+      parentRoute: typeof rootRouteImport
     }
   }
 }
 
-interface AuthenticatedRouteRouteChildren {
-  AuthenticatedDashboardRoute: typeof AuthenticatedDashboardRoute
-  AuthenticatedGraphRoute: typeof AuthenticatedGraphRoute
-  AuthenticatedLernplanRoute: typeof AuthenticatedLernplanRoute
-  AuthenticatedVerlaufRoute: typeof AuthenticatedVerlaufRoute
-  AuthenticatedAufgabenIdRoute: typeof AuthenticatedAufgabenIdRoute
-  AuthenticatedModulTopicIdRoute: typeof AuthenticatedModulTopicIdRoute
-  AuthenticatedSessionSessionIdRoute: typeof AuthenticatedSessionSessionIdRoute
-  AuthenticatedAufgabenIndexRoute: typeof AuthenticatedAufgabenIndexRoute
-}
-
-const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
-  AuthenticatedDashboardRoute: AuthenticatedDashboardRoute,
-  AuthenticatedGraphRoute: AuthenticatedGraphRoute,
-  AuthenticatedLernplanRoute: AuthenticatedLernplanRoute,
-  AuthenticatedVerlaufRoute: AuthenticatedVerlaufRoute,
-  AuthenticatedAufgabenIdRoute: AuthenticatedAufgabenIdRoute,
-  AuthenticatedModulTopicIdRoute: AuthenticatedModulTopicIdRoute,
-  AuthenticatedSessionSessionIdRoute: AuthenticatedSessionSessionIdRoute,
-  AuthenticatedAufgabenIndexRoute: AuthenticatedAufgabenIndexRoute,
-}
-
-const AuthenticatedRouteRouteWithChildren =
-  AuthenticatedRouteRoute._addFileChildren(AuthenticatedRouteRouteChildren)
-
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
-  AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
-  AuthRoute: AuthRoute,
+  EinstellungenRoute: EinstellungenRoute,
+  LernenRundeRoute: LernenRundeRoute,
+  LernenIndexRoute: LernenIndexRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}

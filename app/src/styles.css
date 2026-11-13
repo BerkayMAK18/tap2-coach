@@ -1,5 +1,6 @@
 /* Eigene Tokens und Schriften – siehe src/theme/tokens.css */
 @import "./theme/tokens.css";
+@import "./theme/figures.css";
 
 @import "tailwindcss";
 @config "../tailwind.config.ts";

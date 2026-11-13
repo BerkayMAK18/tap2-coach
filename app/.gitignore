@@ -37,9 +37,6 @@ src/.generated/
 # Lokaler Arbeitsordner
 .workspace/
 
-# Laufzeiten für Python/SQL – werden von scripts/copy-runtimes.mjs aus node_modules kopiert
-public/runtimes/python/
-public/runtimes/sql/
 
 # Geheimnisse und lokale Cloudflare-Daten – nie committen
 .env

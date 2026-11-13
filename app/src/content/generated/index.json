@@ -1,0 +1,50 @@
+{
+ "schema": 1,
+ "quelle": {
+  "datei": "index.html",
+  "hash": "2d1eaf6868d1"
+ },
+ "kataloge": [
+  {
+   "id": "tap2-fiae",
+   "datei": "tap2.json",
+   "titel": "TAP2 Fachinformatik Anwendungsentwicklung",
+   "art": "pruefung",
+   "enabled": true,
+   "tags": [
+    "FIAE",
+    "TAP2",
+    "IHK"
+   ],
+   "fragen": 676
+  },
+  {
+   "id": "lf11a",
+   "datei": "event-lf11a.json",
+   "titel": "Klausur LF11a",
+   "art": "event",
+   "enabled": true,
+   "tags": [
+    "FIAE",
+    "Event",
+    "LF11a"
+   ],
+   "ende": "2026-12-18",
+   "fragen": 73
+  },
+  {
+   "id": "wpf",
+   "datei": "event-wpf.json",
+   "titel": "Klausur WPF Projektmanagement",
+   "art": "event",
+   "enabled": false,
+   "tags": [
+    "FIAE",
+    "Event",
+    "WPF PM"
+   ],
+   "ende": "2026-12-18",
+   "fragen": 63
+  }
+ ]
+}

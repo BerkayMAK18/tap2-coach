@@ -1,0 +1,15 @@
+# Sicherheits-Header für Cloudflare Pages (gilt für alle Antworten).
+# CSP: nur eigene Skripte, keine Inline-Skripte (Vite baut alles als Dateien), WebAssembly für den SQL-Editor,
+# Verbindungen nur zur eigenen Seite, zu Supabase (Sync/Rangliste, später) und zur GitHub-API (Patch Notes, später).
+/*
+  Content-Security-Policy: default-src 'self'; script-src 'self' 'wasm-unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self'; connect-src 'self' https://*.supabase.co https://api.github.com; worker-src 'self'; manifest-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'; frame-ancestors 'none'
+  X-Content-Type-Options: nosniff
+  X-Frame-Options: DENY
+  Referrer-Policy: strict-origin-when-cross-origin
+  Permissions-Policy: camera=(), microphone=(), geolocation=(), payment=(), usb=()
+  Cross-Origin-Opener-Policy: same-origin
+  Strict-Transport-Security: max-age=31536000; includeSubDomains
+
+# Service Worker nie zwischenspeichern, sonst kommen Updates verspätet an
+/sw.js
+  Cache-Control: no-cache

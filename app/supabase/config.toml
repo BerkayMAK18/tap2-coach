@@ -1,3 +1,0 @@
-# Supabase-CLI-Konfiguration. Projekt-ID des eigenen Dev-Projekts eintragen (supabase link --project-ref <id>).
-# Nicht das Live-Projekt der alten App verwenden.
-project_id = "tap2-coach-dev"

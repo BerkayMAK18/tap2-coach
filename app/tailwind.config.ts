@@ -1,6 +1,4 @@
 import type { Config } from "tailwindcss";
-import animate from "tailwindcss-animate";
-import typography from "@tailwindcss/typography";
 
 // Farben kommen aus src/theme/tokens.css (HSL-Tripel → Transparenz per Tailwind möglich).
 const hslVar = (v: string) => `hsl(var(${v}) / <alpha-value>)`;
@@ -76,5 +74,5 @@ export default {
       boxShadow: { overlay: "var(--overlay-shadow)" },
     },
   },
-  plugins: [animate, typography],
+  plugins: [],
 } satisfies Config;

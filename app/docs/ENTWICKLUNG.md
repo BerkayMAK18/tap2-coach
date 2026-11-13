@@ -1,97 +1,69 @@
-# Entwicklung und Einrichtung
+# Entwicklung und Betrieb
 
 ## Voraussetzungen
 
 - Node.js 22 oder neuer, npm.
-- Für Daten/Anmeldung: ein **eigenes** Supabase-Projekt für dev (nicht das der Live-App).
-- Für das Hosting: ein Cloudflare-Konto.
+- Kein Konto und keine Umgebungsvariablen nötig: Die Free-Version läuft komplett im Browser.
 
 ## Lokal starten
 
 ```sh
 cd app
 npm install
-npm run dev        # kopiert vorher die Python/SQL-Laufzeiten, startet auf http://localhost:8080
-npm test           # Vitest
-npm run build      # Cloudflare-Worker-Build nach dist/
+npm run dev        # http://localhost:8080
+npm test           # Vitest: Kataloge, Lernstand, Wiederholungs-Engine
+npm run build      # prüft Kataloge + TypeScript, baut nach dist/ (inkl. Service Worker)
+npm run preview    # gebaute Version lokal ansehen (wie in Produktion, mit Offline-Modus)
 ```
 
-## Umgebungsvariablen
-
-In `app/.env.local` (wird nicht committet, siehe `.gitignore`):
-
-| Variable | Wo | Inhalt |
-| --- | --- | --- |
-| `VITE_SUPABASE_URL` | Browser + Server | URL des Dev-Supabase-Projekts |
-| `VITE_SUPABASE_PUBLISHABLE_KEY` | Browser + Server | Publishable/anon Key (öffentlich, durch RLS geschützt) |
-| `SUPABASE_URL`, `SUPABASE_PUBLISHABLE_KEY` | Server | dieselben Werte für Server-Funktionen |
-| `TUTOR_ALLOWED_USER_IDS` | Server | kommagetrennte **Supabase**-Nutzer-IDs (UUID) mit KI-Zugriff; leer = niemand |
-| `ANTHROPIC_API_KEY` | Server (Phase 3) | nur als Cloudflare-Secret (`wrangler secret put`) |
-
-**Nie** einen `service_role`- oder `sb_secret`-Schlüssel in die App oder ins Repo.
-
-## Supabase-Dev-Projekt einrichten
-
-1. Neues Projekt anlegen (z. B. „tap2-coach-dev“).
-2. Schema einspielen: `drizzle/migrations/0000…0003*.sql` der Reihe nach im SQL-Editor ausführen.
-   `0003_security_hardening.sql` ist Pflicht (privater Speicher, Rechte, Limits).
-3. URL und Publishable Key in `.env.local` eintragen.
-
-## GitHub-Anmeldung
-
-1. GitHub → Settings → Developer settings → OAuth Apps → *New OAuth App*.
-   - Homepage URL: Adresse der Dev-App (lokal `http://localhost:8080`).
-   - Authorization callback URL: `https://<projekt>.supabase.co/auth/v1/callback`.
-2. Supabase → Authentication → Providers → GitHub: Client ID und Client Secret eintragen.
-3. Supabase → Authentication → URL Configuration: Dev-Adresse und `http://localhost:8080/auth` als Redirect-URLs erlauben.
-
-Die App leitet nach der Anmeldung auf `/auth` zurück (`redirectTo` in `src/routes/auth.tsx`).
-
-## Sicherheit (Pflicht vor dem ersten Deploy)
-
-Ergebnis des Security-Checks vom 13.11.2026. Diese Einstellungen liegen **nicht** im Code und müssen im
-Supabase-Dashboard gesetzt werden:
-
-- [ ] **Authentication → Providers → Email: deaktivieren.** Die App bietet nur GitHub an, aber ohne diese
-      Einstellung könnte man sich direkt über die Supabase-API mit E-Mail registrieren.
-- [ ] **Authentication → Sign In / Providers → Anonymous sign-ins: aus** (Standard).
-- [ ] **Authentication → URL Configuration:** nur die Dev-Adresse und `http://localhost:8080` als Redirect erlauben, keine Wildcards auf fremde Domains.
-- [ ] **Storage → attachments: „Public bucket“ aus.** Migration 0003 setzt das, bitte kontrollieren.
-- [ ] **Database → Advisors (Security Advisor):** keine Warnungen zu RLS offen.
-- [ ] `TUTOR_ALLOWED_USER_IDS` nur mit deiner eigenen Nutzer-ID setzen.
-
-Was der Code absichert (zum Nachlesen):
-
-| Schutz | Wo |
-| --- | --- |
-| Jede Tabelle nur für den Besitzer (RLS), anon ohne Rechte | `drizzle/migrations/0000`–`0003` |
-| Anhänge privat, nur erlaubte Typen (kein SVG/HTML), max. 10 MB, Zugriff per signierter URL | Migration 0003, `src/lib/queries.ts` |
-| Server-Funktionen prüfen das JWT und nutzen den Nutzer-Client (kein `service_role` im Code) | `src/integrations/supabase/auth-middleware.ts` |
-| KI-Aufrufe nur für freigeschaltete Nutzer-IDs, fail-closed | `src/lib/ai-provider.server.ts`, `src/lib/learn.functions.ts` |
-| Laufzeitprüfung aller Eingaben, Dateipfade nur im eigenen Ordner | `src/lib/learn.functions.ts`, `storagePathSchema` in `src/lib/learn-types.ts` |
-| Nur GitHub-Login (PKCE), kein Open Redirect nach der Anmeldung | `src/routes/auth.tsx`, `src/lib/safe-redirect.ts` |
-| KI-Inhalte: kein HTML im Markdown, keine externen Bilder, Demos in Sandbox ohne Netzwerk | `src/components/learn/Markdown.tsx`, `session.$sessionId.tsx` |
-| Sicherheits-Header (Clickjacking, nosniff, HSTS …) | `src/integrations/security-headers.ts` |
-| Keine Geheimnisse im Repo (`.env*`, `.dev.vars` ignoriert) | `.gitignore` |
-| Abhängigkeiten: `npm audit --omit=dev` = 0 Funde | `package.json` (`overrides`) |
-
-Bekannte Restpunkte: Für Skripte gibt es noch keine strikte CSP, weil TanStack Start Inline-Skripte braucht.
-Das wird erst mit Nonces möglich. `npm audit` meldet außerdem `minimatch` in `typescript-eslint`. Das betrifft
-nur das lokale Linting und nichts, was ausgeliefert wird. Eigener Code im Python/SQL-Editor läuft in einem
-Web Worker der App-Origin; Code aus fremden Quellen sollte man dort nicht ungeprüft ausführen.
-
-Vor jedem Deploy: `npm audit --omit=dev`, `npm test`, `npx tsc --noEmit`.
-
-## Deploy auf Cloudflare (noch nicht eingerichtet)
-
-- `npm run build`, dann `npx wrangler deploy` (Name in `wrangler.jsonc`).
-- Variablen im Cloudflare-Dashboard bzw. per `wrangler secret put`.
-- Nur aus dem Branch `dev`. Die GitHub Action der Live-App reagiert ausschließlich auf `main`.
-
-## Kataloge aus der Live-App aktualisieren
+## Inhalte aus der Live-App aktualisieren
 
 ```sh
 npm run catalog:export
 ```
 
-Liest `../index.html` (nur lesen) und schreibt `src/content/catalogs/`. Details: `docs/ARCHITEKTUR.md`.
+Liest `../index.html` (nur lesen) und schreibt `src/content/generated/`. Danach `npm test` – der Katalog-Test
+prüft Format und Frage-IDs. `npm run build` bricht ab, wenn die Kataloge nicht mehr zur `index.html` passen.
+
+## Deploy auf Cloudflare Pages (Free)
+
+Einmalig im Cloudflare-Dashboard → Workers & Pages → Create → Pages → mit GitHub verbinden:
+
+| Einstellung | Wert |
+| --- | --- |
+| Repository | `BerkayMAK18/tap2-coach` |
+| Production branch | `dev` |
+| Root directory | `app` |
+| Build command | `npm run build` |
+| Build output directory | `dist` |
+| Umgebungsvariable | `NODE_VERSION` = `22` |
+
+- Cloudflare baut danach bei jedem Push auf `dev` automatisch. Die Live-App (GitHub Pages, `main`) bleibt unberührt.
+- `public/_headers` setzt Sicherheits-Header und CSP. Seiten ohne Datei liefert Pages automatisch als `index.html` aus (SPA).
+- Kosten: Free-Plan, unbegrenzter statischer Traffic, 500 Builds/Monat.
+
+## Sicherheit
+
+Was der Code absichert:
+
+| Schutz | Wo |
+| --- | --- |
+| Lernstand-Format wie Live-App; Fremddaten (Sicherung) werden auf Typen geprüft, echte Daten bleiben unverändert | `src/lib/state.ts` (+ Test) |
+| Vor dem Laden einer Sicherung wird der alte Stand zurückgelegt (`tap2coach-vor-import`) | `src/store/progress.ts` |
+| Keine Inline-Skripte; CSP erlaubt nur eigene Skripte, WebAssembly, Supabase und GitHub-API | `public/_headers` |
+| Texte werden von React escaped; HTML nur für Abbildungen aus dem eigenen Katalog | `src/routes/lernen.runde.tsx` |
+| Kataloge werden gegen ein Schema geprüft, bevor sie in die App kommen | `src/content/catalog.test.ts` |
+
+Vor jedem Deploy: `npm test`, `npm run build`, `npm audit --omit=dev`.
+
+Sobald Sync/Rangliste portiert sind (Supabase):
+- [ ] eigenes Supabase-Projekt für dev, nicht das der Live-App
+- [ ] Authentication: Registrierung neuer Nutzer und E-Mail-Provider aus (die App nutzt keine Konten)
+- [ ] SQL aus `../tools/supabase-sync.sql` und `../tools/supabase-leaderboard.sql` einspielen
+- [ ] nur den Publishable Key verwenden, nie `service_role`/`sb_secret`
+
+## KI-Tutor (Phase 3, noch nicht eingebaut)
+
+Der frühere Tutor-Code (learnlab) liegt in der Git-Historie (Commit `2909805`, u. a. `src/lib/agent.server.ts`).
+Geplanter Wiedereinbau als eigenes Modul: ein Cloudflare Worker mit Claude API, Schlüssel als Secret,
+Zugriff nur für Supabase-Nutzer-IDs auf einer Freigabeliste. Die Free-Version bleibt davon unabhängig.

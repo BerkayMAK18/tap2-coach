@@ -19,6 +19,7 @@ import { INSTRUCTIONS, RESULT_TAG, buildHandoff, buildKnowledgeFor } from "@/lib
 import { useAccount } from "@/store/account";
 import { useProgress } from "@/store/progress";
 import { applyTutorResult, loadTutorStore } from "./TutorBridge";
+import { SafeMarkdown } from "./SafeMarkdown";
 
 type Msg = { role: "user" | "assistant"; content: string };
 type Usage = { input_tokens?: number; output_tokens?: number; cache_read_input_tokens?: number; cache_creation_input_tokens?: number };
@@ -92,7 +93,7 @@ export function TutorChat({ g }: { g: KnowledgeGraph }) {
           <div className="max-h-[60vh] space-y-3 overflow-y-auto rounded-lg bg-muted/40 p-3">
             {msgs.slice(1).map((m, i) => (
               <div key={i} className={m.role === "user" ? "ml-auto max-w-[85%] rounded-lg bg-ink p-3 text-canvas" : "max-w-[95%] rounded-lg bg-card p-3"}>
-                <p className="whitespace-pre-wrap leading-relaxed">{m.content}</p>
+                {m.role === "assistant" ? <SafeMarkdown text={m.content} /> : <p className="whitespace-pre-wrap leading-relaxed">{m.content}</p>}
                 {m.role === "assistant" && m.content.includes("```" + RESULT_TAG) && <Button size="sm" variant="ink" className="mt-2" onClick={() => takeResult(m.content)}>Ergebnis übernehmen & üben</Button>}
               </div>
             ))}

@@ -67,3 +67,26 @@ Sobald Sync/Rangliste portiert sind (Supabase):
 Der frühere Tutor-Code (learnlab) liegt in der Git-Historie (Commit `2909805`, u. a. `src/lib/agent.server.ts`).
 Geplanter Wiedereinbau als eigenes Modul: ein Cloudflare Worker mit Claude API, Schlüssel als Secret,
 Zugriff nur für Supabase-Nutzer-IDs auf einer Freigabeliste. Die Free-Version bleibt davon unabhängig.
+
+## Supabase: Entscheidung 13.11.2026 – Live-Projekt mitbenutzen (Option B)
+
+Der Free-Plan erlaubt nur 2 aktive Projekte. Die neue App nutzt deshalb **das Live-Projekt**, streng getrennt:
+
+- Eigene Tabellen mit Präfix `app_` (z. B. `app_sync`, `app_sync_history`, `app_leaderboard`), RLS „nur eigene Zeile“
+  (`user_id = auth.uid()`). Die Live-Tabellen `tap2_*` bleiben unverändert und gesperrt (keine Rechte für `anon`
+  und `authenticated`, Zugriff nur über die bestehenden Funktionen).
+- SQL der neuen App liegt getrennt in `app/supabase/*.sql` und darf nie `tap2_*`-Objekte ändern.
+- Login: Provider **GitHub an**, „Allow new users to sign up“ **an** (nötig für GitHub-Konten), **E-Mail-Provider aus**,
+  anonyme Anmeldung aus. Die Live-App nutzt keine Konten und ist davon nicht betroffen.
+- Vor jedem SQL im Live-Projekt: lesen, was es ändert; nur `app_*`-Objekte; vorher Backup-Export der `tap2_*`-Tabellen
+  ist nicht nötig, weil sie nicht berührt werden – trotzdem nie `drop`/`truncate` ohne Präfix-Prüfung.
+
+### Einrichtung (von dir)
+1. **GitHub-OAuth-App:** GitHub → Settings → Developer settings → OAuth Apps → New.
+   Homepage: Adresse der Dev-App (vorerst `http://localhost:8080`), Callback: `https://<projekt>.supabase.co/auth/v1/callback`.
+   Client-ID und Client-Secret notieren (Secret nie ins Repo).
+2. **Supabase (Live-Projekt):** Authentication → Sign In / Providers → GitHub aktivieren, Client-ID/Secret eintragen;
+   „Allow new users to sign up“ an; Email aus. Authentication → URL Configuration: `http://localhost:8080` und später
+   die Cloudflare-Adresse als Redirect-URLs.
+3. Danach (nächste Session): `app/supabase/` SQL für `app_*`, Login in der App, E2E-Sync, Rangliste, Konto löschen,
+   dann Tutor Stufe 2 (`docs/TUTOR.md`).

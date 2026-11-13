@@ -5,7 +5,7 @@
 -- sonst nichts. Die ID ist eine Prüfsumme eines geheimen Werts vom Gerät (bzw. vom Sync-Schlüssel), kein Name, keine E-Mail.
 -- Austragen löscht den Eintrag sofort. Unpassende Namen kann der Betreiber im Table Editor (tap2_lb) löschen.
 -- Schutz vor Missbrauch des öffentlichen Schlüssels: Zugriff nur über die Funktionen unten; XP können nur steigen,
--- höchstens 30.000 pro Tag; höchstens eine Aktualisierung alle 15 Sekunden; höchstens 5.000 Einträge.
+-- höchstens 30.000 pro Tag; höchstens eine Aktualisierung alle 15 Sekunden; höchstens 5.000 Einträge, höchstens 30 neue pro Stunde.
 
 create table if not exists public.tap2_lb (
   id         text primary key check (id ~ '^[0-9a-f]{64}$'),
@@ -51,6 +51,10 @@ begin
     update public.tap2_lb set name = btrim(p_name), name_key = k, look = coalesce(p_look, look), updated_at = now() where id = p_id;
   else
     if (select count(*) from public.tap2_lb) >= 5000 then raise exception 'tap2: bestenliste voll'; end if;
+    -- Bremse: höchstens 30 neue Einträge pro Stunde (für alle zusammen), gegen Zuspammen der Liste.
+    if (select count(*) from public.tap2_lb where created_at > now() - interval '1 hour') >= 30 then
+      raise exception 'tap2: gerade zu viele neue eintraege, bitte spaeter erneut';
+    end if;
     -- Startwert: bisher gesammelte XP, aber plausibel begrenzt
     insert into public.tap2_lb(id, name, name_key, xp, level, look) values (p_id, btrim(p_name), k, least(greatest(coalesce(p_xp, 0), 0), 100000), least(greatest(coalesce(p_level, 1), 1), 10000), coalesce(p_look, ''));
   end if;

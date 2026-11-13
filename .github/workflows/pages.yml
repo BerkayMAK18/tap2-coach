@@ -67,8 +67,18 @@ jobs:
           sed -i "s/const BUILD = \"dev\";/const BUILD = \"$v\";/" index.html
           printf '{"build":"%s"}\n' "$v" > version.json
           echo "Version: $v"
+      # Content-Security-Policy: blockiert eingeschleuste Skripte und Verbindungen zu fremden Servern (siehe tools/csp.js).
+      # Läuft nach der Versionskennung, weil die Hashes den endgültigen Skript-Text brauchen.
+      - name: Sicherheitsrichtlinie (CSP) eintragen
+        run: node tools/csp.js index.html
+      # Nur die Dateien veröffentlichen, die die App braucht – nicht Werkzeuge, SQL-Skripte, README oder app/ (Branch dev).
+      - name: Veröffentlichte Dateien zusammenstellen
+        run: |
+          mkdir _site
+          cp -R index.html sw.js manifest.webmanifest version.json .nojekyll icons fonts vendor _site/
+          ls -la _site
       - uses: actions/upload-pages-artifact@v3
         with:
-          path: .
+          path: _site
       - id: deployment
         uses: actions/deploy-pages@v4

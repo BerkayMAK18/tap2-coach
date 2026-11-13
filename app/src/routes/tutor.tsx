@@ -13,6 +13,7 @@ import { TAP2, TOPICS, allQ } from "@/content/catalog";
 import { buildGraph, type GraphNode, type Level } from "@/lib/graph";
 import { shuffle } from "@/lib/dates";
 import { useProgress } from "@/store/progress";
+import { TutorBridge } from "@/components/TutorBridge";
 
 const PREMIUM_KEY = "tap2coach-premium";
 export const isPremium = () => { try { return localStorage.getItem(PREMIUM_KEY) === "1"; } catch { return false; } };
@@ -63,10 +64,7 @@ function Tutor() {
           : <p className="text-body-200 text-slate">Noch keine wiederholten Fehler.</p>}
         {g.errors.length > 0 && <button className="text-body-200 underline" onClick={() => { startSession("Tutor: Fehlerschwerpunkte", g.errors.map((e) => e.id)); navigate({ to: "/lernen/runde" }); }}>Diese Fragen jetzt üben</button>}
       </Card>
-      <Card className="space-y-2 border-dashed">
-        <CardEyebrow>KI-Tutor (Stufe 2, in Vorbereitung)</CardEyebrow>
-        <p className="text-body-300">Der KI-Tutor nutzt diesen Graphen als Lernermodell: Er stellt Diagnosefragen zu schwachen Themen, erklärt Schritt für Schritt und trägt belegte Fortschritte in den Graphen ein. Dafür fehlen noch Login, Supabase-Dev-Projekt und API-Key (docs/TUTOR.md).</p>
-      </Card>
+      <TutorBridge g={g} />
     </div>
   );
 }

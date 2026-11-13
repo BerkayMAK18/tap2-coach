@@ -129,7 +129,7 @@ Jeder Bereich ist ein eigenes Modul (Route + Logik in `lib/` + Tests) und kann u
 | 1b | Funktionsgleichheit inkl. Gamification/Gacha (Tabelle oben) | in Arbeit: Lernen fertig |
 | 1c | Konto (GitHub), E2E-Sync, Rangliste mit Benutzername, Konto löschen | offen (braucht Supabase-Dev-Projekt + GitHub-OAuth-App) |
 | 2 | Katalog-Bibliothek (Suche/Filter, mehrere Kataloge), TAP1, Lehrjahr → Lernfeld, Klausurkalender | offen |
-| 3 | KI-Tutor (Premium, nur Admin) als Supabase Edge Function | offen (braucht Claude-API-Key) |
+| 3 | KI-Tutor (Premium, nur Admin): Stufe 1 Wissensgraph fertig (`/tutor`), Stufe 2 KI siehe `docs/TUTOR.md` | Stufe 2 offen (braucht Login + Claude-API-Key) |
 | 4 | Neue App ersetzt die Live-App (gleiche Origin, Lernstände bleiben) | offen |
 
 ## Sicherheit

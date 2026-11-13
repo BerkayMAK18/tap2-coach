@@ -14,7 +14,7 @@ import { ROUND, counts, dueList, mixIn, openOrder, st } from "@/lib/srs";
 import { useProgress } from "@/store/progress";
 import { cn } from "@/lib/utils";
 
-const search = z.object({ thema: z.string().optional(), teil: z.enum(["alle", "t1", "t2", "wiso"]).optional() });
+const search = z.object({ thema: z.string().optional().catch(undefined), teil: z.enum(["alle", "t1", "t2", "wiso"]).optional().catch(undefined) }); // fehlerhafte Links nie zum Absturz führen lassen
 export const Route = createFileRoute("/lernen/")({ validateSearch: search, component: Lernen });
 
 function Lernen() {

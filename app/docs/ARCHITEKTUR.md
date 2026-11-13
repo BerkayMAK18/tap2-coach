@@ -99,7 +99,7 @@ app/
 | Suche | ✓ | ✓ | `lib/search.ts` |
 | Eigene Karten anlegen/löschen | ✓ | ✓ | Löschen mit Sync-Ereignis |
 | SQL-Karten ausführen (sql.js, Vergleich mit Musterlösung), Code-Editor | ✓ | ✓ | `lib/sql.ts`, `lib/editor.ts`, eigene Chunks |
-| Aufgaben (20 Übungsaufgaben, Timer, Punkte, Fehlerursachen) | ✓ | – | Daten im Katalog vorhanden |
+| Aufgaben (20 Übungsaufgaben, Timer, Punkte, Fehlerursachen) | ✓ | ✓ | `lib/aufgaben.ts`, 1:1 (PORTIERUNG.md) |
 | Prüfung (Simulation, Real-Klausur, Noten, „Bereit für eine 1“) | ✓ | – | Daten vorhanden |
 | Tipps, Operator-Trainer, Lernplan, Tutorial | ✓ | – | Operator-Daten liegen noch in der App-Logik |
 | Events (LF11a) | ✓ | – | Daten vorhanden |

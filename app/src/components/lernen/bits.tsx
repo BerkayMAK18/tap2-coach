@@ -61,16 +61,16 @@ export function Fig({ q }: { q: Question }) {
 }
 export const Ewh = ({ q }: { q: Question }) => (q.type === "card" && q.note ? <div className="ewh"><span className="alab">Erwartungshorizont</span><div className="ewh-b">{q.note}</div></div> : null);
 
-/** Timer in der Theorie (tmHTML(..., { compact: true })) */
-export function TimerBox({ k, min, label = "Start", hint }: { k: string; min: number; label?: string; hint?: string }) {
+/** Timer wie tmHTML() der Live-App: kompakt in der Theorie, groß (compact=false) in den Übungsaufgaben */
+export function TimerBox({ k, min, label = "Start", hint, compact = true }: { k: string; min: number; label?: string; hint?: string; compact?: boolean }) {
   const { TM, start, stop, reset } = useTimer();
   useTimer((s) => s.now); // Sekundentakt
-  const stt = tmState(TM, k);
-  if (stt === "idle") return <div className="tm compact"><button type="button" className="btn small" onClick={() => start(k, min)}><Ic name="play" cls="ic sm" /> {label} · {fmtClock(min * 60)}</button>{hint && <span className="small muted">{hint}</span>}</div>;
+  const stt = tmState(TM, k), cc = compact ? " compact" : "";
+  if (stt === "idle") return <div className={"tm" + cc}><button type="button" className={`btn ${compact ? "small" : "primary big"}`} onClick={() => start(k, min)}><Ic name="play" cls="ic sm" /> {label} · {fmtClock(min * 60)}</button>{hint && <span className="small muted">{hint}</span>}</div>;
   const left = tmLeft(TM);
-  if (stt === "run") return <div className="tm run compact"><span className={`tm-clock num ${left < 0 ? "over" : ""}`}>{fmtClock(left)}</span><span className="small muted">{left < 0 ? "über der Zeit" : "verbleibend"}</span><button type="button" className="btn small" onClick={stop}><Ic name="check" cls="ic xs" /> Stopp – fertig</button></div>;
+  if (stt === "run") return <div className={"tm run" + cc}><span className={`tm-clock num ${left < 0 ? "over" : ""}`}>{fmtClock(left)}</span><span className="small muted">{left < 0 ? "über der Zeit" : "verbleibend"}</span><button type="button" className="btn small" onClick={stop}><Ic name="check" cls="ic xs" /> Stopp – fertig</button></div>;
   const used = (TM!.stop! - TM!.start) / 1000, over = used - min * 60;
-  return <div className="tm done compact"><span className="app-ok"><Ic name="check" cls="ic sm" /> Bearbeitet in {fmtClock(used)}</span><span className={`small ${over > 0 ? "warn-text" : "muted"}`}>{over > 0 ? fmtClock(over) + " über der Zeit" : "in der Zeit"}</span><button type="button" className="linkbtn" onClick={reset}>Timer zurücksetzen</button></div>;
+  return <div className={"tm done" + cc}><span className="app-ok"><Ic name="check" cls="ic sm" /> Bearbeitet in {fmtClock(used)}</span><span className={`small ${over > 0 ? "warn-text" : "muted"}`}>{over > 0 ? fmtClock(over) + " über der Zeit" : "in der Zeit"}</span><button type="button" className="linkbtn" onClick={reset}>Timer zurücksetzen</button></div>;
 }
 
 const TEIL_K: Record<string, string> = { t1: "Planen", t2: "Algorithmen", wiso: "SoWi" };

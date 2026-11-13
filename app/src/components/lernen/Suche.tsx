@@ -92,7 +92,7 @@ function SearchDialog() {
         <h4>Übungsaufgaben <span className="cnt">{r.U.length}</span></h4>
         {r.U.map((x) => (
           // Aufgaben-Bereich ist ein eigenes Modul (noch nicht portiert) – der Treffer führt dorthin
-          <button key={x.u.id} type="button" className="srch-hit" onClick={() => { close(); void navigate({ to: "/aufgaben" }); window.scrollTo({ top: 0 }); }}>
+          <button key={x.u.id} type="button" className="srch-hit" onClick={() => { close(); void navigate({ to: "/aufgaben", search: { u: x.u.id } }); window.scrollTo({ top: 0 }); }}>
             <Ic name="pencil" cls="ic sm" /><span className="ht">{x.u.id} · <Segs segs={hl(x.u.titel, r.terms)} /></span><span className="chip">{x.u.thema}</span>
             {!r.terms.some((t) => x.front.includes(t)) && <span className="hs"><Segs segs={snippet(x.u.text + " " + x.u.loesung, r.terms, 50)} /></span>}
           </button>

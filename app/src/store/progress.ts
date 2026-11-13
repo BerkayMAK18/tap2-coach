@@ -9,6 +9,7 @@
 import { create } from "zustand";
 import { KEYS } from "@/config";
 import { NORMALIZE_CTX } from "@/content/catalog";
+import { UE, parsePts, saveUebRec, setUebCauseRec, type Cause } from "@/lib/aufgaben";
 import type { SessSrc } from "@/lib/lernen";
 import { guess, answer as srsAnswer } from "@/lib/srs";
 import { blank, isObj, normalize, type State } from "@/lib/state";
@@ -49,6 +50,10 @@ type Store = {
   /** Runde starten (leere Liste: nichts tun). src.tid merkt sich das Thema für „Als Nächstes“. */
   startSession: (title: string, ids: string[], src?: SessSrc, startAt?: number) => void;
   setSession: (s: Session | null) => void;
+  /** Punkte einer Übungsaufgabe speichern (Eingabe wie im Feld; keine Zahl → nichts passiert). */
+  saveUeb: (id: string, raw: string) => void;
+  /** Fehlerursache einer Übungsaufgabe setzen/entfernen – mit Eintrag im Fehlerprotokoll und Sync-Ereignis. */
+  setUebCause: (id: string, c: Cause) => void;
 };
 
 const read = <T,>(key: string): T | null => { try { const t = localStorage.getItem(key); return t ? (JSON.parse(t) as T) : null; } catch { return null; } };
@@ -106,6 +111,16 @@ export const useProgress = create<Store>((set, get) => {
       write(KEYS.session, sess); set({ sess });
     },
     setSession: (sess) => { write(KEYS.session, sess); set({ sess }); },
+    saveUeb: (id, raw) => {
+      const u = UE[id], p = u ? parsePts(raw, u.max) : null;
+      if (u && p != null) save(saveUebRec(get().S, id, p));
+    },
+    setUebCause: (id, c) => {
+      const r = setUebCauseRec(get().S, id, c);
+      if (!r) return;
+      void import("./livesync").then((m) => m.recordEv("e", r.ev[0], r.ev[1])); // wie syncEv("e", …) in logCause()
+      save(r.S);
+    },
   };
 });
 

@@ -15,15 +15,14 @@ import { counts, isDue, st } from "@/lib/srs";
 import { useProgress } from "@/store/progress";
 import { Ic, Ring, pctS } from "@/ui-main";
 import { AmpBar, Amp, Legend, TimerBox, TopicRow } from "@/components/lernen/bits";
+import { UebItem } from "@/components/aufgaben/UebItem";
+import { uebOf } from "@/lib/aufgaben";
 import { useAnimRings, useLernenUI, useOpenTopic, useStartRound, type Tf, type TTab } from "@/components/lernen/ui";
 
 const search = z.object({ thema: z.string().optional().catch(undefined) }); // fehlerhafte Links nie zum Absturz führen lassen
 export const Route = createFileRoute("/lernen/")({ validateSearch: search, component: Lernen });
 
 const PK = Object.fromEntries(TAP2.pakete.map((p) => [p.id, p]));
-const UE = Object.fromEntries(TAP2.ueb.map((u) => [u.id, u]));
-/** Aufgaben eines Themas: aus seinen Lernpaketen, ohne Doppelte (t.ueb in der Live-App) */
-const uebOf = (t: Topic) => [...new Set(t.th.flatMap((id) => (PK[id] ? PK[id].ueb ?? [] : [])))].filter((u) => UE[u]);
 const GROUPS: [string, (t: Topic) => boolean][] = [["Planen · Teil 1", (t) => t.teil === "Teil 1"], ["Algorithmen · Teil 2", (t) => t.teil === "Teil 2"], ["Beide IT-Teile", (t) => t.teil === "Teil 1 + 2"], ["Wirtschafts- und Sozialkunde · SoWi", (t) => t.teil === "SoWi"]];
 
 function Lernen() {
@@ -191,17 +190,7 @@ function TopicPage({ t }: { t: Topic }) {
       )}
       {tab === "aufgaben" && (
         <div className="ueb-list">
-          {ueb.map((id) => {
-            const u = UE[id], r = S.ueb[id], pct = r ? r.p / u.max : null;
-            return (
-              // Aufgaben-Bereich ist ein eigenes Modul (noch nicht portiert) – der Klick führt dorthin
-              <button key={id} type="button" className={`ueb-item t-${tcolOf(u.teil)}`} onClick={() => { void navigate({ to: "/aufgaben" }); window.scrollTo({ top: 0 }); }}>
-                <span className="id">{id}</span>
-                <span><span className="t">{u.titel}</span><br /><span className="sub">{u.teil} · {u.max} P · ca. {u.min} Min.</span></span>
-                <span className="r">{r ? <span className={`chip ${pct! >= 0.81 ? "ok" : pct! >= 0.67 ? "warn" : "bad"}`}><span className="d" />{r.p}/{u.max}</span> : <span className="chip">offen</span>}</span>
-              </button>
-            );
-          })}
+          {ueb.map((id) => <UebItem key={id} id={id} onOpen={(u) => { void navigate({ to: "/aufgaben", search: { u } }); window.scrollTo({ top: 0 }); }} />)}
         </div>
       )}
     </>

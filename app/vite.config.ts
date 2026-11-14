@@ -27,8 +27,8 @@ export default defineConfig({
       filename: "sw.ts",
       includeAssets: ["favicon.png", "icon-192.png", "icon-512.png", "apple-touch-icon.png"],
       manifest: {
-        name: "TAP2 Prüfungscoach",
-        short_name: "TAP2 Coach",
+        name: "Vortex – Prüfungscoach TAP2",
+        short_name: "Vortex",
         description: "Lern-App für die Abschlussprüfung Teil 2 – Fachinformatik Anwendungsentwicklung",
         lang: "de",
         start_url: "/",

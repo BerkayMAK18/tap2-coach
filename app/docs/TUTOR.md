@@ -1,12 +1,12 @@
-# Vortex – KI-Prüfungstutor für die TAP2
+# KI-Tutor für die TAP2 (in der App „Vortex“)
 
-Stand: 14.11.2026. Premium-Funktion der neuen App, vorerst nur für den Admin, später für alle (mit XP, Serie, Tageszielen).
+Stand: 14.11.2026. Die App heißt seit 14.11.2026 „Vortex“; der KI-Tutor heißt darin „Tutor“ (kostenlos über die eigene KI) bzw. „Tutor Pro“ (eingebaute KI). Tutor Pro ist Premium (nur das freigeschaltete Konto), der Tutor über die eigene KI ist für alle.
 
 **Einrichtung:** Edge Function deployt (14.11.2026). Für den Tutor-Stand im Konto `004_app_tutor_state_konto.sql` einspielen (ersetzt 003).
 
 ## Zwei Varianten (14.11.2026)
 
-| | **Vortex** (kostenlos) | **Vortex Pro** (Premium) |
+| | **Tutor** (kostenlos) | **Tutor Pro** (Premium) |
 | --- | --- | --- |
 | Für wen | alle, auch ohne Anmeldung | nur das freigeschaltete GitHub-Konto (Admin-Rolle) |
 | KI | die eigene KI der Nutzer (Claude, ChatGPT …) über Kopieren und Einfügen | eingebaut: Claude über die Edge Function |
@@ -15,7 +15,7 @@ Stand: 14.11.2026. Premium-Funktion der neuen App, vorerst nur für den Admin, s
 | XP | wie Antworten (Combo, Serie, Quests), je neuer bewerteter Aufgabe | wie Antworten |
 | Kosten für den Betreiber | keine | API-Kosten (siehe unten) |
 
-**Vortex (Brücke)** – `lib/vortex-bridge.ts`, `components/tutor/BridgePanel.tsx`:
+**Tutor (Brücke)** – `lib/vortex-bridge.ts`, `components/tutor/BridgePanel.tsx`:
 - **Der Text zum Kopieren** besteht aus den Prüfer-Anweisungen (wie bei Pro), der Übergabe (Stand je Konzept,
   Fehlvorstellungen, Lernpakete des Themas) und dem Format des Ergebnis-Blocks `vortex-ergebnis` (JSON, `version: 2`):
   bewertete Aufgaben mit Punkten, Konzepten und Sicherheit, dazu Graph-Updates und ein Fazit.

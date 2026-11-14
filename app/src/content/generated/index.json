@@ -2,7 +2,7 @@
  "schema": 1,
  "quelle": {
   "datei": "index.html",
-  "hash": "2d1eaf6868d1"
+  "hash": "0406f7a0c0c4"
  },
  "kataloge": [
   {
@@ -29,7 +29,7 @@
     "Event",
     "LF11a"
    ],
-   "ende": "2026-12-18",
+   "ende": "2026-12-10",
    "fragen": 73
   },
   {

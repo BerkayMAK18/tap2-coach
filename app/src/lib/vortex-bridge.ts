@@ -1,11 +1,11 @@
 /**
- * Vortex (kostenlos): Brücke zur eigenen KI – kein Server, keine API-Kosten.
+ * Tutor (kostenlos): Brücke zur eigenen KI – kein Server, keine API-Kosten.
  *
- * 1. bridgePrompt(): EIN Text zum Kopieren – Prüfer-Anweisungen (wie Vortex Pro), Übergabe (Stand je Konzept,
+ * 1. bridgePrompt(): EIN Text zum Kopieren – Prüfer-Anweisungen (wie Tutor Pro), Übergabe (Stand je Konzept,
  *    Fehlvorstellungen, Lernpakete des Themas) und das Format des Ergebnis-Blocks. Der Nutzer fügt ihn selbst in eine KI
  *    seiner Wahl ein (Claude, ChatGPT …). Die App überträgt dabei nichts.
  * 2. parseBridge(): Ergebnis-Block zurück in die App – FREMDTEXT: Zod, Längen, nur bekannte Themen-/Konzept-IDs.
- *    Daraus werden Belege für Graph und Lehrplan (gleiches Format wie bei Vortex Pro) und bewertete Aufgaben für XP.
+ *    Daraus werden Belege für Graph und Lehrplan (gleiches Format wie bei Tutor Pro) und bewertete Aufgaben für XP.
  *    Die IDs der Belege hängen nur vom Inhalt des Blocks ab: Zweimal einfügen zählt nur einmal (auch für XP).
  */
 import { z } from "zod";
@@ -15,7 +15,7 @@ import type { Ev } from "./tutor-state";
 
 export const BRIDGE_TAG = "vortex-ergebnis";
 
-export const BRIDGE_INSTRUCTIONS = `Du bist „Vortex“, mein Prüfungstutor und Prüfer für die IHK-Abschlussprüfung Teil 2, Fachinformatiker Anwendungsentwicklung (FIAE). Du sprichst Deutsch, duzt mich und bist klar, fair und knapp.
+export const BRIDGE_INSTRUCTIONS = `Du bist mein Prüfungstutor und Prüfer für die IHK-Abschlussprüfung Teil 2, Fachinformatiker Anwendungsentwicklung (FIAE). Du sprichst Deutsch, duzt mich und bist klar, fair und knapp.
 
 # Sitzung
 Diese Sitzung gilt genau einem Thema (siehe Übergabe unten, mit meinem Stand je Konzept, offenen Fehlvorstellungen und den Inhalten der Lernpakete). Löchere mich die ganze Sitzung zu diesem Thema, prüfungsähnlich im IHK-Stil:
@@ -86,7 +86,7 @@ export function parseBridge(text: string, known: { topics: Set<string>; kern: Se
     const op = OPERATOR_LIST.find((o) => o.toLowerCase() === String(a.operator ?? "").trim().toLowerCase());
     const evId = `vb-${hash}-a${i}`, w = punkte / max;
     (ks.length ? ks : [undefined]).forEach((k, j) => evidence.push({ id: `${evId}-${j}`, at: now, ...(k ? { k } : {}), t: thema, art: "bewertung", w, p: punkte, m: max, ...(sich != null ? { sich } : {}), n: a.titel.slice(0, 300), s: `vb-${hash}` }));
-    // Sicher, aber falsch → Fehlvorstellung (wie bei Vortex Pro)
+    // Sicher, aber falsch → Fehlvorstellung (wie bei Tutor Pro)
     if (sich != null && sich >= 2 && w < 0.5) (ks.length ? ks : [undefined]).forEach((k, j) => evidence.push({ id: `${evId}-sf${j}`, at: now, ...(k ? { k } : {}), t: thema, art: "fehlvorstellung", w: -0.5, f: `sf-vb-${hash}-${i}`, n: `Sicher, aber falsch: ${a.titel}`.slice(0, 300), s: `vb-${hash}` }));
     tasks.push({ titel: a.titel, ...(op ? { operator: op } : {}), punkte, max, konzepte: ks, ...(sich != null ? { sich } : {}), ev: `${evId}-0` });
   });

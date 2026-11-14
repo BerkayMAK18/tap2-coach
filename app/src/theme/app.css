@@ -143,3 +143,19 @@ main.content.wide { max-width: none; }
 .tp-net { width: 100%; max-width: 460px; height: auto; display: block; margin: 0 auto; }
 /* Einstellungen: Hinweis zu den zwei Wegen des Synchronisierens */
 .tp-ways { margin: 4px 4px 10px; }
+/* Bestätigungsdialog (ui-main/confirm.tsx) statt window.confirm */
+.cf-modal { position: fixed; inset: 0; z-index: 95; display: grid; place-items: center; padding: 16px; background: rgba(6, 16, 20, 0.55); backdrop-filter: blur(4px); animation: cf-fade 0.15s ease-out; }
+.cf-box { display: grid; grid-template-columns: auto 1fr; gap: 14px; align-items: start; width: min(440px, 100%); padding: 20px 22px; border-radius: var(--r-lg); background: var(--surface); color: var(--ink); border: 1px solid var(--line); box-shadow: var(--sh-2); animation: cf-pop 0.18s ease-out; }
+.cf-ic { width: 38px; height: 38px; border-radius: 12px; display: grid; place-items: center; background: var(--blue-soft-2); }
+.cf-box.danger .cf-ic { background: var(--red-soft); color: var(--bad); }
+.cf-body h3 { margin: 2px 0 0; font-size: 1.05rem; }
+.cf-body p { margin: 6px 0 0; line-height: 1.55; }
+.cf-act { display: flex; justify-content: flex-end; gap: 8px; margin-top: 18px; }
+@keyframes cf-fade { from { opacity: 0; } to { opacity: 1; } }
+@keyframes cf-pop { from { opacity: 0; transform: translateY(6px) scale(0.98); } to { opacity: 1; transform: none; } }
+@media (prefers-reduced-motion: reduce) { .cf-modal, .cf-box { animation: none; } }
+@media (max-width: 480px) { .cf-modal { place-items: end center; } .cf-box { width: 100%; } .cf-act .btn { flex: 1; } }
+/* Tutor gesperrt (Premium) */
+.tp-locked { display: flex; gap: 14px; align-items: flex-start; }
+.cf-box .btn.danger { background: var(--bad); color: #fff; }
+.cf-box .btn.danger:hover { filter: brightness(1.08); }

@@ -6,6 +6,7 @@
 import type { ConceptGraph } from "@/lib/graph";
 import { useTutor } from "@/store/tutor";
 import { Ic } from "@/ui-main";
+import { ask } from "@/ui-main/ask";
 import { LV, pc, tn } from "./shared";
 
 const W = 340, ROW = 30;
@@ -138,7 +139,7 @@ export function ResetTutor() {
   return (
     <details className="tx-paste"><summary className="small">Tutor-Wissen zurücksetzen</summary>
       <p className="tiny muted">Löscht Belege, Fehlvorstellungen und Sitzungen des Tutors auf allen deinen Geräten – der Graph und der Lehrplan beginnen neu. XP und dein Lernstand aus den Lernrunden bleiben.</p>
-      <button type="button" className="btn small danger" onClick={() => { if (confirm("Tutor-Wissen auf allen Geräten zurücksetzen?")) reset(); }}>Zurücksetzen</button>
+      <button type="button" className="btn small danger" onClick={() => void ask({ title: "Tutor-Wissen zurücksetzen?", text: "Belege, Fehlvorstellungen und Sitzungen des Tutors werden auf allen deinen Geräten gelöscht. Graph und Lehrplan beginnen neu. XP und Lernrunden bleiben.", ok: "Zurücksetzen", danger: true }).then((y) => y && reset())}>Zurücksetzen</button>
     </details>
   );
 }

@@ -24,6 +24,8 @@ import { useProgress } from "./progress";
 
 type Store = {
   user: User | null;
+  /** Anmeldestatus geladen (vorher ist user noch unbekannt – z. B. kein „gesperrt“ anzeigen) */
+  ready: boolean;
   busy: boolean;
   err: string;
   lastSync: number | null;
@@ -65,8 +67,12 @@ async function rpc(fn: string, args: Record<string, unknown>) {
 // Früher (bis 14.11.2026) lag hier ein eigener Schlüssel für den Konto-Sync – wird nicht mehr gebraucht
 try { localStorage.removeItem("tap2coach-app-sync"); } catch { /* privat */ }
 
+/** Premium (KI-Tutor mit Claude): nur Konten mit app_metadata.role = "admin" – setzt nur der Betreiber, Nutzer können
+ *  app_metadata nicht selbst ändern. Die Edge Function prüft das zusätzlich serverseitig. */
+export const isAdmin = (u: User | null | undefined) => u?.app_metadata?.role === "admin";
+
 export const useAccount = create<Store>((set, get) => ({
-  user: null, busy: false, err: "", lastSync: null, imp: null,
+  user: null, ready: !supabase, busy: false, err: "", lastSync: null, imp: null,
 
   signIn: async () => {
     if (!supabase) return;
@@ -123,7 +129,13 @@ let again = false;
 
 // Anmeldestatus verfolgen und automatisch abgleichen
 if (typeof window !== "undefined" && supabase) {
-  supabase.auth.getSession().then(({ data }) => { useAccount.setState({ user: data.session?.user ?? null }); void useAccount.getState().syncNow(); });
+  supabase.auth.getSession().then(async ({ data }) => {
+    useAccount.setState({ user: data.session?.user ?? null });
+    // Rolle (app_metadata) frisch vom Server: ein älterer Login auf einem Gerät kennt eine später gesetzte Rolle sonst nicht
+    if (data.session) { try { const { data: u } = await supabase!.auth.getUser(); if (u.user) useAccount.setState({ user: u.user }); } catch { /* offline: gespeicherten Stand nutzen */ } }
+    useAccount.setState({ ready: true });
+    void useAccount.getState().syncNow();
+  });
   supabase.auth.onAuthStateChange((_e, session) => {
     const was = useAccount.getState().user?.id;
     useAccount.setState({ user: session?.user ?? null });

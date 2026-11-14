@@ -21,9 +21,8 @@ import { syncTutor } from "@/lib/tutor-sync";
 import { gami, gm } from "./gami";
 import { useProgress } from "./progress";
 
-/** Tutor freigeschaltet auf diesem Gerät (/tutor?premium=1) – zeigt den Menüpunkt; der Server prüft zusätzlich die Admin-Rolle */
-export const PREMIUM_KEY = "tap2coach-premium";
-export const isPremium = () => { try { return localStorage.getItem(PREMIUM_KEY) === "1"; } catch { return false; } };
+// Früher (bis 14.11.2026): Freischaltung pro Browser über /tutor?premium=1 – jetzt nur noch über das Konto (isAdmin)
+try { localStorage.removeItem("tap2coach-premium"); } catch { /* privat */ }
 
 const K = { stand: "tap2coach-tutor-stand", chat: "tap2coach-tutor-sitzung", model: "tap2coach-tutor-modell", dev: "tap2coach-tutor-geraet" };
 const read = <T,>(k: string, d: T): T => { try { const v = JSON.parse(localStorage.getItem(k) || "null"); return v ?? d; } catch { return d; } };

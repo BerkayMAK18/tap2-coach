@@ -86,6 +86,13 @@ export type SqlDb = z.infer<typeof SqlDb>;
 
 export const Figure = z.object({ svg: z.string().startsWith("<svg"), caption: z.string() });
 
+/** Operator-Trainer: Aufgabe mit drei Antworten, genau eine erfüllt den Operator (OPDRILLS der Live-App) */
+export const OpDrill = z.object({ op: z.string(), q: z.string(), opts: z.array(z.string()).length(3), right: z.number().int().min(0).max(2), why: z.string() });
+export type OpDrill = z.infer<typeof OpDrill>;
+/** Stufe der Operator-Treppe: [Stufe, Name, [Operator, Anforderung, Beispiel][]] (OP_LADDER) */
+export const OpStufe = z.tuple([z.string(), z.string(), z.array(z.tuple([z.string(), z.string(), z.string()]))]);
+export type OpStufe = z.infer<typeof OpStufe>;
+
 export const Tap2Catalog = z.object({
   schema: z.literal(1),
   id: z.string(),
@@ -105,6 +112,7 @@ export const Tap2Catalog = z.object({
   icons: z.record(z.string(), z.string()),
   sqlDb: SqlDb,
   codeLang: z.record(z.string(), z.enum(["pseudo", "sql"])),
+  operatoren: z.object({ drills: z.array(OpDrill), ladder: z.array(OpStufe) }),
   questions: z.array(Question),
 });
 export type Tap2Catalog = z.infer<typeof Tap2Catalog>;

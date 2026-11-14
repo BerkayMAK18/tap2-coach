@@ -26,7 +26,7 @@ mit Tests. Erst danach neue Funktionen. Referenz ist immer `../index.html` auf `
 | Aufgaben | rUeb (20 Aufgaben, Timer, Punkte, Fehlerursachen) | **fertig (1:1)**, Abnahme 14.11.2026 (siehe unten) |
 | Prüfung | rPK (Simulation, Real-Klausur, Bewertung wie ein Prüfer, Ergebnisse, „Bereit für eine 1“) | **fertig (1:1)**, Abnahme 14.11.2026 (siehe unten) |
 | Events | rEvents (Kapitel, Lernkarten, Abschlusstest, Belohnung) | offen |
-| Tipps | rTipps, Operator-Trainer, Lernplan, Tutorial, Fehlerprotokoll | offen |
+| Tipps | rTipps, Operator-Trainer, Lernplan, Tutorial, Fehlerprotokoll | **fertig (1:1)**, Abnahme 14.11.2026 (siehe unten) |
 | Belohnungen/Rangliste | Original-Modul eingebettet | fertig (1:1) |
 | Einstellungen | Darstellung, App & Offline, Geräte-Sync, Übertragen (Link/QR), Sicherung, Hilfe, Datenschutz | teilweise |
 | Patch Notes | Release-Liste von GitHub | offen |
@@ -121,3 +121,28 @@ Gefunden, gehört zum Grundgerüst: Die Fokus-Klasse saß an `.app`, das Stylesh
 blieb die Navigationsleiste während der Prüfung sichtbar. Jetzt an `<body>` wie in der Live-App. Die Lernrunde setzte
 die Klasse schon selbst und war nicht betroffen. Übersicht → Lernplan „Prüfung simulieren“ wählt jetzt Modus und Teil vor
 (`data-plan-sim` der Live-App).
+
+### Tipps (14.11.2026, Branch `port/tipps`)
+
+Vier Ansichten wie in der Live-App: Tipps (`/tipps`), Operator-Trainer (`/operatoren`), Lernplan (`/plan`), Tutorial
+(`/tutorial`). Logik in `src/lib/tipps.ts` mit Tests: Fehlerprotokoll-Auswertung (errSummaryHTML, mit `CAUSE_TIP`),
+schwächste Themen, Operator-Training, Kennzahlen des Tutorials, Code-Karte. Operator-Übungen und -Treppe standen in der
+Live-App im Logikteil – sie kommen jetzt über `npm run catalog:export` in den Katalog (`operatoren`), nicht von Hand.
+Der Lernplan nutzt das vorhandene `lib/plan.ts`; Lernplan-Knöpfe (Übersicht und Lernplan) gemeinsam in
+`components/tipps/actions.ts`.
+
+Abnahme mit gleichem Lernstand (12 beantwortete Fragen, Fehlerprotokoll mit drei Einträgen und einer unbekannten
+Ursache): Markup **identisch** für Tipps (Fehlerursachen mit Tipp, Prüfungstechnik, schwächste Themen), Operator-Trainer
+(Treppe, Start, Frage vor/nach richtiger und falscher Antwort, Auswertung; 12 Übungen komplett durchgeklickt, Zählung
+stimmt), Lernplan (alle Tage, heute mit Knöpfen) und Übersicht. Tutorial identisch bis auf den Bildpfad (s. u.).
+Knöpfe geprüft: „Los“ beim Fehlerprotokoll, Lernplan ansehen, Fällige wiederholen, Code-Karte üben, Los geht's.
+Erststart ohne Lernstand öffnet das Tutorial, danach die Übersicht. Keine Konsolenfehler; lint, test, build grün.
+
+Bewusste Unterschiede:
+- Tutorial-Bild `/icons/raven.svg` statt `icons/raven.svg`: Die Dev-App hat echte Pfade (`/tutorial`), ein relativer
+  Pfad würde dort ins Leere zeigen.
+- Operator-Training: Die Reihenfolge der Übungen und Antworten ist (wie in der Live-App) zufällig.
+
+Gefunden: Nach einer Antwort im Operator-Trainer bekam „Weiter“ erst im nächsten Bild den Fokus (requestAnimationFrame
+läuft in Hintergrund-Tabs nicht) – jetzt per Effekt nach dem Rendern, wie die Live-App sofort.
+Grundgerüst: Pfade `operatoren`, `plan`, `tutorial` ergänzt; Erststart → Tutorial (wie die Live-App ohne `#…`).

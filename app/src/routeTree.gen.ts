@@ -15,11 +15,14 @@ import { Route as BelohnungenRouteImport } from './routes/belohnungen'
 import { Route as DatenschutzRouteImport } from './routes/datenschutz'
 import { Route as EinstellungenRouteImport } from './routes/einstellungen'
 import { Route as EventsRouteImport } from './routes/events'
+import { Route as OperatorenRouteImport } from './routes/operatoren'
 import { Route as PatchnotesRouteImport } from './routes/patchnotes'
+import { Route as PlanRouteImport } from './routes/plan'
 import { Route as PruefungRouteImport } from './routes/pruefung'
 import { Route as RanglisteRouteImport } from './routes/rangliste'
 import { Route as TippsRouteImport } from './routes/tipps'
 import { Route as TutorRouteImport } from './routes/tutor'
+import { Route as TutorialRouteImport } from './routes/tutorial'
 import { Route as LernenIndexRouteImport } from './routes/lernen.index'
 import { Route as LernenRundeRouteImport } from './routes/lernen.runde'
 
@@ -53,9 +56,19 @@ const EventsRoute = EventsRouteImport.update({
   path: '/events',
   getParentRoute: () => rootRouteImport,
 } as any)
+const OperatorenRoute = OperatorenRouteImport.update({
+  id: '/operatoren',
+  path: '/operatoren',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const PatchnotesRoute = PatchnotesRouteImport.update({
   id: '/patchnotes',
   path: '/patchnotes',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PlanRoute = PlanRouteImport.update({
+  id: '/plan',
+  path: '/plan',
   getParentRoute: () => rootRouteImport,
 } as any)
 const PruefungRoute = PruefungRouteImport.update({
@@ -78,6 +91,11 @@ const TutorRoute = TutorRouteImport.update({
   path: '/tutor',
   getParentRoute: () => rootRouteImport,
 } as any)
+const TutorialRoute = TutorialRouteImport.update({
+  id: '/tutorial',
+  path: '/tutorial',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const LernenIndexRoute = LernenIndexRouteImport.update({
   id: '/lernen/',
   path: '/lernen/',
@@ -96,11 +114,14 @@ export interface FileRoutesByFullPath {
   '/datenschutz': typeof DatenschutzRoute
   '/einstellungen': typeof EinstellungenRoute
   '/events': typeof EventsRoute
+  '/operatoren': typeof OperatorenRoute
   '/patchnotes': typeof PatchnotesRoute
+  '/plan': typeof PlanRoute
   '/pruefung': typeof PruefungRoute
   '/rangliste': typeof RanglisteRoute
   '/tipps': typeof TippsRoute
   '/tutor': typeof TutorRoute
+  '/tutorial': typeof TutorialRoute
   '/lernen/runde': typeof LernenRundeRoute
   '/lernen/': typeof LernenIndexRoute
 }
@@ -111,11 +132,14 @@ export interface FileRoutesByTo {
   '/datenschutz': typeof DatenschutzRoute
   '/einstellungen': typeof EinstellungenRoute
   '/events': typeof EventsRoute
+  '/operatoren': typeof OperatorenRoute
   '/patchnotes': typeof PatchnotesRoute
+  '/plan': typeof PlanRoute
   '/pruefung': typeof PruefungRoute
   '/rangliste': typeof RanglisteRoute
   '/tipps': typeof TippsRoute
   '/tutor': typeof TutorRoute
+  '/tutorial': typeof TutorialRoute
   '/lernen/runde': typeof LernenRundeRoute
   '/lernen': typeof LernenIndexRoute
 }
@@ -127,11 +151,14 @@ export interface FileRoutesById {
   '/datenschutz': typeof DatenschutzRoute
   '/einstellungen': typeof EinstellungenRoute
   '/events': typeof EventsRoute
+  '/operatoren': typeof OperatorenRoute
   '/patchnotes': typeof PatchnotesRoute
+  '/plan': typeof PlanRoute
   '/pruefung': typeof PruefungRoute
   '/rangliste': typeof RanglisteRoute
   '/tipps': typeof TippsRoute
   '/tutor': typeof TutorRoute
+  '/tutorial': typeof TutorialRoute
   '/lernen/runde': typeof LernenRundeRoute
   '/lernen/': typeof LernenIndexRoute
 }
@@ -144,11 +171,14 @@ export interface FileRouteTypes {
     | '/datenschutz'
     | '/einstellungen'
     | '/events'
+    | '/operatoren'
     | '/patchnotes'
+    | '/plan'
     | '/pruefung'
     | '/rangliste'
     | '/tipps'
     | '/tutor'
+    | '/tutorial'
     | '/lernen/runde'
     | '/lernen/'
   fileRoutesByTo: FileRoutesByTo
@@ -159,11 +189,14 @@ export interface FileRouteTypes {
     | '/datenschutz'
     | '/einstellungen'
     | '/events'
+    | '/operatoren'
     | '/patchnotes'
+    | '/plan'
     | '/pruefung'
     | '/rangliste'
     | '/tipps'
     | '/tutor'
+    | '/tutorial'
     | '/lernen/runde'
     | '/lernen'
   id:
@@ -174,11 +207,14 @@ export interface FileRouteTypes {
     | '/datenschutz'
     | '/einstellungen'
     | '/events'
+    | '/operatoren'
     | '/patchnotes'
+    | '/plan'
     | '/pruefung'
     | '/rangliste'
     | '/tipps'
     | '/tutor'
+    | '/tutorial'
     | '/lernen/runde'
     | '/lernen/'
   fileRoutesById: FileRoutesById
@@ -190,11 +226,14 @@ export interface RootRouteChildren {
   DatenschutzRoute: typeof DatenschutzRoute
   EinstellungenRoute: typeof EinstellungenRoute
   EventsRoute: typeof EventsRoute
+  OperatorenRoute: typeof OperatorenRoute
   PatchnotesRoute: typeof PatchnotesRoute
+  PlanRoute: typeof PlanRoute
   PruefungRoute: typeof PruefungRoute
   RanglisteRoute: typeof RanglisteRoute
   TippsRoute: typeof TippsRoute
   TutorRoute: typeof TutorRoute
+  TutorialRoute: typeof TutorialRoute
   LernenRundeRoute: typeof LernenRundeRoute
   LernenIndexRoute: typeof LernenIndexRoute
 }
@@ -243,11 +282,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof EventsRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/operatoren': {
+      id: '/operatoren'
+      path: '/operatoren'
+      fullPath: '/operatoren'
+      preLoaderRoute: typeof OperatorenRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/patchnotes': {
       id: '/patchnotes'
       path: '/patchnotes'
       fullPath: '/patchnotes'
       preLoaderRoute: typeof PatchnotesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/plan': {
+      id: '/plan'
+      path: '/plan'
+      fullPath: '/plan'
+      preLoaderRoute: typeof PlanRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/pruefung': {
@@ -278,6 +331,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof TutorRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/tutorial': {
+      id: '/tutorial'
+      path: '/tutorial'
+      fullPath: '/tutorial'
+      preLoaderRoute: typeof TutorialRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/lernen/': {
       id: '/lernen/'
       path: '/lernen'
@@ -302,11 +362,14 @@ const rootRouteChildren: RootRouteChildren = {
   DatenschutzRoute: DatenschutzRoute,
   EinstellungenRoute: EinstellungenRoute,
   EventsRoute: EventsRoute,
+  OperatorenRoute: OperatorenRoute,
   PatchnotesRoute: PatchnotesRoute,
+  PlanRoute: PlanRoute,
   PruefungRoute: PruefungRoute,
   RanglisteRoute: RanglisteRoute,
   TippsRoute: TippsRoute,
   TutorRoute: TutorRoute,
+  TutorialRoute: TutorialRoute,
   LernenRundeRoute: LernenRundeRoute,
   LernenIndexRoute: LernenIndexRoute,
 }

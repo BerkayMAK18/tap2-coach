@@ -75,11 +75,12 @@ export function TimerBox({ k, min, label = "Start", hint, compact = true }: { k:
 
 const TEIL_K: Record<string, string> = { t1: "Planen", t2: "Algorithmen", wiso: "SoWi" };
 export type PlanActions = { topic: (tid: string) => void; sim: (teil: string) => void; go: (view: string) => void; due: () => void };
-function PlanLi({ it, act }: { it: PlanItem; act: PlanActions }) {
-  if (it.kind === "topic") { const t = TP[it.tid]; return <li><span className="pi-ic"><Ic name={t.ic ?? ""} cls="ic sm" /></span><span className="pi-t"><b>{t.n}</b><span className="small muted">{it.n} Fragen · {t.teil}</span></span><button type="button" className="btn small" onClick={() => act.topic(it.tid)}><Ic name="play" cls="ic xs" /> Lernen</button></li>; }
-  if (it.kind === "sim") return <li><span className="pi-ic"><Ic name="timer" cls="ic sm" /></span><span className="pi-t"><b>Prüfung simulieren: {TEIL_K[it.teil]}</b><span className="small muted">{it.teil === "wiso" ? "Simulation, 60 Min." : "Real-Klausur, 90 Min."} · danach Fehlerursachen eintragen</span></span><button type="button" className="btn small" onClick={() => act.sim(it.teil)}>Starten</button></li>;
-  if (it.kind === "op") return <li><span className="pi-ic"><Ic name="bulb" cls="ic sm" /></span><span className="pi-t"><b>Operator-Trainer</b><span className="small muted">10 Min. · Antworttiefe üben</span></span><button type="button" className="btn small" onClick={() => act.go("operatoren")}>Öffnen</button></li>;
-  return <li><span className="pi-ic"><Ic name="star" cls="ic sm" /></span><span className="pi-t"><b>Nur wiederholen</b><span className="small muted">Fällige Fragen und Fehler, Tipps lesen, nichts Neues. Früh schlafen.</span></span><button type="button" className="btn small" onClick={() => act.go("tipps")}>Tipps</button></li>;
+/** Eintrag im Lernplan (planItemHTML): Knöpfe nur für heute (mit act) */
+export function PlanLi({ it, act }: { it: PlanItem; act?: PlanActions }) {
+  if (it.kind === "topic") { const t = TP[it.tid]; return <li><span className="pi-ic"><Ic name={t.ic ?? ""} cls="ic sm" /></span><span className="pi-t"><b>{t.n}</b><span className="small muted">{it.n} Fragen · {t.teil}</span></span>{act && <button type="button" className="btn small" onClick={() => act.topic(it.tid)}><Ic name="play" cls="ic xs" /> Lernen</button>}</li>; }
+  if (it.kind === "sim") return <li><span className="pi-ic"><Ic name="timer" cls="ic sm" /></span><span className="pi-t"><b>Prüfung simulieren: {TEIL_K[it.teil]}</b><span className="small muted">{it.teil === "wiso" ? "Simulation, 60 Min." : "Real-Klausur, 90 Min."} · danach Fehlerursachen eintragen</span></span>{act && <button type="button" className="btn small" onClick={() => act.sim(it.teil)}>Starten</button>}</li>;
+  if (it.kind === "op") return <li><span className="pi-ic"><Ic name="bulb" cls="ic sm" /></span><span className="pi-t"><b>Operator-Trainer</b><span className="small muted">10 Min. · Antworttiefe üben</span></span>{act && <button type="button" className="btn small" onClick={() => act.go("operatoren")}>Öffnen</button>}</li>;
+  return <li><span className="pi-ic"><Ic name="star" cls="ic sm" /></span><span className="pi-t"><b>Nur wiederholen</b><span className="small muted">Fällige Fragen und Fehler, Tipps lesen, nichts Neues. Früh schlafen.</span></span>{act && <button type="button" className="btn small" onClick={() => act.go("tipps")}>Tipps</button>}</li>;
 }
 /** „Heute laut Lernplan“ (todayPlanHTML() der Live-App) */
 export function TodayPlan({ act }: { act: PlanActions }) {

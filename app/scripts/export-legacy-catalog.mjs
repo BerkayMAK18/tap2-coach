@@ -52,6 +52,8 @@ const L = vm.runInNewContext(`({
   cards: ${lit(/const SQLX = (\{[\s\S]*?\n {2}\});/, "SQLX")},
   note: ${lit(/const SQL_NOTE = ("[^"\n]*");/, "SQL_NOTE")},
   code: ${lit(/const CODE = (\{[\s\S]*?\n {2}\});/, "CODE")},
+  opDrills: ${lit(/const OPDRILLS = (\[[\s\S]*?\n {2}\]);/, "OPDRILLS")},
+  opLadder: ${lit(/const OP_LADDER = (\[[\s\S]*?\n {2}\]);/, "OP_LADDER")},
 })`, {});
 
 // ---- Kernkatalog: gleiche Ableitung wie BASE_Q in der Live-App
@@ -89,6 +91,8 @@ const tap2 = {
   sqlDb: { seed: L.seed, tables: L.tables, cards: L.cards, note: L.note },
   // Code-Karten mit Editor (Abschnitt „Code-Editor“): Frage-ID → Sprache (pseudo | sql)
   codeLang: L.code,
+  // Operator-Trainer (Tipps): Übungen (Operator, Aufgabe, 3 Antworten, richtige, Erklärung) und Operator-Treppe
+  operatoren: { drills: L.opDrills, ladder: L.opLadder },
   // Icon-Pfade der Live-App (für <Ic/>, gleiche Optik) – inkl. der später im Code ergänzten (ICONS.x = '…')
   icons: { ...D.ICONS, ...Object.fromEntries([...lines.join("\n").matchAll(/ICONS\.([a-z0-9]+) = '([^']*)';/g)].map((m) => [m[1], m[2]])) },
   questions,

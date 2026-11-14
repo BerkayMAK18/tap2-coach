@@ -3,17 +3,17 @@
  * Runde (parts), „Heute laut Lernplan“ mit Tagesziel und „Gezielt üben“ (Schnellstarts).
  */
 import { useRef } from "react";
-import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { createFileRoute } from "@tanstack/react-router";
 import { TOPICS, allQ, inTeil, topicQ } from "@/content/catalog";
 import { EXAM_DAY, EXAM_DE } from "@/config";
 import { daysBetween, today } from "@/lib/dates";
-import { learnList, learnTopic, nextTopic, perDay, tcolOf, type Kind } from "@/lib/lernen";
+import { learnList, nextTopic, perDay, tcolOf, type Kind } from "@/lib/lernen";
 import { counts, isDue, reifeLabel } from "@/lib/srs";
 import { useProgress } from "@/store/progress";
-import { usePruefung } from "@/store/pruefung";
 import { Ic, Ring, pctS } from "@/ui-main";
 import { AmpBar, Legend, TodayPlan, type PlanActions } from "@/components/lernen/bits";
 import { useAnimRings, useStartRound } from "@/components/lernen/ui";
+import { usePlanActions } from "@/components/tipps/actions";
 
 export const Route = createFileRoute("/")({ component: Start });
 
@@ -22,7 +22,7 @@ const TEIL_K = { t1: "Planen", t2: "Algorithmen", wiso: "SoWi" };
 
 function Start() {
   const S = useProgress((s) => s.S);
-  const navigate = useNavigate(), startRound = useStartRound(), ref = useRef<HTMLElement>(null);
+  const startRound = useStartRound(), ref = useRef<HTMLElement>(null);
   useAnimRings(ref, []);
   const all = allQ(S), c = counts(S, all), daysLeft = daysBetween(today(), EXAM_DAY), left = Math.max(0, daysLeft);
   const pd = perDay(S, left), todayN = S.log[today()] || 0;
@@ -30,9 +30,7 @@ function Start() {
   const parts = PARTS.map((p) => { const tids = TOPICS.filter((t) => inTeil(t, p)).map((t) => t.id); return { p, c: counts(S, all.filter((q) => tids.includes(q.topic))) }; });
   const errN = c.r, markN = all.filter((q) => S.mark[q.id]).length, dueN = all.filter((q) => isDue(S, q.id)).length;
   const kind = (k: Kind) => startRound(learnList(S, k));
-  // Tutorial, Lernplan und Operator-Trainer gehören zu „Tipps“ (noch nicht portiert) → dorthin
-  const go = (v: string) => void navigate({ to: v === "pruefung" ? "/pruefung" : "/tipps" });
-  const act: PlanActions = { topic: (tid) => startRound(learnTopic(S, tid)), sim: (t) => { usePruefung.getState().setPk({ mode: t === "wiso" ? "sim" : "real", teil: t }); go("pruefung"); }, go, due: () => kind("due") };
+  const act: PlanActions = usePlanActions(), go = act.go; // Lernplan-Knöpfe wie bindPlan() der Live-App
 
   return (
     <>

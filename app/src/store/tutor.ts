@@ -31,6 +31,8 @@ let sys = "";
 export const tutorSystem = () => (sys ||= `${SYSTEM}\n\n${kbOverview(KB)}\n\n${kbDetail(KB, [...KB.pakete.keys()])}`);
 
 export type Model = "haiku" | "sonnet";
+// Die alte Funktion (ohne Werkzeuge) antwortet nur mit „Ungültige Anfrage.“ – die neue nennt immer den Grund
+const OLD_FN = "Auf dem Server läuft noch die alte Tutor-Funktion. Bitte im Supabase-Dashboard unter Edge Functions → „tutor“ den Code aus app/supabase/functions/tutor/index.ts einsetzen und deployen.";
 type Meta = { wahl?: number; correct?: boolean; sicher: Answer["sicher"]; weissNicht?: boolean };
 export type Convo = {
   model: Model; msgs: ApiMsg[]; cost: number;
@@ -70,7 +72,7 @@ export const useTutor = create<Store>((set, get) => {
   async function call(model: Model, msgs: ApiMsg[]): Promise<{ content: (Block | RawBlock)[]; usage: Usage; stop: string }> {
     if (!supabase) throw new Error("Der Tutor braucht den Server (Supabase).");
     const { data, error } = await supabase.functions.invoke("tutor", { body: { model, system: tutorSystem(), tools: TOOLS, messages: msgs } });
-    if (error) { const ctx = (error as { context?: Response }).context; const j = ctx ? await ctx.json().catch(() => null) : null; throw new Error(j?.error ?? "Der Tutor ist gerade nicht erreichbar."); }
+    if (error) { const ctx = (error as { context?: Response }).context; const j = ctx ? await ctx.json().catch(() => null) : null; throw new Error(j?.error === "Ungültige Anfrage." ? OLD_FN : j?.error ?? "Der Tutor ist gerade nicht erreichbar."); }
     if (!Array.isArray(data?.content) || data.stop === "refusal") throw new Error(String(data?.text || "Keine Antwort erhalten."));
     return { content: data.content, usage: data.usage ?? {}, stop: String(data.stop ?? "") };
   }

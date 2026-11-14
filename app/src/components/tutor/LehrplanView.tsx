@@ -1,6 +1,6 @@
 /**
  * Tab „Lehrplan“ unter Tutor: deterministisch aus Konzept-Graph, Prüfungsdatum, Muss-Themen und Fehlvorstellungen
- * (lib/lehrplan.ts). Passt sich nach jeder Sitzung an. „Starten“ beginnt eine Sitzung zu Thema und Fokus des Eintrags.
+ * (lib/lehrplan.ts). Passt sich nach jeder Sitzung an. „Öffnen“ öffnet den Chat zu Thema und Fokus des Eintrags (die KI startet mit der ersten Nachricht).
  */
 import { EXAM_DE } from "@/config";
 import { fmtDay, today } from "@/lib/dates";
@@ -20,7 +20,7 @@ export function LehrplanView({ plan, onStart, busy }: { plan: Lehrplan; onStart:
         <p className="tiny muted">{it.grund}</p>
         {it.fokus.length > 0 && <p className="tiny">Fokus: {it.fokus.map((f) => f.label).join(" · ")}</p>}
       </div>
-      {isToday && <button type="button" className="btn small primary" disabled={busy} onClick={() => onStart(it.topic, it.fokus.map((f) => f.id))}>Starten</button>}
+      {isToday && <button type="button" className="btn small primary" disabled={busy} onClick={() => onStart(it.topic, it.fokus.map((f) => f.id))}>Öffnen</button>}
     </li>
   );
   return (

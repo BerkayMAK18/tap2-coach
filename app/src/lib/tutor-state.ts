@@ -15,12 +15,17 @@
  * - Sitzungen (sess): Vereinigung über die ID; Zähler je Sitzung als Maximum (eine Sitzung läuft auf einem Gerät).
  * - Tutor-XP je Tag (xp): je Tag und Gerät das Maximum, Summe über Geräte = XP des Tages (Anzeige).
  *   Tage älter als XP_DAYS fallen weg.
+ * - Zurücksetzen (reset): Zeitpunkt, je Gerät das Maximum. Belege, Fehlvorstellungen und Sitzungen vor dem Zeitpunkt
+ *   fallen auf allen Geräten weg – ein Zurücksetzen kommt so auch bei Geräten an, die noch alte Daten haben.
+ *   EPOCH: fester Stichtag (Neustart des Tutor-Wissens am 14.11.2026), gilt wie ein Zurücksetzen.
  * Daten aus der Cloud oder älteren Ständen gehen immer durch normalizeTutor() (Zod, Längen, nur bekannte IDs).
  */
 import { z } from "zod";
 import { stab } from "./gami/state";
 
 export const MAX_EV = 800, MAX_FV = 120, MAX_SESS = 120, XP_DAYS = 14;
+/** Neustart des Tutor-Wissens (auf Wunsch zurückgesetzt): alles davor zählt nicht mehr */
+export const EPOCH = Date.parse("2026-11-14T19:25:00+01:00");
 
 /** Beleg: eine Beobachtung zu einem Konzept (Graph-Update des Tutors oder Bewertung einer Aufgabe) */
 export type Ev = {
@@ -32,8 +37,10 @@ export type Ev = {
 };
 export type Fv = { id: string; k?: string; t: string; text: string; first: number; seen: number; fix?: number };
 export type Sess = { id: string; t: string; start: number; end?: number; aufgaben: number; punkte: number; max: number; xp: number; model?: string };
-export type TutorState = { v: 2; ev: Ev[]; fv: Record<string, Fv>; sess: Record<string, Sess>; xp: Record<string, Record<string, number>> };
+export type TutorState = { v: 2; ev: Ev[]; fv: Record<string, Fv>; sess: Record<string, Sess>; xp: Record<string, Record<string, number>>; reset?: number };
 export const emptyTutor = (): TutorState => ({ v: 2, ev: [], fv: {}, sess: {}, xp: {} });
+/** Ab wann Daten zählen (Stichtag oder letztes Zurücksetzen) */
+export const cutoff = (s: Pick<TutorState, "reset">) => Math.max(EPOCH, s.reset ?? 0);
 
 // ---------- Prüfen (Fremddaten)
 const id = z.string().regex(/^[A-Za-z0-9_.:-]{1,64}$/);
@@ -56,6 +63,7 @@ export function normalizeTutor(raw: unknown, known: Known): TutorState {
   if (Array.isArray(o.ev)) o.ev.slice(-MAX_EV * 2).forEach((e) => { const r = EvZ.safeParse(e); if (r.success && known.topics.has(r.data.t) && okK(r.data.k)) out.ev.push(r.data); });
   if (o.fv && typeof o.fv === "object") Object.values(o.fv).forEach((f) => { const r = FvZ.safeParse(f); if (r.success && known.topics.has(r.data.t) && okK(r.data.k)) out.fv[r.data.id] = r.data; });
   if (o.sess && typeof o.sess === "object") Object.values(o.sess).forEach((s) => { const r = SessZ.safeParse(s); if (r.success && known.topics.has(r.data.t)) out.sess[r.data.id] = r.data; });
+  if (ts.safeParse(o.reset).success && (o.reset as number) > 0) out.reset = o.reset as number;
   if (o.xp && typeof o.xp === "object") Object.entries(o.xp as Record<string, unknown>).forEach(([d, m]) => {
     if (!day.test(d) || !m || typeof m !== "object") return;
     Object.entries(m as Record<string, unknown>).forEach(([g, n]) => { if (dev.test(g) && Number.isInteger(n) && (n as number) >= 0 && (n as number) <= 100000) (out.xp[d] ??= {})[g] = n as number; });
@@ -68,6 +76,11 @@ const later = <T,>(a: T, b: T) => (stab(a) >= stab(b) ? a : b);
 const evOrder = (a: Ev, b: Ev) => a.at - b.at || (a.id < b.id ? -1 : a.id > b.id ? 1 : 0);
 /** Feste Größen und Reihenfolge – Ergebnis hängt nur vom Inhalt ab, nicht von der Reihenfolge des Zusammenführens */
 function tidy(s: TutorState, todayStr?: string): TutorState {
+  const cut = cutoff(s);
+  s.ev = s.ev.filter((e) => e.at >= cut);
+  s.fv = Object.fromEntries(Object.entries(s.fv).filter(([, f]) => f.seen >= cut));
+  s.sess = Object.fromEntries(Object.entries(s.sess).filter(([, x]) => x.start >= cut));
+  if (!s.reset) delete s.reset;
   s.ev.sort(evOrder); if (s.ev.length > MAX_EV) s.ev = s.ev.slice(-MAX_EV);
   const fv = Object.values(s.fv).sort((a, b) => b.seen - a.seen || (a.id < b.id ? -1 : 1)).slice(0, MAX_FV);
   s.fv = Object.fromEntries(fv.sort((a, b) => (a.id < b.id ? -1 : 1)).map((f) => [f.id, f]));
@@ -98,8 +111,11 @@ export function mergeTutor(a: TutorState, b: TutorState): TutorState {
   });
   const xp: TutorState["xp"] = {};
   [a.xp, b.xp].forEach((src) => Object.entries(src).forEach(([d, m]) => Object.entries(m).forEach(([g, n]) => { const t = (xp[d] ??= {}); t[g] = Math.max(t[g] ?? 0, n); })));
-  return tidy({ v: 2, ev: [...ev.values()], fv, sess, xp });
+  const reset = Math.max(a.reset ?? 0, b.reset ?? 0);
+  return tidy({ v: 2, ev: [...ev.values()], fv, sess, xp, ...(reset ? { reset } : {}) });
 }
+/** Tutor-Stand zurücksetzen (alle Geräte): Zeitpunkt setzen, XP-Anzeige bleibt */
+export const resetTutor = (s: TutorState, now: number): TutorState => tidy({ ...s, reset: Math.max(s.reset ?? 0, now) });
 
 // ---------- Abfragen und Änderungen (rein)
 /** Tutor-XP heute (alle Geräte) – nur zur Anzeige, keine Obergrenze */
@@ -126,25 +142,3 @@ export function addEvidence(s: TutorState, list: Ev[]): TutorState {
   return tidy({ ...s, ev: [...s.ev, ...list], fv });
 }
 export function putSession(s: TutorState, x: Sess): TutorState { return tidy({ ...s, sess: { ...s.sess, [x.id]: x } }); }
-
-// ---------- Übernahme aus dem bisherigen Lernpfad (nur dieses Gerät, Format v1) und der Claude-Brücke
-type OldPfad = { evidence?: { at?: string; thema?: string; punkte?: number; max?: number }[]; miscon?: { at?: string; thema?: string; aussage?: string }[] };
-type OldBridge = { miscon?: { thema?: string; aussage?: string }[] };
-const dayMs = (d?: string) => { const t = Date.parse((d ?? "") + "T12:00:00"); return Number.isFinite(t) ? t : 0; };
-const slug = (s: string) => s.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "").slice(0, 30) || "x";
-/** Alte lokale Stände einmalig übernehmen (IDs fest aus dem Inhalt → doppeltes Übernehmen auf zwei Geräten ergibt dasselbe) */
-export function migrateOld(pfad: unknown, bridge: unknown, known: Known): TutorState {
-  const s = emptyTutor(), p = (pfad && typeof pfad === "object" ? pfad : {}) as OldPfad, b = (bridge && typeof bridge === "object" ? bridge : {}) as OldBridge;
-  (Array.isArray(p.evidence) ? p.evidence : []).forEach((e, i) => {
-    if (!e || !known.topics.has(String(e.thema)) || !(Number(e.max) > 0)) return;
-    const at = dayMs(e.at); if (!at) return;
-    const w = Math.max(0, Math.min(1, Number(e.punkte) / Number(e.max)));
-    s.ev.push({ id: `alt-${at.toString(36)}-${i}`, at, t: String(e.thema), art: "bewertung", w, p: Number(e.punkte), m: Number(e.max) });
-  });
-  [...(Array.isArray(p.miscon) ? p.miscon : []), ...(Array.isArray(b.miscon) ? b.miscon : [])].forEach((m) => {
-    if (!m || !known.topics.has(String(m.thema)) || typeof m.aussage !== "string" || !m.aussage.trim()) return;
-    const fid = "alt-" + slug(m.aussage), at = dayMs((m as { at?: string }).at) || 1;
-    if (!s.fv[fid]) s.fv[fid] = { id: fid, t: String(m.thema), text: m.aussage.trim().slice(0, 300), first: at, seen: at };
-  });
-  return normalizeTutor(s, known);
-}

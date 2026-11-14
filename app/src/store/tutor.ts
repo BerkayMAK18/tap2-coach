@@ -17,7 +17,7 @@ import { today } from "@/lib/dates";
 import { supabase } from "@/lib/supabase";
 import { kbIds, kbOverview, makeKb } from "@/lib/tutor-kb";
 import { applyReply, chunks, rewardArgs, costOf, newConvo, tooLong, userMsg, userText, type Block, type Convo, type Model, type Sicher, type UserMeta } from "@/lib/tutor-session";
-import { addEvidence, addXpDay, emptyTutor, migrateOld, normalizeTutor, putSession, type TutorState } from "@/lib/tutor-state";
+import { EPOCH, addEvidence, addXpDay, emptyTutor, normalizeTutor, putSession, resetTutor, type TutorState } from "@/lib/tutor-state";
 import { syncTutor } from "@/lib/tutor-sync";
 import { gami, gm } from "./gami";
 import { liveGet } from "./livesync";
@@ -28,7 +28,6 @@ export const PREMIUM_KEY = "tap2coach-premium";
 export const isPremium = () => { try { return localStorage.getItem(PREMIUM_KEY) === "1"; } catch { return false; } };
 
 const K = { stand: "tap2coach-tutor-stand", rev: "tap2coach-tutor-rev", chat: "tap2coach-tutor-sitzung", model: "tap2coach-tutor-modell", dev: "tap2coach-tutor-geraet" };
-const OLD = { pfad: "tap2coach-tutor-pfad", bridge: "tap2coach-tutor" }; // bisheriger Lernpfad / Claude-Brücke (werden nur gelesen)
 const read = <T,>(k: string, d: T): T => { try { const v = JSON.parse(localStorage.getItem(k) || "null"); return v ?? d; } catch { return d; } };
 const write = (k: string, v: unknown) => { try { if (v == null) localStorage.removeItem(k); else localStorage.setItem(k, JSON.stringify(v)); } catch { /* privat oder voll */ } };
 
@@ -43,15 +42,11 @@ function device(): string { let d = read<string>(K.dev, ""); if (!/^[A-Za-z0-9_-
 
 function loadState(): TutorState {
   if (typeof window === "undefined") return emptyTutor();
-  const raw = read<unknown>(K.stand, null);
-  if (raw) return normalizeTutor(raw, IDS);
-  const s = migrateOld(read(OLD.pfad, null), read(OLD.bridge, null), IDS); // einmalig: alten Lernpfad übernehmen
-  write(K.stand, s);
-  return s;
+  return normalizeTutor(read<unknown>(K.stand, null), IDS); // alles vor dem Stichtag (EPOCH) fällt dabei weg
 }
 function loadConvo(): Convo | null {
   const c = read<Convo | null>(K.chat, null);
-  return c && typeof c === "object" && Array.isArray(c.msgs) && typeof c.thema === "string" && IDS.topics.has(c.thema) && c.rounds ? c : null;
+  return c && typeof c === "object" && Array.isArray(c.msgs) && typeof c.thema === "string" && IDS.topics.has(c.thema) && c.rounds && c.started >= EPOCH ? c : null;
 }
 
 /** Sync-Schlüssel des Geräts: Geräte-Sync (wie die Live-App), sonst Konto-Sync */
@@ -68,15 +63,16 @@ const OLD_FN = "Auf dem Server läuft noch eine ältere Tutor-Funktion. Bitte de
 type Store = {
   state: TutorState; rev: number; convo: Convo | null; model: Model; busy: boolean; err: string; sync: SyncInfo;
   setModel: (m: Model) => void;
-  /** Neue Sitzung zu einem Thema mit Übergabe (beendet eine laufende) */
-  start: (thema: string, handoff: string) => Promise<boolean>;
-  /** Antwort/Rückfrage, „Ich stehe auf dem Schlauch“ oder Sitzung beenden. false = nicht gesendet */
-  send: (m: UserMeta) => Promise<boolean>;
+  /** Sitzung zu einem Thema öffnen – ohne Anfrage an die KI; sie beginnt erst mit meiner ersten Nachricht (spart Kosten) */
+  open: (thema: string, fokus?: string[]) => void;
+  /** Antwort/Rückfrage, „Ich stehe auf dem Schlauch“ oder Sitzung beenden. Die erste Nachricht geht mit der Übergabe
+   *  (Stand, Fehlvorstellungen, Lernpakete) an den Tutor. false = nicht gesendet */
+  send: (m: UserMeta, handoff?: () => string) => Promise<boolean>;
   /** Sitzung schließen (Verlauf weg, Stand bleibt) */
   close: () => void;
   syncNow: (force?: boolean) => Promise<void>;
-  /** Tutor-Stand löschen (lokal; mit cloud auch in der Cloud). XP bleiben. */
-  wipe: (cloud: boolean) => Promise<void>;
+  /** Tutor-Wissen zurücksetzen – auf allen Geräten (Belege, Fehlvorstellungen, Sitzungen). XP bleiben. */
+  reset: () => void;
 };
 
 let syncTimer: ReturnType<typeof setTimeout> | undefined;
@@ -130,14 +126,19 @@ export const useTutor = create<Store>((set, get) => {
     model: read<Model>(K.model, "sonnet") === "haiku" ? "haiku" : "sonnet",
     busy: false, err: "", sync: { busy: false, at: 0, err: "", mismatch: false, off: "" },
     setModel: (model) => { write(K.model, model); set({ model }); const c = get().convo; if (c && !c.msgs.length) saveConvo({ ...c, model }); },
-    start: async (thema, handoff) => {
-      if (get().busy || !IDS.topics.has(thema)) return false;
-      const c = newConvo(`s${Date.now().toString(36)}${randId(4)}`, thema, get().model, Date.now());
-      return round(c, { kind: "start" }, chunks(handoff));
+    open: (thema, fokus) => {
+      if (get().busy || !IDS.topics.has(thema)) return;
+      saveConvo({ ...newConvo(`s${Date.now().toString(36)}${randId(4)}`, thema, get().model, Date.now()), ...(fokus?.length ? { fokus } : {}) });
+      set({ err: "" });
     },
-    send: async (m) => {
+    send: async (m, handoff) => {
       const c = get().convo; if (!c || get().busy || c.ende && m.kind !== "antwort") return false;
       if (m.kind === "antwort" && !m.text?.trim()) return false;
+      if (!c.msgs.length) { // erste Nachricht: Übergabe + meine Nachricht, erst jetzt fragt die App die KI
+        if (m.kind !== "antwort" || !handoff) return false;
+        const first = { ...c, model: get().model, started: Date.now() };
+        return round(first, { kind: "antwort", text: m.text }, chunks(`${handoff()}\n\nMeine erste Nachricht:\n"""\n${(m.text ?? "").trim().slice(0, 5000)}\n"""`));
+      }
       if (tooLong(c)) { set({ err: "Diese Sitzung ist sehr lang geworden. Beende sie und starte eine neue – dein Stand bleibt erhalten." }); return false; }
       const offen = c.offen ? c.aufgaben[c.offen] : undefined;
       return round(c, { ...m, ...(offen ? { aufgabe: offen.id } : {}) }, [{ type: "text", text: userText(m, offen) }]);
@@ -163,10 +164,7 @@ export const useTutor = create<Store>((set, get) => {
         set({ sync: { ...get().sync, busy: false, err: /app_tutor_state/.test(m) ? "Tabelle app_tutor_state fehlt – supabase/003_app_tutor_state.sql im SQL-Editor einspielen." : "Abgleich fehlgeschlagen: " + m } });
       }
     },
-    wipe: async (cloud) => {
-      if (cloud && supabase) { try { await supabase.rpc("app_tutor_state_delete"); } catch { /* lokal trotzdem */ } }
-      write(K.rev, 0); set({ rev: 0 }); write(K.stand, emptyTutor()); set({ state: emptyTutor() });
-    },
+    reset: () => { saveState(resetTutor(get().state, Date.now())); syncSoon(500); },
   };
 });
 

@@ -53,6 +53,11 @@ describe("applyReply", () => {
     expect(step(c0, { phase: "aufgabe" }).convo.pending?.is_error).toBe(true);
     expect(step(c0, { nachricht: "x", bewertung: bew("A9", 2) }).convo.pending?.content).toContain("unbekannte Aufgabe A9");
   });
+  it("erste Nachricht mit Übergabe: Feed zeigt Übergabe-Hinweis und meine Nachricht", () => {
+    const c = { ...c0, msgs: [{ role: "user" as const, content: [{ type: "text" as const, text: "Übergabe … Meine erste Nachricht: Los" }] }], ui: { 0: { kind: "antwort" as const, text: "Los" } } };
+    const r = applyReply(c, toolUse({ nachricht: "Los geht's.", phase: "aufgabe", aufgabe: auf("A1") }), ids, topicOf, 1);
+    expect(feedOf(r.convo, ids).map((f) => f.k)).toEqual(["start", "me", "tutor", "aufgabe"]);
+  });
   it("ohne Werkzeugaufruf: Text als Chat, kein tool_result offen", () => {
     const r = applyReply(c0, [{ type: "text", text: "Nur Text." }], ids, topicOf, 1);
     expect(r.text).toBe("Nur Text."); expect(r.convo.pending).toBeUndefined(); expect(r.evidence).toEqual([]);

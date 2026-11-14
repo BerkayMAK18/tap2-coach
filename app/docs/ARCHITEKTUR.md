@@ -136,7 +136,7 @@ Server und Browser teilen sich die Arbeit so (Details: `docs/TUTOR.md`):
   - `lehrplan.ts` berechnet den Lehrplan deterministisch,
   - `tutor-state.ts` hält den Tutor-Stand mit Merge-Regel,
   - `tutor-sync.ts` gleicht ab (E2E, `app_tutor_state`).
-- **XP** über das Belohnungs-Modul (`onTutor` → `addXP`), damit kompatibel mit Sync und Rangliste der Live-App
+- **XP:** Eine bewertete Aufgabe zählt wie eine normale Antwort (`gm.answer`, Combo, Serie, Quests, keine Obergrenze). Damit ist sie kompatibel mit Sync und Rangliste der Live-App
   (`gami/tutor-xp.test.ts` gegen das Original).
 - **Speicher:**
 
@@ -156,7 +156,7 @@ Server und Browser teilen sich die Arbeit so (Details: `docs/TUTOR.md`):
 | 1b | Funktionsgleichheit inkl. Gamification/Gacha (Tabelle oben) | erledigt (alle Module 1:1, PORTIERUNG.md) |
 | 1c | Konto (GitHub), E2E-Sync, Rangliste mit Benutzername, Konto löschen | offen (braucht Supabase-Dev-Projekt + GitHub-OAuth-App) |
 | 2 | Katalog-Bibliothek (Suche/Filter, mehrere Kataloge), TAP1, Lehrjahr → Lernfeld, Klausurkalender | offen |
-| 3 | KI-Prüfungstutor (Premium, nur Admin): Sitzung je Thema im IHK-Stil, Konzept-Graph, deterministischer Lehrplan, E2E-verschlüsselter Tutor-Stand, XP – `docs/TUTOR.md` | Code fertig (14.11.); SQL 003 einspielen + Function deployen |
+| 3 | KI-Prüfungstutor (Premium, nur Admin): Sitzung je Thema im IHK-Stil, Konzept-Graph, deterministischer Lehrplan, E2E-verschlüsselter Tutor-Stand, XP – `docs/TUTOR.md` | fertig (14.11., SQL 003 eingespielt, Function deployt) |
 | 4 | Neue App ersetzt die Live-App (gleiche Origin, Lernstände bleiben) | offen |
 
 ## Sicherheit

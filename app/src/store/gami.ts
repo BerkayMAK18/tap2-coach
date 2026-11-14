@@ -10,7 +10,7 @@ import { create } from "zustand";
 import type { EventCatalog, Question } from "@/content/schema";
 import { today } from "@/lib/dates";
 import { supabase } from "@/lib/supabase";
-import { claimable, claimLogin, claimQuest, chipText, equip, evFinal as evFinalCore, evInfo as evInfoCore, evKap as evKapCore, evWear, loginOffer, loginToast, onAnswer, onGuess, onTutor, openChest, pull, rollDay, setTitle, titleCheck, applyBoost, type Ctx, type LoginOffer, type PullResult } from "@/lib/gami/core";
+import { claimable, claimLogin, claimQuest, chipText, equip, evFinal as evFinalCore, evInfo as evInfoCore, evKap as evKapCore, evWear, loginOffer, loginToast, onAnswer, onGuess, openChest, pull, rollDay, setTitle, titleCheck, applyBoost, type Ctx, type LoginOffer, type PullResult } from "@/lib/gami/core";
 import { KEY_GAMI } from "@/lib/gami/items";
 import { NAME_RE, lbGet, lbId, lbSet, lookOf, type LbData } from "@/lib/gami/lb";
 import { firstStart, merge as mergeCore, pack as packCore, parseStored, type GState } from "@/lib/gami/state";
@@ -94,8 +94,6 @@ function safe<T>(f: () => T): T | undefined { try { return f(); } catch (e) { co
 export const gm = {
   answer: (q: Pick<Question, "id" | "topic">, ok: boolean, unsure: boolean, f: number, t: number) => safe(() => { onAnswer(gami(), ctx, q, ok, unsure, f, t); bump(); }),
   guess: (q: Pick<Question, "id" | "topic">) => safe(() => { onGuess(gami(), ctx, q); bump(); }),
-  /** Tutor-Aufgabe bewertet: Quests/Serie wie eine Antwort, XP nach Punkten (gedeckelt). Gibt die vergebenen XP zurück. */
-  tutor: (q: Pick<Question, "id" | "topic">, punkte: number, max: number, unsure: boolean, xp: number, cap: number) => safe(() => { const r = onTutor(gami(), ctx, q, punkte, max, unsure, xp, cap); bump(); return r; }) ?? 0,
   chip: () => safe(() => chipText(gami())) ?? "",
   pack: () => safe(() => packCore(gami())) ?? null,
   merge: (p: unknown) => safe(() => { if (mergeCore(gami(), p)) { save(); bump(); } }),

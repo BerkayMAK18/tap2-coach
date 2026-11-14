@@ -4,8 +4,9 @@
  * - Sitzung (tap2coach-tutor-sitzung, nur dieses Gerät): Verlauf im Format der Claude-API, nur angehängt.
  * - Tutor-Stand (tap2coach-tutor-stand): Belege, Fehlvorstellungen, Sitzungen, Tutor-XP je Tag – Ende-zu-Ende-verschlüsselt
  *   auf allen Geräten (lib/tutor-sync.ts, Tabelle app_tutor_state). Nicht im Paket tap2_sync.
- * - Belohnung: Jede bewertete Aufgabe zählt einmal – Tagesstatistik (S.log), Serie und Quests wie eine Antwort, XP nach
- *   Punkten über das Belohnungs-Modul (gm.tutor → addXP), gedeckelt auf XP_TAG_MAX je Tag über alle Geräte.
+ * - Belohnung: Jede bewertete Aufgabe zählt einmal genau wie eine normale Antwort (gm.answer): XP mit Combo-Bonus und
+ *   Trank, Federn, Serie, Tagesquests und Tagesstatistik (S.log). „Richtig“ = mindestens die Hälfte der Punkte,
+ *   „unsicher“ = als geraten/unsicher markiert (dann wie bei Lernrunden keine XP). Keine Tagesobergrenze.
  * Reine Logik: lib/tutor-session.ts, lib/tutor-schema.ts, lib/tutor-state.ts.
  */
 import { create } from "zustand";
@@ -15,10 +16,10 @@ import { isKey, keyRaw } from "@/lib/crypto";
 import { today } from "@/lib/dates";
 import { supabase } from "@/lib/supabase";
 import { kbIds, kbOverview, makeKb } from "@/lib/tutor-kb";
-import { applyReply, chunks, costOf, newConvo, tooLong, userMsg, userText, type Block, type Convo, type Model, type Sicher, type UserMeta } from "@/lib/tutor-session";
-import { addEvidence, addXpDay, emptyTutor, migrateOld, normalizeTutor, putSession, tutorXp, xpLeft, type TutorState } from "@/lib/tutor-state";
+import { applyReply, chunks, rewardArgs, costOf, newConvo, tooLong, userMsg, userText, type Block, type Convo, type Model, type Sicher, type UserMeta } from "@/lib/tutor-session";
+import { addEvidence, addXpDay, emptyTutor, migrateOld, normalizeTutor, putSession, type TutorState } from "@/lib/tutor-state";
 import { syncTutor } from "@/lib/tutor-sync";
-import { gm } from "./gami";
+import { gami, gm } from "./gami";
 import { liveGet } from "./livesync";
 import { useProgress } from "./progress";
 
@@ -109,8 +110,9 @@ export const useTutor = create<Store>((set, get) => {
       let c = a.convo, st = addEvidence(get().state, a.evidence);
       // Belohnung: nur die erste Bewertung je Aufgabe zählt
       if (a.graded?.first) {
-        const g = a.graded, d = today(), unsure = g.sich != null && g.sich <= 1;
-        const xp = gm.tutor({ id: `tutor:${c.id}:${g.key}`, topic: g.topic }, g.punkte, g.max, unsure, tutorXp(g.punkte), xpLeft(st, d));
+        const g = a.graded, d = today(), r = rewardArgs(g), before = gami().earned;
+        gm.answer({ id: `tutor:${c.id}:${g.key}`, topic: g.topic }, r.ok, r.unsure, r.f, r.t); // wie eine neue Frage in der Lernrunde
+        const xp = Math.max(0, gami().earned - before);
         st = addXpDay(st, d, device(), xp);
         useProgress.getState().logTutor();
         c = { ...c, bewertungen: { ...c.bewertungen, [g.key]: { ...c.bewertungen[g.key], xp } } };

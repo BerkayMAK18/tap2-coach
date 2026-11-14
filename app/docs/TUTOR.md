@@ -2,6 +2,8 @@
 
 Stand: 14.11.2026. Premium-Funktion der neuen App, vorerst nur für den Admin, später für alle (mit XP, Serie, Tageszielen).
 
+**Eingerichtet (14.11.2026):** `003_app_tutor_state.sql` ist eingespielt, die Edge Function ist deployt.
+
 ## Was er tut
 
 Der Tutor ist auf die **TAP2 (FIAE)** spezialisiert und arbeitet ausschließlich mit den Themen und Lernpaketen des
@@ -50,7 +52,7 @@ dir der Tutor die ganze Sitzung lang Aufgaben im IHK-Stil und **bewertet wie ein
 | Abgleich | `src/lib/tutor-sync.ts`, `supabase/003_app_tutor_state.sql` | E2E-verschlüsselt in `app_tutor_state` |
 | Graph | `src/lib/graph.ts` (`buildConceptGraph`) | Konzepte = Kernaussagen (`P04.2` …), Stand aus Belegen + Fragendaten |
 | Lehrplan | `src/lib/lehrplan.ts` | deterministisch, nicht von der KI |
-| XP | `src/lib/gami/core.ts` (`onTutor`), `store/gami.ts` (`gm.tutor`) | gleicher Weg wie alle XP (`addXP`) |
+| XP | `store/tutor.ts` → `gm.answer` mit `rewardArgs` | wie eine normale Antwort (Combo, Serie, Quests), keine Obergrenze |
 | Store/UI | `src/store/tutor.ts`, `src/routes/tutor.tsx`, `src/components/TutorChat.tsx`, `src/components/tutor/*` | |
 
 ### Eine Runde
@@ -128,22 +130,27 @@ allen Geräten gleich.
 
 ### XP, Serie, Tagesziele
 
-- Die **erste Bewertung** einer Aufgabe zählt:
-  - Tagesstatistik (`S.log`) und damit die Lern-Serie,
-  - Tagesquests (`G.today.answered/correct/t2/sowi`) und Antwort-Serie (`combo`) wie eine normale Antwort.
-- „Richtig“ heißt: mindestens die Hälfte der Punkte und nicht als geraten oder unsicher markiert.
-- **XP nach Punkten:** 3 XP je Punkt. Bei „richtig“ kommen Serien-Bonus und Trank dazu. Die **Tagesobergrenze**
-  beträgt 300 Tutor-XP über alle Geräte; Grundlage ist der Zähler im Tutor-Stand.
-- Ehrliche Unsicherheit kostet keine XP. Sie unterbricht nur die Serie.
-- **Gleicher Weg wie alle XP:** `onTutor` → `addXP` → `G.earned/xp/level`. Die XP stehen damit im Sync-Paket (`x/l/p`)
-  und in der Rangliste (`tap2_lb_push` mit `earned`). Das Format ist unverändert.
+Eine bewertete Aufgabe zählt **genau wie eine normale Antwort** in der Lernrunde. Sie läuft über denselben Aufruf des
+Belohnungs-Moduls (`gm.answer` → `onAnswer`, Argumente aus `rewardArgs` in `lib/tutor-session.ts`). Es gibt **keine
+Tagesobergrenze**.
+
+- Es zählt nur die **erste Bewertung** einer Aufgabe; eine Nachbewertung bringt keine XP mehr.
+- „Richtig“ heißt: mindestens die Hälfte der Punkte. „Unsicher“ heißt: als geraten oder unsicher markiert.
+- **Richtig und sicher:** 10 XP × Combo-Bonus (× 2 mit Trank), +5 Federn, Antwort-Serie (`combo`) läuft weiter.
+- **Unsicher richtig oder falsch:** keine XP, die Serie endet (das Serien-Schild rettet sie) – wie in der Lernrunde.
+- Die Aufgabe zählt außerdem für Tagesquests (`G.today.answered/correct/t2/sowi/fresh`) und für die Tagesstatistik
+  (`S.log`), also auch für die Lern-Serie.
+- Der Tutor-Stand zählt Tutor-XP je Tag und Gerät, aber nur für die Anzeige „Tutor-XP heute“.
+- **Gleicher Weg wie alle XP:** `onAnswer` → `addXP` → `G.earned/xp/level`. Die XP stehen damit im Sync-Paket (`x/l/p`)
+  und in der Rangliste (`tap2_lb_push` mit `earned`). Das Belohnungs-Modul selbst ist unverändert (1:1 wie `main`).
 - **Prüfung gegen `main`** (`lib/gami/tutor-xp.test.ts`, gegen `golden/original.js` = Abschnitt aus `index.html` auf
   `origin/main`, v2.8):
-  - `main` übernimmt die Tutor-XP beim Abgleich (`merge` → `mirror`: XP vom weiter fortgeschrittenen Stand), ohne
-    umzurechnen.
+  - Dieselbe Folge von Tutor-Aufgaben ergibt in Dev-App und Original exakt denselben Belohnungs-Stand.
+  - `main` übernimmt die Tutor-XP beim Abgleich (`merge` → `mirror`).
   - `main` meldet danach genau diese XP an `tap2_lb_push`.
   - Das Paket hat dieselben Felder wie das von `main`.
-  - Die Tagesobergrenze liegt weit unter der Bremse der Rangliste (30 000 XP/Tag).
+- **Bremse der Rangliste** (Server, unverändert): höchstens 30 000 XP Zuwachs pro Tag und Eintrag. Das entspricht weit
+  über 1 000 richtigen Antworten.
 - **Bekannte Grenze (Regel von `main`, nicht neu):** Verdienen zwei Geräte gleichzeitig XP vom selben Ausgangsstand,
   gilt nach dem Abgleich der weiter fortgeschrittene Stand; die XP werden nicht addiert.
 
@@ -171,7 +178,7 @@ allen Geräten gleich.
 
 Längere Pausen (> 1 Std.) schreiben den Cache neu: + ≈ 0,05 $.
 
-## Was du selbst tun musst
+## Einrichtung (erledigt am 14.11.2026; bei Änderungen an Function oder SQL erneut)
 
 1. **SQL einspielen:** `supabase/003_app_tutor_state.sql` im Supabase-Dashboard → SQL Editor ausführen. Es legt nur
    `app_tutor_state` und die `app_tutor_state_*`-Funktionen an; `tap2_*` bleibt unberührt.

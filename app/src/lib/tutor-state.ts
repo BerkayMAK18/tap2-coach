@@ -13,7 +13,7 @@
  * - Fehlvorstellungen (fv): Vereinigung über die ID; Text/Konzept vom zuletzt gesehenen Eintrag (Gleichstand: feste Regel),
  *   first = frühester, seen = spätester Zeitpunkt, fix = spätester „behoben“-Zeitpunkt. Aktiv, solange seen > fix.
  * - Sitzungen (sess): Vereinigung über die ID; Zähler je Sitzung als Maximum (eine Sitzung läuft auf einem Gerät).
- * - Tutor-XP je Tag (xp): je Tag und Gerät das Maximum, Summe über Geräte = XP des Tages (für die Tagesobergrenze).
+ * - Tutor-XP je Tag (xp): je Tag und Gerät das Maximum, Summe über Geräte = XP des Tages (Anzeige).
  *   Tage älter als XP_DAYS fallen weg.
  * Daten aus der Cloud oder älteren Ständen gehen immer durch normalizeTutor() (Zod, Längen, nur bekannte IDs).
  */
@@ -21,8 +21,6 @@ import { z } from "zod";
 import { stab } from "./gami/state";
 
 export const MAX_EV = 800, MAX_FV = 120, MAX_SESS = 120, XP_DAYS = 14;
-/** Tutor-XP pro erreichtem Punkt und Obergrenze pro Tag (alle Geräte zusammen) – gegen Farmen */
-export const XP_PRO_PUNKT = 3, XP_TAG_MAX = 300;
 
 /** Beleg: eine Beobachtung zu einem Konzept (Graph-Update des Tutors oder Bewertung einer Aufgabe) */
 export type Ev = {
@@ -104,11 +102,8 @@ export function mergeTutor(a: TutorState, b: TutorState): TutorState {
 }
 
 // ---------- Abfragen und Änderungen (rein)
-/** Tutor-XP heute (alle Geräte) */
+/** Tutor-XP heute (alle Geräte) – nur zur Anzeige, keine Obergrenze */
 export const xpToday = (s: TutorState, d: string) => Object.values(s.xp[d] ?? {}).reduce((a, n) => a + n, 0);
-/** Grund-XP für eine bewertete Aufgabe (nach Punkten) und der Rest der Tagesobergrenze */
-export const tutorXp = (punkte: number) => Math.max(0, Math.round(punkte * XP_PRO_PUNKT));
-export const xpLeft = (s: TutorState, d: string) => Math.max(0, XP_TAG_MAX - xpToday(s, d));
 export function addXpDay(s: TutorState, d: string, device: string, n: number): TutorState {
   if (n <= 0) return s;
   const m = { ...(s.xp[d] ?? {}) }; m[device] = (m[device] ?? 0) + n;

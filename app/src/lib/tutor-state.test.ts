@@ -4,7 +4,7 @@ import { TAP2 } from "@/content/catalog";
 import { seeded } from "./gami/golden/harness";
 import { stab } from "./gami/state";
 import { kbIds, makeKb, paketeOf } from "./tutor-kb";
-import { XP_TAG_MAX, addEvidence, addXpDay, emptyTutor, fvActive, fvCount, mergeTutor, migrateOld, normalizeTutor, putSession, xpLeft, xpToday, type Ev, type TutorState } from "./tutor-state";
+import { addEvidence, addXpDay, emptyTutor, fvActive, fvCount, mergeTutor, migrateOld, normalizeTutor, putSession, xpToday, type Ev, type TutorState } from "./tutor-state";
 
 const kb = makeKb(TAP2), known = kbIds(kb);
 const T = "T03", K = `${paketeOf(kb, T)[0]}.1`, K2 = `${paketeOf(kb, T)[0]}.2`;
@@ -50,14 +50,13 @@ describe("mergeTutor", () => {
 });
 
 describe("Tutor-XP je Tag (alle Geräte)", () => {
-  it("je Gerät das Maximum, Summe über Geräte, Obergrenze gilt gemeinsam", () => {
+  it("je Gerät das Maximum, Summe über Geräte (Anzeige „Tutor-XP heute“)", () => {
     let a = addXpDay(emptyTutor(), "2026-11-14", "geraetA", 120); const b = addXpDay(emptyTutor(), "2026-11-14", "geraetB", 150);
     a = addXpDay(a, "2026-11-14", "geraetA", 30);
     const m = mergeTutor(mergeTutor(a, b), a);
-    expect(xpToday(m, "2026-11-14")).toBe(300); expect(xpLeft(m, "2026-11-14")).toBe(XP_TAG_MAX - 300);
-    expect(xpLeft(m, "2026-11-15")).toBe(XP_TAG_MAX);
+    expect(xpToday(m, "2026-11-14")).toBe(300); expect(xpToday(m, "2026-11-15")).toBe(0);
   });
-  it("nur die letzten 14 Tage, Tage in der Zukunft zählen beim Buchen nicht", () => {
+  it("nur die letzten 14 Tage", () => {
     let s = emptyTutor(); for (let d = 1; d <= 20; d++) s = addXpDay(s, `2026-11-${String(d).padStart(2, "0")}`, "geraetA", 5);
     expect(Object.keys(s.xp).length).toBe(14); expect(Object.keys(s.xp)[0]).toBe("2026-11-07");
   });

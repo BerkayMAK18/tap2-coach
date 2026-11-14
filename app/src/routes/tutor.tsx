@@ -14,7 +14,7 @@ import { TAP2, TOPICS, TP, allQ } from "@/content/catalog";
 import { EXAM_DE } from "@/config";
 import { inTeil } from "@/content/catalog";
 import { buildGraph, weakest } from "@/lib/graph";
-import { XP_TAG_MAX, xpToday } from "@/lib/tutor-state";
+import { xpToday } from "@/lib/tutor-state";
 import { today } from "@/lib/dates";
 import { useProgress } from "@/store/progress";
 import { PREMIUM_KEY, isPremium, useTutor } from "@/store/tutor";
@@ -121,7 +121,7 @@ function Themenwahl() {
         )}
         {err && <p className="small warn-text" role="alert" style={{ margin: "10px 0 0" }}>{err}</p>}
         {busy && <p className="small muted" style={{ margin: "10px 0 0" }}>Der Tutor bereitet die erste Aufgabe vor …</p>}
-        <p className="tiny muted" style={{ margin: "10px 0 0" }}>Tutor-XP heute: {xpHeute} von {XP_TAG_MAX} · jede bewertete Aufgabe zählt für Serie und Tagesziele.</p>
+        <p className="tiny muted" style={{ margin: "10px 0 0" }}>Tutor-XP heute: {xpHeute} · jede bewertete Aufgabe zählt wie eine Antwort: XP mit Combo, Serie und Tagesziele (richtig ab der Hälfte der Punkte).</p>
       </section>
       {TEILE.map(([label, part]) => {
         const list = TOPICS.filter((t) => inTeil(t, part) && !seen.has(t.id)); list.forEach((t) => seen.add(t.id));

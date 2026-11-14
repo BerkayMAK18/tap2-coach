@@ -93,38 +93,6 @@ export function onAnswer(G: GState, ctx: Ctx, q: Pick<Question, "id" | "topic">,
   ctx.fx.save(); ctx.fx.lbSoon();
   if (msg) ctx.fx.float(msg, sure);
 }
-/**
- * Tutor-Aufgabe bewertet (nur Dev-App, Prüfer-Tutor): zählt wie eine Antwort in Tagesquests, Serie und Tagesstatistik;
- * die XP richten sich nach den erreichten Punkten (xp = Punkte × XP_PRO_PUNKT); nach Serien-Bonus und Trank wird auf
- * cap gedeckelt (Rest der Tagesobergrenze aller Geräte, lib/tutor-state.ts). Sie laufen über addXP wie alle XP, landen also in G.earned/G.xp/G.level und damit im Sync-Paket
- * (pack: x/l/p) und in der Rangliste (tap2_lb_push: earned). Die Live-App übernimmt sie beim Abgleich (mirror: XP vom
- * weiter fortgeschrittenen Stand) – Format unverändert, getestet in tutor-xp.test.ts.
- * „richtig“ (Serie, Quest „richtig“) = mindestens die Hälfte der Punkte und nicht als geraten/unsicher markiert.
- * Serien-Bonus und Trank gelten wie bei Antworten, die Federn (+5) nur bei „richtig“.
- */
-export function onTutor(G: GState, ctx: Ctx, q: Pick<Question, "id" | "topic">, punkte: number, max: number, unsure: boolean, xp: number, cap: number) {
-  rollDay(G, ctx.today());
-  const st = G.today!, tp = TPX[q.topic], ok = max > 0 && punkte / max >= 0.5, sure = ok && !unsure;
-  st.answered++;
-  if (tp && tp.teil === "SoWi") st.sowi++;
-  if (tp && tp.teil !== "SoWi" && tp.teil.includes("2")) st.t2 = (st.t2 || 0) + 1;
-  let gain = 0;
-  if (sure) { G.combo++; st.correct++; st.maxCombo = Math.max(st.maxCombo, G.combo); G.best = Math.max(G.best, G.combo); G.federn += 5; }
-  else if (G.shieldOn && G.combo > 0) { G.shieldOn = false; ctx.fx.toast("🛡️ Das Schild hat deine Serie gerettet", 150); }
-  else G.combo = 0;
-  if (xp > 0 && cap > 0) {
-    const m = sure ? mult(G.combo) : 1, boost = G.xp2Left > 0 ? 2 : 1; if (boost > 1) G.xp2Left--;
-    gain = Math.max(0, Math.min(cap, Math.round(xp * m * boost))); addXP(G, ctx, gain);
-  }
-  if (new Date().getHours() < 4) (G.flags = G.flags || {}).nacht = 1;
-  G.u = Date.now();
-  titleCheck(G, ctx);
-  ctx.fx.save(); ctx.fx.lbSoon();
-  ctx.fx.float(gain ? `+${gain} XP · ${fmtP(punkte)}/${fmtP(max)} P.` : `${fmtP(punkte)}/${fmtP(max)} P.`, sure);
-  return gain;
-}
-const fmtP = (n: number) => (Number.isInteger(n) ? String(n) : n.toFixed(1).replace(".", ","));
-
 /** „Geraten“ nach einer richtigen Auswahlfrage: XP und Serie dieser Antwort zurücknehmen und als unsicher werten */
 export function onGuess(G: GState, ctx: Ctx, q: Pick<Question, "id" | "topic">) {
   const L = ctx.rt.last;

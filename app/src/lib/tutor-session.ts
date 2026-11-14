@@ -30,6 +30,12 @@ export type Sicher = 0 | 1 | 2 | 3;
 export type UserKind = "start" | "antwort" | "schlauch" | "ende";
 export type UserMeta = { kind: UserKind; text?: string; gedanke?: string; sich?: Sicher; aufgabe?: string };
 export type Graded = { key: string; topic: string; punkte: number; max: number; sich?: Sicher; first: boolean };
+/**
+ * Bewertete Tutor-Aufgabe → Antwort im Belohnungs-Modul (gm.answer / onAnswer), genau wie eine neue Frage in der
+ * Lernrunde: richtig ab der Hälfte der Punkte, unsicher bei „geraten“/„unsicher“ (dann wie dort keine XP, Serie endet).
+ * f = -1 (neue Frage), t = Ampel danach (gelb bei richtig, rot sonst).
+ */
+export const rewardArgs = (g: Pick<Graded, "punkte" | "max" | "sich">) => { const ok = g.max > 0 && g.punkte / g.max >= 0.5; return { ok, unsure: g.sich != null && g.sich <= 1, f: -1, t: ok ? 1 : 0 }; };
 
 export type Convo = {
   id: string; thema: string; model: Model; started: number; cost: number;

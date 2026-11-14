@@ -1,81 +1,75 @@
 // @vitest-environment happy-dom
 /**
- * Tutor-XP und die Live-App (main): Die Dev-App vergibt Tutor-XP über das Belohnungs-Modul (onTutor → addXP). Sie stehen
- * damit in G.earned/xp/level, im Sync-Paket (pack: x/l/p) und in der Rangliste. Geprüft wird gegen das Original der
- * Live-App (golden/original.js = Abschnitt aus index.html auf main, v2.8):
- * - main übernimmt die Tutor-XP beim Abgleich (mirror: XP vom weiter fortgeschrittenen Stand) und rechnet nichts um,
- * - main schickt danach genau diese XP an tap2_lb_push,
- * - Format unverändert: das Paket der Dev-App hat dieselben Felder wie das von main,
- * - Tagesquests und Serie zählen Tutor-Aufgaben wie Antworten, die Tagesobergrenze bleibt weit unter der Bremse der
- *   Rangliste (30 000 XP pro Tag).
+ * Tutor-XP und die Live-App (main): Eine bewertete Tutor-Aufgabe zählt genau wie eine normale Antwort – derselbe Aufruf
+ * des Belohnungs-Moduls (onAnswer, in der App über gm.answer) mit rewardArgs (lib/tutor-session.ts): XP mit Combo-Bonus
+ * und Trank, Federn, Serie, Tagesquests, keine Obergrenze. Geprüft gegen das Original der Live-App (golden/original.js =
+ * Abschnitt aus index.html auf main, v2.8):
+ * - eine Tutor-Aufgabe ergibt in Dev-App und main exakt denselben Belohnungs-Stand wie eine Antwort,
+ * - main übernimmt die Tutor-XP beim Abgleich (mirror: XP vom weiter fortgeschrittenen Stand), Paket-Format gleich,
+ * - main schickt danach genau diese XP an tap2_lb_push.
  */
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { stab, fix, merge, pack, parseStored, type GState } from "./state";
-import { mult, need } from "./items";
-import { onAnswer, onTutor, rollDay } from "./core";
-import { lbId } from "./lb";
-import { newCtx, oldGami, seeded, stateWith, type World } from "./golden/harness";
-import { XP_PRO_PUNKT, XP_TAG_MAX, tutorXp } from "../tutor-state";
 import { BASE_Q } from "@/content/catalog";
+import { rewardArgs } from "../tutor-session";
+import { onAnswer } from "./core";
+import { mult } from "./items";
+import { lbId } from "./lb";
+import { merge, pack, parseStored, stab, type GState } from "./state";
+import { newCtx, oldGami, seeded, stateWith, type World } from "./golden/harness";
 
 const DAY = "2026-11-14", KEY = "ABCD-EFGH-JKMN-PQRS-TUVW-XYZ2-3456-7890";
 const START = { earned: 4000, level: 12, xp: 0, federn: 370, tickets: 0, loginClaimed: DAY, lastLogin: DAY, loginStreak: 3, calIdx: 2 };
 const dev = (raw: object = START) => { const w: World = { S: stateWith([]), day: DAY, synced: true, syncKey: KEY }; const G = parseStored(JSON.stringify(raw)); return { G, ctx: newCtx(w, () => G), w }; };
 const main = (raw: object = START, rpc?: World["rpc"]) => { localStorage.setItem("tap2coach-gami", JSON.stringify(raw)); const o = oldGami({ S: stateWith([]), day: DAY, synced: true, syncKey: KEY, conf: true, rpc }); o.init(); return o; };
 const T2 = { id: "tutor:s1:A1", topic: "T02" }; // SQL (Teil 2)
+/** Tutor-Aufgabe bewertet – derselbe Aufruf wie in store/tutor.ts */
+const tutor = (d: ReturnType<typeof dev>, punkte: number, max: number, sich?: 0 | 1 | 2 | 3) => { const r = rewardArgs({ punkte, max, sich }); onAnswer(d.G, d.ctx, T2, r.ok, r.unsure, r.f, r.t); };
 
 beforeEach(() => { vi.useFakeTimers({ now: new Date("2026-11-14T10:00:00"), toFake: ["Date", "setTimeout", "clearTimeout"] }); localStorage.clear(); const r = seeded(4); vi.spyOn(Math, "random").mockImplementation(() => r()); });
 afterEach(() => { vi.useRealTimers(); vi.restoreAllMocks(); });
 
-describe("onTutor (Dev-App)", () => {
-  it("XP nach Punkten über addXP: earned, xp und level bleiben stimmig (wie bei Antworten)", () => {
-    const d = dev(), xp = tutorXp(8);
-    expect(xp).toBe(8 * XP_PRO_PUNKT);
-    const gain = onTutor(d.G, d.ctx, T2, 8, 10, false, xp, XP_TAG_MAX);
-    expect(gain).toBe(Math.round(xp * mult(1))); expect(d.G.earned).toBe(4000 + gain);
-    const copy = parseStored(JSON.stringify(d.G)); fix(copy); expect(copy.level).toBe(d.G.level); expect(copy.xp).toBe(d.G.xp); // fix() ändert nichts
-    expect(d.G.xp).toBeLessThan(need(d.G.level));
+describe("Tutor-Aufgabe = normale Antwort", () => {
+  it("richtig ab der Hälfte der Punkte, unsicher bei „geraten“/„unsicher“", () => {
+    expect(rewardArgs({ punkte: 2, max: 4 })).toEqual({ ok: true, unsure: false, f: -1, t: 1 });
+    expect(rewardArgs({ punkte: 1.5, max: 4, sich: 3 })).toEqual({ ok: false, unsure: false, f: -1, t: 0 });
+    expect(rewardArgs({ punkte: 4, max: 4, sich: 1 }).unsure).toBe(true);
+    expect(rewardArgs({ punkte: 4, max: 4, sich: 2 }).unsure).toBe(false);
   });
-  it("zählt für Tagesquests und Serie wie eine Antwort; unter der Hälfte oder unsicher: keine Serie", () => {
-    const d = dev(); rollDay(d.G, DAY);
-    onTutor(d.G, d.ctx, T2, 6, 8, false, tutorXp(6), XP_TAG_MAX);
-    expect(d.G.today).toMatchObject({ answered: 1, correct: 1, t2: 1 }); expect(d.G.combo).toBe(1);
-    onAnswer(d.G, d.ctx, BASE_Q[0], true, false, -1, 1); expect(d.G.combo).toBe(2); // Serie läuft mit normalen Antworten weiter
-    onTutor(d.G, d.ctx, T2, 3, 8, false, tutorXp(3), XP_TAG_MAX);
-    expect(d.G.combo).toBe(0); expect(d.G.today).toMatchObject({ answered: 3, correct: 2 });
-    const before = d.G.earned; onTutor(d.G, d.ctx, T2, 8, 8, true, tutorXp(8), XP_TAG_MAX);
-    expect(d.G.combo).toBe(0); expect(d.G.earned - before).toBe(tutorXp(8)); // unsicher: XP nach Punkten, aber ohne Serien-Bonus
+  it("XP mit Combo wie Antworten, keine Obergrenze: 30 richtige Aufgaben in Folge", () => {
+    const d = dev(); let expected = 0;
+    for (let i = 1; i <= 30; i++) { tutor(d, 6, 8, 3); expected += Math.round(10 * mult(i)); }
+    expect(d.G.earned).toBe(4000 + expected); expect(d.G.combo).toBe(30); expect(d.G.today).toMatchObject({ answered: 30, correct: 30, t2: 30 });
   });
-  it("Tagesobergrenze: nie mehr als der Rest des Tages, auch mit Serien-Bonus und Trank", () => {
-    const d = dev({ ...START, combo: 20, xp2Left: 5 });
-    expect(onTutor(d.G, d.ctx, T2, 25, 25, false, tutorXp(25), 40)).toBe(40);
-    expect(onTutor(d.G, d.ctx, T2, 25, 25, false, tutorXp(25), 0)).toBe(0);
-    // Höchstmöglich pro Tag (alle Geräte) bleibt weit unter der Bremse von tap2_lb_push (30 000 XP/Tag)
-    expect(XP_TAG_MAX).toBeLessThan(30000 / 10);
+  it("Serie läuft mit Lernrunden-Antworten weiter; unter der Hälfte endet sie, unsicher gibt keine XP", () => {
+    const d = dev();
+    tutor(d, 6, 8); onAnswer(d.G, d.ctx, BASE_Q[0], true, false, -1, 1); expect(d.G.combo).toBe(2);
+    tutor(d, 3, 8); expect(d.G.combo).toBe(0);
+    const e = d.G.earned; tutor(d, 8, 8, 0); expect(d.G.earned).toBe(e); expect(d.G.combo).toBe(0);
+  });
+  it("gleicher Belohnungs-Stand wie das Original der Live-App für dieselbe Folge", () => {
+    const d = dev(), m = main();
+    for (const [p, max, s] of [[6, 8, 3], [8, 8, 2], [1, 4, 3], [4, 4, undefined], [3, 6, 1]] as const) {
+      tutor(d, p, max, s); const r = rewardArgs({ punkte: p, max, sich: s }); m.answer(T2, r.ok, r.unsure, r.f, r.t);
+    }
+    const md = m.data() as GState;
+    for (const k of ["earned", "xp", "level", "federn", "combo", "best"] as const) expect(d.G[k]).toBe(md[k]);
+    expect(d.G.today).toEqual(md.today);
   });
 });
 
 describe("Live-App (main) übernimmt Tutor-XP", () => {
   it("Abgleich Dev → main: gleiche XP, gleiches Level, Paket-Format identisch", () => {
     const d = dev(), m = main();
-    merge(d.G, m.pack()); // wie beim Verbinden
-    for (let i = 0; i < 5; i++) { vi.advanceTimersByTime(1000); onTutor(d.G, d.ctx, T2, 4 + i, 10, false, tutorXp(4 + i), XP_TAG_MAX); }
+    merge(d.G, m.pack());
+    for (let i = 0; i < 5; i++) { vi.advanceTimersByTime(1000); tutor(d, 5 + i, 10, 3); }
     const p = pack(d.G); m.merge(p);
     const md = m.data() as GState;
     expect(md.earned).toBe(d.G.earned); expect(md.level).toBe(d.G.level); expect(md.xp).toBe(d.G.xp);
     expect(Object.keys(m.pack()).sort()).toEqual(Object.keys(p).sort());
-    // und zurück: main → Dev verändert nichts mehr (beide Geräte gleich)
     merge(d.G, m.pack()); expect(stab(pack(d.G))).toBe(stab(m.pack()));
   });
-  it("gleichzeitig: Tutor-XP auf Dev, Lernrunden auf main – nach dem Abgleich zählt der weiter fortgeschrittene Stand (Regel von main)", () => {
-    const d = dev(), m = main(); merge(d.G, m.pack());
-    onTutor(d.G, d.ctx, T2, 10, 10, false, tutorXp(10), XP_TAG_MAX); // +30 XP
-    m.answer(BASE_Q[0], true, false, -1, 1); // +10 XP auf main
-    m.merge(pack(d.G)); merge(d.G, m.pack());
-    expect((m.data() as GState).earned).toBe(d.G.earned); expect(d.G.earned).toBe(4030);
-  });
   it("main meldet der Rangliste genau die übernommenen XP (tap2_lb_push)", async () => {
-    const d = dev(); onTutor(d.G, d.ctx, T2, 10, 10, false, tutorXp(10), XP_TAG_MAX);
+    const d = dev(); for (let i = 0; i < 3; i++) tutor(d, 10, 10, 3);
     const calls: Record<string, unknown>[] = [];
     localStorage.setItem("tap2coach-lb", JSON.stringify({ joined: true, id: await lbId(KEY), name: "Tester" }));
     const m = main(START, async (fn, a) => { if (fn === "tap2_lb_push") calls.push(a); return { ok: true }; });

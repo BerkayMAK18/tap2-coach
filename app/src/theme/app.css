@@ -159,3 +159,12 @@ main.content.wide { max-width: none; }
 .tp-locked { display: flex; gap: 14px; align-items: flex-start; }
 .cf-box .btn.danger { background: var(--bad); color: #fff; }
 .cf-box .btn.danger:hover { filter: brightness(1.08); }
+/* Vortex (kostenlos): Brücke zur eigenen KI */
+.tp-topbar { gap: 8px; }
+.vx-steps { flex: 1; min-height: 0; overflow-y: auto; display: grid; align-content: start; gap: 12px; padding: 16px 2px; }
+.vx-step { display: grid; grid-template-columns: 32px 1fr; gap: 12px; padding: 14px 16px; border-radius: var(--r); background: var(--surface-2); }
+.vx-step p { margin: 4px 0 0; line-height: 1.55; }
+.vx-step textarea { width: 100%; margin-top: 10px; resize: vertical; border-radius: 12px; padding: 10px 12px; }
+.vx-n { width: 32px; height: 32px; border-radius: 50%; display: grid; place-items: center; font-weight: 800; background: var(--blue); color: var(--on-blue); }
+.vx-note { display: flex; gap: 6px; align-items: center; margin: 8px 2px 0; padding-top: 10px; border-top: 1px solid var(--line); }
+.vx-pro { display: flex; gap: 6px; align-items: center; margin: 6px 0 0; }

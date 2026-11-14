@@ -1,5 +1,8 @@
 /**
- * Prüfer-Tutor (Premium, vorerst nur Admin). Zwei Tabs:
+ * Vortex – Prüfungstutor für die TAP2. Zwei Varianten:
+ * - „Vortex“ (kostenlos, für alle, auch ohne Anmeldung): Brücke zur eigenen KI (components/tutor/BridgePanel.tsx).
+ * - „Vortex Pro“ (Premium, nur das freigeschaltete Konto): eingebaute KI (Claude) mit Chat, Aufgabe und Bewertung.
+ * Beide teilen Themenwahl, Lehrplan und Graph (Tutor-Stand). Zwei Tabs:
  * - „Sitzung“: ohne Sitzung die Themenwahl (Empfehlung aus dem Lehrplan). Ein Klick öffnet nur den Chat zum Thema –
  *   die KI wird erst mit der ersten Nachricht gefragt (keine Kosten fürs Hineinschauen). Mit Sitzung zwei Spalten:
  *   links der Chat, rechts die Reiter „Aufgabe“ (Stellung, Operator, Punkte, Material) und „Dein Stand“ (Konzept-Graph).
@@ -7,22 +10,21 @@
  * - „Lehrplan“: deterministisch berechneter Plan bis zur Prüfung.
  *
  * Premium: nur das freigeschaltete GitHub-Konto (app_metadata.role = "admin"), auf jedem Gerät, auf dem es angemeldet ist.
- * Andere sehen „gesperrt“. Maßgeblich ist die Prüfung im Server (Edge Function), die Ansicht folgt ihr nur.
+ * Maßgeblich ist die Prüfung im Server (Edge Function), die Ansicht folgt ihr nur.
  */
 import { useEffect, useState } from "react";
-import { Link, createFileRoute } from "@tanstack/react-router";
-import { TAP2, TOPICS, TP, allQ } from "@/content/catalog";
+import { createFileRoute } from "@tanstack/react-router";
+import { TOPICS, TP } from "@/content/catalog";
 import { EXAM_DE } from "@/config";
-import { buildGraph } from "@/lib/graph";
 import { xpToday } from "@/lib/tutor-state";
 import { today } from "@/lib/dates";
-import { useProgress } from "@/store/progress";
 import { useTutor } from "@/store/tutor";
 import { isAdmin, useAccount } from "@/store/account";
+import { supabase } from "@/lib/supabase";
 import { Ic } from "@/ui-main";
 import { ask } from "@/ui-main/ask";
 import { TutorChat } from "@/components/TutorChat";
-import { TutorBridge } from "@/components/TutorBridge";
+import { BridgePanel } from "@/components/tutor/BridgePanel";
 import { AufgabeView } from "@/components/tutor/AufgabeView";
 import { LehrplanView } from "@/components/tutor/LehrplanView";
 import { ResetTutor, StandView, SyncNote } from "@/components/tutor/StandView";
@@ -35,35 +37,32 @@ type Side = "aufgabe" | "stand";
 type Mob = "chat" | Side;
 
 function Tutor() {
-  const ok = useAccount((s) => isAdmin(s.user)), ready = useAccount((s) => s.ready), signedIn = useAccount((s) => !!s.user), signIn = useAccount((s) => s.signIn);
+  const pro = useAccount((s) => isAdmin(s.user)), ready = useAccount((s) => s.ready);
   const [top, setTop] = useState<Top>("sitzung");
   const syncNow = useTutor((s) => s.syncNow);
-  useEffect(() => { if (ok) void syncNow(); }, [ok, syncNow]);
-  if (!ok) return !ready ? <section className="card"><p className="small muted">Anmeldung wird geprüft …</p></section> : (
-    <section className="card tp-locked">
-      <span className="tc-ava" aria-hidden="true"><Ic name="lock" cls="ic sm" /></span>
-      <div><h3 style={{ margin: 0 }}>KI-Tutor · Premium</h3>
-        <p className="small muted" style={{ margin: "4px 0 0" }}>{signedIn ? "Der KI-Tutor ist für dein Konto nicht freigeschaltet." : "Der KI-Tutor ist eine Premium-Funktion. Melde dich mit dem freigeschalteten GitHub-Konto an."}</p>
-        <div className="row" style={{ marginTop: 12 }}>{!signedIn && <button type="button" className="btn small primary" onClick={() => void signIn()}><Ic name="users" cls="ic xs" /> Mit GitHub anmelden</button>}<Link className="btn small ghost" to="/">Zur Übersicht</Link></div>
-      </div>
-    </section>
-  );
+  useEffect(() => { void syncNow(); }, [syncNow]);
+  if (supabase && !ready) return <section className="card"><p className="small muted">Anmeldung wird geprüft …</p></section>;
   return (
     <div className="tp-page">
-      <div className="segs tp-top" role="tablist" aria-label="Tutor">
-        {([["sitzung", "Sitzung"], ["lehrplan", "Lehrplan"]] as [Top, string][]).map(([k, l]) => <button key={k} type="button" role="tab" aria-selected={top === k} className={`seg ${top === k ? "on" : ""}`} onClick={() => setTop(k)}>{l}</button>)}
+      <div className="row tp-topbar">
+        <div className="segs tp-top" role="tablist" aria-label="Vortex">
+          {([["sitzung", "Sitzung"], ["lehrplan", "Lehrplan"]] as [Top, string][]).map(([k, l]) => <button key={k} type="button" role="tab" aria-selected={top === k} className={`seg ${top === k ? "on" : ""}`} onClick={() => setTop(k)}>{l}</button>)}
+        </div>
+        <span className="spacer" />
+        <span className={`chip ${pro ? "violet" : ""}`}>{pro ? "Vortex Pro" : "Vortex"}</span>
       </div>
-      {top === "lehrplan" ? <PlanTab onStarted={() => setTop("sitzung")} /> : <SessionTab />}
+      {top === "lehrplan" ? <PlanTab pro={pro} onStarted={() => setTop("sitzung")} /> : pro ? <SessionTab /> : <FreeTab />}
     </div>
   );
 }
 
-function PlanTab({ onStarted }: { onStarted: () => void }) {
-  const plan = useLehrplan(), { busy, err, convo, open } = useTutor();
+function PlanTab({ pro, onStarted }: { pro: boolean; onStarted: () => void }) {
+  const plan = useLehrplan(), { busy, err, convo, open, openBridge } = useTutor();
   return (
     <>
       {err && <p className="small warn-text" role="alert">{err}</p>}
       <LehrplanView plan={plan} busy={busy} onStart={(tid, fokus) => void (async () => {
+        if (!pro) { openBridge(tid, fokus); onStarted(); return; }
         if (convo?.msgs.length && !convo.ende && !(await ask({ title: "Neue Sitzung öffnen?", text: "Die laufende Sitzung wird beendet. Dein Stand und deine XP bleiben erhalten.", ok: "Neue Sitzung" }))) return;
         open(tid, fokus); onStarted();
       })()} />
@@ -71,10 +70,27 @@ function PlanTab({ onStarted }: { onStarted: () => void }) {
   );
 }
 
+/** Vortex (kostenlos): links die Brücke zur eigenen KI, rechts „Dein Stand“; ohne Thema die Themenwahl */
+function FreeTab() {
+  const bridge = useTutor((s) => s.bridge), graphs = useGraphs(), [mob, setMob] = useState<"chat" | "stand">("chat");
+  if (!bridge) return <Themenwahl pro={false} />;
+  return (
+    <div className={`tutor-shell m-${mob}`}>
+      <div className="segs tutor-mtabs" role="tablist" aria-label="Vortex">
+        {([["chat", "Vortex"], ["stand", "Dein Stand"]] as const).map(([k, l]) => <button key={k} type="button" role="tab" className={`seg ${mob === k ? "on" : ""}`} aria-selected={mob === k} onClick={() => setMob(k)}>{l}</button>)}
+      </div>
+      <section className="card tutor-main"><BridgePanel /></section>
+      <aside className="card tutor-side" aria-label="Dein Stand">
+        <div className="tutor-side-b" style={{ marginTop: 0 }}><StandView g={graphs.get(bridge.thema)!} /></div>
+      </aside>
+    </div>
+  );
+}
+
 function SessionTab() {
   const convo = useTutor((s) => s.convo), graphs = useGraphs();
   const [side, setSide] = useState<Side | null>(null), [mob, setMob] = useState<Mob>("chat");
-  if (!convo) return <Themenwahl />;
+  if (!convo) return <Themenwahl pro />;
   const cur = side ?? (convo.offen ? "aufgabe" : "stand"); // ohne Aufgabe zuerst der Stand
   const key = convo.offen ?? convo.order[convo.order.length - 1];
   const a = key ? convo.aufgaben[key] : undefined, r = key ? convo.bewertungen[key] : undefined;
@@ -99,8 +115,9 @@ function SessionTab() {
 }
 
 /** Themenwahl: alle Katalogthemen nach Prüfungsteil, Empfehlung aus dem Lehrplan */
-function Themenwahl() {
-  const graphs = useGraphs(), plan = useLehrplan(), { busy, err, model, setModel, state, open } = useTutor();
+function Themenwahl({ pro }: { pro: boolean }) {
+  const graphs = useGraphs(), plan = useLehrplan(), { busy, err, model, setModel, state, open: openPro, openBridge } = useTutor();
+  const open = pro ? openPro : openBridge;
   const rec = plan.empfehlung?.kind === "sitzung" ? plan.empfehlung : null;
   const xpHeute = xpToday(state, today());
   // Reihenfolge: Teil 1, Teil 2, Teil 1 + 2, WiSo (Prüfungsteil laut Katalog)
@@ -110,8 +127,10 @@ function Themenwahl() {
       <section className="card tp-hero">
         <div className="row" style={{ gap: 10, flexWrap: "wrap" }}>
           <span className="tc-ava" aria-hidden="true"><Ic name="sparkles" cls="ic sm" /></span>
-          <div style={{ flex: 1, minWidth: 220 }}><h2 style={{ margin: 0 }}>Prüfungstraining mit dem KI-Tutor</h2><p className="small muted" style={{ margin: "4px 0 0" }}>Wähle ein Thema – der Chat öffnet sich. Sobald du deine erste Nachricht schreibst, löchert dich der Tutor eine ganze Sitzung lang mit Aufgaben im IHK-Stil und bewertet wie ein Prüfer mit Teilpunkten. Prüfung am {EXAM_DE}.</p></div>
-          <div className="segs" role="group" aria-label="Modell">{(["sonnet", "haiku"] as const).map((m) => <button key={m} type="button" className={`seg ${model === m ? "on" : ""}`} aria-pressed={model === m} onClick={() => setModel(m)}>{m === "sonnet" ? "Gründlich (Sonnet)" : "Schnell (Haiku)"}</button>)}</div>
+          <div style={{ flex: 1, minWidth: 220 }}><h2 style={{ margin: 0 }}>{pro ? "Vortex Pro" : "Vortex"}</h2><p className="small muted" style={{ margin: "4px 0 0" }}>{pro
+            ? <>Wähle ein Thema – der Chat öffnet sich. Sobald du deine erste Nachricht schreibst, löchert dich Vortex eine ganze Sitzung lang mit Aufgaben im IHK-Stil und bewertet wie ein Prüfer mit Teilpunkten. Prüfung am {EXAM_DE}.</>
+            : <>Dein Prüfungstutor für die TAP2 – mit deiner eigenen KI, kostenlos. Wähle ein Thema: Vortex stellt dir eine ganze Sitzung lang Aufgaben im IHK-Stil, bewertet wie ein Prüfer mit Teilpunkten, und dein Graph lernt mit. Prüfung am {EXAM_DE}.</>}</p></div>
+          {pro && <div className="segs" role="group" aria-label="Modell">{(["sonnet", "haiku"] as const).map((m) => <button key={m} type="button" className={`seg ${model === m ? "on" : ""}`} aria-pressed={model === m} onClick={() => setModel(m)}>{m === "sonnet" ? "Gründlich (Sonnet)" : "Schnell (Haiku)"}</button>)}</div>}
         </div>
         {rec && (
           <div className="tp-rec">
@@ -120,7 +139,8 @@ function Themenwahl() {
           </div>
         )}
         {err && <p className="small warn-text" role="alert" style={{ margin: "10px 0 0" }}>{err}</p>}
-        <p className="tiny muted" style={{ margin: "10px 0 0" }}>Tutor-XP heute: {xpHeute} · jede bewertete Aufgabe zählt wie eine Antwort: XP mit Combo, Serie und Tagesziele (richtig ab der Hälfte der Punkte).</p>
+        <p className="tiny muted" style={{ margin: "10px 0 0" }}>Vortex-XP heute: {xpHeute} · jede bewertete Aufgabe zählt wie eine Antwort: XP mit Combo, Serie und Tagesziele (richtig ab der Hälfte der Punkte).</p>
+        {!pro && <p className="tiny muted vx-pro"><Ic name="lock" cls="ic xs" /> <b>Vortex Pro</b> mit eingebauter KI – direkt in der App, ohne Kopieren – ist eine Premium-Funktion.</p>}
       </section>
       {TEILE.map(([label, part]) => {
         const list = TOPICS.filter((t) => t.teil === part);
@@ -142,11 +162,8 @@ function Themenwahl() {
           </section>
         );
       })}
-      <section className="card"><SyncNote /><ResetTutor />
-        <details className="tx-paste"><summary className="small">Alternative ohne API: über ein Claude-Projekt (Kopieren)</summary><Bridge /></details>
-      </section>
+      <section className="card"><SyncNote /><ResetTutor /></section>
     </div>
   );
 }
 
-function Bridge() { const S = useProgress((s) => s.S); return <TutorBridge g={buildGraph(S, TOPICS, TAP2.pakete, allQ(S))} />; }

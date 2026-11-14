@@ -18,13 +18,14 @@ import { applyReply, chunks, rewardArgs, costOf, newConvo, tooLong, userMsg, use
 import { EPOCH, addEvidence, addXpDay, emptyTutor, mergeTutor, normalizeTutor, putSession, resetTutor, type TutorState } from "@/lib/tutor-state";
 import { stab } from "@/lib/gami/state";
 import { syncTutor } from "@/lib/tutor-sync";
+import { parseBridge } from "@/lib/vortex-bridge";
 import { gami, gm } from "./gami";
 import { useProgress } from "./progress";
 
 // Früher (bis 14.11.2026): Freischaltung pro Browser über /tutor?premium=1 – jetzt nur noch über das Konto (isAdmin)
 try { localStorage.removeItem("tap2coach-premium"); } catch { /* privat */ }
 
-const K = { stand: "tap2coach-tutor-stand", chat: "tap2coach-tutor-sitzung", model: "tap2coach-tutor-modell", dev: "tap2coach-tutor-geraet" };
+const K = { stand: "tap2coach-tutor-stand", bridge: "tap2coach-vortex-bruecke", chat: "tap2coach-tutor-sitzung", model: "tap2coach-tutor-modell", dev: "tap2coach-tutor-geraet" };
 const read = <T,>(k: string, d: T): T => { try { const v = JSON.parse(localStorage.getItem(k) || "null"); return v ?? d; } catch { return d; } };
 const write = (k: string, v: unknown) => { try { if (v == null) localStorage.removeItem(k); else localStorage.setItem(k, JSON.stringify(v)); } catch { /* privat oder voll */ } };
 
@@ -51,7 +52,13 @@ export type SyncInfo = { busy: boolean; at: number; err: string; off: string };
 const OLD_FN = "Auf dem Server läuft noch eine ältere Tutor-Funktion. Bitte den Code aus app/supabase/functions/tutor/index.ts im Supabase-Dashboard unter Edge Functions → „tutor“ einsetzen und deployen.";
 
 type Store = {
-  state: TutorState; convo: Convo | null; model: Model; busy: boolean; err: string; sync: SyncInfo;
+  state: TutorState; convo: Convo | null;
+  /** Vortex (kostenlos): offenes Thema der Brücke zur eigenen KI */
+  bridge: { thema: string; fokus?: string[]; at: number } | null;
+  openBridge: (thema: string, fokus?: string[]) => void;
+  closeBridge: () => void;
+  /** Ergebnis-Block aus der eigenen KI übernehmen → Belege, XP wie Antworten (nur neue Aufgaben), Sitzung */
+  applyBridge: (text: string) => { ok: boolean; msg: string }; model: Model; busy: boolean; err: string; sync: SyncInfo;
   setModel: (m: Model) => void;
   /** Sitzung zu einem Thema öffnen – ohne Anfrage an die KI; sie beginnt erst mit meiner ersten Nachricht (spart Kosten) */
   open: (thema: string, fokus?: string[]) => void;
@@ -112,6 +119,29 @@ export const useTutor = create<Store>((set, get) => {
   }
 
   return {
+    bridge: (() => { const b = read<{ thema?: string; fokus?: string[]; at?: number } | null>(K.bridge, null); return b?.thema && IDS.topics.has(b.thema) ? { thema: b.thema, ...(Array.isArray(b.fokus) ? { fokus: b.fokus.filter((k) => IDS.kern.has(k)) } : {}), at: Number(b.at) || 0 } : null; })(),
+    openBridge: (thema, fokus) => { if (!IDS.topics.has(thema)) return; const b = { thema, ...(fokus?.length ? { fokus } : {}), at: Date.now() }; write(K.bridge, b); set({ bridge: b }); },
+    closeBridge: () => { write(K.bridge, null); set({ bridge: null }); },
+    applyBridge: (text) => {
+      let r;
+      try { r = parseBridge(text, IDS, topicOfKern, Date.now()); } catch (e) { return { ok: false, msg: e instanceof Error ? e.message : "Unbekannter Fehler." }; }
+      const before = get().state, have = new Set(before.ev.map((e) => e.id));
+      const fresh = r.tasks.filter((t) => !have.has(t.ev)), newEv = r.evidence.filter((e) => !have.has(e.id));
+      if (!newEv.length) return { ok: false, msg: "Dieser Ergebnis-Block wurde schon übernommen." };
+      let st = addEvidence(before, r.evidence), xp = 0;
+      fresh.forEach((t, i) => { // jede neue bewertete Aufgabe zählt wie eine Antwort (Combo, Serie, Quests)
+        const a = rewardArgs({ punkte: t.punkte, max: t.max, sich: t.sich }), b0 = gami().earned;
+        gm.answer({ id: `vortex:${r.hash}:${i}`, topic: r.thema }, a.ok, a.unsure, a.f, a.t);
+        xp += Math.max(0, gami().earned - b0);
+        useProgress.getState().logTutor();
+      });
+      const now = Date.now(), d = today();
+      st = addXpDay(st, d, device(), xp);
+      if (fresh.length) st = putSession(st, { id: `vb-${r.hash}`, t: r.thema, start: now, end: now, aufgaben: fresh.length, punkte: fresh.reduce((x, t) => x + t.punkte, 0), max: fresh.reduce((x, t) => x + t.max, 0), xp, model: "bruecke" });
+      saveState(st);
+      const pts = fresh.length ? ` (${fresh.reduce((x, t) => x + t.punkte, 0)}/${fresh.reduce((x, t) => x + t.max, 0)} P.)` : "";
+      return { ok: true, msg: `Übernommen: ${fresh.length} ${fresh.length === 1 ? "Aufgabe" : "Aufgaben"}${pts}, ${newEv.filter((e) => e.art !== "bewertung").length} Einträge für den Graphen${xp ? `, +${xp} XP` : ""}.${r.skipped ? ` ${r.skipped} unbrauchbare Einträge übersprungen.` : ""}${r.fazit ? `\n${r.fazit}` : ""}` };
+    },
     state: loadState(), convo: typeof window === "undefined" ? null : loadConvo(),
     model: read<Model>(K.model, "sonnet") === "haiku" ? "haiku" : "sonnet",
     busy: false, err: "", sync: { busy: false, at: 0, err: "", off: "" },

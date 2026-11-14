@@ -30,6 +30,8 @@ export const Route = createRootRoute({
     // Übertragungs-Link (…#import=…): Lernstand anzeigen und fragen, wie er übernommen wird (txReceive der Live-App)
     const h = window.location.hash.slice(1);
     if (h.startsWith("import=")) { void import("@/store/transfer").then((m) => m.useTransfer.getState().receive(h)); throw redirect({ to: "/einstellungen", replace: true }); }
+    // Kopplungs-Link (…#verbinden=CODE): Code prüfen und „Dieses Gerät verbinden?“ fragen (syncBoot der Live-App)
+    if (h.startsWith("verbinden=")) { void useLiveSync.getState().redeem(h.slice(10)); throw redirect({ to: "/einstellungen", replace: true }); }
     const P = useProgress.getState();
     if (P.sess && !location.pathname.startsWith("/lernen/runde")) throw redirect({ to: "/lernen/runde", replace: true });
     // Erster Start (noch nichts beantwortet, Tutorial nie gesehen): Tutorial zeigen – wie die Live-App ohne Adresse (#…)

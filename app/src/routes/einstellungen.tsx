@@ -1,8 +1,7 @@
 /**
  * Einstellungen – 1:1 wie rSettings() der Live-App: Darstellung, App & Offline, Geräte-Sync, Übertragen per Link/QR,
  * Fortschritt (Sicherung im selben Dateiformat inkl. Belohnungen, Zurücksetzen), Hilfe, Datenschutz.
- * Geräte-Sync: vorerst die bisherigen Karten der neuen App (Live-Sync, Konto) – die Sync-Karte der Live-App
- * (Kopplungscode, Schlüssel, Cloud-Kopie löschen) folgt als eigener Schritt (docs/PORTIERUNG.md).
+ * Geräte-Sync: Karte der Live-App (components/SyncCard.tsx); darunter das optionale Konto der neuen App (AccountCard).
  */
 import { useEffect, useRef, useState } from "react";
 import { createFileRoute } from "@tanstack/react-router";
@@ -19,7 +18,8 @@ import { installApp, usePwa } from "@/store/pwa";
 import { useTransfer } from "@/store/transfer";
 import { Ic } from "@/ui-main";
 import { AccountCard } from "@/components/AccountCard";
-import { LiveSyncCard } from "@/components/LiveSyncCard";
+import { SyncCard } from "@/components/SyncCard";
+import { supabase } from "@/lib/supabase";
 
 export const Route = createFileRoute("/einstellungen")({ component: Einstellungen });
 
@@ -45,7 +45,7 @@ function Einstellungen() {
         {!pwa.standalone && !pwa.prompt && pwa.ios && <p className="small muted" style={{ marginTop: 8 }}>iPhone/iPad: In Safari auf <b>Teilen</b> tippen und <b>Zum Home-Bildschirm</b> wählen.</p>}
         {!pwa.standalone && !pwa.prompt && !pwa.ios && <p className="small muted" style={{ marginTop: 8 }}>Installieren: im Browser-Menü „App installieren“ bzw. „Zum Startbildschirm hinzufügen“ wählen.</p>}
       </section>
-      <LiveSyncCard />
+      <SyncCard />
       <AccountCard />
       <TxCard />
       <DataCard />
@@ -110,6 +110,8 @@ function DataCard() {
         if (!isObj(d) || (!d.q && !d.qstat && !d.runs)) throw new Error("format");
         replaceAll(d); // legt den bisherigen Stand zurück (tap2coach-vor-import)
         if (isObj(o) && o.gami) gm("merge", o.gami);
+        // Sync-Schlüssel in der Sicherung: Verbinden anbieten (nur wenn hier noch nicht verbunden), wie SY.offer der Live-App
+        if (isObj(o) && isObj(o.sync) && typeof o.sync.key === "string" && !liveGet() && supabase) useLiveSync.getState().setUi({ offer: o.sync.key });
         setConfirm(false); setMsg("Sicherung geladen.");
       } catch { setMsg("Die Datei ist keine gültige Sicherung des Coaches."); }
     };

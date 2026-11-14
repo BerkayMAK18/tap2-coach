@@ -52,7 +52,7 @@ function Shell() {
   useEffect(() => { document.title = `${VTITLE[view] ?? "TAP2 Coach"} · TAP2 Prüfungscoach`; }, [view]);
 
   const c = counts(S, allQ(S)), left = daysBetween(today(), EXAM_DAY);
-  const navView = view === "operatoren" || view === "plan" ? "tipps" : view;
+  const navView = view === "operatoren" || view === "plan" ? "tipps" : view === "lernen" && sess?.src?.ev ? "events" : view; // Event-Runde: Menüpunkt Events
   const focus = loc.pathname.startsWith("/lernen/runde") || (view === "pruefung" && !!run && run.phase === "write"); // Fokus wie die Live-App: Lernrunde, Prüfung beim Schreiben
   // Fokus-Ansicht wie die Live-App an <body> (das Stylesheet blendet mit body.focus die Navigation auf dem Handy aus)
   useEffect(() => { document.body.classList.toggle("focus", focus); return () => document.body.classList.remove("focus"); }, [focus]);
@@ -97,9 +97,11 @@ function Foot() {
   return <footer className="foot"><span>TAP2 Prüfungscoach · {live || acc ? "Dein Fortschritt wird in diesem Browser gespeichert und verschlüsselt mit deinen Geräten abgeglichen." : "Dein Fortschritt wird lokal in diesem Browser gespeichert."}</span></footer>;
 }
 
+// Link setzt bei aktiver Route selbst aria-current="page" – nur bei exakt gleichem Pfad, sonst gilt unsere Markierung
+// (z. B. während einer Event-Runde unter /lernen/runde nur „Events“, wie die Live-App)
 function NavBtn({ n, current }: { n: { view: string; svg: string; label: string }; current: boolean }) {
   return (
-    <Link to={PATH[n.view] ?? "/"} className="nav-i" data-view={n.view} aria-current={current ? "page" : "false"}>
+    <Link to={PATH[n.view] ?? "/"} className="nav-i" data-view={n.view} aria-current={current ? "page" : "false"} activeOptions={{ exact: true, includeSearch: false }}>
       {/* Icon-Pfade aus dem Markup der Live-App (generiert, ui-main/nav.ts) */}
       <svg className="ic" viewBox="0 0 24 24" aria-hidden="true" dangerouslySetInnerHTML={{ __html: n.svg }} />
       <span>{n.label}</span>

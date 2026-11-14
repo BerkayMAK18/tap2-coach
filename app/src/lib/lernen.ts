@@ -94,8 +94,8 @@ export const dueCount = (S: State, qs: Question[]) => qs.filter((q) => isDue(S, 
 // ---------- Fehler melden (vorausgefülltes GitHub-Issue, wie reportUrl() in der Live-App)
 const REPO = "BerkayMAK18/tap2-coach";
 export const clip = (x: unknown, n: number) => { const s = String(x || "").trim(); return s.length > n ? s.slice(0, n) + " …" : s; };
-const quote = (x: string) => clip(x, 1200).split("\n").map((l) => "> " + l).join("\n");
-function issueUrl(title: string, lines: string[]) {
+export const quote = (x: string) => clip(x, 1200).split("\n").map((l) => "> " + l).join("\n");
+export function issueUrl(title: string, lines: string[]) {
   const body = lines.concat(["", "**Was ist falsch, was schlägst du vor?**", "", "<!-- Bitte hier beschreiben. Quelle (z. B. Lösungshinweis, Gesetz) hilft beim Prüfen. -->", ""]).join("\n");
   return "https://github.com/" + REPO + "/issues/new?" + new URLSearchParams({ title, labels: "fehler", body }).toString();
 }

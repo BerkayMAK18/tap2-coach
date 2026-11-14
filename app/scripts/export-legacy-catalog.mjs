@@ -33,7 +33,9 @@ if (!existsSync(src)) {
   console.log("[catalog] ../index.html nicht gefunden – eingecheckte Kataloge werden verwendet.");
   process.exit(0);
 }
-const lines = readFileSync(src, "utf8").split("\n");
+// Zeilenenden vereinheitlichen: Git unter Windows (core.autocrlf) checkt mit CRLF aus – Hash und Vergleich bleiben gleich
+const lf = (t) => t.replace(/\r\n/g, "\n");
+const lines = lf(readFileSync(src, "utf8")).split("\n");
 const start = lines.findIndex((l, i) => i > 10 && l.trim() === "<script>");
 const end = lines.findIndex((l, i) => i > start && l.startsWith("(function () {"));
 if (start < 0 || end < 0) throw new Error("Datenteil in index.html nicht gefunden (Struktur geändert?)");
@@ -134,7 +136,7 @@ if (!CHECK) mkdirSync(outDir, { recursive: true });
 for (const [name, data] of Object.entries(files)) {
   const text = JSON.stringify(data, null, 1) + "\n";
   const path = join(outDir, name);
-  if (CHECK) { if (!existsSync(path) || readFileSync(path, "utf8") !== text) stale.push(name); }
+  if (CHECK) { if (!existsSync(path) || lf(readFileSync(path, "utf8")) !== text) stale.push(name); }
   else writeFileSync(path, text);
 }
 if (CHECK && stale.length) {

@@ -23,7 +23,7 @@ mit Tests. Erst danach neue Funktionen. Referenz ist immer `../index.html` auf `
 | --- | --- | --- |
 | Grundgerüst | Seitenleiste, Kopfzeile (Ring, Tage, Figur, Suche, Einstellungen), Hell/Dunkel | in Arbeit |
 | Lernen | Übersicht (rStart), Lernen (Themen, Themenseite, Runde rSess), Suche, SQL-/Code-Karten, eigene Karten | **fertig (1:1)**, Abnahme 13.11.2026 (siehe unten) |
-| Aufgaben | rUeb (20 Aufgaben, Timer, Punkte, Fehlerursachen) | offen |
+| Aufgaben | rUeb (20 Aufgaben, Timer, Punkte, Fehlerursachen) | **fertig (1:1)**, Abnahme 14.11.2026 (siehe unten) |
 | Prüfung | rPK (Simulation, Real-Klausur, Bewertung wie ein Prüfer, Ergebnisse, „Bereit für eine 1“) | offen |
 | Events | rEvents (Kapitel, Lernkarten, Abschlusstest, Belohnung) | offen |
 | Tipps | rTipps, Operator-Trainer, Lernplan, Tutorial, Fehlerprotokoll | offen |
@@ -67,3 +67,25 @@ Ring-Klasse der Live-App – in `styles.css` ausgeschlossen (`@source not inline
 Geräte-Sync lautet ihr Text „… in diesem Browser gespeichert und verschlüsselt mit deinen Geräten abgeglichen“
 (bewusst anders als „nur lokal“, weil dann eine verschlüsselte Kopie auf dem Server liegt). Offen im Grundgerüst: Monospace-Schrift (AppMono) zeigt Fettdruck im Editor schwächer als JetBrains Mono.
 
+### Aufgaben (14.11.2026, Branch `port/aufgaben`)
+
+Neu gebaut auf `port/lernen` (der ältere Cloud-Patch lag nicht vor). Logik in `src/lib/aufgaben.ts` mit Tests
+(`aufgaben.test.ts`): Gruppen, Chip-Farbe, Punkte-Eingabe, Speichern, Fehlerprotokoll (`logCause`, `CAUSES`,
+`CAUSE_TIP`), „Fehler melden“. Bausteine `CauseChips` (auch für die Real-Klausur) und `UebItem` (auch auf der Themenseite).
+
+Live-App (`main`, lokal) und Dev-App nebeneinander mit demselben Test-Lernstand (3 bearbeitete Aufgaben, eine mit
+Ursache). Verglichen wurde das erzeugte Markup (Elemente, Klassen, Texte, Attribute, Styles; Uhrzeiten maskiert) –
+**identisch** für: Liste · Aufgabe vor dem Start · ohne Zeitmessung · Musterlösung · Ursache abwählen / neu wählen ·
+Punkte über dem Maximum speichern (auf max begrenzt) · zurück zur Liste · Timer läuft · gestoppt · Lösung nach dem
+Stopp · Timer zurücksetzen · SQL-Aufgabe mit Tabellen. „Fehler melden“-Link gleich. Lernstand und Fehlerprotokoll nach
+denselben Klicks gleich. „Theorie: …“ öffnet das Thema im Reiter Theorie, Themenseite und Suche öffnen direkt die
+Aufgabe (`/aufgaben?u=<id>`). Handy (375 px) per Screenshot geprüft, keine Konsolenfehler; lint, test, build grün.
+
+Bewusste Unterschiede:
+- Ursache abwählen: Die Live-App speichert `cause: null`, hier fehlt der Schlüssel. `normalize()` (beide Apps)
+  entfernt `null` beim Laden ohnehin; der Sync überträgt bei Aufgaben nur Punkte und Datum.
+- Die Aufgabe steht in der Adresse (`?u=S1`), ist also verlinkbar; Zurück im Browser führt zur Liste.
+
+Gefunden, gehört zum Grundgerüst: Unter Windows (Git `core.autocrlf`) meldete `catalog:check` die Kataloge als
+veraltet (CRLF in `../index.html`) – das Export-Skript vereinheitlicht jetzt die Zeilenenden. `state.test.ts` verglich
+das lokale Datum mit dem UTC-Datum und schlug nachts fehl – korrigiert.

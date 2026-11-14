@@ -3,6 +3,7 @@
  * alte Formate werden migriert. Die Fälle stammen aus dem Security-Check der Live-App (v2.7.4).
  */
 import { describe, expect, it } from "vitest";
+import { today } from "./dates"; // lokales Datum wie pastDay() – toISOString() wäre UTC und scheitert nachts
 import { normalize } from "./state";
 
 const ctx = { knownTopics: new Set(["T01", "T02", "T05"]), deckTopic: { algo: "T01", sql: "T02" } };
@@ -32,7 +33,7 @@ describe("normalize", () => {
     expect(x.runs[0].pct).toBe(0);
     expect(x.errlog).toEqual([]);
     expect(x.log).toEqual({ "2026-11-13": 0 });
-    expect(x.ueb.U2.at <= new Date().toISOString().slice(0, 10)).toBe(true); // Zukunftsdatum gekappt
+    expect(x.ueb.U2.at <= today()).toBe(true); // Zukunftsdatum gekappt
     expect(Object.getPrototypeOf(x)).toBe(Object.prototype);
     expect(({} as Record<string, unknown>).evil).toBeUndefined();
   });

@@ -67,7 +67,7 @@ export const Paket = z.object({
 });
 export type Paket = z.infer<typeof Paket>;
 
-export const Aufgabe = z.object({ id: z.string(), teil: z.string(), thema: z.string(), titel: z.string(), max: z.number(), min: z.number(), text: z.string(), loesung: z.string() });
+export const Aufgabe = z.object({ id: z.string(), teil: z.string(), thema: z.string(), titel: z.string(), max: z.number(), min: z.number(), text: z.string(), loesung: z.string(), schema: z.boolean().optional() }); // schema: Tabellen der SQL-Beispieldatenbank anzeigen
 export type Aufgabe = z.infer<typeof Aufgabe>;
 
 export const OpenQuestion = z.object({ id: z.string(), teil: z.string(), cat: z.string(), p: z.number(), q: z.string(), a: z.string() }).passthrough();

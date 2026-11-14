@@ -1,7 +1,7 @@
 /**
- * Vortex – Prüfungstutor für die TAP2. Zwei Varianten:
- * - „Vortex“ (kostenlos, für alle, auch ohne Anmeldung): Brücke zur eigenen KI (components/tutor/BridgePanel.tsx).
- * - „Vortex Pro“ (Premium, nur das freigeschaltete Konto): eingebaute KI (Claude) mit Chat, Aufgabe und Bewertung.
+ * Tutor – Prüfungstutor für die TAP2. Zwei Varianten:
+ * - „Tutor“ (kostenlos, für alle, auch ohne Anmeldung): Brücke zur eigenen KI (components/tutor/BridgePanel.tsx).
+ * - „Tutor Pro“ (Premium, nur das freigeschaltete Konto): eingebaute KI (Claude) mit Chat, Aufgabe und Bewertung.
  * Beide teilen Themenwahl, Lehrplan und Graph (Tutor-Stand). Zwei Tabs:
  * - „Sitzung“: ohne Sitzung die Themenwahl (Empfehlung aus dem Lehrplan). Ein Klick öffnet nur den Chat zum Thema –
  *   die KI wird erst mit der ersten Nachricht gefragt (keine Kosten fürs Hineinschauen). Mit Sitzung zwei Spalten:
@@ -45,11 +45,11 @@ function Tutor() {
   return (
     <div className="tp-page">
       <div className="row tp-topbar">
-        <div className="segs tp-top" role="tablist" aria-label="Vortex">
+        <div className="segs tp-top" role="tablist" aria-label="Tutor">
           {([["sitzung", "Sitzung"], ["lehrplan", "Lehrplan"]] as [Top, string][]).map(([k, l]) => <button key={k} type="button" role="tab" aria-selected={top === k} className={`seg ${top === k ? "on" : ""}`} onClick={() => setTop(k)}>{l}</button>)}
         </div>
         <span className="spacer" />
-        <span className={`chip ${pro ? "violet" : ""}`}>{pro ? "Vortex Pro" : "Vortex"}</span>
+        <span className={`chip ${pro ? "violet" : ""}`}>{pro ? "Tutor Pro" : "Tutor"}</span>
       </div>
       {top === "lehrplan" ? <PlanTab pro={pro} onStarted={() => setTop("sitzung")} /> : pro ? <SessionTab /> : <FreeTab />}
     </div>
@@ -70,14 +70,14 @@ function PlanTab({ pro, onStarted }: { pro: boolean; onStarted: () => void }) {
   );
 }
 
-/** Vortex (kostenlos): links die Brücke zur eigenen KI, rechts „Dein Stand“; ohne Thema die Themenwahl */
+/** Tutor (kostenlos): links die Brücke zur eigenen KI, rechts „Dein Stand“; ohne Thema die Themenwahl */
 function FreeTab() {
   const bridge = useTutor((s) => s.bridge), graphs = useGraphs(), [mob, setMob] = useState<"chat" | "stand">("chat");
   if (!bridge) return <Themenwahl pro={false} />;
   return (
     <div className={`tutor-shell m-${mob}`}>
-      <div className="segs tutor-mtabs" role="tablist" aria-label="Vortex">
-        {([["chat", "Vortex"], ["stand", "Dein Stand"]] as const).map(([k, l]) => <button key={k} type="button" role="tab" className={`seg ${mob === k ? "on" : ""}`} aria-selected={mob === k} onClick={() => setMob(k)}>{l}</button>)}
+      <div className="segs tutor-mtabs" role="tablist" aria-label="Tutor">
+        {([["chat", "Tutor"], ["stand", "Dein Stand"]] as const).map(([k, l]) => <button key={k} type="button" role="tab" className={`seg ${mob === k ? "on" : ""}`} aria-selected={mob === k} onClick={() => setMob(k)}>{l}</button>)}
       </div>
       <section className="card tutor-main"><BridgePanel /></section>
       <aside className="card tutor-side" aria-label="Dein Stand">
@@ -127,9 +127,9 @@ function Themenwahl({ pro }: { pro: boolean }) {
       <section className="card tp-hero">
         <div className="row" style={{ gap: 10, flexWrap: "wrap" }}>
           <img className="vx-mark" src="/icons/vortex.svg" alt="" />
-          <div style={{ flex: 1, minWidth: 220 }}><h2 style={{ margin: 0 }}>{pro ? "Vortex Pro" : "Vortex"}</h2><p className="small muted" style={{ margin: "4px 0 0" }}>{pro
-            ? <>Wähle ein Thema – der Chat öffnet sich. Sobald du deine erste Nachricht schreibst, löchert dich Vortex eine ganze Sitzung lang mit Aufgaben im IHK-Stil und bewertet wie ein Prüfer mit Teilpunkten. Prüfung am {EXAM_DE}.</>
-            : <>Dein Prüfungstutor für die TAP2 – mit deiner eigenen KI, kostenlos. Wähle ein Thema: Vortex stellt dir eine ganze Sitzung lang Aufgaben im IHK-Stil, bewertet wie ein Prüfer mit Teilpunkten, und dein Graph lernt mit. Prüfung am {EXAM_DE}.</>}</p></div>
+          <div style={{ flex: 1, minWidth: 220 }}><h2 style={{ margin: 0 }}>{pro ? "Tutor Pro" : "Tutor"}</h2><p className="small muted" style={{ margin: "4px 0 0" }}>{pro
+            ? <>Wähle ein Thema – der Chat öffnet sich. Sobald du deine erste Nachricht schreibst, löchert dich der Tutor eine ganze Sitzung lang mit Aufgaben im IHK-Stil und bewertet wie ein Prüfer mit Teilpunkten. Prüfung am {EXAM_DE}.</>
+            : <>Dein Prüfungstutor für die TAP2 – mit deiner eigenen KI, kostenlos. Wähle ein Thema: Der Tutor stellt dir eine ganze Sitzung lang Aufgaben im IHK-Stil, bewertet wie ein Prüfer mit Teilpunkten, und dein Graph lernt mit. Prüfung am {EXAM_DE}.</>}</p></div>
           {pro && <div className="segs" role="group" aria-label="Modell">{(["sonnet", "haiku"] as const).map((m) => <button key={m} type="button" className={`seg ${model === m ? "on" : ""}`} aria-pressed={model === m} onClick={() => setModel(m)}>{m === "sonnet" ? "Gründlich (Sonnet)" : "Schnell (Haiku)"}</button>)}</div>}
         </div>
         {rec && (
@@ -139,8 +139,8 @@ function Themenwahl({ pro }: { pro: boolean }) {
           </div>
         )}
         {err && <p className="small warn-text" role="alert" style={{ margin: "10px 0 0" }}>{err}</p>}
-        <p className="tiny muted" style={{ margin: "10px 0 0" }}>Vortex-XP heute: {xpHeute} · jede bewertete Aufgabe zählt wie eine Antwort: XP mit Combo, Serie und Tagesziele (richtig ab der Hälfte der Punkte).</p>
-        {!pro && <p className="tiny muted vx-pro"><Ic name="lock" cls="ic xs" /> <b>Vortex Pro</b> mit eingebauter KI – direkt in der App, ohne Kopieren – ist eine Premium-Funktion.</p>}
+        <p className="tiny muted" style={{ margin: "10px 0 0" }}>Tutor-XP heute: {xpHeute} · jede bewertete Aufgabe zählt wie eine Antwort: XP mit Combo, Serie und Tagesziele (richtig ab der Hälfte der Punkte).</p>
+        {!pro && <p className="tiny muted vx-pro"><Ic name="lock" cls="ic xs" /> <b>Tutor Pro</b> mit eingebauter KI – direkt in der App, ohne Kopieren – ist eine Premium-Funktion.</p>}
       </section>
       {TEILE.map(([label, part]) => {
         const list = TOPICS.filter((t) => t.teil === part);

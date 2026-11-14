@@ -1,5 +1,5 @@
 /**
- * Vortex (kostenlos) – Brücke zur eigenen KI: Text kopieren → in einer KI deiner Wahl einfügen → am Ende den
+ * Tutor (kostenlos) – Brücke zur eigenen KI: Text kopieren → in einer KI deiner Wahl einfügen → am Ende den
  * Ergebnis-Block hier einfügen. Die App sendet dabei nichts; Graph, Lehrplan und XP aktualisieren sich aus dem Block.
  */
 import { useState } from "react";
@@ -24,7 +24,7 @@ export function BridgePanel() {
   return (
     <div className="tutor-chat vx-bridge">
       <div className="tutor-head">
-        <div className="tc-title"><img className="vx-mark" src="/icons/vortex.svg" alt="" /><div><b>{tn(bridge.thema)}</b><span className="tiny muted">Vortex · mit deiner eigenen KI</span></div></div>
+        <div className="tc-title"><img className="vx-mark" src="/icons/vortex.svg" alt="" /><div><b>{tn(bridge.thema)}</b><span className="tiny muted">Tutor · mit deiner eigenen KI</span></div></div>
         <span className="spacer" />
         <button type="button" className="btn small ghost" aria-label="Thema schließen" title="Thema schließen (dein Stand bleibt)" onClick={closeBridge}><Ic name="x" cls="ic xs" /></button>
       </div>

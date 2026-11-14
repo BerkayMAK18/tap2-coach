@@ -53,7 +53,7 @@ const OLD_FN = "Auf dem Server läuft noch eine ältere Tutor-Funktion. Bitte de
 
 type Store = {
   state: TutorState; convo: Convo | null;
-  /** Vortex (kostenlos): offenes Thema der Brücke zur eigenen KI */
+  /** Tutor (kostenlos): offenes Thema der Brücke zur eigenen KI */
   bridge: { thema: string; fokus?: string[]; at: number } | null;
   openBridge: (thema: string, fokus?: string[]) => void;
   closeBridge: () => void;

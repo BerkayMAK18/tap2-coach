@@ -10,7 +10,7 @@
  ],
  "quelle": {
   "datei": "index.html",
-  "hash": "2d1eaf6868d1"
+  "hash": "0406f7a0c0c4"
  },
  "sqlSchema": "Kunde (KID [PK], Name, Ort, Email)\nArtikel (ArtNr [PK], Bezeichnung, Kategorie, Preis)\nBestellung (BID [PK], KID [FK → Kunde], Datum, Status)\nPosition (BID [PK, FK → Bestellung], ArtNr [PK, FK → Artikel], Menge)",
  "topics": [

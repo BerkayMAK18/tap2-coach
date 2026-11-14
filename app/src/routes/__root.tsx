@@ -21,8 +21,8 @@ import { Ic, Ring, pctS } from "@/ui-main";
 import { NAV_FOOT, NAV_MAIN, VTITLE } from "@/ui-main/nav";
 import { ConfirmHost } from "@/ui-main/confirm";
 
-/** Menüpunkt Vortex (KI-Tutor, nicht in der Live-App, daher nicht in der generierten nav.ts) */
-const TUTOR_NAV = { view: "tutor", label: "Vortex", svg: '<path d="M12 12.2c.9-.5 1.9.2 1.8 1.2-.2 1.5-2 2.2-3.3 1.6-1.8-.8-2.3-3.1-1.4-4.7 1.2-2.1 4.1-2.6 6-1.3 2.4 1.6 2.8 5 1.2 7.3-2 2.8-6 3.2-8.7 1.2C4.6 15.2 4.2 10.4 6.6 7.3 9.4 3.7 15 3.3 18.4 6.2"/>' }; // Wirbel (wie das Vortex-Logo)
+/** Menüpunkt Tutor (KI-Tutor, nicht in der Live-App, daher nicht in der generierten nav.ts) */
+const TUTOR_NAV = { view: "tutor", label: "Tutor", svg: '<path d="M12 12.2c.9-.5 1.9.2 1.8 1.2-.2 1.5-2 2.2-3.3 1.6-1.8-.8-2.3-3.1-1.4-4.7 1.2-2.1 4.1-2.6 6-1.3 2.4 1.6 2.8 5 1.2 7.3-2 2.8-6 3.2-8.7 1.2C4.6 15.2 4.2 10.4 6.6 7.3 9.4 3.7 15 3.3 18.4 6.2"/>' }; // Wirbel (wie das Vortex-Logo)
 import { useProgress } from "@/store/progress";
 import { useLiveSync } from "@/store/livesync";
 import { useAccount } from "@/store/account";
@@ -64,7 +64,7 @@ function Shell() {
   setGamiContext(view, { sess, run });
   useEffect(() => { if (!booted) { booted = true; gm.boot(BOOT_HASH.startsWith("verbinden=") ? "import=" : BOOT_HASH); } }, []);
   useSearchHotkey();
-  useEffect(() => { document.title = `${VTITLE[view] ?? (view === "tutor" ? "Vortex" : "TAP2 Coach")} · TAP2 Prüfungscoach`; }, [view]);
+  useEffect(() => { document.title = `${VTITLE[view] ?? (view === "tutor" ? "Tutor" : "Vortex")} · Vortex`; }, [view]);
 
   const c = counts(S, allQ(S)), left = daysBetween(today(), EXAM_DAY);
   const navView = view === "operatoren" || view === "plan" ? "tipps" : view === "lernen" && sess?.src?.ev ? "events" : view; // Event-Runde: Menüpunkt Events
@@ -80,15 +80,15 @@ function Shell() {
   return (
     <div className="app" onClick={go}>
       <nav className="side" aria-label="Hauptnavigation">
-        <div className="brand"><img className="brand-mark" src="/icons/vortex.svg" alt="" /><div className="brand-t">TAP2 Coach<span>Fachinformatik AE</span></div></div>
+        <div className="brand"><img className="brand-mark" src="/icons/vortex.svg" alt="" /><div className="brand-t">Vortex</div></div>
         {NAV_MAIN.map((n) => <NavBtn key={n.view} n={n} current={navView === n.view} />)}
-        {/* Vortex für alle: kostenlos über die eigene KI, Vortex Pro (eingebaute KI) nur fürs freigeschaltete Konto */}
+        {/* Tutor für alle: kostenlos über die eigene KI, Tutor Pro (eingebaute KI) nur fürs freigeschaltete Konto */}
         <NavBtn n={TUTOR_NAV} current={navView === "tutor"} />
         <div className="side-foot">{NAV_FOOT.map((n) => <NavBtn key={n.view} n={n} current={navView === n.view} />)}</div>
       </nav>
       <div className="col">
         <header className="top" id="topbar">
-          <div className="top-l"><h1 id="page-title">{VTITLE[view] ?? (view === "tutor" ? "Vortex" : "TAP2 Coach")}</h1></div>
+          <div className="top-l"><h1 id="page-title">{VTITLE[view] ?? (view === "tutor" ? "Tutor" : "Vortex")}</h1></div>
           <div className="hud" id="hud">
             <button type="button" className="pill" data-go="start" title="Anteil der Fragen auf Grün, gelbe zählen halb"><Ring frac={c.pct} size={22} sw={4} /><span className="lbl">Prüfungsreife</span><b>{pctS(c.pct)}</b></button>
             <span className="pill days"><Ic name="calendar" /><b>{Math.max(0, left)}</b><span className="lbl">{left === 1 ? "Tag" : "Tage"}</span></span>
@@ -112,7 +112,7 @@ function Shell() {
  *  Server – dann nennt der Text das, statt „nur lokal“ zu behaupten. */
 function Foot() {
   const live = useLiveSync((s) => !!s.cfg), acc = useAccount((s) => !!s.user);
-  return <footer className="foot"><span>TAP2 Prüfungscoach · {acc ? "Dein Fortschritt wird in diesem Browser gespeichert und mit deinem Konto abgeglichen." : live ? "Dein Fortschritt wird in diesem Browser gespeichert und verschlüsselt mit deinen Geräten abgeglichen." : "Dein Fortschritt wird lokal in diesem Browser gespeichert."}</span></footer>;
+  return <footer className="foot"><span>Vortex · {acc ? "Dein Fortschritt wird in diesem Browser gespeichert und mit deinem Konto abgeglichen." : live ? "Dein Fortschritt wird in diesem Browser gespeichert und verschlüsselt mit deinen Geräten abgeglichen." : "Dein Fortschritt wird lokal in diesem Browser gespeichert."}</span></footer>;
 }
 
 // Link setzt bei aktiver Route selbst aria-current="page" – nur bei exakt gleichem Pfad, sonst gilt unsere Markierung

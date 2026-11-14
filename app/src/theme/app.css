@@ -159,7 +159,7 @@ main.content.wide { max-width: none; }
 .tp-locked { display: flex; gap: 14px; align-items: flex-start; }
 .cf-box .btn.danger { background: var(--bad); color: #fff; }
 .cf-box .btn.danger:hover { filter: brightness(1.08); }
-/* Vortex (kostenlos): Brücke zur eigenen KI */
+/* Tutor (kostenlos): Brücke zur eigenen KI */
 .tp-topbar { gap: 8px; }
 .vx-steps { flex: 1; min-height: 0; overflow-y: auto; display: grid; align-content: start; gap: 12px; padding: 16px 2px; }
 .vx-step { display: grid; grid-template-columns: 32px 1fr; gap: 12px; padding: 14px 16px; border-radius: var(--r); background: var(--surface-2); }
@@ -171,3 +171,6 @@ main.content.wide { max-width: none; }
 /* Vortex-Logo als Avatar (public/icons/vortex.svg) */
 .vx-mark { flex: none; width: 36px; height: 36px; border-radius: 11px; display: block; }
 .vx-mark.sm { width: 28px; height: 28px; border-radius: 8px; }
+/* Handy: keine eckige Tipp-Markierung des Browsers – Rückmeldung beim Antippen gerundet wie Auswahl und Fokusrand */
+a, button { -webkit-tap-highlight-color: transparent; }
+@media (max-width: 900px) { .nav-i:active { background: var(--surface-2); } }

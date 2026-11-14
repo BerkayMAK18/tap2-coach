@@ -134,7 +134,9 @@ Jeder Bereich ist ein eigenes Modul (Route + Logik in `lib/` + Tests) und kann u
   angemeldeten Geräten derselbe. Beim Anmelden zieht ein bestehender Eintrag mit seinem Namen auf die Konto-ID um;
   beim Abmelden bleibt er beim Konto. Ohne Konto gilt die Regel der Live-App (Sync-Schlüssel bzw. Gerät).
 - **Logo:** Vortex-Wirbel (`public/icons/vortex.svg`; daraus `favicon.png`, `icon-192/512.png`, `apple-touch-icon.png`)
-  ersetzt in der Dev-App den Raben (Markenzeichen, Tutorial, Menü-Icon und Avatar von Vortex).
+  ersetzt in der Dev-App den Raben (Markenzeichen, Tutorial, Menü-Icon und Avatar des Tutors).
+- **Name:** Die Dev-App heißt „Vortex“ (Seitenleiste, Fenstertitel, PWA-Manifest, Fußzeile). Der KI-Tutor darin heißt
+  „Tutor“ bzw. „Tutor Pro“. Texte, die 1:1 aus der Live-App stammen („Coach“), sind unverändert.
 - **KI-Tutor als Premium-Funktion**, vorerst nur für den Admin (`app_metadata.role = 'admin'`), für andere unsichtbar,
   umgesetzt als Supabase Edge Function. Bezahl-Option später.
 

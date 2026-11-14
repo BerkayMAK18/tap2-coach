@@ -12,6 +12,21 @@ Stand: 13.11.2026. Premium-Funktion der neuen App, vorerst nur für den Admin.
 - Freischalten auf einem Gerät: `/tutor?premium=1` (setzt `tap2coach-premium`). Das schützt nichts Geheimes,
   die Seite zeigt nur den eigenen lokalen Lernstand. Die echte Prüfung kommt mit Stufe 2 serverseitig.
 
+## Tutor-Ansicht (14.11.2026)
+
+- Menüpunkt **„Tutor“** in der Seitenleiste – nur für Admin: Admin-Konto (`app_metadata.role = 'admin'`) oder auf diesem
+  Gerät freigeschaltet (`/tutor?premium=1`). Die KI selbst prüft weiterhin der Server.
+- Links der **Chat** über die ganze Fläche (Modell Schnell/Gründlich, Kostenschätzung, Strg/Cmd + Enter senden).
+- Rechts eine eigene **Leiste** mit Reitern:
+  - **Lernstand:** Lehrplan nach Prüfungsteil → Thema mit Reife aus dem Lernstand (Wissensgraph) und der
+    **Einschätzung des Tutors** je Thema (Chip „KI“ mit Notiz), belegte Erkenntnisse und Fehlvorstellungen,
+    Fehlerschwerpunkte, großer Graph und die Brücke ohne API.
+  - **Aufgabe:** was der Tutor gerade fragt (Thema, Operator, Punkte, Aufgabentext, Hinweis, „Antwort schreiben“).
+- Auf dem Handy wechseln Chat, Lernstand und Aufgabe über Reiter.
+- Dafür liefert der Tutor zwei zusätzliche Blöcke (`src/lib/tutor-blocks.ts`, mit Tests): `tap2-aufgabe` und
+  `tap2-stand`. Sie werden mit Zod geprüft (nur bekannte Themen-IDs, feste Längen), aus der Chatblase entfernt und
+  rechts angezeigt. Aufgabe nur für die Sitzung (sessionStorage), Einschätzung auf dem Gerät (`tap2coach-tutor-stand`).
+
 ## Stufe 2 – KI-Tutor (geplant)
 
 Ablauf wie LearnHarness: **Diagnose → Plan → Erklären → Transfer → Erkenntnis sichern.**

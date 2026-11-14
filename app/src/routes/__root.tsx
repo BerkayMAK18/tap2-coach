@@ -19,6 +19,10 @@ import { HudPill } from "@/components/gami/Hud";
 import { GamiLayer } from "@/components/gami/Layer";
 import { Ic, Ring, pctS } from "@/ui-main";
 import { NAV_FOOT, NAV_MAIN, VTITLE } from "@/ui-main/nav";
+import { isPremium } from "@/store/tutor";
+
+/** Menüpunkt Tutor (nicht in der Live-App, daher nicht in der generierten nav.ts) */
+const TUTOR_NAV = { view: "tutor", label: "Tutor", svg: '<path d="M21 12a8 8 0 0 1-11.8 7L4 20l1-4.6A8 8 0 1 1 21 12z"/><path d="M8.5 11h.01M12 11h.01M15.5 11h.01"/>' };
 import { useProgress } from "@/store/progress";
 import { useLiveSync } from "@/store/livesync";
 import { useAccount } from "@/store/account";
@@ -60,9 +64,11 @@ function Shell() {
   setGamiContext(view, { sess, run });
   useEffect(() => { if (!booted) { booted = true; gm.boot(BOOT_HASH.startsWith("verbinden=") ? "import=" : BOOT_HASH); } }, []);
   useSearchHotkey();
-  useEffect(() => { document.title = `${VTITLE[view] ?? "TAP2 Coach"} · TAP2 Prüfungscoach`; }, [view]);
+  useEffect(() => { document.title = `${VTITLE[view] ?? (view === "tutor" ? "Tutor" : "TAP2 Coach")} · TAP2 Prüfungscoach`; }, [view]);
 
   const c = counts(S, allQ(S)), left = daysBetween(today(), EXAM_DAY);
+  // Tutor (Premium): Menüpunkt nur für Admin – Admin-Konto oder auf diesem Gerät freigeschaltet (/tutor?premium=1)
+  const admin = useAccount((s) => s.user?.app_metadata?.role === "admin"), tutorOn = admin || isPremium() || view === "tutor";
   const navView = view === "operatoren" || view === "plan" ? "tipps" : view === "lernen" && sess?.src?.ev ? "events" : view; // Event-Runde: Menüpunkt Events
   const focus = loc.pathname.startsWith("/lernen/runde") || (view === "pruefung" && !!run && run.phase === "write"); // Fokus wie die Live-App: Lernrunde, Prüfung beim Schreiben
   // Fokus-Ansicht wie die Live-App an <body> (das Stylesheet blendet mit body.focus die Navigation auf dem Handy aus)
@@ -78,11 +84,12 @@ function Shell() {
       <nav className="side" aria-label="Hauptnavigation">
         <div className="brand"><img className="brand-mark" src="/icons/raven.svg" alt="" /><div className="brand-t">TAP2 Coach<span>Fachinformatik AE</span></div></div>
         {NAV_MAIN.map((n) => <NavBtn key={n.view} n={n} current={navView === n.view} />)}
+        {tutorOn && <NavBtn n={TUTOR_NAV} current={navView === "tutor"} />}
         <div className="side-foot">{NAV_FOOT.map((n) => <NavBtn key={n.view} n={n} current={navView === n.view} />)}</div>
       </nav>
       <div className="col">
         <header className="top" id="topbar">
-          <div className="top-l"><h1 id="page-title">{VTITLE[view] ?? "TAP2 Coach"}</h1></div>
+          <div className="top-l"><h1 id="page-title">{VTITLE[view] ?? (view === "tutor" ? "Tutor" : "TAP2 Coach")}</h1></div>
           <div className="hud" id="hud">
             <button type="button" className="pill" data-go="start" title="Anteil der Fragen auf Grün, gelbe zählen halb"><Ring frac={c.pct} size={22} sw={4} /><span className="lbl">Prüfungsreife</span><b>{pctS(c.pct)}</b></button>
             <span className="pill days"><Ic name="calendar" /><b>{Math.max(0, left)}</b><span className="lbl">{left === 1 ? "Tag" : "Tage"}</span></span>
@@ -91,7 +98,7 @@ function Shell() {
             <button type="button" className={`iconbtn hb ${view === "einstellungen" ? "on" : ""}`} data-go="einstellungen" aria-label="Einstellungen" title="Einstellungen"><Ic name="gear" /></button>
           </div>
         </header>
-        <main className="content"><section className="view"><Outlet /></section></main>
+        <main className={`content${view === "tutor" ? " wide" : ""}`}><section className="view"><Outlet /></section></main>
         <Foot />
       </div>
       <UpdatePrompt />

@@ -25,3 +25,31 @@
 
 /* Navigation: Die neue App nutzt echte Links (<a>), die Live-App Buttons – ohne Reset wären die Menüpunkte unterstrichen. */
 a.nav-i { text-decoration: none; }
+
+/* Tutor-Ansicht (Premium): Chat über die ganze Fläche, rechts Leiste mit Lernstand und Aufgabe; Handy: Reiter */
+main.content.wide { max-width: none; }
+.tutor-shell { display: grid; grid-template-columns: minmax(0, 1fr) 360px; gap: var(--sp-4); height: calc(100dvh - 150px); min-height: 520px; }
+.tutor-shell > .card { margin: 0; min-height: 0; display: flex; flex-direction: column; }
+.tutor-mtabs { display: none; }
+.tutor-chat { display: flex; flex-direction: column; min-height: 0; flex: 1; }
+.tutor-head { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; padding-bottom: 10px; border-bottom: 1px solid var(--line); }
+.tutor-msgs { flex: 1; min-height: 0; overflow-y: auto; display: grid; align-content: start; gap: 10px; padding: 14px 2px; }
+.tutor-msgs .tut-msg { background: var(--surface-2); max-width: min(760px, 92%); }
+.tutor-msgs .tut-msg.me { background: var(--ink); }
+.tutor-empty { flex: 1; display: flex; flex-direction: column; align-items: flex-start; justify-content: center; gap: 12px; max-width: 520px; }
+.tutor-input { display: flex; gap: 8px; align-items: flex-end; padding-top: 10px; border-top: 1px solid var(--line); }
+.tutor-input textarea { flex: 1; min-height: 56px; max-height: 30vh; resize: vertical; }
+.tutor-err { margin: 6px 0 0; }
+.tutor-side-b { flex: 1; min-height: 0; overflow-y: auto; margin-top: 12px; padding-right: 2px; }
+.tutor-tabs { align-self: flex-start; }
+.tutor-dot { display: inline-block; width: 7px; height: 7px; margin-left: 6px; border-radius: 50%; background: var(--bad); vertical-align: middle; }
+.tutor-teil { margin-top: 14px; }
+.tutor-topics { list-style: none; margin: 8px 0 0; padding: 0; display: grid; gap: 10px; }
+.tutor-notes { margin: 6px 0 0; padding-left: 18px; display: grid; gap: 4px; }
+.tutor-task .qtext p:first-child { margin-top: 0; }
+@media (max-width: 900px) {
+  .tutor-shell { grid-template-columns: 1fr; grid-template-rows: auto minmax(0, 1fr); height: calc(100dvh - 170px); gap: 10px; }
+  .tutor-mtabs { display: flex; }
+  .tutor-tabs { display: none; }
+  .tutor-shell.m-chat .tutor-side, .tutor-shell:not(.m-chat) .tutor-main { display: none; }
+}

@@ -1,22 +1,25 @@
 /**
- * Premium: Tutor mit Wissensgraph (Stufe 1, ohne KI). Für normale Nutzer unsichtbar (kein Menüeintrag).
+ * Tutor (Premium, vorerst nur Admin): links der KI-Chat über die ganze Fläche, rechts eine eigene Leiste mit
+ * - „Lernstand“: Lehrplan nach Prüfungsteil → Thema mit Reife aus dem Lernstand (Wissensgraph) und der Einschätzung
+ *   des Tutors je Thema, belegte Erkenntnisse, Fehlerschwerpunkte, großer Graph und die Brücke ohne API;
+ * - „Aufgabe“: was der Tutor gerade fragt (Operator, Punkte, Aufgabentext, Hinweis).
+ * Auf dem Handy wechseln Chat, Lernstand und Aufgabe über Reiter.
  *
- * Freischaltung bis zum Login: /tutor?premium=1 setzt localStorage „tap2coach-premium“ auf diesem Gerät.
- * Das schützt nichts Geheimes – die Seite zeigt nur den eigenen, lokalen Lernstand. Die KI-Funktionen (Stufe 2)
- * werden serverseitig geprüft (app_metadata.role = 'admin'), siehe docs/TUTOR.md.
+ * Menüpunkt nur für Admin (Admin-Konto oder /tutor?premium=1 auf diesem Gerät). Das schützt nichts Geheimes –
+ * die Seite zeigt nur den eigenen, lokalen Lernstand; die KI prüft der Server (app_metadata.role = 'admin').
  */
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Link, createFileRoute, useNavigate } from "@tanstack/react-router";
 import { z } from "zod";
-import { TAP2, TOPICS, allQ } from "@/content/catalog";
-import { buildGraph, type GraphNode, type Level } from "@/lib/graph";
+import { TAP2, TOPICS, TP, allQ } from "@/content/catalog";
+import { buildGraph, type GraphNode, type KnowledgeGraph, type Level } from "@/lib/graph";
 import { shuffle } from "@/lib/dates";
 import { useProgress } from "@/store/progress";
-import { TutorBridge } from "@/components/TutorBridge";
+import { PREMIUM_KEY, isPremium, useTutor, type SideTab } from "@/store/tutor";
+import { Ic } from "@/ui-main";
+import { TutorBridge, loadTutorStore } from "@/components/TutorBridge";
 import { TutorChat } from "@/components/TutorChat";
-
-const PREMIUM_KEY = "tap2coach-premium";
-export const isPremium = () => { try { return localStorage.getItem(PREMIUM_KEY) === "1"; } catch { return false; } };
+import { SafeMarkdown } from "@/components/SafeMarkdown";
 
 export const Route = createFileRoute("/tutor")({ validateSearch: z.object({ premium: z.coerce.string().optional().catch(undefined) }), component: Tutor });
 
@@ -27,46 +30,109 @@ const LV: Record<Level, { label: string; chip: string; fill: string }> = {
   schwach: { label: "Schwach", chip: "bad", fill: "var(--bad)" },
   offen: { label: "Offen", chip: "", fill: "var(--line-2)" },
 };
+type MobileTab = "chat" | SideTab;
 
 function Tutor() {
   const { premium } = Route.useSearch();
   const [ok, setOk] = useState(isPremium());
   useEffect(() => { if (premium === "1") { try { localStorage.setItem(PREMIUM_KEY, "1"); } catch { /* privat */ } setOk(true); } }, [premium]);
-  const { S, startSession } = useProgress();
-  const navigate = useNavigate();
+  const S = useProgress((s) => s.S), { tab, setTab, task } = useTutor();
+  const [mtab, setMtab] = useState<MobileTab>("chat");
+  const input = useRef<HTMLTextAreaElement>(null);
+  // Neue Aufgabe vom Tutor: auf dem Handy bleibt der Chat, ein Punkt am Reiter zeigt sie an
+  const [seen, setSeen] = useState(task?.titel ?? "");
   if (!ok) return <section className="card"><h3>Diese Seite ist nicht verfügbar.</h3><p className="small muted"><Link to="/">Zur Übersicht</Link></p></section>;
 
   const g = buildGraph(S, TOPICS, TAP2.pakete, allQ(S));
-  const train = (n: GraphNode) => { const qs = shuffle(allQ(S).filter((q) => q.topic === n.id)).slice(0, 20); startSession(`Tutor: ${n.label}`, qs.map((q) => q.id)); void navigate({ to: "/lernen/runde" }); };
-  const List = ({ title, items, empty }: { title: string; items: GraphNode[]; empty: string }) => (
-    <section className="card"><h3>{title}</h3>
-      {items.length ? <ul className="tut-list">{items.slice(0, 6).map((n) => (
-        <li key={n.id}><span className={`chip ${LV[n.level].chip}`}>{Math.round(n.pct * 100)} %</span><span className="tut-l">{n.label}{n.prio === "Muss" ? " · Muss" : ""}</span><button type="button" className="btn small ghost" onClick={() => train(n)}>Üben</button></li>))}</ul>
-        : <p className="small muted">{empty}</p>}
-    </section>
-  );
+  const side = (t: SideTab) => { setTab(t); setMtab(t); if (t === "aufgabe") setSeen(task?.titel ?? ""); };
+  const answer = () => { setMtab("chat"); requestAnimationFrame(() => input.current?.focus()); };
+  const newTask = !!task && task.titel !== seen;
 
   return (
-    <>
-      <div className="sec-head"><div><h2>Dein Wissensgraph</h2><p>Aus deinen Antworten: was du kannst, wo es hakt und was du noch nicht angefangen hast.</p></div></div>
-      <section className="card tut-graph"><GraphSvg nodes={g.nodes} /></section>
-      <div className="tut-cols">
-        <List title="Schwächen – zuerst üben" items={g.weaknesses} empty="Keine Schwächen erkannt." />
-        <List title="Stärken" items={g.strengths} empty="Noch keine Stärken – weiter so!" />
-        <List title="Noch offen" items={g.gaps} empty="Alles begonnen." />
+    <div className={`tutor-shell m-${mtab}`}>
+      <div className="segs tutor-mtabs" role="tablist" aria-label="Tutor">
+        {([["chat", "Chat"], ["lernstand", "Lernstand"], ["aufgabe", "Aufgabe"]] as const).map(([k, l]) => <button key={k} type="button" role="tab" className={`seg ${mtab === k ? "on" : ""}`} aria-selected={mtab === k} onClick={() => (k === "chat" ? setMtab("chat") : side(k))}>{l}{k === "aufgabe" && newTask && <i className="tutor-dot" aria-label="neu" />}</button>)}
       </div>
-      <section className="card"><h3>Fehlerschwerpunkte</h3>
-        {g.errors.length ? <ol className="tut-errs">{g.errors.map((e) => <li key={e.id}><span>{e.q}</span><span className="tiny muted">{e.wrong}× falsch von {e.tries} Versuchen</span></li>)}</ol>
-          : <p className="small muted">Noch keine wiederholten Fehler.</p>}
-        {g.errors.length > 0 && <div className="row" style={{ marginTop: 10 }}><button type="button" className="btn small primary" onClick={() => { startSession("Tutor: Fehlerschwerpunkte", g.errors.map((e) => e.id)); void navigate({ to: "/lernen/runde" }); }}>Diese Fragen jetzt üben</button></div>}
-      </section>
-      <TutorChat g={g} />
-      <section className="card"><details className="tx-paste"><summary className="small">Alternative ohne API: über ein Claude-Projekt (Kopieren)</summary><TutorBridge g={g} /></details></section>
+      <section className="card tutor-main"><TutorChat g={g} inputRef={input} /></section>
+      <aside className="card tutor-side" aria-label="Lernstand und Aufgabe">
+        <div className="segs tutor-tabs" role="tablist">
+          {([["lernstand", "Lernstand"], ["aufgabe", "Aufgabe"]] as const).map(([k, l]) => <button key={k} type="button" role="tab" className={`seg ${tab === k ? "on" : ""}`} aria-selected={tab === k} onClick={() => side(k)}>{l}{k === "aufgabe" && newTask && tab !== "aufgabe" && <i className="tutor-dot" aria-label="neu" />}</button>)}
+        </div>
+        <div className="tutor-side-b">{tab === "aufgabe" ? <Aufgabe onAnswer={answer} /> : <Lernstand g={g} />}</div>
+      </aside>
+    </div>
+  );
+}
+
+/** Was der Tutor gerade fragt */
+function Aufgabe({ onAnswer }: { onAnswer: () => void }) {
+  const task = useTutor((s) => s.task);
+  if (!task) return <p className="small muted">Noch keine Aufgabe. Starte links eine Sitzung – Fragen und Aufgaben des Tutors erscheinen hier, damit du sie beim Antworten im Blick hast.</p>;
+  return (
+    <div className="tutor-task">
+      <div className="row" style={{ gap: 6 }}>
+        {task.thema && <span className="chip">{TP[task.thema]?.n ?? task.thema}</span>}
+        {task.operator && <span className="chip violet">{task.operator}</span>}
+        {task.punkte != null && <span className="chip blue">{task.punkte} P</span>}
+      </div>
+      <h3 style={{ marginTop: 10 }}>{task.titel}</h3>
+      <div className="qtext" style={{ marginTop: 8 }}><SafeMarkdown text={task.text} /></div>
+      {task.hinweis && <details className="tx-paste"><summary className="small">Hinweis anzeigen</summary><p className="small">{task.hinweis}</p></details>}
+      <div className="row" style={{ marginTop: 12 }}><button type="button" className="btn small primary" onClick={onAnswer}><Ic name="pencil" cls="ic xs" /> Antwort schreiben</button></div>
+    </div>
+  );
+}
+
+/** Lernstand nach Lehrplan: Prüfungsteil → Thema, Reife aus dem Lernstand und Einschätzung des Tutors */
+function Lernstand({ g }: { g: KnowledgeGraph }) {
+  const { S, startSession } = useProgress(), stand = useTutor((s) => s.stand), navigate = useNavigate();
+  const { insights, miscon } = loadTutorStore();
+  const train = (n: GraphNode) => { const qs = shuffle(allQ(S).filter((q) => q.topic === n.id)).slice(0, 20); startSession(`Tutor: ${n.label}`, qs.map((q) => q.id)); void navigate({ to: "/lernen/runde" }); };
+  const teile = g.nodes.filter((n) => n.kind === "teil");
+  return (
+    <>
+      <p className="tiny muted">Balken: Reife aus deinen Antworten. Chip „KI“: Einschätzung des Tutors aus dem Gespräch.</p>
+      {teile.map((t) => (
+        <div key={t.id} className="tutor-teil">
+          <div className="row"><b>{t.label}</b><span className="spacer" /><span className={`chip ${LV[t.level].chip}`}>{Math.round(t.pct * 100)} %</span></div>
+          <ul className="tutor-topics">
+            {g.nodes.filter((n) => n.kind === "topic" && n.parent === t.id).map((n) => {
+              const k = stand[n.id];
+              return (
+                <li key={n.id}>
+                  <div className="row" style={{ gap: 6 }}>
+                    <span className="tut-l small">{n.label}{n.prio === "Muss" ? " · Muss" : ""}</span>
+                    {k && <span className={`chip ${LV[k.stufe].chip}`} title={k.notiz ?? ""}>KI: {LV[k.stufe].label}</span>}
+                    <button type="button" className="btn small ghost" onClick={() => train(n)} aria-label={`${n.label} üben`}>Üben</button>
+                  </div>
+                  <div className="bar" style={{ marginTop: 4 }}><i style={{ width: `${Math.round(n.pct * 100)}%`, background: LV[n.level].fill }} /></div>
+                  {k?.notiz && <p className="tiny muted" style={{ margin: "4px 0 0" }}>{k.notiz}</p>}
+                </li>
+              );
+            })}
+          </ul>
+        </div>
+      ))}
+      {(insights.length > 0 || miscon.length > 0) && (
+        <div className="tutor-teil">
+          <b>Vom Tutor festgehalten</b>
+          {insights.length > 0 && <ul className="small tutor-notes">{insights.slice(-6).reverse().map((i, n) => <li key={"i" + n}><b>{TP[i.thema]?.n ?? i.thema}:</b> {i.aussage}</li>)}</ul>}
+          {miscon.length > 0 && <ul className="small tutor-notes bad">{miscon.slice(-4).reverse().map((i, n) => <li key={"m" + n}><b>{TP[i.thema]?.n ?? i.thema}:</b> {i.aussage}</li>)}</ul>}
+        </div>
+      )}
+      {g.errors.length > 0 && (
+        <div className="tutor-teil">
+          <div className="row"><b>Fehlerschwerpunkte</b><span className="spacer" /><button type="button" className="btn small primary" onClick={() => { startSession("Tutor: Fehlerschwerpunkte", g.errors.map((e) => e.id)); void navigate({ to: "/lernen/runde" }); }}>Üben</button></div>
+          <ol className="tut-errs small">{g.errors.slice(0, 5).map((e) => <li key={e.id}><span>{e.q.length > 120 ? e.q.slice(0, 119) + "…" : e.q}</span><span className="tiny muted">{e.wrong}× falsch</span></li>)}</ol>
+        </div>
+      )}
+      <details className="tx-paste"><summary className="small">Wissensgraph groß</summary><div className="tut-graph"><GraphSvg nodes={g.nodes} /></div></details>
+      <details className="tx-paste"><summary className="small">Alternative ohne API: über ein Claude-Projekt (Kopieren)</summary><TutorBridge g={g} /></details>
     </>
   );
 }
 
-/** Einfache Graph-Darstellung: Prüfungsteile als Spalten, Themen als Kreise (Farbe = Einordnung, Größe = Fragenzahl). */
+/** Graph-Darstellung: Prüfungsteile als Spalten, Themen als Kreise (Farbe = Einordnung, Größe = Fragenzahl). */
 function GraphSvg({ nodes }: { nodes: GraphNode[] }) {
   const teile = nodes.filter((n) => n.kind === "teil"), W = 900, colW = W / teile.length;
   const topicsOf = (t: string) => nodes.filter((n) => n.kind === "topic" && n.parent === t);

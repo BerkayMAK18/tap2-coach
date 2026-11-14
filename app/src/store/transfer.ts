@@ -4,7 +4,7 @@
  */
 import { create } from "zustand";
 import qrcode from "qrcode-generator";
-import { gm } from "@/legacy/gami-env";
+import { gm } from "./gami";
 import { txApply, txDecode, txEncode, type TxIn } from "@/lib/transfer";
 import { useProgress } from "./progress";
 
@@ -25,7 +25,7 @@ export const useTransfer = create<{ tx: Tx; imp: Imp; build: () => Promise<void>
   build: async () => {
     set({ tx: { busy: true } });
     try {
-      const S = useProgress.getState().S, g = gm("pack") ?? null;
+      const S = useProgress.getState().S, g = gm.pack();
       const full = base() + "#import=" + (await txEncode(S, true, g));
       let qrText = full, partial = false, qr: ReturnType<typeof qrPath> | null = null;
       if (full.length > 1100) { const core = base() + "#import=" + (await txEncode(S, false, g)); if (core.length < full.length) { qrText = core; partial = true; } } // QR möglichst klein = sicher scannbar
@@ -42,7 +42,7 @@ export const useTransfer = create<{ tx: Tx; imp: Imp; build: () => Promise<void>
     const P = useProgress.getState();
     P.applySynced(txApply(P.S, inc, mode));
     if (mode === "replace") P.setSession(null);
-    if (inc.g) gm("merge", inc.g); // Belohnungen werden immer zusammengeführt, nie ersetzt
+    if (inc.g) gm.merge(inc.g); // Belohnungen werden immer zusammengeführt, nie ersetzt
     set({ imp: { done: mode === "merge" ? "Mit deinem Stand zusammengeführt." : "Dein Stand wurde ersetzt." }, tx: null });
   },
   cancel: () => set({ imp: null }),

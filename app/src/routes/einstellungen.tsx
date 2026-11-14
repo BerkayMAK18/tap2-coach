@@ -5,7 +5,7 @@
  */
 import { useEffect, useRef, useState } from "react";
 import { createFileRoute } from "@tanstack/react-router";
-import { gm } from "@/legacy/gami-env";
+import { gm } from "@/store/gami";
 import { today, fmtDay } from "@/lib/dates";
 import { isObj } from "@/lib/state";
 import { REPO } from "@/lib/patchnotes";
@@ -93,7 +93,7 @@ function DataCard() {
   useEffect(() => { if (confirm) reset2.current?.scrollIntoView({ block: "center" }); }, [confirm]);
   const exportBackup = () => {
     const cfg = liveGet();
-    const data = JSON.stringify({ app: "tap2coach", exportiert: new Date().toISOString(), data: S, gami: gm("data") || undefined, sync: cfg ? { key: cfg.key } : undefined }, null, 1);
+    const data = JSON.stringify({ app: "tap2coach", exportiert: new Date().toISOString(), data: S, gami: gm.data() || undefined, sync: cfg ? { key: cfg.key } : undefined }, null, 1);
     const a = document.createElement("a");
     a.href = URL.createObjectURL(new Blob([data], { type: "application/json" }));
     a.download = "tap2-fortschritt-" + today() + ".json";
@@ -109,7 +109,7 @@ function DataCard() {
         const o = JSON.parse(String(rd.result)), d = isObj(o) && isObj(o.data) ? o.data : o;
         if (!isObj(d) || (!d.q && !d.qstat && !d.runs)) throw new Error("format");
         replaceAll(d); // legt den bisherigen Stand zurück (tap2coach-vor-import)
-        if (isObj(o) && o.gami) gm("merge", o.gami);
+        if (isObj(o) && o.gami) gm.merge(o.gami);
         // Sync-Schlüssel in der Sicherung: Verbinden anbieten (nur wenn hier noch nicht verbunden), wie SY.offer der Live-App
         if (isObj(o) && isObj(o.sync) && typeof o.sync.key === "string" && !liveGet() && supabase) useLiveSync.getState().setUi({ offer: o.sync.key });
         setConfirm(false); setMsg("Sicherung geladen.");

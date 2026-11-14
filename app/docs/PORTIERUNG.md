@@ -13,7 +13,7 @@ mit Tests. Erst danach neue Funktionen. Referenz ist immer `../index.html` auf `
    die das Verhalten der Live-App festhalten. Speicherformate/IDs unverändert (siehe MIGRATION.md).
 4. **Gleiche Icons.** `<Ic name="…"/>` nutzt die Icon-Pfade der Live-App aus dem Katalog (`TAP2.icons`).
 5. **Sicherheit.** Texte als React-Text (escaped). HTML nur für eigene Katalog-Inhalte (Icons, Abbildungen) oder das
-   eingebettete Original-Belohnungsmodul. Fremddaten nur über `normalize()`/`clean*`.
+   eigene Figuren des Belohnungs-Moduls (`lib/gami/art.ts`). Fremddaten nur über `normalize()`/`clean*`.
 6. **Abnahme je Ansicht:** Live-App und Dev-App nebeneinander öffnen (gleicher Lernstand per Sicherung), Screenshot-
    Vergleich Desktop + Handy, Bedienablauf einmal komplett durchklicken, keine Konsolenfehler. Ergebnis unten eintragen.
 
@@ -27,7 +27,7 @@ mit Tests. Erst danach neue Funktionen. Referenz ist immer `../index.html` auf `
 | Prüfung | rPK (Simulation, Real-Klausur, Bewertung wie ein Prüfer, Ergebnisse, „Bereit für eine 1“) | **fertig (1:1)**, Abnahme 14.11.2026 (siehe unten) |
 | Events | rEvents (Kapitel, Lernkarten, Abschlusstest, Belohnung) | **fertig (1:1)**, Abnahme 14.11.2026 (siehe unten) |
 | Tipps | rTipps, Operator-Trainer, Lernplan, Tutorial, Fehlerprotokoll | **fertig (1:1)**, Abnahme 14.11.2026 (siehe unten) |
-| Belohnungen/Rangliste | Original-Modul eingebettet | fertig (1:1) |
+| Belohnungen/Rangliste | XP/Level/Serien, Tagesquests, Login-Kalender, Schatzkammer, Garderobe, Titel, Event-Belohnungen, Rangliste, HUD-Figur | **fertig (1:1)**, Abnahme 14.11.2026 (siehe unten; Rangliste ohne echten Server geprüft) |
 | Einstellungen | Darstellung, App & Offline, Geräte-Sync, Übertragen (Link/QR), Sicherung, Hilfe, Datenschutz | **fertig (1:1)**, Abnahme 14.11.2026 (siehe unten; Geräte-Sync ohne echten Server geprüft) |
 | Patch Notes | Release-Liste von GitHub | **fertig (1:1)**, Abnahme 14.11.2026 (siehe unten) |
 
@@ -236,3 +236,54 @@ Bewusste Unterschiede:
   den Bereich zu – wer „Schlüssel anzeigen“ drückt, sieht den Schlüssel dort erst nach erneutem Aufklappen.
 - Testzugang: nach „Speichern“ lädt die Seite neu (alle Teile nutzen denselben Supabase-Client); die Adresse muss eine
   `*.supabase.co`-Projekt-URL sein (die Live-App nimmt jede https-Adresse).
+
+### Belohnungen/Rangliste (14.11.2026, Branch `port/belohnungen`)
+
+Das bisher eingebettete Original (`src/legacy/gami.js` über `gm(...)`) ist nach React/TypeScript umgebaut, `src/legacy/`
+entfernt. Logik als Funktionen in `src/lib/gami/`: Zeichnungen (`art.ts`), Katalog mit Kollektionen, Skins, Extras,
+Quests, Kalender (`items.ts`), Titel inkl. Event-Titeln (`titles.ts`), Zustand mit `fix`/`pack`/`unpack`/`merge` und
+Startbonus (`state.ts`), Regeln für XP/Serien/Geraten, Quests, Login, Schatzkammer, Garderobe, Events (`core.ts`),
+Figur (`figure.ts`), Rangliste mit ID-Ableitung und Aussehen (`lb.ts`). Laufzeit in `store/gami.ts` (Speicher
+`tap2coach-gami`, Fenster/Hinweise, Rangliste, Sync-Anbindung); Ansichten in `components/gami/` (Belohnungen,
+Rangliste, Fenster-Ebene, HUD-Figur, Serien-Anzeige, Event-Vorschau). Alle Aufrufer umgestellt: Lernrunde, Events,
+Sync (`livesync.ts`, jetzt auch `syncSoon` wie die Live-App), Übertragen, Sicherung, Kopfzeile. Event-Shirts und
+-Titel kommen aus **allen** Events (`ALL_EVENTS`, auch WPF). Speicher, Packformat, IDs und Ranglisten-ID unverändert.
+
+**Golden-Tests gegen das Original** (`lib/gami/golden/original.js`, nur für Tests, nicht im Bundle):
+`lib/gami/gami.golden.test.ts` (121 Tests) – Laden/Reparieren echter Stände (frisch, fortgeschritten, kaputt/alt,
+Titel aus v2.6), erster Start mit Startbonus, `pack`, `merge` für 4 Stände × 19 Eingänge (Packs, ganze Sicherungen,
+altes Format ohne Titel/Events/Zeit mit 4 Slots, Gleichstand ohne Zeitpunkt, jüngere Wahl, Müll), XP über
+zufällige Antwortfolgen bis 600 Schritte (Serien, Multiplikator, Boosts, Schild, Geraten, Tageswechsel, Hinweise,
+Level-Fenster), Nachteule, Gacha mit fester Zufallsquelle (Tickets/Federn, Soft- und Hard-Pity, Highlight-Garantie,
+Doppelte → Federn), Quests an 400 Tagen, Abholen/Truhe/roter Punkt, Login-Kalender (Serie, gerissen, Boost-Tag,
+Woche geschafft), Event-Belohnungen (vor/in/nach dem Zeitraum, Shirt und Titel), Titel, Ranglisten-ID und -Aussehen.
+`components/gami/gami.markup.test.tsx` (31 Tests) – DOM der React-Ansichten gegen das Original bei gleichem Stand:
+Belohnungen (alle drei Reiter, drei Stände), HUD-Figur, Serien-Anzeige, Event-Vorschau, Bedienabläufe mit Vergleich
+nach jedem Schritt (Seite, Fenster, Hinweise, Stand): Login-Kalender mit „Woche geschafft“, alle Quests + Truhe,
+Kollektion/10×/Nochmal/1×/alle Teile, 24 Züge bis Legendär, Tier/Anziehen/Titel/Boost, Serie mit Level-Up, Geraten,
+Abschlusstest mit Event-Fenster und „Jetzt anziehen“, Kapitel. Rangliste: ohne Server, vier Listen × eingetragen/nicht,
+Fehler, Austragen-Rückfrage, Namen ändern, Abbrechen. Alle Ergebnisse identisch.
+
+Abnahme im Browser: Live-App (`main`, lokal) und Dev-App mit demselben Lern- und Belohnungsstand. Markup **identisch**
+für: Belohnungen (Quests, Schatzkammer, Garderobe), HUD-Figur mit rotem Punkt, Login-Fenster beim Start, Schatzkammer
+nach 10× + Nochmal, Fenster „alle Teile“, Rangliste (ohne Server). Nach Abholen bzw. Ziehen mit gleichem Zufall ist der
+gespeicherte Stand gleich (bis auf Zeitstempel). Desktop und Handy (375 px) per Screenshot, keine Konsolenfehler;
+lint, test, tsc, build grün.
+
+Bewusste Unterschiede:
+- Zylinder (Hut): Firmenfarbe `#08312A` → `#172033` wie im übrigen Design.
+- Figuren-IDs (`gm1` …) laufen in jeder App eigenständig hoch.
+- „Spitznamen wählen“ führt auf `/rangliste` (echte Pfade) statt `#rangliste`.
+- Ein Start über `#import=`/`#verbinden=` zeigt wie in der Live-App keinen Login-Kalender (vorher in der Dev-App doch).
+- Styles setzt React über das CSSOM: Breiten wie `8.928571%` und Farben (`rgb(…)` statt `#…`) schreibt der Browser
+  anders ins Attribut – gleiche Darstellung.
+- Spitzname-Feld behält beim Neuzeichnen die Eingabe (die Live-App setzt es auf den gespeicherten Namen zurück).
+- Nach einer Ziehung zeichnet die Dev-App die Seite hinter dem Fenster gleich neu, die Live-App erst beim Schließen.
+- Roter Punkt an „Events“ in der Navigation ergänzt (fehlte bisher in der Dev-App).
+- Bekannter Text der Live-App unverändert übernommen: Das Fenster der Tagestruhe zeigt „+150 🪶 · +1 🎟️“, gutgeschrieben
+  werden (wie dort) 300 🪶 + 2 🎟️.
+
+Gefunden, gehört zum Grundgerüst: Tailwinds Basis-Reset (preflight) setzt Links app-weit auf Textfarbe ohne
+Unterstrich – in der Live-App sind Links wie „Spitznamen wählen“ blau unterstrichen. Betrifft alle Ansichten mit
+einfachen Links.
+

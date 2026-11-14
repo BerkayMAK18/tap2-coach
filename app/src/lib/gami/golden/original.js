@@ -1,15 +1,11 @@
 // @ts-nocheck
 /*
+ * NUR FÜR DIE GOLDEN-TESTS (gami.golden.test.ts) – wird von der App nicht geladen.
  * Belohnungs-Modul (XP, Level, Quests, Login-Kalender, Schatzkammer/Gacha, Garderobe, Titel, Event-Belohnungen,
- * Bestenliste) – ORIGINAL aus der Live-App (index.html, main), unverändert übernommen.
- *
- * Warum unverändert: Live-App und Dev-App teilen Sync (tap2_sync) und Rangliste (tap2_lb). Gleiche Regeln, gleiche IDs
- * und gleiches Speicherformat (tap2coach-gami, pack/merge) sind Pflicht, sonst widersprechen sich die Apps.
- * Änderungen an Regeln deshalb nur zusammen mit der Live-App.
- *
- * Einbettung: Die Abhängigkeiten aus der Live-App kommen über `env` (siehe src/legacy/gami-env.ts). Einzige
- * Änderungen am Text: S/UI/view werden über env gelesen (env.S(), env.UI(), env.view()).
- * Quelle aktualisieren: Abschnitt „Belohnungen (XP, Level …)“ bis „App-Anbindung“ aus index.html kopieren.
+ * Bestenliste) – ORIGINAL aus der Live-App (index.html, main, Abschnitt „Belohnungen (XP, Level …)“ bis „App-Anbindung“),
+ * unverändert übernommen. Einzige Änderung: S/UI/view werden über env gelesen (env.S(), env.UI(), env.view()).
+ * Die Tests vergleichen die React/TS-Fassung (src/lib/gami, store/gami.ts, components/gami) mit diesem Original.
+ * Ändert sich das Belohnungs-Modul der Live-App, hier den Abschnitt neu übernehmen und die Tests laufen lassen.
  */
 export function createGami(env) {
   const { esc, render, num, today, rpc, syncSoon, syncConf, syncGet, hexOf, TP, QMAP, sha, plain, isObj, dayStr, EVENTS, topicQ, st, mapObj, keyRaw, hud, daysBetween, counts, allQ, TOPICS } = env;

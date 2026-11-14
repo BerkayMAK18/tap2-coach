@@ -3,7 +3,7 @@
  * - Liste (/events): Events mit Belohnung (Vorschau aus dem Belohnungs-Modul), Stand und Restzeit.
  * - Event (/events?ev=lf11a): Kopf mit Sonderbelohnung, Abschlusstest (ab 80 % je Kapitel), Tipps, Kapitel mit
  *   „Kurz erklärt“ (Abbildung aus dem eigenen Katalog) und Lernrunden.
- * HTML wird nur für die Belohnungs-Vorschau (Original-Modul) und Katalog-Abbildungen eingefügt.
+ * HTML wird nur für die Belohnungs-Figur (eigene Zeichnung) und Katalog-Abbildungen eingefügt.
  */
 import { useEffect, useRef } from "react";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
@@ -12,7 +12,8 @@ import { EVENTS, figFor } from "@/content/catalog";
 import type { EventCatalog } from "@/content/schema";
 import { EV_FINAL, evAllQ, evById, evDate, evKapQ, evOn, evReady, evStatusTxt, evSure, learnEv, learnEvFinal, type EvInfo } from "@/lib/events";
 import { counts } from "@/lib/srs";
-import { gm, useGamiTick } from "@/legacy/gami-env";
+import { gm, useGami } from "@/store/gami";
+import { EvPreview } from "@/components/gami/Hud";
 import { useProgress } from "@/store/progress";
 import { Ic } from "@/ui-main";
 import { AmpBar, Legend } from "@/components/lernen/bits";
@@ -21,17 +22,13 @@ import { useStartRound } from "@/components/lernen/ui";
 const search = z.object({ ev: z.string().optional().catch(undefined) }); // fehlerhafte Links nie zum Absturz führen lassen
 export const Route = createFileRoute("/events")({ validateSearch: search, component: Events });
 
-/** Belohnungs-Vorschau (evRewardHTML): Figur mit Shirt bzw. Titel aus dem Original-Modul, sonst einfacher Ersatz */
-function Reward({ e }: { e: EventCatalog }) {
-  const html = gm("evPreview", e) as string | undefined;
-  if (html) return <div className="ev-rw" dangerouslySetInnerHTML={{ __html: html }} />; // eigenes, intern escaptes HTML des Moduls
-  return <div className="ev-rw"><div className="ev-tt">{e.reward.kind === "shirt" ? "👕" : "🏷️"}<b>{e.reward.name}</b></div></div>;
-}
-const info = (e: EventCatalog) => (gm("evInfo", e) as EvInfo | undefined) || {};
+/** Belohnungs-Vorschau (evRewardHTML): eigene Figur mit Shirt bzw. Titel */
+const Reward = ({ e }: { e: EventCatalog }) => <div className="ev-rw"><EvPreview e={e} /></div>;
+const info = (e: EventCatalog): EvInfo => gm.evInfo(e);
 
 function Events() {
   const { ev } = Route.useSearch(), e = evById(ev);
-  useGamiTick((t) => t.n);
+  useGami((t) => t.n);
   return e ? <EventPage key={e.id} e={e} /> : <EventList />;
 }
 

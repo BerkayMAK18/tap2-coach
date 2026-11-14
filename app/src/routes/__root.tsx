@@ -12,7 +12,11 @@ import { allQ } from "@/content/catalog";
 import { EXAM_DAY } from "@/config";
 import { daysBetween, today } from "@/lib/dates";
 import { counts } from "@/lib/srs";
-import { gm, setGamiContext, useGamiTick } from "@/legacy/gami-env";
+import { EVENTS } from "@/content/catalog";
+import { evOn } from "@/lib/events";
+import { gm, setGamiContext, useGami } from "@/store/gami";
+import { HudPill } from "@/components/gami/Hud";
+import { GamiLayer } from "@/components/gami/Layer";
 import { Ic, Ring, pctS } from "@/ui-main";
 import { NAV_FOOT, NAV_MAIN, VTITLE } from "@/ui-main/nav";
 import { useProgress } from "@/store/progress";
@@ -46,13 +50,15 @@ export const PATH: Record<string, string> = { start: "/", lernen: "/lernen", auf
 const viewOf = (path: string) => (path === "/" ? "start" : path.split("/")[1] || "start");
 
 let booted = false;
+// Adresse beim Start (vor der Weiterleitung): Übertragen/Verbinden zeigt keinen Login-Kalender darüber (wie die Live-App)
+const BOOT_HASH = typeof window !== "undefined" ? window.location.hash.slice(1) : "";
 function Shell() {
   const S = useProgress((s) => s.S), sess = useProgress((s) => s.sess), run = usePruefung((s) => s.run);
   const loc = useLocation(), navigate = useNavigate();
-  useGamiTick((t) => t.n);
+  useGami((t) => t.n);
   const view = viewOf(loc.pathname);
   setGamiContext(view, { sess, run });
-  useEffect(() => { if (!booted) { booted = true; gm("init"); gm("boot", ""); } }, []);
+  useEffect(() => { if (!booted) { booted = true; gm.boot(BOOT_HASH.startsWith("verbinden=") ? "import=" : BOOT_HASH); } }, []);
   useSearchHotkey();
   useEffect(() => { document.title = `${VTITLE[view] ?? "TAP2 Coach"} · TAP2 Prüfungscoach`; }, [view]);
 
@@ -80,8 +86,7 @@ function Shell() {
           <div className="hud" id="hud">
             <button type="button" className="pill" data-go="start" title="Anteil der Fragen auf Grün, gelbe zählen halb"><Ring frac={c.pct} size={22} sw={4} /><span className="lbl">Prüfungsreife</span><b>{pctS(c.pct)}</b></button>
             <span className="pill days"><Ic name="calendar" /><b>{Math.max(0, left)}</b><span className="lbl">{left === 1 ? "Tag" : "Tage"}</span></span>
-            {/* Figur/Level aus dem Original-Belohnungs-Modul (eigenes, intern escaptes HTML) */}
-            <span style={{ display: "contents" }} dangerouslySetInnerHTML={{ __html: (gm("hudHTML") as string) || "" }} />
+            <HudPill view={view} />
             <button type="button" className="iconbtn hb" aria-label="Fragen durchsuchen" title="Suchen (Taste /)" onClick={openSearch}><Ic name="search" /></button>
             <Link to="/einstellungen" className={`iconbtn hb${view === "einstellungen" ? " on" : ""}`} aria-label="Einstellungen" title="Einstellungen"><Ic name="gear" /></Link>
           </div>
@@ -90,6 +95,7 @@ function Shell() {
         <Foot />
       </div>
       <UpdatePrompt />
+      <GamiLayer />
       <Suche />
     </div>
   );
@@ -110,6 +116,8 @@ function NavBtn({ n, current }: { n: { view: string; svg: string; label: string 
       {/* Icon-Pfade aus dem Markup der Live-App (generiert, ui-main/nav.ts) */}
       <svg className="ic" viewBox="0 0 24 24" aria-hidden="true" dangerouslySetInnerHTML={{ __html: n.svg }} />
       <span>{n.label}</span>
+      {/* Roter Punkt bei Events mit noch offener Belohnung (wie die Live-App) */}
+      {n.view === "events" && <i className="nav-dot" aria-hidden="true" hidden={!EVENTS.some((e) => evOn(e) && !gm.evInfo(e).got)} />}
     </Link>
   );
 }

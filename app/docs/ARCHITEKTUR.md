@@ -123,6 +123,30 @@ Jeder Bereich ist ein eigenes Modul (Route + Logik in `lib/` + Tests) und kann u
 - **KI-Tutor als Premium-Funktion**, vorerst nur für den Admin (`app_metadata.role = 'admin'`), für andere unsichtbar,
   umgesetzt als Supabase Edge Function. Bezahl-Option später.
 
+## KI-Prüfungstutor (14.11.2026)
+
+Server und Browser teilen sich die Arbeit so (Details: `docs/TUTOR.md`):
+
+- **Edge Function `tutor`** (einziger Server-Code): Login + Admin-Rolle, Tageslimit, Anweisungen und das einzige
+  Werkzeug `pruefer_runde` (festes Schema, strict). Der Browser kann weder Anweisungen noch Werkzeuge mitschicken.
+- **Browser, reine Logik in `lib/`:**
+  - `tutor-schema.ts` prüft jede Runde (Zod, Fremdtext),
+  - `tutor-session.ts` macht daraus Aufgaben, Bewertungen und Belege,
+  - `graph.ts` (`buildConceptGraph`) berechnet den Stand je Konzept,
+  - `lehrplan.ts` berechnet den Lehrplan deterministisch,
+  - `tutor-state.ts` hält den Tutor-Stand mit Merge-Regel,
+  - `tutor-sync.ts` gleicht ab (E2E, `app_tutor_state`).
+- **XP** über das Belohnungs-Modul (`onTutor` → `addXP`), damit kompatibel mit Sync und Rangliste der Live-App
+  (`gami/tutor-xp.test.ts` gegen das Original).
+- **Speicher:**
+
+  | Was | Wo |
+  | --- | --- |
+  | Tutor-Stand | `tap2coach-tutor-stand`, synchronisiert über `app_tutor_state`, **nicht** in `tap2_sync` |
+  | Sitzung | `tap2coach-tutor-sitzung`, nur dieses Gerät |
+  | Modell | `tap2coach-tutor-modell` |
+  | Geräte-ID für XP je Gerät | `tap2coach-tutor-geraet` |
+
 ## Phasenplan
 
 | Phase | Inhalt | Stand |
@@ -132,7 +156,7 @@ Jeder Bereich ist ein eigenes Modul (Route + Logik in `lib/` + Tests) und kann u
 | 1b | Funktionsgleichheit inkl. Gamification/Gacha (Tabelle oben) | erledigt (alle Module 1:1, PORTIERUNG.md) |
 | 1c | Konto (GitHub), E2E-Sync, Rangliste mit Benutzername, Konto löschen | offen (braucht Supabase-Dev-Projekt + GitHub-OAuth-App) |
 | 2 | Katalog-Bibliothek (Suche/Filter, mehrere Kataloge), TAP1, Lehrjahr → Lernfeld, Klausurkalender | offen |
-| 3 | KI-Tutor (Premium, nur Admin): Stufe 1 Wissensgraph fertig (`/tutor`), Stufe 2 KI siehe `docs/TUTOR.md` | Stufe 2 offen (braucht Login + Claude-API-Key) |
+| 3 | KI-Prüfungstutor (Premium, nur Admin): Sitzung je Thema im IHK-Stil, Konzept-Graph, deterministischer Lehrplan, E2E-verschlüsselter Tutor-Stand, XP – `docs/TUTOR.md` | Code fertig (14.11.); SQL 003 einspielen + Function deployen |
 | 4 | Neue App ersetzt die Live-App (gleiche Origin, Lernstände bleiben) | offen |
 
 ## Sicherheit

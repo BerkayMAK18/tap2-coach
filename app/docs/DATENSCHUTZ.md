@@ -28,7 +28,8 @@ diesen Hinweis und dieses Dokument mitpflegen.**
 | Patch Notes (Seite öffnen) | IP an GitHub | GitHub (USA, DPF) | Art. 6 (1) f | GitHub | – |
 | Übertragen per Link/QR | Lernstand im #-Teil des Links | nur auf den Geräten (kein Server) | Art. 6 (1) b | wer den Link hat | Link nicht weitergeben |
 | Fehler melden | was der Nutzer selbst auf GitHub abschickt | GitHub (USA, DPF) | eigenständig GitHub | öffentlich | über GitHub |
-| KI-Tutor (nur Admin) | Eingaben des Admins | Anthropic (USA) | – (nur eigene Daten des Betreibers) | Anthropic | nach Anbieter |
+| KI-Tutor (nur Admin) | Eingaben des Admins, Übergabe (Stand je Konzept, Fehlvorstellungen – keine Namen) | Anthropic (USA) | – (nur eigene Daten des Betreibers) | Anthropic | nach Anbieter |
+| Tutor-Stand (nur Admin) | **verschlüsselte** Belege, Fehlvorstellungen, Sitzungen, Tutor-XP; Prüfsumme des Schlüssels (`kid`), Version, Zeitstempel | Supabase DB, Frankfurt (`app_tutor_state`) | – (nur eigene Daten des Betreibers); später Art. 6 (1) b | niemand außer Nutzer (Schlüssel nur im Browser) | Knopf in der App / Konto löschen (Kaskade) |
 
 AV = Auftragsverarbeitung. **Supabase:** Der DPA ist Teil der Terms of Service und gilt automatisch für alle
 Organisationen (geprüft am 13.11.2026 unter Organization → Settings → Legal Documents, „View DPA“). Eine Kopie als
@@ -66,6 +67,14 @@ PDF für die eigenen Unterlagen ablegen (Rechenschaftspflicht, Art. 5 Abs. 2 DSG
 - Zugriff nur, wenn `app_metadata.role = 'admin'` im geprüften JWT steht. `app_metadata` können Nutzer **nicht**
   selbst ändern (nur mit Service-Key). Die Rolle wird einmalig für das eigene Konto gesetzt.
 - Im Frontend ist der Tutor für alle anderen unsichtbar; maßgeblich ist aber nur die Prüfung im Server.
+- Anweisungen und Werkzeug legt nur der Server fest; an Anthropic gehen die Wissensbasis (Katalog), die Übergabe zum
+  Thema (Stand je Konzept, Fehlvorstellungen, häufige Fehler – keine Namen, keine Konto-Daten) und der Gesprächsverlauf.
+- **Tutor-Stand** (`supabase/003_app_tutor_state.sql`): Tabelle `app_tutor_state (user_id PK = auth.uid(), rev, kid,
+  blob, updated_at)`, RLS an, keine Tabellenrechte für `anon`/`authenticated`, zusätzlich Richtlinie „nur eigene
+  Zeile“; Zugriff nur über `app_tutor_state_pull/push/delete` (security definer, `auth.uid()`). `blob` ist mit dem
+  Sync-Schlüssel des Geräts AES-GCM-verschlüsselt (wie der Sync), `kid` eine Prüfsumme des Schlüssels (verrät ihn
+  nicht). Der Betreiber kann den Inhalt nicht lesen. Löschen: Knopf in der App, beim Konto-Löschen per Kaskade.
+- Der Gesprächsverlauf bleibt nur im Browser (`tap2coach-tutor-sitzung`).
 - Vor einer späteren Bezahl-Option nötig: Einwilligung/Information zur Übermittlung an Anthropic (USA),
   DPA mit Anthropic, Impressum, AGB, Zahlungsanbieter.
 

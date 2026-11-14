@@ -4,8 +4,8 @@
  * Statische, lokal-first PWA – kein eigener Server nötig:
  * - TanStack Router (dateibasiert): Seiten liegen in src/routes/, routeTree.gen.ts wird erzeugt.
  * - Tailwind v4 mit eigenen Tokens (src/theme/tokens.css).
- * - vite-plugin-pwa: Service Worker mit Precache → die App läuft nach dem ersten Besuch offline,
- *   Updates kommen beim nächsten Start (wie in der Live-App).
+ * - vite-plugin-pwa mit eigenem Service Worker (src/sw.ts): Seiten Netz zuerst (immer aktuell), Programmdateien
+ *   aus dem Vorab-Cache, offline nutzbar – wie sw.js der Live-App.
  * Hosting: beliebiges statisches CDN, z. B. Cloudflare Pages Free (siehe docs/ENTWICKLUNG.md).
  */
 import path from "node:path";
@@ -24,6 +24,9 @@ export default defineConfig({
     tailwindcss(),
     VitePWA({
       registerType: "prompt", // Nutzer entscheidet, wann neu geladen wird – nie mitten in einer Lernrunde
+      strategies: "injectManifest", // eigener Service Worker (src/sw.ts): Seiten Netz zuerst wie in der Live-App
+      srcDir: "src",
+      filename: "sw.ts",
       includeAssets: ["favicon.png", "icon-192.png"],
       manifest: {
         name: "TAP2 Prüfungscoach",
@@ -36,10 +39,9 @@ export default defineConfig({
         theme_color: "#172033",
         icons: [{ src: "icon-192.png", sizes: "192x192", type: "image/png" }],
       },
-      workbox: {
-        globPatterns: ["**/*.{js,css,html,woff2,png,svg,json,wasm}"],
+      injectManifest: {
+        globPatterns: ["**/*.{js,css,woff2,png,svg,json,wasm}"], // ohne HTML: Seiten kommen immer zuerst aus dem Netz
         maximumFileSizeToCacheInBytes: 3 * 1024 * 1024, // Katalog-Chunk (~1 MB) muss offline verfügbar sein
-        navigateFallback: "/index.html",
       },
     }),
   ],

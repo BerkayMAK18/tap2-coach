@@ -114,9 +114,17 @@ function NavBtn({ n, current }: { n: { view: string; svg: string; label: string 
   );
 }
 
+/** Nach neuer Version suchen wie checkUpdate() der Live-App: alle 10 Minuten und beim Zurückkehren in den Tab (nur online). */
+const UPDATE_EVERY = 10 * 60 * 1000;
+function watchUpdates(r: ServiceWorkerRegistration) {
+  const check = () => { if (navigator.onLine !== false && !r.installing) void r.update().catch(() => { /* offline o. ä.: beim nächsten Mal */ }); };
+  setInterval(check, UPDATE_EVERY);
+  document.addEventListener("visibilitychange", () => { if (document.visibilityState === "visible") check(); });
+}
+
 /** Neue Version: nie automatisch neu laden (könnte eine Lernrunde unterbrechen) – Hinweis im Markup der Live-App (#upd). */
 function UpdatePrompt() {
-  const { needRefresh: [need, setNeed], updateServiceWorker } = useRegisterSW();
+  const { needRefresh: [need, setNeed], updateServiceWorker } = useRegisterSW({ onRegisteredSW: (_url, r) => { if (r) watchUpdates(r); } });
   if (!need) return null;
   return (
     <div className="upd" id="upd" role="status" aria-live="polite">

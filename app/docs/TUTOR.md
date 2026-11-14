@@ -25,20 +25,26 @@ dir der Tutor die ganze Sitzung lang Aufgaben im IHK-Stil und **bewertet wie ein
 
 ## Aufbau
 
-- **`/tutor` → Tab „Sitzung“.** Ohne laufende Sitzung siehst du die Themenwahl: alle Katalogthemen nach Prüfungsteil
-  mit Stand, Muss-Kennzeichen und offenen Fehlvorstellungen; die Empfehlung aus dem Lehrplan steht oben. Mit Sitzung
-  gibt es zwei Spalten:
+- **`/tutor` → Tab „Sitzung“.** Ohne laufende Sitzung siehst du die Themenwahl: alle Katalogthemen in der Reihenfolge
+  Teil 1, Teil 2, Teil 1 + 2, WiSo, mit Stand, Muss-Kennzeichen und offenen Fehlvorstellungen; die Empfehlung aus dem
+  Lehrplan steht oben.
+  - Ein Klick auf ein Thema **öffnet nur den Chat** – ohne Anfrage an die KI. Erst mit deiner ersten Nachricht geht die
+    Übergabe (Stand, Fehlvorstellungen, Lernpakete) an den Tutor und er stellt die erste Aufgabe. Hineinschauen kostet
+    also nichts. Bis dahin lässt sich das Modell noch wechseln.
+  - Mit Sitzung gibt es zwei Spalten:
   - **Links der Chat** mit dem Eingabefeld „Deine Antwort oder Frage“, „Senden“, den Feldern *Gedankengang* und
     *Sicherheit* und dem Knopf „Ich stehe auf dem Schlauch“. Aufgaben und Bewertungen erscheinen als Karten.
   - **Rechts die Reiter:**
     - **Aufgabe:** Aufgabenstellung, Operator mit Anforderungsbereich, Punkte und das Ausgangsmaterial (Tabelle,
       Code, Geschäftsregeln, Text). Die App rendert das Material selbst und übernimmt nie HTML aus der KI. Nach der
       Bewertung folgen Teilpunkte und Erwartungshorizont.
-    - **Dein Stand:** Graph des Themas: Lernpakete → Konzepte, Fehlvorstellungen als eigene Knoten.
+    - **Dein Stand:** Graph des Themas als Netz – Thema in der Mitte, Lernpakete auf dem inneren Ring, Konzepte außen,
+      Fehlvorstellungen als rote Rauten an ihrem Konzept. Darunter die Konzepte als Liste und „Tutor-Wissen
+      zurücksetzen“.
 
   Auf dem Handy wechseln Chat, Aufgabe und Stand über Reiter.
-- **`/tutor` → Tab „Lehrplan“:** Plan bis zur Prüfung (siehe unten). „Starten“ beginnt eine Sitzung zu Thema und Fokus
-  des Eintrags.
+- **`/tutor` → Tab „Lehrplan“:** Plan bis zur Prüfung (siehe unten). „Öffnen“ öffnet den Chat zu Thema und Fokus des
+  Eintrags.
 - Design ausschließlich wie in `main` (`theme/main.css`, `ui-main`, Ergänzungen in `theme/app.css` mit Präfix `tp-`).
 
 ## Technik
@@ -81,12 +87,15 @@ dir der Tutor die ganze Sitzung lang Aufgaben im IHK-Stil und **bewertet wie ein
 - **Konzepte** sind die Kernaussagen der Lernpakete eines Themas (`kern` im Katalog), z. B. funktionale Abhängigkeit
   oder 2NF.
 - **Beherrschung** ist ein gewichteter Mittelwert:
-  - Vorwissen aus den Lernrunden: Karten der Paket-Decks, sonst das Thema; Gewicht bis 2.
+  - Vorwissen aus den Lernrunden: Karten der Paket-Decks, sonst das Thema. Es ist nur ein **schwacher Hinweis**:
+    höchstens 50 % und höchstens so viel Gewicht wie ein Tutor-Beleg. Grüne Karten heißen noch nicht, dass man es in
+    der Prüfung erklären kann.
   - Tutor-Belege: Bewertung = Anteil der Punkte; Beleg 0,6–1; Lücke 0–0,4; Fehlvorstellung 0,1; behoben 0,75.
   - Neuere Belege zählen mehr: Faktor 0,8 je älterem Beleg.
 - **Einordnung:**
   - Eine offene Fehlvorstellung macht das Konzept „schwach“.
-  - „Sitzt“ erst ab 75 % und mindestens zwei Tutor-Belegen.
+  - „Sitzt“ erst ab 75 % und mindestens zwei Tutor-Belegen. Ein Thema „sitzt“ erst, wenn mindestens 60 % seiner
+    Konzepte sitzen – ohne Tutor-Belege also nie.
 - **Fehlvorstellungen** sind eigene Knoten. Sie bleiben offen, solange sie nach dem letzten „behoben“ noch einmal
   auftraten.
 
@@ -124,9 +133,12 @@ allen Geräten gleich.
   | Fehlvorstellungen | Vereinigung; Text vom zuletzt gesehenen Eintrag; first = frühester, seen = spätester, fix = spätester Zeitpunkt; Anzahl aus den Belegen abgeleitet |
   | Sitzungen | Vereinigung; Zähler je Sitzung als Maximum |
   | Tutor-XP | je Tag und Gerät das Maximum; Summe über Geräte = XP des Tages |
+  | Zurücksetzen | spätester Zeitpunkt gilt; alles davor fällt weg |
 
-- Der alte Lernpfad (`tap2coach-tutor-pfad`, nur dieses Gerät) und Fehlvorstellungen aus der Claude-Brücke werden
-  einmalig übernommen. Die IDs sind fest, sodass zwei Geräte zum selben Ergebnis kommen.
+- **Zurücksetzen:** Der Tutor-Stand hat einen Zeitpunkt `reset` (je Gerät das Maximum). Belege, Fehlvorstellungen
+  und Sitzungen davor fallen auf allen Geräten weg, auch auf Geräten, die noch alte Daten haben. Das Tutor-Wissen
+  wurde am 14.11.2026 auf Wunsch neu gestartet (Stichtag `EPOCH` in `lib/tutor-state.ts`); der alte Lernpfad wird
+  nicht mehr übernommen. XP und der Lernstand der Lernrunden bleiben.
 
 ### XP, Serie, Tagesziele
 

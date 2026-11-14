@@ -106,14 +106,15 @@ export function evValue(e: Pick<TutorEv, "art" | "w">): number {
     case "behoben": return 0.75;
   }
 }
-const DECAY = 0.8, PRIOR_MAX = 2;
+const DECAY = 0.8, PRIOR_MAX = 1, PRIOR_CAP = 0.5;
 /**
- * Beherrschung eines Konzepts: gewichteter Mittelwert aus Vorwissen (Lernrunden, Gewicht bis 2 Belege) und Tutor-Belegen
- * (neuere zählen mehr: Faktor 0,8 je älterem Beleg). Ohne Vorwissen und Belege: null (offen).
+ * Beherrschung eines Konzepts: gewichteter Mittelwert aus Vorwissen und Tutor-Belegen (neuere zählen mehr: Faktor 0,8 je
+ * älterem Beleg). Vorwissen aus den Lernrunden ist nur ein schwacher Hinweis: höchstens 50 % und höchstens so viel
+ * Gewicht wie ein Beleg – grüne Karten heißen noch nicht, dass man es in der Prüfung erklären kann. Ohne beides: null.
  */
 export function mastery(evs: Pick<TutorEv, "art" | "w" | "at" | "id">[], prior: number | null, priorWeight: number): number | null {
   const list = evs.slice().sort((a, b) => a.at - b.at || (a.id < b.id ? -1 : 1));
-  let W = prior != null ? Math.min(PRIOR_MAX, Math.max(0, priorWeight)) : 0, S = prior != null ? W * prior : 0;
+  let W = prior != null ? Math.min(PRIOR_MAX, Math.max(0, priorWeight)) : 0, S = prior != null ? W * Math.min(PRIOR_CAP, prior) : 0;
   list.forEach((e, i) => { const k = Math.pow(DECAY, list.length - 1 - i); W += k; S += k * evValue(e); });
   return W > 0 ? S / W : null;
 }
@@ -135,7 +136,7 @@ export function buildConceptGraph(S: State, topic: Topic, pakete: Paket[], quest
     const p = PK.get(pid); if (!p) return;
     const decks = new Set(p.decks ?? []), pq = qs.filter((q) => q.type === "card" && q.deck && decks.has(q.deck));
     const c = pq.length ? counts(S, pq) : topicC, started = pq.length ? c.t - c.n : topicStarted;
-    priorOf.set(pid, started > 0 ? { p: c.pct, w: (pq.length ? 1 : 0.5) * Math.min(PRIOR_MAX, started / 5) } : { p: null, w: 0 });
+    priorOf.set(pid, started > 0 ? { p: c.pct, w: (pq.length ? 1 : 0.5) * Math.min(PRIOR_MAX, started / 10) } : { p: null, w: 0 });
   });
   const evT = tv.ev.filter((e) => e.t === topic.id);
   const topicEv = evT.filter((e) => !e.k); // Bewertungen ohne Konzept (z. B. aus dem alten Lernpfad) wirken auf alle Konzepte schwach
@@ -150,7 +151,9 @@ export function buildConceptGraph(S: State, topic: Topic, pakete: Paket[], quest
     .sort((a, b) => Number(b.active) - Number(a.active) || b.seen - a.seen);
   const known = concepts.filter((c) => c.m != null);
   const m = known.length ? concepts.reduce((a, c) => a + (c.m ?? 0.2), 0) / concepts.length : null; // offene Konzepte zählen mit 0,2
-  const level = m == null ? "offen" : miscon.some((x) => x.active) && m < 0.75 ? "schwach" : m >= 0.75 ? "stark" : m < 0.4 ? "schwach" : "festigen";
+  // „Sitzt“ nur, wenn der Tutor die meisten Konzepte belegt hat (mind. 60 % der Konzepte „sitzt“)
+  const strong = concepts.length > 0 && concepts.filter((c) => c.level === "stark").length / concepts.length >= 0.6;
+  const level: Level = m == null ? "offen" : miscon.some((x) => x.active) || m < 0.4 ? "schwach" : strong && m >= 0.75 ? "stark" : "festigen";
   return { topic: topic.id, concepts, miscon, m, level };
 }
 

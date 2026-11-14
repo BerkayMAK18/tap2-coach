@@ -140,3 +140,4 @@ main.content.wide { max-width: none; }
   .tp-cost { display: none; }
 }
 @media (max-width: 480px) { .tp-send-l { display: none; } }
+.tp-net { width: 100%; max-width: 460px; height: auto; display: block; margin: 0 auto; }

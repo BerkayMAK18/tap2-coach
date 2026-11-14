@@ -7,11 +7,11 @@ import { TAP2 } from "@/content/catalog";
 import { newSyncKey } from "./crypto";
 import { stab } from "./gami/state";
 import { kbIds, makeKb, paketeOf } from "./tutor-kb";
-import { addEvidence, addXpDay, emptyTutor, type Ev } from "./tutor-state";
+import { EPOCH, addEvidence, addXpDay, emptyTutor, type Ev } from "./tutor-state";
 import { syncTutor, tutorKid, type Rpc } from "./tutor-sync";
 
 const kb = makeKb(TAP2), known = kbIds(kb), K = `${paketeOf(kb, "T03")[0]}.1`;
-const ev = (id: string, at: number, n?: string): Ev => ({ id, at, k: K, t: "T03", art: n ? "fehlvorstellung" : "beleg", w: n ? -0.5 : 0.5, ...(n ? { f: "fv1", n } : {}) });
+const ev = (id: string, at: number, n?: string): Ev => ({ id, at: EPOCH + at, k: K, t: "T03", art: n ? "fehlvorstellung" : "beleg", w: n ? -0.5 : 0.5, ...(n ? { f: "fv1", n } : {}) });
 
 /** Schein-Server: eine Zeile pro Konto, Regeln wie app_tutor_state_push */
 function server() {

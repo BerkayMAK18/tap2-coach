@@ -51,6 +51,8 @@ export type Convo = {
   /** tool_result zur letzten Runde – geht mit meiner nächsten Nachricht zurück */
   pending?: ToolResult;
   ende?: { fazit: string; naechstes?: string };
+  /** Fokus-Konzepte aus dem Lehrplan (für die Übergabe mit der ersten Nachricht) */
+  fokus?: string[];
 };
 export const newConvo = (id: string, thema: string, model: Model, now: number): Convo => ({ id, thema, model, started: now, cost: 0, msgs: [], ui: {}, aufgaben: {}, order: [], alias: {}, bewertungen: {}, rounds: {} });
 
@@ -157,7 +159,7 @@ export function handoff(o: HandoffIn): string {
   if (o.errors.length) L.push("", "Häufige Fehler aus den Lernrunden zu diesem Thema:", ...o.errors.slice(0, 5).map((e) => `- ${e.replace(/\s+/g, " ").slice(0, 160)}`));
   L.push("", o.sessions.n ? `Bisherige Tutor-Sitzungen zu diesem Thema: ${o.sessions.n}${o.sessions.last ? ` (zuletzt ${o.sessions.last})` : ""}.` : "Erste Tutor-Sitzung zu diesem Thema.");
   if (o.fokus.length) L.push(`Fokus laut Lehrplan: ${o.fokus.join(", ")}.`);
-  L.push("", o.inhalte, "", "Beginne jetzt: ein Satz zur Begrüßung, dann die erste Aufgabe.");
+  L.push("", o.inhalte, "", "Gehe kurz auf meine erste Nachricht unten ein (Begrüßung höchstens ein Satz) und stelle dann die erste Aufgabe.");
   return L.join("\n");
 }
 
@@ -174,7 +176,12 @@ export type Feed =
 export function feedOf(c: Convo, ids: KnownIds): Feed[] {
   const out: Feed[] = [];
   c.msgs.forEach((m, i) => {
-    if (m.role === "user") { const meta = c.ui[i]; out.push(!meta || meta.kind === "start" ? { k: "start", i } : { k: "me", i, meta }); return; }
+    if (m.role === "user") {
+      const meta = c.ui[i];
+      if (i === 0) out.push({ k: "start", i }); // erste Nachricht enthält die Übergabe
+      if (meta && meta.kind !== "start") out.push({ k: "me", i, meta });
+      return;
+    }
     const use = m.content.find(isUse);
     if (!use) { const text = m.content.filter(isText).map((b) => b.text).join("\n").trim(); if (text) out.push({ k: "tutor", i, text }); return; }
     const { runde } = parseRunde(use.input, ids);

@@ -44,7 +44,7 @@ describe("Konzept-Graph", () => {
   });
   it("Beherrschung: Vorwissen + Belege, neuere zählen mehr; ohne alles offen", () => {
     expect(mastery([], null, 0)).toBeNull();
-    expect(mastery([], 0.8, 2)).toBeCloseTo(0.8);
+    expect(mastery([], 0.8, 2)).toBeCloseTo(0.5); // Lernrunden allein: höchstens 50 %
     const e = (id: string, at: number, w: number) => ({ id, at, art: "bewertung" as const, w });
     const up = mastery([e("a", 1, 0), e("b", 2, 1)], null, 0)!, down = mastery([e("a", 1, 1), e("b", 2, 0)], null, 0)!;
     expect(up).toBeGreaterThan(0.5); expect(down).toBeLessThan(0.5);
@@ -66,12 +66,13 @@ describe("Konzept-Graph", () => {
     const fixed = buildConceptGraph(blank(), T03, TAP2.pakete, [], { ...tv, fv: { fv1: { ...tv.fv.fv1, fix: 9 } } });
     expect(fixed.miscon[0].active).toBe(false); expect(fixed.concepts.find((c) => c.id === K2)!.fv).toBe(0);
   });
-  it("Fragendaten der Lernrunden wirken als Vorwissen", () => {
+  it("Lernrunden sind nur ein schwacher Hinweis: alle Karten grün → höchstens 50 %, nie „sitzt“", () => {
     const g0 = buildConceptGraph(blank(), T03, TAP2.pakete, [], empty);
     expect(g0.m).toBeNull(); expect(g0.level).toBe("offen");
     const qs = Array.from({ length: 10 }, (_, i) => q("t3q" + i, "T03")), S = blank();
     qs.forEach((x) => { S.q[x.id] = { s: 2, n: 3, w: 0 }; });
     const g = buildConceptGraph(S, T03, TAP2.pakete, qs, empty);
-    expect(g.concepts.every((c) => c.prior === 1 && c.m === 1)).toBe(true);
+    expect(g.concepts.every((c) => c.prior === 1 && c.m === 0.5 && c.level === "festigen")).toBe(true);
+    expect(g.level).toBe("festigen"); expect(g.m).toBe(0.5);
   });
 });

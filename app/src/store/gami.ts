@@ -39,6 +39,9 @@ const LBX = { timer: 0 as ReturnType<typeof setTimeout> | 0, away: true }; // ni
 type SyncHooks = { get: () => { key: string } | null; soon: (ms?: number) => void };
 let SYNC: SyncHooks = { get: () => null, soon: () => {} };
 export const connectGamiSync = (h: SyncHooks) => { SYNC = h; };
+/** Konto-Anbindung (store/account.ts meldet sich hier an): Ranglisten-Eintrag gehört dann zum Konto */
+let ACC: () => string | null = () => null;
+export const connectGamiAccount = (f: () => string | null) => { ACC = f; };
 const syncConf = () => !!supabase;
 
 // ---- Ansicht und Lernrunde der App (für den Login-Kalender beim Start und das Neuzeichnen)
@@ -105,7 +108,7 @@ export const gm = {
   /** Start: Tag weiterschalten, Titel prüfen, Rangliste nachziehen, Login-Kalender zeigen (nicht über Übertragen/Verbinden, Tutorial, Runde, Prüfung) */
   boot: (h: string) => safe(() => {
     const g = gami(); rollDay(g, today()); titleCheck(g, ctx); save();
-    if (lbGet().joined) setTimeout(() => void lbPush(), 4000); else if (SYNC.get() && syncConf()) setTimeout(() => void lbLoad(true), 5000);
+    if (lbGet().joined) setTimeout(() => void lbPush(), 4000); else if ((SYNC.get() || ACC()) && syncConf()) setTimeout(() => void lbLoad(true), 5000);
     const free = () => current.view !== "tutorial" && !current.sess && !current.run;
     if (!h.startsWith("import=") && free() && g.loginClaimed !== today()) setTimeout(() => { if (free()) showLogin(); }, 700);
     bump();
@@ -147,7 +150,7 @@ async function rpc(fn: string, args: Record<string, unknown>) {
   return data as Record<string, unknown> | null;
 }
 const LB = () => useGami.getState().lb;
-const myId = () => lbId(SYNC.get()?.key);
+const myId = () => lbId(SYNC.get()?.key, ACC());
 export async function lbLoad(force?: boolean) {
   if (!syncConf() || (!force && Date.now() - LB().at < 60000)) return;
   lbSetState({ at: Date.now() });

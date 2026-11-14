@@ -126,7 +126,7 @@ function Themenwahl({ pro }: { pro: boolean }) {
     <div className="tp-pick">
       <section className="card tp-hero">
         <div className="row" style={{ gap: 10, flexWrap: "wrap" }}>
-          <span className="tc-ava" aria-hidden="true"><Ic name="sparkles" cls="ic sm" /></span>
+          <img className="vx-mark" src="/icons/vortex.svg" alt="" />
           <div style={{ flex: 1, minWidth: 220 }}><h2 style={{ margin: 0 }}>{pro ? "Vortex Pro" : "Vortex"}</h2><p className="small muted" style={{ margin: "4px 0 0" }}>{pro
             ? <>Wähle ein Thema – der Chat öffnet sich. Sobald du deine erste Nachricht schreibst, löchert dich Vortex eine ganze Sitzung lang mit Aufgaben im IHK-Stil und bewertet wie ein Prüfer mit Teilpunkten. Prüfung am {EXAM_DE}.</>
             : <>Dein Prüfungstutor für die TAP2 – mit deiner eigenen KI, kostenlos. Wähle ein Thema: Vortex stellt dir eine ganze Sitzung lang Aufgaben im IHK-Stil, bewertet wie ein Prüfer mit Teilpunkten, und dein Graph lernt mit. Prüfung am {EXAM_DE}.</>}</p></div>

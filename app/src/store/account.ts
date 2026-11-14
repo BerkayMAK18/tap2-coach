@@ -18,7 +18,8 @@ import { pairHash, pairOpen, parsePairInput } from "@/lib/pair";
 import { isObj, normalize, type State } from "@/lib/state";
 import { canon, evMerge, mergeStates, type Ev } from "@/lib/sync-merge";
 import { supabase } from "@/lib/supabase";
-import { gm, useGami } from "./gami";
+import { connectGamiAccount, gm, lbLoad, useGami } from "./gami";
+import { lbGet, lbSet } from "@/lib/gami/lb";
 import { syncId } from "./livesync";
 import { useProgress } from "./progress";
 
@@ -79,7 +80,11 @@ export const useAccount = create<Store>((set, get) => ({
     const { error } = await supabase.auth.signInWithOAuth({ provider: "github", options: { redirectTo: window.location.origin + "/einstellungen" } });
     if (error) set({ err: "Anmeldung fehlgeschlagen. Versuche es erneut." });
   },
-  signOut: async () => { await supabase?.auth.signOut(); set({ user: null, err: "", lastSync: null }); },
+  signOut: async () => {
+    // Ranglisten-Eintrag bleibt beim Konto: lokal nur „nicht eingetragen“ merken, damit er nicht auf die Geräte-ID umzieht
+    const lb = lbGet(); if (lb.joined) { lb.joined = false; delete lb.id; lbSet(lb); }
+    await supabase?.auth.signOut(); set({ user: null, err: "", lastSync: null });
+  },
 
   syncNow: async () => {
     const { user, busy } = get();
@@ -127,6 +132,9 @@ export const useAccount = create<Store>((set, get) => ({
 }));
 let again = false;
 
+// Ranglisten-Eintrag gehört zum Konto (ein Eintrag auf allen angemeldeten Geräten)
+connectGamiAccount(() => useAccount.getState().user?.id ?? null);
+
 // Anmeldestatus verfolgen und automatisch abgleichen
 if (typeof window !== "undefined" && supabase) {
   supabase.auth.getSession().then(async ({ data }) => {
@@ -135,11 +143,12 @@ if (typeof window !== "undefined" && supabase) {
     if (data.session) { try { const { data: u } = await supabase!.auth.getUser(); if (u.user) useAccount.setState({ user: u.user }); } catch { /* offline: gespeicherten Stand nutzen */ } }
     useAccount.setState({ ready: true });
     void useAccount.getState().syncNow();
+    if (useAccount.getState().user) setTimeout(() => void lbLoad(true), 2000); // Ranglisten-Eintrag des Kontos erkennen bzw. mitnehmen
   });
   supabase.auth.onAuthStateChange((_e, session) => {
     const was = useAccount.getState().user?.id;
     useAccount.setState({ user: session?.user ?? null });
-    if (session?.user && session.user.id !== was) void useAccount.getState().syncNow(); // gerade angemeldet: Gerät ins Konto einmischen
+    if (session?.user && session.user.id !== was) { void useAccount.getState().syncNow(); setTimeout(() => void lbLoad(true), 2000); } // gerade angemeldet: Gerät ins Konto einmischen, Ranglisten-Eintrag übernehmen
   });
   let timer: ReturnType<typeof setTimeout> | undefined;
   const soon = () => { if (!useAccount.getState().user) return; clearTimeout(timer); timer = setTimeout(() => void useAccount.getState().syncNow(), 5000); };

@@ -25,7 +25,7 @@ export default defineConfig({
       strategies: "injectManifest", // eigener Service Worker (src/sw.ts): Seiten Netz zuerst wie in der Live-App
       srcDir: "src",
       filename: "sw.ts",
-      includeAssets: ["favicon.png", "icon-192.png"],
+      includeAssets: ["favicon.png", "icon-192.png", "icon-512.png", "apple-touch-icon.png"],
       manifest: {
         name: "TAP2 Prüfungscoach",
         short_name: "TAP2 Coach",
@@ -35,7 +35,7 @@ export default defineConfig({
         display: "standalone",
         background_color: "#f6f7f9",
         theme_color: "#172033",
-        icons: [{ src: "icon-192.png", sizes: "192x192", type: "image/png" }],
+        icons: [{ src: "icon-192.png", sizes: "192x192", type: "image/png" }, { src: "icon-512.png", sizes: "512x512", type: "image/png" }], // Vortex-Logo (public/icons/vortex.svg)
       },
       injectManifest: {
         globPatterns: ["**/*.{js,css,woff2,png,svg,json,wasm}"], // ohne HTML: Seiten kommen immer zuerst aus dem Netz

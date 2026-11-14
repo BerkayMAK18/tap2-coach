@@ -15,7 +15,8 @@ import { shuffle } from "@/lib/dates";
 import { evById, evPassFallback, kapMastered, learnEv, learnEvFinal, type EvRes } from "@/lib/events";
 import { ST_LBL, looksCode, nextRound, qTask, reportUrl, tcolOf } from "@/lib/lernen";
 import { counts, nextTxt, st } from "@/lib/srs";
-import { gm, useGamiTick } from "@/legacy/gami-env";
+import { gm } from "@/store/gami";
+import { ComboChip } from "@/components/gami/Hud";
 import { useProgress, type Session } from "@/store/progress";
 import { Ic } from "@/ui-main";
 import { AmpBar, Amp, Ewh, Fig, Front, Legend, Trans } from "@/components/lernen/bits";
@@ -44,7 +45,7 @@ function pick(i: number) {
   const q = getQ(S0().S, s.ids[s.i]); if (!q || q.type !== "mc") return;
   const ok = i === q.right, [f, t] = S0().answer(q.id, ok);
   patch({ pick: i, res: { ...s.res, [q.id]: { ok, f, t } }, last: null });
-  gm("answer", q, ok, false, f, t);
+  gm.answer(q, ok, false, f, t);
   focusSel("#s-next");
 }
 function reveal() { patch({ rev: true }); focusSel("#s-yes"); }
@@ -52,7 +53,7 @@ function markGuess() {
   const s = S0().sess; if (!s) return;
   const q = getQ(S0().S, s.ids[s.i]); if (!q) return;
   const r = s.res[q.id];
-  if (S0().S.q[q.id] && r && r.ok) { S0().markGuess(q.id); patch({ res: { ...s.res, [q.id]: { ...r, t: 1, guess: true } } }); gm("guess", q); }
+  if (S0().S.q[q.id] && r && r.ok) { S0().markGuess(q.id); patch({ res: { ...s.res, [q.id]: { ...r, t: 1, guess: true } } }); gm.guess(q); }
   sessNext();
 }
 function rateCard(ok: boolean, unsure = false) {
@@ -60,7 +61,7 @@ function rateCard(ok: boolean, unsure = false) {
   const q = getQ(S0().S, s.ids[s.i]); if (!q) return;
   const [f, t] = S0().answer(q.id, ok, unsure);
   patch({ res: { ...s.res, [q.id]: { ok, f, t } }, last: { ok, f, t, id: q.id } });
-  gm("answer", q, ok, !!unsure, f, t);
+  gm.answer(q, ok, !!unsure, f, t);
   sessNext();
 }
 /** Gemischte Reihenfolge der Optionen, je Frage einmal festgelegt und gespeichert (optOrder()). */
@@ -71,7 +72,6 @@ function ensureOrd(q: Question & { type: "mc" }) {
 
 function Runde() {
   const sess = useProgress((s) => s.sess), S = useProgress((s) => s.S), navigate = useNavigate();
-  useGamiTick((t) => t.n);
   // Lernrunde = Fokusmodus (auf dem Handy ohne Navigationsleiste), wie body.focus in der Live-App
   useEffect(() => { document.body.classList.add("focus"); return () => document.body.classList.remove("focus"); }, []);
   // Ohne laufende Runde (z. B. direkt aufgerufen) zur Themenliste; Beenden navigiert selbst
@@ -218,14 +218,13 @@ function QuestionView({ sess: s, q, at, close }: { sess: Session; q: Question; a
     );
     foot = s.rev ? rate : <p className="kbdhelp"><span className="kbd">Leertaste</span> Antwort zeigen · <span className="kbd">Esc</span> beenden</p>;
   }
-  const last = s.last, chip = (gm("chip") as string) || "";
+  const last = s.last;
   return (
     <div className={`quiz t-${tcolOf(t.teil)}`} ref={ref}>
       <div className="quiz-top">
         <button type="button" className="iconbtn" id="s-close" aria-label="Runde beenden" onClick={close}><Ic name="x" /></button>
         <div className="prog"><span>{s.title}</span><div className="bar"><i style={{ width: `${(at / s.ids.length) * 100}%` }} /></div></div>
-        {/* Serien-Anzeige aus dem Original-Belohnungs-Modul (eigenes, intern escaptes HTML) */}
-        {chip && <span style={{ display: "contents" }} dangerouslySetInnerHTML={{ __html: chip }} />}
+        <ComboChip />
         <span className="qcount num">{at + 1} / {s.ids.length}</span>
         <a className="iconbtn report" href={reportUrl(q)} target="_blank" rel="noopener" aria-label="Fehler in dieser Frage melden" title="Fehler melden"><Ic name="flag" /></a>
         <button type="button" className={`iconbtn star ${marked ? "marked" : ""}`} aria-pressed={marked} aria-label={marked ? "Markierung entfernen" : "Frage markieren"} title="Markieren" onClick={() => toggleMark(q.id)}><Ic name="star" /></button>
@@ -257,10 +256,10 @@ function SessEnd({ sess: s, close }: { sess: Session; close: () => void }) {
     const cur = S0().sess; if (!evE || !cur) return;
     if (cur.src.final && !cur.evRes) {
       const sure = done.filter((x) => x.r.ok && !x.r.guess).length;
-      const r = (gm("evFinal", evE, sure, done.length) as { pass?: boolean; got?: boolean; late?: boolean } | undefined) || { pass: evPassFallback(sure, done.length) };
+      const r = gm.evFinal(evE, sure, done.length) || { pass: evPassFallback(sure, done.length), got: false, late: false };
       patch({ evRes: { sure, n: done.length, pass: !!r.pass, got: !!r.got, late: !!r.late } satisfies EvRes });
     }
-    if (cur.src.kap && !cur.evKap) { patch({ evKap: true }); if (kapMastered(S0().S, evE, cur.src.kap)) gm("evKap", evE, cur.src.kap); }
+    if (cur.src.kap && !cur.evKap) { patch({ evKap: true }); if (kapMastered(S0().S, evE, cur.src.kap)) gm.evKap(evE, cur.src.kap); }
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
   const er = s.evRes as EvRes | undefined;
   return (

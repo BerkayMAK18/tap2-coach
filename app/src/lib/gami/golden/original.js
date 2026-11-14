@@ -1,15 +1,11 @@
 // @ts-nocheck
 /*
+ * NUR FÜR DIE GOLDEN-TESTS (gami.golden.test.ts) – wird von der App nicht geladen.
  * Belohnungs-Modul (XP, Level, Quests, Login-Kalender, Schatzkammer/Gacha, Garderobe, Titel, Event-Belohnungen,
- * Bestenliste) – ORIGINAL aus der Live-App (index.html, main), unverändert übernommen.
- *
- * Warum unverändert: Live-App und Dev-App teilen Sync (tap2_sync) und Rangliste (tap2_lb). Gleiche Regeln, gleiche IDs
- * und gleiches Speicherformat (tap2coach-gami, pack/merge) sind Pflicht, sonst widersprechen sich die Apps.
- * Änderungen an Regeln deshalb nur zusammen mit der Live-App.
- *
- * Einbettung: Die Abhängigkeiten aus der Live-App kommen über `env` (siehe src/legacy/gami-env.ts). Einzige
- * Änderungen am Text: S/UI/view werden über env gelesen (env.S(), env.UI(), env.view()).
- * Quelle aktualisieren: Abschnitt „Belohnungen (XP, Level …)“ bis „App-Anbindung“ aus index.html kopieren.
+ * Bestenliste) – ORIGINAL aus der Live-App (index.html, main, Abschnitt „Belohnungen (XP, Level …)“ bis „App-Anbindung“),
+ * unverändert übernommen. Einzige Änderung: S/UI/view werden über env gelesen (env.S(), env.UI(), env.view()).
+ * Die Tests vergleichen die React/TS-Fassung (src/lib/gami, store/gami.ts, components/gami) mit diesem Original.
+ * Ändert sich das Belohnungs-Modul der Live-App, hier den Abschnitt neu übernehmen und die Tests laufen lassen.
  */
 export function createGami(env) {
   const { esc, render, num, today, rpc, syncSoon, syncConf, syncGet, hexOf, TP, QMAP, sha, plain, isObj, dayStr, EVENTS, topicQ, st, mapObj, keyRaw, hud, daysBetween, counts, allQ, TOPICS } = env;
@@ -339,8 +335,28 @@ export function createGami(env) {
     G.hist = G.hist.filter((r) => typeof r === "string" && /^[A-Z]{1,4}$/.test(r)).slice(0, 60);
     if (G.quests) { G.quests.chest = !!G.quests.chest; if (!Array.isArray(G.quests.claimed)) G.quests.claimed = []; }
     if (!["quests", "schatz", "garderobe"].includes(G.tab)) G.tab = "quests";
-    ["lookAt", "titleAt"].forEach((k) => { if (G[k] != null) G[k] = num(G[k]); });
+    ["lookAt", "titleAt", "u"].forEach((k) => { if (G[k] != null) G[k] = num(G[k]); });
+    book(G);
   }
+  // ---- Konto (seit v2.8): Damit Ausgaben (Schatzkammer, Boosts) auf allen Geräten ankommen, zählt jedes Gerät Eingänge
+  // und Ausgänge getrennt. Beide wachsen nur – beim Abgleich gilt je Zähler das Maximum. Nacheinander genutzte Geräte
+  // landen so beim exakt gleichen Stand; gleichzeitige Änderungen gehen nie zulasten des Nutzers.
+  const KB = ["fi", "fo", "ti", "to", "xi", "xo", "si", "so"];
+  // Konto an den Kontostand angleichen: Was seit dem letzten Mal dazukam, ist Eingang, was fehlt, Ausgang.
+  function book(g) {
+    const K = (g.kb = isObj(g.kb) ? g.kb : {});
+    KB.forEach((k) => { K[k] = Math.max(0, num(K[k])); });
+    const adj = (cur, i, o) => { const d = cur - (K[i] - K[o]); if (d > 0) K[i] += d; else if (d < 0) K[o] -= d; };
+    adj(g.federn, "fi", "fo"); adj(g.tickets, "ti", "to"); adj(g.boosts.xp2, "xi", "xo"); adj(g.boosts.shield, "si", "so");
+  }
+  // JSON mit sortierten Schlüsseln (feste Regel für Gleichstände – gleiches Ergebnis auf allen Geräten)
+  const stab = (v) => (Array.isArray(v) ? "[" + v.map(stab).join(",") + "]" : v && typeof v === "object" ? "{" + Object.keys(v).sort().map((k) => JSON.stringify(k) + ":" + stab(v[k])).join(",") + "}" : JSON.stringify(v ?? null));
+  const DAYK = ["answered", "correct", "maxCombo", "sowi", "t2", "green", "fixed", "fresh"];
+  const cleanToday = (t) => { const o = { day: t.day }; DAYK.forEach((k) => { o[k] = Math.max(0, num(t[k])); }); return o; };
+  const cleanQuests = (q) => {
+    if (!isObj(q) || !Array.isArray(q.ids) || !q.ids.every((id) => QPOOL.some((x) => x.id === id))) return null;
+    const ids = q.ids; return { ids: ids.slice(), claimed: Array.isArray(q.claimed) ? ids.filter((id) => q.claimed.includes(id)) : [], chest: !!q.chest };
+  };
   function save() { try { localStorage.setItem(KEY_GAMI, JSON.stringify(G)); } catch (e) {} }
   function load() {
     let raw = null;
@@ -424,6 +440,7 @@ export function createGami(env) {
       else G.combo = 0;
     }
     if (new Date().getHours() < 4) (G.flags = G.flags || {}).nacht = 1;
+    G.u = Date.now(); // Serie/Boosts geändert (Abgleich zwischen Geräten)
     titleCheck();
     save(); lbSoon();
     if (msg) setTimeout(() => { ensureLayer(); const fl = document.createElement("div"); fl.className = "gm-float" + (sure ? "" : " gm-float-off"); fl.textContent = msg; document.body.appendChild(fl); setTimeout(() => fl.remove(), 1200); }, 30);
@@ -552,7 +569,7 @@ export function createGami(env) {
       else if (d.gmChar) { G.char = d.gmChar; G.lookAt = Date.now(); save(); render(); }
       else if (d.gmEq) { const it = IT[d.gmEq]; if (!it || !G.owned[it.id]) return; G.equip[it.char][it.slot] = it.id; G.lookAt = Date.now(); save(); render(); }
       else if (d.gmTitle !== undefined) { const id = d.gmTitle; if (id && !(G.titles || {})[id]) return; G.title = id; G.titleAt = G.lookAt = Date.now(); save(); render(); }
-      else if (d.gmUse) { const id = d.gmUse; if (G.boosts[id] < 1) return; G.boosts[id]--; if (id === "xp2") G.xp2Left = 10; else G.shieldOn = true; save(); toast(`${IT[id].icon} ${IT[id].name} aktiviert`); render(); }
+      else if (d.gmUse) { const id = d.gmUse; if (G.boosts[id] < 1) return; G.boosts[id]--; if (id === "xp2") G.xp2Left = 10; else G.shieldOn = true; G.u = Date.now(); save(); toast(`${IT[id].icon} ${IT[id].name} aktiviert`); render(); }
       if (d.gmClaim || d.gmChest !== undefined || d.gmPull || d.gmChar || d.gmEq || d.gmUse || d.gmTitle !== undefined) { try { syncSoon(3000); } catch (x) {} lbSoon(d.gmChar || d.gmEq || d.gmTitle !== undefined ? 5000 : 30000); } // Belohnungen auch ohne Lernen abgleichen
     };
     return true;
@@ -560,9 +577,11 @@ export function createGami(env) {
 
   // ---- Übertragung und Sicherung: zusammenführen, nie verlieren
   function pack() {
-    const own = {}; Object.keys(G.owned).forEach((id) => { const it = IT[id]; if (it && it.rar !== "S") (own[it.char] = own[it.char] || []).push(it.art); });
+    book(G);
+    const own = {}; ITEMS.forEach((it) => { if (G.owned[it.id] && it.char && it.rar !== "S") (own[it.char] = own[it.char] || []).push(it.art); }); // feste Reihenfolge (seit v2.8): gleicher Besitz = gleiches Paket
     const eq = {}; CHARS.forEach((c) => { eq[c] = SLOTS.map(([s]) => (IT[G.equip[c][s]] || {}).art || "").join("."); });
-    return { v: 1, x: G.earned, l: G.level, p: G.xp, f: G.federn, t: G.tickets, o: Object.fromEntries(Object.entries(own).map(([c, l]) => [c, l.join(".")])), e: eq, c: G.char, b: [G.boosts.xp2, G.boosts.shield], y: G.pity, n: G.pulls, s: [G.loginStreak, G.lastLogin, G.calIdx, G.calRound, G.best], a: G.lookAt || 0, ti: Object.keys(G.titles || {}).filter((id) => TI[id]).join("."), tt: G.title || "", tz: G.titleAt || 0, ev: G.ev || {} };
+    return { v: 1, x: G.earned, l: G.level, p: G.xp, f: G.federn, t: G.tickets, o: Object.fromEntries(Object.entries(own).map(([c, l]) => [c, l.join(".")])), e: eq, c: G.char, b: [G.boosts.xp2, G.boosts.shield], y: G.pity, n: G.pulls, s: [G.loginStreak, G.lastLogin, G.calIdx, G.calRound, G.best], a: G.lookAt || 0, ti: TITLES.filter((t) => (G.titles || {})[t.id]).map((t) => t.id).join("."), tt: G.title || "", tz: G.titleAt || 0, ev: G.ev || {},
+      k: KB.map((k) => G.kb[k]), lc: G.loginClaimed, qd: G.today ? { t: G.today, q: G.quests } : null, r: [G.combo, G.xp2Left, G.shieldOn ? 1 : 0], u: G.u || 0 }; // seit v2.8 (ältere Versionen ignorieren diese Felder)
   }
   function unpack(p) {
     if (!p || typeof p !== "object") return null;
@@ -573,21 +592,30 @@ export function createGami(env) {
     g.titles = {}; String(p.ti || "").split(".").forEach((id) => { if (TI[id]) g.titles[id] = 1; }); if (p.tt != null) g.title = TI[p.tt] ? String(p.tt) : ""; if (+p.tz) g.titleAt = +p.tz; else if (p.tt) g.titleAt = +p.a || 0; g.ev = p.ev && typeof p.ev === "object" ? p.ev : {};
     Object.entries(p.o || {}).forEach(([c, l]) => String(l).split(".").forEach((a) => { if (IT[c + "-" + a]) g.owned[c + "-" + a] = 1; }));
     Object.entries(p.e || {}).forEach(([c, l]) => { if (!ANIMALS[c]) return; const arts = String(l).split("."); g.equip[c] = baseEquip(c); SLOTS.forEach(([sl], i) => { if (i >= arts.length) { delete g.equip[c][sl]; return; } const id = c + "-" + arts[i]; if (arts[i] && IT[id] && IT[id].slot === sl) g.equip[c][sl] = id; }); });
+    // seit v2.8
+    if (Array.isArray(p.k)) { const K = {}; KB.forEach((k, n) => { K[k] = Math.max(0, num(p.k[n])); }); g.kb = K; }
+    if (p.lc != null) g.loginClaimed = dayStr(p.lc) || null;
+    if (isObj(p.qd) && isObj(p.qd.t) && dayStr(p.qd.t.day)) { g.today = cleanToday(p.qd.t); g.quests = cleanQuests(p.qd.q); }
+    if (Array.isArray(p.r)) { g.combo = Math.max(0, Math.floor(num(p.r[0]))); g.xp2Left = Math.max(0, Math.floor(num(p.r[1]))); g.shieldOn = !!num(p.r[2]); }
+    if (num(p.u)) g.u = num(p.u);
     return g;
   }
   function merge(p) {
     const inc = unpack(p); if (!inc) return;
+    // Stand mit Konto (v2.8+): Spiegelung. Ohne Konto (ältere Version): bisherige Regel, das Konto gleicht fix() danach an.
+    const neu = isObj(inc.kb) && !Array.isArray(inc.kb);
     Object.keys(inc.owned || {}).forEach((id) => { if (IT[id]) G.owned[id] = 1; });
     Object.keys(inc.titles || {}).forEach((id) => { if (TI[id] && !G.titles[id]) G.titles[id] = +inc.titles[id] || 1; });           // Titel: Vereinigung
-    Object.entries(inc.ev || {}).forEach(([k, r]) => { if (!r || typeof r !== "object") return; const m = G.ev[k] = G.ev[k] || {}; m.best = Math.max(+m.best || 0, +r.best || 0); ["done", "got"].forEach((f) => { if (+r[f] && (!+m[f] || +r[f] < +m[f])) m[f] = +r[f]; }); m.kap = Object.assign({}, r.kap || {}, m.kap || {}); }); // Events: nie verlieren           // Skins: Vereinigung
-    G.boosts.xp2 = Math.max(G.boosts.xp2, +inc.boosts.xp2 || 0); G.boosts.shield = Math.max(G.boosts.shield, +inc.boosts.shield || 0);
+    Object.entries(inc.ev || {}).forEach(([k, r]) => { if (!r || typeof r !== "object") return; const m = G.ev[k] = G.ev[k] || {}; m.best = Math.max(+m.best || 0, +r.best || 0); ["done", "got"].forEach((f) => { if (+r[f] && (!+m[f] || +r[f] < +m[f])) m[f] = +r[f]; }); m.kap = Object.assign({}, r.kap || {}, m.kap || {}); Object.entries(isObj(r.kap) ? r.kap : {}).forEach(([x, v]) => { if (+v && (!+m.kap[x] || +v < +m.kap[x])) m.kap[x] = +v; }); }); // Kapitel: frühester Zeitpunkt (gleich auf allen Geräten) // Events: nie verlieren           // Skins: Vereinigung
+    if (!neu) { G.boosts.xp2 = Math.max(G.boosts.xp2, +inc.boosts.xp2 || 0); G.boosts.shield = Math.max(G.boosts.shield, +inc.boosts.shield || 0); }
     if (inc.title !== undefined && (+inc.titleAt || 0) > (+G.titleAt || 0) && (!inc.title || G.titles[inc.title])) { G.title = inc.title; G.titleAt = +inc.titleAt; } // Titel: die zuletzt getroffene Wahl
     const ahead = (+inc.earned || 0) > G.earned, tie = (+inc.earned || 0) === G.earned, incA = +inc.lookAt || 0, myA = +G.lookAt || 0;
     const lookKey = (g) => g.char + "|" + CHARS.map((c) => SLOTS.map(([s]) => ((g.equip || {})[c] || {})[s] || "").join(",")).join(";");
-    if (ahead) {                                                                                 // Fortschritt: der weiter fortgeschrittene Stand
+    if (!neu && ahead) {                                                                         // Fortschritt (ältere Version): der weiter fortgeschrittene Stand
       ["earned", "xp", "level", "federn", "tickets", "pulls", "best", "loginStreak", "lastLogin", "calIdx", "calRound"].forEach((k) => { if (inc[k] != null) G[k] = inc[k]; });
       if (inc.pity) G.pity = inc.pity;
     }
+    if (neu) mirror(inc, ahead);
     if (incA > myA) {                                                                            // Figur + Ausrüstung: die zuletzt getroffene Wahl gilt auf allen Geräten
       if (inc.char && ANIMALS[inc.char]) G.char = inc.char;
       CHARS.forEach((c) => { const ie = inc.equip && inc.equip[c]; if (ie) SLOTS.forEach(([s]) => { const it = IT[ie[s]]; if (it && it.char === c && it.slot === s && G.owned[it.id]) G.equip[c][s] = it.id; }); });
@@ -605,6 +633,34 @@ export function createGami(env) {
       });
     }
     fix(); save();
+  }
+  // Spiegelung (v2.8+): Konto je Zähler das Maximum, XP vom weiter fortgeschrittenen Stand, Schatzkammer vom Stand mit
+  // mehr Zügen, Login-Kalender vom späteren Tag, Tagesquests zusammengeführt, Serie/aktive Boosts vom jüngeren Stand.
+  // Bei Gleichstand entscheidet eine feste Regel – beide Geräte kommen so zum selben Ergebnis.
+  function mirror(inc, ahead) {
+    book(G); const K = G.kb;
+    KB.forEach((k) => { K[k] = Math.max(K[k], Math.max(0, num(inc.kb[k]))); });
+    G.federn = K.fi - K.fo; G.tickets = K.ti - K.to; G.boosts = { xp2: K.xi - K.xo, shield: K.si - K.so };
+    if (ahead) ["earned", "xp", "level"].forEach((k) => { if (inc[k] != null) G[k] = inc[k]; });
+    G.best = Math.max(G.best, +inc.best || 0);
+    const ip = +inc.pulls || 0;
+    if (ip > G.pulls || (ip === G.pulls && stab(inc.pity) > stab(G.pity))) { G.pulls = ip; if (inc.pity) G.pity = inc.pity; }
+    const pad = (n) => String(Math.max(0, Math.floor(num(n)))).padStart(6, "0");
+    const lk = (g) => [g.loginClaimed || "", pad(g.calRound), pad(g.calIdx), pad(g.loginStreak), g.lastLogin || ""].join("|");
+    if (lk(inc) > lk(G)) ["lastLogin", "loginClaimed", "loginStreak", "calIdx", "calRound"].forEach((k) => { G[k] = inc[k]; });
+    const it = inc.today, mt = G.today;
+    if (it && dayStr(it.day)) {
+      if (!mt || it.day > mt.day) { G.today = cleanToday(it); G.quests = cleanQuests(inc.quests); }
+      else if (it.day === mt.day) {
+        DAYK.forEach((k) => { mt[k] = Math.max(num(mt[k]), Math.max(0, num(it[k]))); });
+        const iq = cleanQuests(inc.quests), q = G.quests;
+        if (iq && q && iq.ids.join() === q.ids.join()) { q.claimed = q.ids.filter((id) => q.claimed.includes(id) || iq.claimed.includes(id)); q.chest = q.chest || iq.chest; }
+        else if (iq && !q) G.quests = iq;
+      }
+    }
+    const rv = (g) => stab([Math.floor(num(g.combo)), Math.floor(num(g.xp2Left)), g.shieldOn ? 1 : 0]), iu = num(inc.u), mu = num(G.u);
+    if (iu > mu || (iu === mu && rv(inc) > rv(G))) { G.combo = Math.max(0, Math.floor(num(inc.combo))); G.xp2Left = Math.max(0, Math.floor(num(inc.xp2Left))); G.shieldOn = !!inc.shieldOn; }
+    if (iu > mu) G.u = iu;
   }
 
   // ---- Bestenliste (freiwillig): sichtbar sind nur Spitzname, Level, XP und Figur. Server: tools/supabase-leaderboard.sql

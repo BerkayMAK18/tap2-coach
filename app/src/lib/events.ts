@@ -1,7 +1,7 @@
 /**
  * Events – Klausur-Lernaktionen mit Kurz-Lektionen, eigenen Fragen und Sonderbelohnung bis zum Klausurtermin.
  * Regeln wie in der Live-App (evKapQ, evOn, evSure, evReady, learnEv, learnEvFinal, evStatus, Abschlusstest).
- * Die Belohnung selbst vergibt das Original-Belohnungs-Modul (gm("evFinal"), gm("evKap")).
+ * Die Belohnung selbst vergibt das Belohnungs-Modul (store/gami.ts: gm.evFinal, gm.evKap).
  */
 import { EVENTS } from "@/content/catalog";
 import type { EventCatalog, Question } from "@/content/schema";
@@ -37,7 +37,7 @@ export function learnEvFinal(S: State, e: EventCatalog): Plan | null {
   return { list: shuffle(pick), title: e.kurz + " · Abschlusstest", src: { kind: "ev", ev: e.id, final: true } };
 }
 
-/** Stand der Belohnung aus dem Belohnungs-Modul (gm("evInfo")) */
+/** Stand der Belohnung aus dem Belohnungs-Modul (gm.evInfo) */
 export type EvInfo = { got?: number; done?: number; best?: number; kap?: Record<string, number> };
 export function evStatusTxt(e: EventCatalog, inf: EvInfo, day = today()) {
   const left = evLeft(e, day);

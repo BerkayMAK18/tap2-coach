@@ -4,8 +4,8 @@
  * (Ablauf 1:1 wie syncNow() in index.html). Freigegeben vom Betreiber am 13.11.2026 – schreibt nur in den Eintrag,
  * dessen Schlüssel auf diesem Gerät liegt.
  *
- * Belohnungen (g): Solange das Belohnungs-Modul nicht portiert ist, führt die Dev-App g UNVERÄNDERT mit
- * (übernimmt den Stand aus der Cloud), damit auf der Live-App nichts verloren geht.
+ * Belohnungen (g): wie die Live-App – Cloud-Stand einmischen (merge), eigenen Stand packen (pack); Format unverändert.
+ * Fällt der Belohnungs-Teil aus, wird g unverändert weitergereicht, damit nichts verloren geht.
  * Vor dem ersten Abgleich wird der lokale Stand zurückgelegt (tap2coach-vorsync) – wie in der Live-App.
  */
 import { create } from "zustand";
@@ -16,10 +16,10 @@ import { canon, evMerge, mergeStates, type Ev } from "@/lib/sync-merge";
 import { normalize } from "@/lib/state";
 import { supabase } from "@/lib/supabase";
 import { useProgress } from "./progress";
-import { gm } from "@/legacy/gami-env";
+import { connectGamiSync, gm } from "./gami";
 
 const KEY_SYNC = "tap2coach-sync", KEY_VORSYNC = "tap2coach-vorsync", KEY_GAMI = "tap2coach-gami";
-// Belohnungen aus der Cloud im kompakten Sync-Format (gm("pack")) – getrennt von tap2coach-gami (volles Format der Live-App)
+// Belohnungen aus der Cloud im kompakten Sync-Format (gm.pack()) – getrennt von tap2coach-gami (volles Format der Live-App)
 const KEY_GAMI_CLOUD = "tap2coach-gami-cloud";
 export type LiveCfg = { v: 1; key: string; rev: number; at: number; ev: Ev; since: number; grp?: string };
 export const liveGet = (): LiveCfg | null => { try { const c = JSON.parse(localStorage.getItem(KEY_SYNC) || "null"); return c && typeof c.key === "string" && isKey(keyRaw(c.key)) ? c : null; } catch { return null; } };
@@ -147,10 +147,9 @@ export const useLiveSync = create<Store>((set, get) => ({
         ev = evMerge(ev, R?.ev);
         let S = useProgress.getState().S;
         if (R?.s && typeof R.s === "object") { const m = mergeStates(S, R.s, NORMALIZE_CTX, ev); if (canon(m) !== canon(S)) { useProgress.getState().applySynced(m); S = m; } }
-        // Belohnungen: unverändert aus der Cloud übernehmen (Belohnungs-Modul folgt), lokal ablegen für später
         // Belohnungen wie in der Live-App: Cloud-Stand einmischen (merge), dann den eigenen Stand packen (pack)
-        if (R?.g) gm("merge", R.g);
-        const packed = gm("pack");
+        if (R?.g) gm.merge(R.g);
+        const packed = gm.pack();
         const g = packed ?? R?.g ?? (() => { try { return JSON.parse(localStorage.getItem(KEY_GAMI_CLOUD) || "null"); } catch { return null; } })(); // Rückfall, falls das Modul ausfällt
         if (!packed && R?.g) { try { localStorage.setItem(KEY_GAMI_CLOUD, JSON.stringify(R.g)); } catch { /* privat */ } }
         if (R?.s && canon(normalize(structuredClone(R.s), NORMALIZE_CTX)) === canon(S) && canon(R.g ?? null) === canon(g ?? null) && canon(R.ev ?? {}) === canon(ev)) { cfg.rev = rev; done = true; break; }
@@ -170,6 +169,11 @@ export const useLiveSync = create<Store>((set, get) => ({
     }
   },
 }));
+
+/** Bald abgleichen (syncSoon der Live-App), z. B. nach Belohnungen ohne Lernen */
+let soonTimer: ReturnType<typeof setTimeout> | undefined;
+export function syncSoon(ms?: number) { if (!supabase || !liveGet()) return; clearTimeout(soonTimer); soonTimer = setTimeout(() => { soonTimer = undefined; void useLiveSync.getState().syncNow(); }, ms ?? 20000); }
+connectGamiSync({ get: liveGet, soon: syncSoon });
 
 if (typeof window !== "undefined" && supabase) {
   if (liveGet()) void useLiveSync.getState().syncNow();

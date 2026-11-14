@@ -102,9 +102,9 @@ app/
 | Aufgaben (20 Übungsaufgaben, Timer, Punkte, Fehlerursachen) | ✓ | ✓ | `lib/aufgaben.ts`, 1:1 (PORTIERUNG.md) |
 | Prüfung (Simulation, Real-Klausur, Noten, „Bereit für eine 1“) | ✓ | ✓ | `lib/pruefung.ts`, `store/pruefung.ts`, 1:1 (PORTIERUNG.md) |
 | Tipps, Operator-Trainer, Lernplan, Tutorial | ✓ | ✓ | `lib/tipps.ts`, Operator-Daten im Katalog, 1:1 (PORTIERUNG.md) |
-| Events (LF11a) | ✓ | ✓ | `lib/events.ts`, Belohnung über das Original-Modul, 1:1 (PORTIERUNG.md) |
-| Belohnungen (XP, Level, Quests, Kalender, Tiere, Skins, Titel) | ✓ | – | eigenes Modul, Format `tap2coach-gami` übernehmen |
-| Rangliste, Geräte-Sync | ✓ | – | Supabase, gleiches Protokoll |
+| Events (LF11a) | ✓ | ✓ | `lib/events.ts`, Belohnung über `store/gami.ts`, 1:1 (PORTIERUNG.md) |
+| Belohnungen (XP, Level, Quests, Kalender, Tiere, Skins, Titel) | ✓ | ✓ | `lib/gami/`, `store/gami.ts`, Format `tap2coach-gami` unverändert, Golden-Tests gegen das Original (PORTIERUNG.md) |
+| Rangliste, Geräte-Sync | ✓ | ✓ | `tap2_lb` bzw. `tap2_sync`, gleiches Protokoll und gleiche IDs |
 | Übertragen per Link/QR | ✓ | – | |
 | Patch Notes, Hell/Dunkel | ✓ | Patch Notes ✓ (`lib/patchnotes.ts`), Hell/Dunkel – | |
 

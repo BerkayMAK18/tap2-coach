@@ -12,6 +12,7 @@ import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { TAP2, TP, getQ } from "@/content/catalog";
 import type { Question } from "@/content/schema";
 import { shuffle } from "@/lib/dates";
+import { evById, evPassFallback, kapMastered, learnEv, learnEvFinal, type EvRes } from "@/lib/events";
 import { ST_LBL, looksCode, nextRound, qTask, reportUrl, tcolOf } from "@/lib/lernen";
 import { counts, nextTxt, st } from "@/lib/srs";
 import { gm, useGamiTick } from "@/legacy/gami-env";
@@ -78,8 +79,8 @@ function Runde() {
   const closeSess = () => {
     const src = S0().sess?.src;
     S0().setSession(null);
-    // Event-Runden gehören zum Event-Modul (noch nicht portiert)
-    if (src?.ev) void navigate({ to: "/events" });
+    // Event-Runden: zurück zum Event (closeSess() der Live-App)
+    if (src?.ev) void navigate({ to: "/events", search: { ev: src.ev } });
     else void navigate({ to: "/lernen", search: src?.tid ? { thema: src.tid } : {} });
     window.scrollTo({ top: 0 });
   };
@@ -246,16 +247,29 @@ function SessEnd({ sess: s, close }: { sess: Session; close: () => void }) {
   const ok = done.filter((x) => x.r.ok).length, wrong = done.filter((x) => !x.r.ok);
   const c = counts(S, done.map((x) => x.q)), green = done.filter((x) => x.r.t === 2 && x.r.f !== 2).length;
   const again = () => startRound({ list: wrong.map((x) => x.q), title: "Fehler wiederholen", src: s.src.final ? { ...s.src, final: false } : s.src });
+  const evE = evById(s.src.ev);
   const next = () => {
-    if (s.src.ev) { void navigate({ to: "/events" }); return; } // Event-Runden startet das Event-Modul (noch nicht portiert)
+    if (evE) { startRound(s.src.final ? learnEvFinal(S, evE) : learnEv(S, evE, s.src.kap)); return; }
     startRound(nextRound(S, s.src));
   };
+  // Event: Abschlusstest auswerten (Belohnung vergibt das Belohnungs-Modul) und gemeistertes Kapitel melden – je Runde einmal
+  useEffect(() => {
+    const cur = S0().sess; if (!evE || !cur) return;
+    if (cur.src.final && !cur.evRes) {
+      const sure = done.filter((x) => x.r.ok && !x.r.guess).length;
+      const r = (gm("evFinal", evE, sure, done.length) as { pass?: boolean; got?: boolean; late?: boolean } | undefined) || { pass: evPassFallback(sure, done.length) };
+      patch({ evRes: { sure, n: done.length, pass: !!r.pass, got: !!r.got, late: !!r.late } satisfies EvRes });
+    }
+    if (cur.src.kap && !cur.evKap) { patch({ evKap: true }); if (kapMastered(S0().S, evE, cur.src.kap)) gm("evKap", evE, cur.src.kap); }
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+  const er = s.evRes as EvRes | undefined;
   return (
     <div className="quiz">
       <section className="card endcard">
         <span className="small muted">Runde beendet · {s.title}</span>
         <h2>{ok} von {done.length} gewusst</h2>
         <p className="muted">{green ? `${green} ${green === 1 ? "Frage ist" : "Fragen sind"} neu auf Grün. ` : ""}{wrong.length ? `${wrong.length} ${wrong.length === 1 ? "Frage steht" : "Fragen stehen"} auf Rot und ${wrong.length === 1 ? "kommt" : "kommen"} in der nächsten Runde zuerst.` : "Keine Fehler in dieser Runde."}</p>
+        {er && <div className={`ev-res ${er.pass ? "ok" : "bad"}`}><b>Abschlusstest: {er.sure} von {er.n} sicher richtig ({Math.round((er.sure / Math.max(1, er.n)) * 100)} %)</b><span>{er.pass ? (er.got ? "Bestanden! Deine Sonderbelohnung liegt jetzt in der Garderobe." : er.late ? "Bestanden – das Event ist aber vorbei, die Belohnung gibt es nicht mehr." : "Bestanden!") : "Noch nicht bestanden – ab 80 % klappt es. Wiederhole die Fehler und versuche es dann noch einmal."}</span></div>}
         <div><AmpBar c={c} cls="lg" /><Legend c={c} /></div>
         <div className="row">
           {wrong.length > 0 && <button type="button" className="btn primary" onClick={again}><Ic name="again" cls="ic sm" /> Fehler wiederholen ({wrong.length})</button>}

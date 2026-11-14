@@ -25,7 +25,7 @@ mit Tests. Erst danach neue Funktionen. Referenz ist immer `../index.html` auf `
 | Lernen | Übersicht (rStart), Lernen (Themen, Themenseite, Runde rSess), Suche, SQL-/Code-Karten, eigene Karten | **fertig (1:1)**, Abnahme 13.11.2026 (siehe unten) |
 | Aufgaben | rUeb (20 Aufgaben, Timer, Punkte, Fehlerursachen) | **fertig (1:1)**, Abnahme 14.11.2026 (siehe unten) |
 | Prüfung | rPK (Simulation, Real-Klausur, Bewertung wie ein Prüfer, Ergebnisse, „Bereit für eine 1“) | **fertig (1:1)**, Abnahme 14.11.2026 (siehe unten) |
-| Events | rEvents (Kapitel, Lernkarten, Abschlusstest, Belohnung) | offen |
+| Events | rEvents (Kapitel, Lernkarten, Abschlusstest, Belohnung) | **fertig (1:1)**, Abnahme 14.11.2026 (siehe unten) |
 | Tipps | rTipps, Operator-Trainer, Lernplan, Tutorial, Fehlerprotokoll | **fertig (1:1)**, Abnahme 14.11.2026 (siehe unten) |
 | Belohnungen/Rangliste | Original-Modul eingebettet | fertig (1:1) |
 | Einstellungen | Darstellung, App & Offline, Geräte-Sync, Übertragen (Link/QR), Sicherung, Hilfe, Datenschutz | teilweise |
@@ -146,3 +146,26 @@ Bewusste Unterschiede:
 Gefunden: Nach einer Antwort im Operator-Trainer bekam „Weiter“ erst im nächsten Bild den Fokus (requestAnimationFrame
 läuft in Hintergrund-Tabs nicht) – jetzt per Effekt nach dem Rendern, wie die Live-App sofort.
 Grundgerüst: Pfade `operatoren`, `plan`, `tutorial` ergänzt; Erststart → Tutorial (wie die Live-App ohne `#…`).
+
+### Events (14.11.2026, Branch `port/events`)
+
+`/events` (Liste) und `/events?ev=<id>` (Event-Seite). Logik in `src/lib/events.ts` mit Tests: Kapitel- und gemischte
+Runden, Abschlusstest (Freischaltung ab 80 % gelb/grün je Kapitel, 15 Auswahlfragen, aus jedem Kapitel mindestens zwei),
+Status-Text, Bestehen ab 80 % sicher richtig, Kapitel gemeistert. Die Belohnung vergibt weiter das Original-Modul
+(`gm("evFinal")`, `gm("evKap")`, Vorschau `gm("evPreview")`). In der Lernrunde: Ergebnis des Abschlusstests auf der
+Endkarte, Kapitel-Meldung, „Nächste Runde“ und „Fertig“ zurück ins Event.
+
+Abnahme mit gleichem Lern- **und Belohnungsstand** (`tap2coach-gami` übernommen): Markup **identisch** für Einleitung,
+Event-Karte, Event-Seite (Abschlusstest gesperrt und frei, Tipps, 7 Kapitel mit „Kurz erklärt“ und Abbildungen) –
+einziger Unterschied ist eine laufende ID im SVG der Figur aus dem Belohnungs-Modul (`gm4s`/`gm8s`). Kapitel-Runde und
+Abschlusstest durchgespielt: Endkarte mit Ergebnis-Hinweis gleich aufgebaut, bestes Ergebnis landet im Belohnungsstand,
+„Fertig“ führt zurück ins Event, „Nächste Runde“ startet bei gesperrtem Test nichts – beides wie in der Live-App.
+Keine Konsolenfehler; lint, test, build grün.
+
+Bewusste Unterschiede:
+- Die Liste zeigt nur LF11a: WPF PM ist im Export abgeschaltet (`enabled: false`, Entscheidung in ARCHITEKTUR.md),
+  die Live-App zeigt beide.
+
+Gefunden, gehört zum Grundgerüst: TanStacks `Link` setzt bei aktiver Route selbst `aria-current="page"` – während einer
+Runde unter `/lernen/runde` war „Lernen“ immer mitmarkiert (bei Event-Runden zusätzlich zu „Events“). Die Menü-Links
+gelten jetzt nur bei exakt gleichem Pfad als aktiv, sonst gilt unsere Markierung wie in der Live-App (`navView`).

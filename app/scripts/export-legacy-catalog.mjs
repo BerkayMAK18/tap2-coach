@@ -4,7 +4,8 @@
  * Die Live-App bleibt die Quelle der Inhalte, bis die neue App sie ersetzt. Das Skript liest index.html nur:
  * Es führt den Datenteil (erstes <script> bis zur Haupt-IIFE) in einer Node-VM aus und baut daraus
  *   - tap2.json      Kernkatalog TAP2: Themen, Fragen (MC + Karten), Aufgaben, offene Prüfungsfragen,
- *                    Lernpakete, Notationshilfen, Abbildungen, SQL-Schema
+ *                    Lernpakete, Notationshilfen, Abbildungen, SQL-Schema, SQL-Beispieldatenbank, Code-Karten
+ *                    (die letzten beiden stehen in der Live-App im Logikteil; es werden nur diese Literale gelesen)
  *   - event-<id>.json je Event (Kapitel mit Lernkarten, Fragen, Belohnung, Zeitraum)
  *   - index.json      Verzeichnis aller Kataloge (Grundlage der Katalog-Bibliothek)
  *
@@ -40,6 +41,17 @@ const dataCode = lines.slice(start + 1, end).join("\n");
 const D = vm.runInNewContext(dataCode + "\n;({ ICONS, DECKS, CARDS_RAW, SQL_SCHEMA, UEB, CATS, MC, OPEN, TOPICS, CARD_TOPIC, MC_TOPIC, PAKETE, NOTATION, FIG, EVENTS });", {});
 const sourceHash = createHash("sha256").update(dataCode).digest("hex").slice(0, 12);
 
+// ---- Daten, die in der Live-App im Logikteil stehen (nur diese Literale werden ausgewertet, kein App-Code)
+const fullText = lines.join("\n");
+const lit = (re, name) => { const m = fullText.match(re); if (!m) throw new Error(`${name} in index.html nicht gefunden (Struktur geändert?)`); return m[1]; };
+const L = vm.runInNewContext(`({
+  seed: ${lit(/const SQL_SEED = (`[\s\S]*?`);/, "SQL_SEED")},
+  tables: ${lit(/const SQL_TABLES = (\[[\s\S]*?\n {2}\]);/, "SQL_TABLES")},
+  cards: ${lit(/const SQLX = (\{[\s\S]*?\n {2}\});/, "SQLX")},
+  note: ${lit(/const SQL_NOTE = ("[^"\n]*");/, "SQL_NOTE")},
+  code: ${lit(/const CODE = (\{[\s\S]*?\n {2}\});/, "CODE")},
+})`, {});
+
 // ---- Kernkatalog: gleiche Ableitung wie BASE_Q in der Live-App
 const DECK_TOPIC = {}, CAT_TOPIC = {};
 D.TOPICS.forEach((t) => { t.decks.forEach((d) => { DECK_TOPIC[d] = t.id; }); t.cats.forEach((c) => { CAT_TOPIC[c] = t.id; }); });
@@ -71,6 +83,10 @@ const tap2 = {
   open,
   notation: D.NOTATION,
   figs,
+  // SQL-Beispieldatenbank (Abschnitt „SQL ausführen“): Aufbau + Daten, Tabellenübersicht, je SQL-Karte Musterlösung/Prüfabfrage
+  sqlDb: { seed: L.seed, tables: L.tables, cards: L.cards, note: L.note },
+  // Code-Karten mit Editor (Abschnitt „Code-Editor“): Frage-ID → Sprache (pseudo | sql)
+  codeLang: L.code,
   // Icon-Pfade der Live-App (für <Ic/>, gleiche Optik) – inkl. der später im Code ergänzten (ICONS.x = '…')
   icons: { ...D.ICONS, ...Object.fromEntries([...lines.join("\n").matchAll(/ICONS\.([a-z0-9]+) = '([^']*)';/g)].map((m) => [m[1], m[2]])) },
   questions,

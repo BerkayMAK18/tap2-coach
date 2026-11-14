@@ -47,7 +47,13 @@ export default defineConfig({
     chunkSizeWarningLimit: 1200,
     rolldownOptions: {
       // Katalog als eigener Chunk: Bei App-Updates ohne Inhaltsänderung bleibt er im Cache.
-      output: { codeSplitting: { groups: [{ name: "catalog", test: /src[\\/]content[\\/]generated/ }, { name: "vendor", test: /node_modules/ }] } },
+      // Code-Editor und SQLite nur für Code-/SQL-Karten: eigene Chunks, erst bei Bedarf geladen (nicht im vendor-Chunk).
+      output: { codeSplitting: { groups: [
+        { name: "catalog", test: /src[\\/]content[\\/]generated/ },
+        { name: "codemirror", test: /node_modules[\\/](@codemirror|@lezer|style-mod|w3c-keyname|crelt)[\\/]/, priority: 2 },
+        { name: "sqljs", test: /node_modules[\\/]sql\.js[\\/]/, priority: 2 },
+        { name: "vendor", test: /node_modules/ },
+      ] } },
     },
   },
   test: { environment: "node" },

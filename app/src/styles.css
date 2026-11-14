@@ -4,6 +4,9 @@
 @import "./theme/main.css";
 
 @import "tailwindcss";
+/* Klassennamen der Live-App, die zugleich Tailwind-Utilities wären, nicht als Utility erzeugen:
+   .ring (Fortschrittsring) bekäme sonst einen 1-px-Rahmenschatten. */
+@source not inline("ring");
 @config "../tailwind.config.ts";
 
 @layer base {

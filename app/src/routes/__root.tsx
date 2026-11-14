@@ -3,9 +3,10 @@
  * (Prüfungsreife-Ring, Tage, Figur aus dem Belohnungs-Modul, Suche, Einstellungen), main.content.
  * Klassen und Aufbau 1:1 – das Stylesheet der Live-App (theme/main.css) sorgt für das Aussehen, auch auf dem Handy.
  * Noch nicht portierte Bereiche zeigen eine Platzhalterseite (docs/PORTIERUNG.md).
+ * Die Suche über alle Fragen (Lupe, „/“, Strg/Cmd + K) liegt wie in der Live-App über allen Ansichten.
  */
 import { useEffect } from "react";
-import { Link, Outlet, createRootRoute, useLocation, useNavigate } from "@tanstack/react-router";
+import { Link, Outlet, createRootRoute, redirect, useLocation, useNavigate } from "@tanstack/react-router";
 import { useRegisterSW } from "virtual:pwa-register/react";
 import { allQ } from "@/content/catalog";
 import { EXAM_DAY } from "@/config";
@@ -15,8 +16,16 @@ import { gm, setGamiContext, useGamiTick } from "@/legacy/gami-env";
 import { Ic, Ring, pctS } from "@/ui-main";
 import { NAV_FOOT, NAV_MAIN, VTITLE } from "@/ui-main/nav";
 import { useProgress } from "@/store/progress";
+import { useLiveSync } from "@/store/livesync";
+import { useAccount } from "@/store/account";
+import { Suche } from "@/components/lernen/Suche";
+import { openSearch, takeBoot, useSearchHotkey } from "@/components/lernen/ui";
 
-export const Route = createRootRoute({ component: Shell, notFoundComponent: NotFound });
+export const Route = createRootRoute({
+  // Beim Start eine gespeicherte Lernrunde fortsetzen (wie die Live-App: gespeicherte Runde → Ansicht Lernen)
+  beforeLoad: ({ location }) => { if (takeBoot() && useProgress.getState().sess && !location.pathname.startsWith("/lernen/runde")) throw redirect({ to: "/lernen/runde", replace: true }); },
+  component: Shell, notFoundComponent: NotFound,
+});
 
 /** Ansicht der Live-App ↔ Pfad der neuen App */
 export const PATH: Record<string, string> = { start: "/", lernen: "/lernen", aufgaben: "/aufgaben", pruefung: "/pruefung", events: "/events", rangliste: "/rangliste", tipps: "/tipps", patchnotes: "/patchnotes", einstellungen: "/einstellungen", belohnungen: "/belohnungen", datenschutz: "/datenschutz", tutor: "/tutor" };
@@ -30,6 +39,7 @@ function Shell() {
   const view = viewOf(loc.pathname);
   setGamiContext(view, { sess, run: null });
   useEffect(() => { if (!booted) { booted = true; gm("init"); gm("boot", ""); } }, []);
+  useSearchHotkey();
   useEffect(() => { document.title = `${VTITLE[view] ?? "TAP2 Coach"} · TAP2 Prüfungscoach`; }, [view]);
 
   const c = counts(S, allQ(S)), left = daysBetween(today(), EXAM_DAY);
@@ -56,15 +66,24 @@ function Shell() {
             <span className="pill days"><Ic name="calendar" /><b>{Math.max(0, left)}</b><span className="lbl">{left === 1 ? "Tag" : "Tage"}</span></span>
             {/* Figur/Level aus dem Original-Belohnungs-Modul (eigenes, intern escaptes HTML) */}
             <span style={{ display: "contents" }} dangerouslySetInnerHTML={{ __html: (gm("hudHTML") as string) || "" }} />
-            <button type="button" className="iconbtn hb" aria-label="Fragen durchsuchen" title="Suchen" onClick={() => void navigate({ to: "/lernen" })}><Ic name="search" /></button>
+            <button type="button" className="iconbtn hb" aria-label="Fragen durchsuchen" title="Suchen (Taste /)" onClick={openSearch}><Ic name="search" /></button>
             <Link to="/einstellungen" className={`iconbtn hb${view === "einstellungen" ? " on" : ""}`} aria-label="Einstellungen" title="Einstellungen"><Ic name="gear" /></Link>
           </div>
         </header>
         <main className="content"><section className="view"><Outlet /></section></main>
+        <Foot />
       </div>
       <UpdatePrompt />
+      <Suche />
     </div>
   );
+}
+
+/** Fußzeile wie in der Live-App. Abweichung mit Grund: Mit Geräte-Sync (Live-Sync oder Konto) liegt zusätzlich eine
+ *  verschlüsselte Kopie auf dem Server – dann nennt der Text das, statt „nur lokal“ zu behaupten. */
+function Foot() {
+  const live = useLiveSync((s) => !!s.cfg), acc = useAccount((s) => !!s.cfg);
+  return <footer className="foot"><span>TAP2 Prüfungscoach · {live || acc ? "Dein Fortschritt wird in diesem Browser gespeichert und verschlüsselt mit deinen Geräten abgeglichen." : "Dein Fortschritt wird lokal in diesem Browser gespeichert."}</span></footer>;
 }
 
 function NavBtn({ n, current }: { n: { view: string; svg: string; label: string }; current: boolean }) {
@@ -77,15 +96,15 @@ function NavBtn({ n, current }: { n: { view: string; svg: string; label: string 
   );
 }
 
-/** Neue Version: nie automatisch neu laden (könnte eine Lernrunde unterbrechen) – wie in der Live-App. */
+/** Neue Version: nie automatisch neu laden (könnte eine Lernrunde unterbrechen) – Hinweis im Markup der Live-App (#upd). */
 function UpdatePrompt() {
   const { needRefresh: [need, setNeed], updateServiceWorker } = useRegisterSW();
   if (!need) return null;
   return (
-    <div className="toast" role="status">
+    <div className="upd" id="upd" role="status" aria-live="polite">
       <span>Neue Version verfügbar. Dein Lernstand bleibt erhalten.</span>
-      <button type="button" className="btn small primary" onClick={() => updateServiceWorker(true)}>Neu laden</button>
-      <button type="button" className="btn small ghost" onClick={() => setNeed(false)}>Später</button>
+      <button type="button" className="btn small primary" id="upd-go" onClick={() => updateServiceWorker(true)}>Neu laden</button>
+      <button type="button" className="iconbtn sm" id="upd-x" aria-label="Hinweis schließen" onClick={() => setNeed(false)}><Ic name="x" /></button>
     </div>
   );
 }

@@ -9,25 +9,45 @@
 import { create } from "zustand";
 import { KEYS } from "@/config";
 import { NORMALIZE_CTX } from "@/content/catalog";
-import { answer as srsAnswer } from "@/lib/srs";
-import { blank, normalize, type State } from "@/lib/state";
+import type { SessSrc } from "@/lib/lernen";
+import { guess, answer as srsAnswer } from "@/lib/srs";
+import { blank, isObj, normalize, type State } from "@/lib/state";
 
-/** Laufende Lernrunde. Wird gespeichert, damit ein Neuladen die Runde nicht verliert. */
-export type Session = { title: string; ids: string[]; i: number; res: Record<string, "ok" | "unsure" | "wrong"> };
+/**
+ * Laufende Lernrunde – gleiches Format wie UI.sess der Live-App (Schlüssel tap2coach-sess), damit ein Neuladen
+ * (und später der Umstieg) die Runde nicht verliert. res: Ergebnis je Frage (ok, Ampel vorher f / nachher t, geraten),
+ * last: Hinweis „Vorherige Frage …“, pick: gewählte Option, rev: Antwort aufgedeckt, optOpen: Optionen sichtbar,
+ * own: eigene Antwort (Stichpunkte), code: getippte Lösung je Code-Karte, ord: gemischte Reihenfolge der Optionen.
+ */
+export type SessRes = { ok: boolean; f: number; t: number; guess?: boolean };
+export type Session = {
+  title: string; ids: string[]; i: number; pick: number | null; rev: boolean; res: Record<string, SessRes>;
+  last: { ok: boolean; f: number; t: number; id?: string } | null; src: SessSrc;
+  optOpen?: boolean; own?: string; ord?: Record<string, number[]>; code?: Record<string, string>;
+  evRes?: unknown; evKap?: boolean;
+};
 
 type Store = {
   S: State;
   storeOk: boolean;
   sess: Session | null;
-  answer: (id: string, ok: boolean, unsure?: boolean) => void;
+  /** Antwort verbuchen; gibt die Ampel vorher und nachher zurück (wie answer() in der Live-App). */
+  answer: (id: string, ok: boolean, unsure?: boolean) => [number, number];
+  /** „War geraten“: höchstens gelb, morgen wieder. */
+  markGuess: (id: string) => void;
   toggleMark: (id: string) => void;
+  /** Eigene Karte zu einem Thema anlegen (ID „c“ + Zeitstempel wie in der Live-App). */
+  addCustom: (tid: string, f: string, b: string) => void;
+  /** Eigene Karte löschen – mit Lösch-Ereignis für den Sync, damit sie nicht von einem anderen Gerät zurückkommt. */
+  deleteCustom: (tid: string, id: string) => void;
   /** Ganzen Stand ersetzen (Sicherung laden). Der bisherige Stand wird vorher zurückgelegt. */
   replaceAll: (incoming: unknown) => void;
   /** Zusammengeführten Stand aus dem Sync übernehmen (ohne Rücklage, Zusammenführen verliert nichts). */
   applySynced: (S: State) => void;
   /** Lernstand und laufende Runde in diesem Browser löschen (Datenschutz: Recht auf Löschung, lokal). */
   resetAll: () => void;
-  startSession: (title: string, ids: string[]) => void;
+  /** Runde starten (leere Liste: nichts tun). src.tid merkt sich das Thema für „Als Nächstes“. */
+  startSession: (title: string, ids: string[], src?: SessSrc, startAt?: number) => void;
   setSession: (s: Session | null) => void;
 };
 
@@ -38,10 +58,14 @@ function loadState(): State {
   const raw = read<unknown>(KEYS.state);
   return raw ? normalize(raw, NORMALIZE_CTX) : blank();
 }
-function loadSession(): Session | null {
-  const s = read<Session>(KEYS.session);
-  return s && Array.isArray(s.ids) && s.ids.every((x) => typeof x === "string") && Number.isInteger(s.i) && s.i < s.ids.length ? { title: String(s.title ?? "Lernrunde"), ids: s.ids, i: s.i, res: s.res && typeof s.res === "object" ? s.res : {} } : null;
+/** Gespeicherte Runde prüfen (eigene Daten, aber evtl. aus einer älteren Version): unbrauchbare Teile verwerfen. */
+export function cleanSession(s: unknown): Session | null {
+  if (!isObj(s) || !Array.isArray(s.ids) || !s.ids.every((x) => typeof x === "string") || !Number.isInteger(s.i) || (s.i as number) < 0 || (s.i as number) >= s.ids.length) return null;
+  const res: Record<string, SessRes> = {};
+  if (isObj(s.res)) Object.entries(s.res).forEach(([k, v]) => { if (isObj(v) && typeof v.ok === "boolean") res[k] = { ok: v.ok, f: Number(v.f ?? -1), t: Number(v.t ?? -1), ...(v.guess ? { guess: true } : {}) }; });
+  return { ...(s as Session), title: String(s.title ?? "Lernrunde"), ids: s.ids as string[], i: s.i as number, pick: typeof s.pick === "number" ? s.pick : null, rev: !!s.rev, res, last: isObj(s.last) ? (s.last as Session["last"]) : null, src: isObj(s.src) ? (s.src as SessSrc) : {} };
 }
+const loadSession = () => cleanSession(read<unknown>(KEYS.session));
 
 export const useProgress = create<Store>((set, get) => {
   const save = (S: State) => set({ S, storeOk: write(KEYS.state, S) });
@@ -50,9 +74,17 @@ export const useProgress = create<Store>((set, get) => {
     storeOk: true,
     sess: typeof window === "undefined" ? null : loadSession(),
     answer: (id, ok, unsure = false) => {
-      const S = get().S, { q, logDay } = srsAnswer(S, id, ok, unsure);
-      const next: State = { ...S, q: { ...S.q, [id]: q }, last: id, log: logDay ? { ...S.log, [logDay]: (S.log[logDay] || 0) + 1 } : S.log };
-      save(next);
+      const S = get().S, before = S.q[id] ? S.q[id].s : -1, { q, logDay } = srsAnswer(S, id, ok, unsure);
+      save({ ...S, q: { ...S.q, [id]: q }, log: logDay ? { ...S.log, [logDay]: (S.log[logDay] || 0) + 1 } : S.log });
+      return [before, q.s];
+    },
+    markGuess: (id) => { const S = get().S; if (S.q[id]) save({ ...S, q: { ...S.q, [id]: guess(S.q[id]) } }); },
+    addCustom: (tid, f, b) => { const S = get().S; save({ ...S, custom: { ...S.custom, [tid]: (S.custom[tid] || []).concat([{ id: "c" + Date.now(), f, b }]) } }); },
+    deleteCustom: (tid, id) => {
+      const S = get().S, q = { ...S.q }, mark = { ...S.mark };
+      delete q[id]; delete mark[id];
+      void import("./livesync").then((m) => m.recordEv("c", id));
+      save({ ...S, q, mark, custom: { ...S.custom, [tid]: (S.custom[tid] || []).filter((x) => x.id !== id) } });
     },
     toggleMark: (id) => {
       const S = get().S, mark = { ...S.mark };
@@ -67,7 +99,12 @@ export const useProgress = create<Store>((set, get) => {
     },
     applySynced: (S) => save(S),
     resetAll: () => { [KEYS.state, KEYS.session, KEYS.beforeImport].forEach((k) => write(k, null)); set({ S: blank(), sess: null, storeOk: true }); },
-    startSession: (title, ids) => { const sess = { title, ids, i: 0, res: {} }; write(KEYS.session, sess); set({ sess }); },
+    startSession: (title, ids, src = {}, startAt = 0) => {
+      if (!ids.length) return;
+      if (src.tid) save({ ...get().S, last: src.tid });
+      const sess: Session = { title, ids, i: startAt, pick: null, rev: false, res: {}, last: null, src };
+      write(KEYS.session, sess); set({ sess });
+    },
     setSession: (sess) => { write(KEYS.session, sess); set({ sess }); },
   };
 });

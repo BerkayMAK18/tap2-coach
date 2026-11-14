@@ -3560,6 +3560,123 @@
    "caption": "Physische Sicht: Welche Software (Artefakt) läuft auf welchem Knoten, und wie sind die Knoten verbunden."
   }
  },
+ "sqlDb": {
+  "seed": "CREATE TABLE Kunde (KID INTEGER PRIMARY KEY, Name VARCHAR(60) NOT NULL, Ort VARCHAR(40), Email VARCHAR(80));\nCREATE TABLE Artikel (ArtNr INTEGER PRIMARY KEY, Bezeichnung VARCHAR(60) NOT NULL, Kategorie VARCHAR(30), Preis DECIMAL(8,2));\nCREATE TABLE Bestellung (BID INTEGER PRIMARY KEY, KID INTEGER NOT NULL REFERENCES Kunde(KID), Datum DATE, Status VARCHAR(20));\nCREATE TABLE Position (BID INTEGER REFERENCES Bestellung(BID), ArtNr INTEGER REFERENCES Artikel(ArtNr), Menge INTEGER, PRIMARY KEY (BID, ArtNr));\nCREATE TABLE Mitarbeiter (MID INTEGER PRIMARY KEY, Name VARCHAR(60), Abteilung VARCHAR(30), ChefID INTEGER REFERENCES Mitarbeiter(MID));\nCREATE TABLE Konto (Nr INTEGER PRIMARY KEY, Inhaber VARCHAR(60), Saldo DECIMAL(10,2));\nINSERT INTO Kunde VALUES (1,'Weingut Becker','Mainz','info@weingut-becker.example'),(2,'Klinik am Rhein','Bingen','einkauf@klinik-rhein.example'),(3,'Stadtwerke Alzey','Alzey',NULL),(4,'Bäckerei Roth','Mainz','roth@baeckerei.example'),(5,'Autohaus Klein','Worms',NULL),(6,'Praxis Dr. Yilmaz','Bad Kreuznach','praxis@yilmaz.example');\nINSERT INTO Artikel VALUES (101,'Notebook 14 Zoll','Hardware',899.00),(102,'Monitor 27 Zoll','Hardware',249.90),(103,'Dockingstation','Zubehör',179.00),(104,'Maus kabellos','Zubehör',24.90),(105,'Office-Lizenz','Software',129.00),(106,'Server-Rack','Hardware',899.00),(107,'Headset','Zubehör',59.90);\nINSERT INTO Bestellung VALUES (1001,1,'2026-09-02','geliefert'),(1002,2,'2026-09-15','geliefert'),(1003,1,'2026-10-01','offen'),(1004,3,'2026-10-12','storniert'),(1005,6,'2026-10-20','offen'),(1006,2,'2026-11-03','offen');\nINSERT INTO Position VALUES (1001,101,2),(1001,104,2),(1002,102,4),(1002,103,4),(1003,105,3),(1004,101,1),(1005,104,10),(1005,102,1),(1006,103,2),(1006,105,5);\nINSERT INTO Mitarbeiter VALUES (1,'Sandra Weber','Geschäftsführung',NULL),(2,'Jonas Hoffmann','IT',1),(3,'Aylin Demir','IT',2),(4,'Lukas Schmitt','IT',2),(5,'Mara Fischer','Vertrieb',1),(6,'Tim Wagner','Vertrieb',5);\nINSERT INTO Konto VALUES (1,'Weingut Becker',1500.00),(2,'Klinik am Rhein',320.00),(3,'Stadtwerke Alzey',0.00);",
+  "tables": [
+   [
+    "Kunde",
+    "KID [PK], Name, Ort, Email"
+   ],
+   [
+    "Artikel",
+    "ArtNr [PK], Bezeichnung, Kategorie, Preis"
+   ],
+   [
+    "Bestellung",
+    "BID [PK], KID [FK → Kunde], Datum, Status"
+   ],
+   [
+    "Position",
+    "BID [PK, FK → Bestellung], ArtNr [PK, FK → Artikel], Menge"
+   ],
+   [
+    "Mitarbeiter",
+    "MID [PK], Name, Abteilung, ChefID [FK → Mitarbeiter]"
+   ],
+   [
+    "Konto",
+    "Nr [PK], Inhaber, Saldo"
+   ]
+  ],
+  "cards": {
+   "k:sql3": {
+    "sol": "SELECT K.Name, COUNT(B.BID) AS Anzahl\nFROM Kunde K\nLEFT JOIN Bestellung B ON B.KID = K.KID\nGROUP BY K.KID, K.Name;"
+   },
+   "k:sql7": {
+    "pre": "CREATE TABLE BestellungArchiv AS SELECT * FROM Bestellung WHERE 0;",
+    "sol": "INSERT INTO BestellungArchiv SELECT * FROM Bestellung WHERE Status = 'storniert';\nDELETE FROM Position WHERE BID IN (SELECT BID FROM Bestellung WHERE Status = 'storniert');\nDELETE FROM Bestellung WHERE Status = 'storniert';",
+    "check": "SELECT * FROM BestellungArchiv ORDER BY BID;\nSELECT COUNT(*) AS Bestellungen FROM Bestellung;\nSELECT COUNT(*) AS Positionen FROM Position;",
+    "checkT": "Archiv und Bestände danach",
+    "note": "Die Tabelle BestellungArchiv ist hier schon angelegt (leer, gleiche Spalten wie Bestellung)."
+   },
+   "k:sql8": {
+    "sol": "UPDATE Artikel SET Preis = Preis * 1.1 WHERE Kategorie = 'Zubehör';",
+    "check": "SELECT * FROM Artikel ORDER BY ArtNr;",
+    "checkT": "Tabelle Artikel danach"
+   },
+   "k:sql9": {
+    "sol": "DELETE FROM Artikel WHERE ArtNr NOT IN (SELECT ArtNr FROM Position);",
+    "check": "SELECT * FROM Artikel ORDER BY ArtNr;",
+    "checkT": "Tabelle Artikel danach"
+   },
+   "k:sql10": {
+    "sol": "ALTER TABLE Kunde ADD Telefon VARCHAR(30);\nALTER TABLE Kunde DROP COLUMN Email;",
+    "check": "SELECT name AS Spalte FROM pragma_table_info('Kunde') ORDER BY cid;",
+    "checkT": "Spalten von Kunde danach",
+    "note": "SQLite kennt kein MODIFY bzw. ALTER COLUMN; ADD und DROP COLUMN funktionieren."
+   },
+   "k:sql11": {
+    "sol": "CREATE INDEX idx_kunde_ort ON Kunde (Ort);",
+    "check": "SELECT ii.name AS Spalte FROM pragma_index_list('Kunde') AS il JOIN pragma_index_info(il.name) AS ii WHERE il.origin = 'c';",
+    "checkT": "Indizierte Spalten von Kunde"
+   },
+   "k:sql12": {
+    "norun": "SQLite im Browser kennt keine Benutzer und Rechte. CREATE USER, GRANT und REVOKE kannst du hier nur schreiben, nicht ausführen."
+   },
+   "k:sql13": {
+    "sol": "SELECT * FROM Artikel WHERE Preis = (SELECT MAX(Preis) FROM Artikel);"
+   },
+   "k:sql14": {
+    "sol": "SELECT AVG(Anzahl) AS DurchschnittPositionen FROM (SELECT COUNT(*) AS Anzahl FROM Position GROUP BY BID) AS t;"
+   },
+   "k:sql19": {
+    "pre": "DROP TABLE Position;",
+    "sol": "CREATE TABLE Position (\n  BID INT, ArtNr INT, Menge INT,\n  PRIMARY KEY (BID, ArtNr),\n  FOREIGN KEY (BID) REFERENCES Bestellung(BID),\n  FOREIGN KEY (ArtNr) REFERENCES Artikel(ArtNr));",
+    "check": "SELECT name AS Spalte, pk AS PK FROM pragma_table_info('Position') ORDER BY name;\nSELECT \"from\" AS Spalte, \"table\" AS verweistAuf FROM pragma_foreign_key_list('Position') ORDER BY 1;",
+    "checkT": "Aufbau der Tabelle Position",
+    "note": "Die Tabelle Position ist hier vorher gelöscht, damit du sie neu anlegen kannst."
+   },
+   "k:sql22": {
+    "sol": "SELECT k.Name\nFROM Kunde k\nWHERE NOT EXISTS (\n  SELECT * FROM Bestellung b\n  WHERE b.KID = k.KID\n);"
+   },
+   "k:sql23": {
+    "sol": "SELECT m.Name, v.Name AS Chef\nFROM Mitarbeiter m\nLEFT JOIN Mitarbeiter v ON m.ChefID = v.MID;"
+   },
+   "k:sql25": {
+    "sol": "START TRANSACTION;\nUPDATE Konto SET Saldo = Saldo - 100 WHERE Nr = 1;\nUPDATE Konto SET Saldo = Saldo + 100 WHERE Nr = 2;\nCOMMIT;",
+    "check": "SELECT * FROM Konto ORDER BY Nr;",
+    "checkT": "Tabelle Konto danach"
+   }
+  },
+  "note": "Läuft mit SQLite direkt in deinem Browser. Jede Ausführung startet mit einer frischen Beispiel-Datenbank, du kannst also nichts kaputt machen."
+ },
+ "codeLang": {
+  "k:algo0": "pseudo",
+  "k:algo3": "pseudo",
+  "k:algo6": "pseudo",
+  "k:algo7": "pseudo",
+  "k:algo15": "pseudo",
+  "k:algo17": "pseudo",
+  "k:algo19": "pseudo",
+  "k:algo21": "pseudo",
+  "k:algo22": "pseudo",
+  "k:algo23": "pseudo",
+  "k:algo24": "pseudo",
+  "k:algo25": "pseudo",
+  "k:sql3": "sql",
+  "k:sql7": "sql",
+  "k:sql8": "sql",
+  "k:sql9": "sql",
+  "k:sql10": "sql",
+  "k:sql11": "sql",
+  "k:sql12": "sql",
+  "k:sql13": "sql",
+  "k:sql14": "sql",
+  "k:sql19": "sql",
+  "k:sql22": "sql",
+  "k:sql23": "sql",
+  "k:sql25": "sql"
+ },
  "icons": {
   "box": "<path d=\"M21 8l-9-5-9 5 9 5 9-5z\"/><path d=\"M3 8v8l9 5 9-5V8\"/><path d=\"M12 13v8\"/>",
   "cards": "<rect x=\"3\" y=\"6\" width=\"14\" height=\"15\" rx=\"2\"/><path d=\"M7 3h12a2 2 0 0 1 2 2v12\"/>",

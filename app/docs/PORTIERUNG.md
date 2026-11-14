@@ -28,7 +28,7 @@ mit Tests. Erst danach neue Funktionen. Referenz ist immer `../index.html` auf `
 | Events | rEvents (Kapitel, Lernkarten, Abschlusstest, Belohnung) | **fertig (1:1)**, Abnahme 14.11.2026 (siehe unten) |
 | Tipps | rTipps, Operator-Trainer, Lernplan, Tutorial, Fehlerprotokoll | **fertig (1:1)**, Abnahme 14.11.2026 (siehe unten) |
 | Belohnungen/Rangliste | Original-Modul eingebettet | fertig (1:1) |
-| Einstellungen | Darstellung, App & Offline, Geräte-Sync, Übertragen (Link/QR), Sicherung, Hilfe, Datenschutz | teilweise |
+| Einstellungen | Darstellung, App & Offline, Geräte-Sync, Übertragen (Link/QR), Sicherung, Hilfe, Datenschutz | **fertig (1:1) bis auf Geräte-Sync**, Abnahme 14.11.2026 (siehe unten) |
 | Patch Notes | Release-Liste von GitHub | **fertig (1:1)**, Abnahme 14.11.2026 (siehe unten) |
 
 ## Vorgehen
@@ -180,3 +180,33 @@ Struktur, die React als Text rendert – mit demselben DOM (auch die Unterliste 
 Abnahme: Beide Apps laden die echten Releases (32) – Markup und Zwischenspeicher **identisch**. Fehlerfall (GitHub nicht
 erreichbar, Kopie älter als 10 Minuten): gleicher Hinweis, Liste aus der letzten Kopie, identisch. Keine Konsolenfehler;
 lint, test, build grün. Die CSP (`public/_headers`) erlaubt `api.github.com` bereits.
+
+### Einstellungen (14.11.2026, Branch `port/einstellungen`)
+
+Wie rSettings() der Live-App: Darstellung (wie System/Hell/Dunkel, `tap2coach-theme`), App & Offline (installieren,
+offline bereit, iPhone-Hinweis; `store/pwa.ts`), Auf anderes Gerät übertragen (Link + QR), Dein Fortschritt (Sicherung
+im Live-Format **inklusive Belohnungen** und Sync-Schlüssel, Laden mit Belohnungen zusammenführen, Zurücksetzen mit
+Rückfrage – trennt auch Sync und verwirft eine laufende Prüfung), Hilfe (App-Version, Tutorial, Patch Notes, gemeldete
+Fehler), Datenschutz-Link. Übertragen-Logik in `src/lib/transfer.ts` mit Tests – **gleiches Binärformat wie die
+Live-App**; QR-Code mit derselben Bibliothek (`qrcode-generator` 1.4.4, jetzt npm-Abhängigkeit statt `vendor/`).
+Ein Start über `…#import=…` öffnet die Einstellungen mit der Übernahme-Frage (txReceive).
+
+Abnahme (gleicher Stand): Markup **identisch** für Darstellung (auch nach Hell/Dunkel), Übertragen (vor und nach dem
+Erstellen, Übernahme-Frage, „übernommen“), Fortschritt (auch Rückfrage), Hilfe, Datenschutz-Link. **Links quer
+geprüft:** Ein Live-Link in der Dev-App ergibt dieselbe Zusammenfassung wie in der Live-App selbst und umgekehrt;
+Zusammenführen gleich. Sicherungsdatei mit denselben Feldern (`app, exportiert, data, gami`). App & Offline im
+Produktions-Build „Offline nutzbar“ (im Entwicklungsmodus ohne Service Worker „wird eingerichtet …“, wie die
+Live-App ohne sw.js). Keine Konsolenfehler; lint, test, build grün.
+
+Bewusste Unterschiede:
+- Link-Adresse: Ursprung + `/` (die Dev-App hat echte Pfade), die Live-App nimmt Ursprung + Pfad.
+- Beim Lesen eines Links wird die Box-Stufe auf 0–5 begrenzt (die Live-App übernimmt beliebige Werte, `normalize`
+  fängt das erst später ab).
+- **Geräte-Sync:** Die Sync-Karte der Live-App (Sync einschalten, Gerät per Code/QR koppeln, Schlüssel anzeigen,
+  Cloud-Kopie löschen, Testzugang lokal) ist **noch nicht portiert**. Bis dahin stehen dort die bisherigen Karten der
+  neuen App (Verbinden mit Schlüssel, Konto). Lokal ohne Supabase-Zugang zeigt die Dev-App keine Sync-Karte, die
+  Live-App den „Testzugang“.
+- Datenschutzhinweis: Markup der Live-App, **Inhalt der neuen App** (Cloudflare, Konto, Funktionsschalter). Ergänzt:
+  Übertragungs-Links/QR und „Fehler melden“ (beides gibt es jetzt), Stand 14.11.2026. **Korrigiert:**
+  `FEATURES.patchNotes` stand auf `false`, obwohl die portierten Patch Notes von GitHub laden – damit fehlte der
+  Abschnitt im Hinweis. Jetzt `true`; Verarbeitungsübersicht in DATENSCHUTZ.md ergänzt.

@@ -23,7 +23,7 @@ export const FEATURES = {
   account: SUPABASE_ON, // Anmeldung mit GitHub (Supabase Auth) – an, sobald die Build-Variablen gesetzt sind
   sync: SUPABASE_ON, // Ende-zu-Ende-verschlüsselte Sicherung/Sync im Konto
   leaderboard: false, // Rangliste mit selbst gewähltem Benutzernamen (Einwilligung)
-  patchNotes: false, // Release-Liste von der GitHub-API
+  patchNotes: true, // Release-Liste von der GitHub-API (Seite Patch Notes, portiert 14.11.2026)
   tutor: false, // KI-Tutor – nur für freigeschaltete Konten (Admin), für andere unsichtbar
 } as const;
 
@@ -37,4 +37,4 @@ export const CONTROLLER = {
 } as const;
 
 /** Stand des Datenschutzhinweises – bei jeder inhaltlichen Änderung anpassen. */
-export const PRIVACY_VERSION = "2026-11-13";
+export const PRIVACY_VERSION = "2026-11-14";

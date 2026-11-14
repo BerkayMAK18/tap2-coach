@@ -25,7 +25,9 @@ diesen Hinweis und dieses Dokument mitpflegen.**
 | Konto (optional) | GitHub-ID, -Name, E-Mail, Avatar-URL | Supabase Auth, Frankfurt (AV) | Art. 6 (1) b | Betreiber im Dashboard (unvermeidbar) | Konto löschen |
 | Sicherung/Sync (optional) | **verschlüsselter** Lernstand, Version, Zeitstempel | Supabase DB, Frankfurt | Art. 6 (1) b | niemand außer Nutzer (Schlüssel nur im Browser) | Konto/Sicherung löschen; Tagesstände max. 10 Tage |
 | Rangliste (optional) | Benutzername, Level, XP, Figur, Einwilligungszeitpunkt | Supabase DB, Frankfurt | Art. 6 (1) a | alle Nutzer (nur diese Felder) | Austragen / Konto löschen |
-| Patch Notes (optional) | IP an GitHub | GitHub (USA, DPF) | Art. 6 (1) f | GitHub | – |
+| Patch Notes (Seite öffnen) | IP an GitHub | GitHub (USA, DPF) | Art. 6 (1) f | GitHub | – |
+| Übertragen per Link/QR | Lernstand im #-Teil des Links | nur auf den Geräten (kein Server) | Art. 6 (1) b | wer den Link hat | Link nicht weitergeben |
+| Fehler melden | was der Nutzer selbst auf GitHub abschickt | GitHub (USA, DPF) | eigenständig GitHub | öffentlich | über GitHub |
 | KI-Tutor (nur Admin) | Eingaben des Admins | Anthropic (USA) | – (nur eigene Daten des Betreibers) | Anthropic | nach Anbieter |
 
 AV = Auftragsverarbeitung. **Supabase:** Der DPA ist Teil der Terms of Service und gilt automatisch für alle

@@ -27,7 +27,7 @@ export async function aesKey(key: string): Promise<CryptoKey> {
   return crypto.subtle.importKey("raw", await sha("tap2-enc|" + keyRaw(key)), "AES-GCM", false, ["encrypt", "decrypt"]);
 }
 
-async function deflate(u8: Uint8Array, inflate = false): Promise<Uint8Array | null> {
+export async function deflate(u8: Uint8Array, inflate = false): Promise<Uint8Array | null> {
   if (typeof CompressionStream === "undefined") return null;
   const st = inflate ? new DecompressionStream("deflate-raw") : new CompressionStream("deflate-raw");
   const out = new Response(new Blob([u8 as BlobPart]).stream().pipeThrough(st));

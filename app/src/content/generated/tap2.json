@@ -3677,6 +3677,202 @@
   "k:sql23": "sql",
   "k:sql25": "sql"
  },
+ "operatoren": {
+  "drills": [
+   {
+    "op": "Nennen",
+    "q": "Nennen Sie zwei Schutzziele der Informationssicherheit. (2 P)",
+    "opts": [
+     "Vertraulichkeit, Integrität",
+     "Sicherheit und Schutz der Daten",
+     "Vertraulichkeit"
+    ],
+    "right": 0,
+    "why": "Bei „Nennen“ genügen Stichworte – je richtigem Aspekt ein Punkt. „Sicherheit und Schutz“ ist zu ungenau, eine einzige Nennung bringt nur 1 von 2 Punkten."
+   },
+   {
+    "op": "Nennen",
+    "q": "Nennen Sie drei Phasen des Wasserfallmodells. (3 P)",
+    "opts": [
+     "In der Analyse werden die Anforderungen erhoben, mit dem Kunden abgestimmt und im Lastenheft dokumentiert.",
+     "Analyse, Entwurf, Implementierung",
+     "Sprint Planning, Daily Scrum, Review"
+    ],
+    "right": 1,
+    "why": "Drei Stichworte = drei Punkte. Die ausführliche Beschreibung einer einzigen Phase kostet viel Zeit und bringt nur einen Punkt. Die dritte Antwort gehört zu Scrum."
+   },
+   {
+    "op": "Beschreiben",
+    "q": "Beschreiben Sie den Ablauf eines Sprints in Scrum. (4 P)",
+    "opts": [
+     "Sprint Planning, Daily Scrum, Review, Retrospektive.",
+     "Im Sprint Planning wählt das Team Einträge aus dem Product Backlog und plant sie. Täglich stimmt es sich im Daily Scrum ab. Am Ende zeigt es das Ergebnis im Sprint Review und verbessert in der Retrospektive die Zusammenarbeit.",
+     "Scrum ist besser als das Wasserfallmodell, weil der Kunde schneller Ergebnisse sieht."
+    ],
+    "right": 1,
+    "why": "„Beschreiben“ heißt: Sachverhalt in ganzen Sätzen und sinnvoller Reihenfolge darstellen. Eine Aufzählung ist nur „Nennen“, die Wertung beantwortet eine andere Frage."
+   },
+   {
+    "op": "Erläutern",
+    "q": "Ein Online-Shop zählt die Bestellungen je Kunde. Erläutern Sie, warum dafür ein LEFT JOIN nötig ist. (4 P)",
+    "opts": [
+     "Weil sonst Kunden fehlen.",
+     "Ein INNER JOIN liefert nur Kunden mit mindestens einer Bestellung. Der LEFT JOIN behält alle Kunden; fehlt eine Bestellung, stehen NULL-Werte in den Bestellspalten. So erscheint z. B. ein Neukunde mit 0 Bestellungen.",
+     "Der LEFT JOIN ist ein Join-Typ in SQL, der zwei Tabellen verbindet."
+    ],
+    "right": 1,
+    "why": "„Erläutern“ = beschreiben und mit Begründung oder Beispiel verständlich machen. Die kurze Antwort ist nur eine Behauptung (höchstens die Hälfte der Punkte), die dritte erklärt den Begriff, aber nicht das Warum."
+   },
+   {
+    "op": "Erläutern",
+    "q": "Eine Tierarztpraxis speichert Halterdaten. Erläutern Sie einen Vorteil der 3. Normalform für die Praxis. (4 P)",
+    "opts": [
+     "Redundanz wird vermieden: Die Adresse eines Halters steht nur einmal in der Tabelle Halter. Zieht er um, wird sie an einer Stelle geändert – widersprüchliche Adressen (Änderungsanomalien) entstehen nicht.",
+     "Weniger Redundanz.",
+     "Die 3. Normalform ist besser als die 2. Normalform."
+    ],
+    "right": 0,
+    "why": "Volle Punkte gibt es nur mit Erläuterung und Bezug zur Situation (hier: Praxis, Halteradresse). „Weniger Redundanz“ ist nur genannt."
+   },
+   {
+    "op": "Erklären",
+    "q": "Erklären Sie, warum die binäre Suche eine sortierte Liste voraussetzt. (4 P)",
+    "opts": [
+     "Weil sie sonst nicht funktioniert.",
+     "Die binäre Suche hat die Laufzeit O(log n).",
+     "Sie vergleicht mit dem mittleren Element und verwirft dann eine Hälfte. Das ist nur korrekt, wenn alle kleineren Werte links und alle größeren rechts liegen – also bei sortierten Daten."
+    ],
+    "right": 2,
+    "why": "„Erklären“ verlangt den Zusammenhang (Warum?). Die Laufzeit stimmt, beantwortet aber nicht die Frage."
+   },
+   {
+    "op": "Begründen",
+    "q": "Begründen Sie, warum Passwörter gehasht und nicht verschlüsselt gespeichert werden. (3 P)",
+    "opts": [
+     "Hashing ist sicherer.",
+     "Mit bcrypt und einem zufälligen Salt pro Benutzer.",
+     "Das Passwort muss nie wieder im Klartext vorliegen – zur Prüfung reicht der Vergleich der Hashes. Verschlüsselte Passwörter könnte jeder mit dem Schlüssel zurückrechnen, ein Hash ist nicht umkehrbar."
+    ],
+    "right": 2,
+    "why": "„Begründen“ braucht ein tragfähiges Argument. „Sicherer“ ist eine Behauptung ohne Grund, bcrypt + Salt beschreibt das Wie, nicht das Warum."
+   },
+   {
+    "op": "Beurteilen",
+    "q": "Ein Weingut ohne eigene IT-Abteilung überlegt, seine Kundendaten in der Cloud zu speichern. Beurteilen Sie das Vorhaben. (4 P)",
+    "opts": [
+     "Vorteile: keine eigene Hardware, Backups und Updates durch den Anbieter. Nachteile: Abhängigkeit vom Anbieter, Datenschutz. Da das Weingut keine eigene IT hat, überwiegen die Vorteile – sofern ein Rechenzentrum in der EU und ein Auftragsverarbeitungsvertrag vereinbart werden.",
+     "Vorteile: keine eigene Hardware. Nachteile: Abhängigkeit vom Anbieter, Datenschutz.",
+     "Ja, die Cloud ist gut."
+    ],
+    "right": 0,
+    "why": "„Beurteilen/Bewerten“ = abwägen und zu einem eigenen, begründeten Urteil mit Bezug zur Situation kommen. Ohne Urteil fehlt der wichtigste Teil, ein Urteil ohne Begründung bringt kaum Punkte."
+   },
+   {
+    "op": "Abwägen",
+    "q": "Wägen Sie Eigenentwicklung und Standardsoftware für die Buchhaltung eines Handwerksbetriebs ab. (4 P)",
+    "opts": [
+     "Standardsoftware ist schnell verfügbar und erprobt, aber begrenzt anpassbar. Eine Eigenentwicklung passt genau, kostet aber viel Zeit und Geld. Da Buchhaltung ein Standardprozess ist, spricht mehr für Standardsoftware.",
+     "Standardsoftware ist schnell verfügbar und günstig.",
+     "Eine Eigenentwicklung ist teuer."
+    ],
+    "right": 0,
+    "why": "Beim Abwägen gehören Pro und Contra beider Seiten dazu und am Ende ein begründetes Ergebnis. Eine einseitige Antwort erfüllt den Operator nicht."
+   },
+   {
+    "op": "Vergleichen",
+    "q": "Vergleichen Sie Wasserfallmodell und Scrum hinsichtlich Planung und Kundeneinbindung. (4 P)",
+    "opts": [
+     "Scrum arbeitet in Sprints, der Kunde sieht regelmäßig Ergebnisse.",
+     "Planung: Wasserfall plant alles vorab im Lastenheft, Scrum plant iterativ pro Sprint. Kundeneinbindung: Beim Wasserfall vor allem am Anfang und bei der Abnahme, bei Scrum laufend im Sprint Review.",
+     "Wasserfall ist alt, Scrum ist modern und agil."
+    ],
+    "right": 1,
+    "why": "„Vergleichen“ = beide Seiten nach denselben Kriterien gegenüberstellen. Die erste Antwort beschreibt nur Scrum, die dritte nennt kein Kriterium."
+   },
+   {
+    "op": "Unterscheiden",
+    "q": "Unterscheiden Sie Aggregation und Komposition. (2 P)",
+    "opts": [
+     "Beide sind Ganzes-Teil-Beziehungen.",
+     "Bei der Komposition ist das Teil existenzabhängig vom Ganzen (gefüllte Raute), bei der Aggregation kann es allein weiterbestehen (leere Raute).",
+     "Die Komposition ist stärker."
+    ],
+    "right": 1,
+    "why": "Beim „Unterscheiden“ muss der Unterschied ausdrücklich genannt sein. Die Gemeinsamkeit bringt keine Punkte, „stärker“ ist zu ungenau."
+   },
+   {
+    "op": "Berechnen",
+    "q": "Berechnen Sie den Speicherbedarf von 1.000 Bildern mit je 2 MiB in GiB. (3 P)",
+    "opts": [
+     "1,95 GiB",
+     "1.000 · 2 MiB = 2.000 MiB; 2.000 MiB ÷ 1.024 ≈ 1,95 GiB",
+     "2.000 MiB ÷ 1.000 = 2 GiB"
+    ],
+    "right": 1,
+    "why": "Beim „Berechnen“ zählt der Rechenweg mit Einheiten. Nur das Ergebnis kann Punkte kosten; die dritte Antwort rechnet mit 1.000 statt 1.024 – bei MiB/GiB falsch."
+   }
+  ],
+  "ladder": [
+   [
+    "I",
+    "Wiedergeben",
+    [
+     [
+      "Nennen / Angeben",
+      "Stichworte genügen. Punkte je Aspekt.",
+      "Hashen mit Salt."
+     ]
+    ]
+   ],
+   [
+    "II",
+    "Darstellen und erklären",
+    [
+     [
+      "Beschreiben",
+      "Ganze Sätze, sinnvolle Reihenfolge, ohne Wertung.",
+      "Beim Speichern wird ein zufälliger Salt erzeugt, Passwort und Salt werden mit bcrypt gehasht und gespeichert."
+     ],
+     [
+      "Erläutern / Erklären",
+      "Beschreiben + Begründung oder Beispiel, Bezug zur Situation.",
+      "… Dadurch ergeben gleiche Passwörter unterschiedliche Hashes – vorberechnete Tabellen (Rainbow Tables) helfen einem Angreifer nicht."
+     ],
+     [
+      "Vergleichen / Unterscheiden",
+      "Beide Seiten nach gleichen Kriterien, Unterschied ausdrücklich nennen.",
+      "Hashing ist nicht umkehrbar, Verschlüsselung schon – deshalb Hashing für Passwörter."
+     ],
+     [
+      "Berechnen",
+      "Rechenweg mit Einheiten, Ergebnis markieren.",
+      ""
+     ],
+     [
+      "Erstellen / Entwickeln",
+      "Vollständige Lösung (Pseudocode, SQL, Diagramm) nach Vorgabe.",
+      ""
+     ]
+    ]
+   ],
+   [
+    "III",
+    "Urteilen",
+    [
+     [
+      "Begründen",
+      "Entscheidung + tragfähiges Argument.",
+      "Hashing, weil das Passwort nie wieder im Klartext gebraucht wird."
+     ],
+     [
+      "Beurteilen / Bewerten / Abwägen",
+      "Pro und Contra, dann eigenes begründetes Urteil mit Bezug zur Situation.",
+      "Für das Kundenportal ist bcrypt mit Salt angemessen: etwas langsamer beim Login, aber Brute Force wird stark erschwert."
+     ]
+    ]
+   ]
+  ]
+ },
  "icons": {
   "box": "<path d=\"M21 8l-9-5-9 5 9 5 9-5z\"/><path d=\"M3 8v8l9 5 9-5V8\"/><path d=\"M12 13v8\"/>",
   "cards": "<rect x=\"3\" y=\"6\" width=\"14\" height=\"15\" rx=\"2\"/><path d=\"M7 3h12a2 2 0 0 1 2 2v12\"/>",

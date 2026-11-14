@@ -19,17 +19,25 @@ import { useProgress } from "@/store/progress";
 import { useLiveSync } from "@/store/livesync";
 import { useAccount } from "@/store/account";
 import { usePruefung } from "@/store/pruefung";
+import { KEY_TUT } from "@/lib/tipps";
 import { Suche } from "@/components/lernen/Suche";
 import { openSearch, takeBoot, useSearchHotkey } from "@/components/lernen/ui";
 
 export const Route = createRootRoute({
   // Beim Start eine gespeicherte Lernrunde fortsetzen (wie die Live-App: gespeicherte Runde → Ansicht Lernen)
-  beforeLoad: ({ location }) => { if (takeBoot() && useProgress.getState().sess && !location.pathname.startsWith("/lernen/runde")) throw redirect({ to: "/lernen/runde", replace: true }); },
+  beforeLoad: ({ location }) => {
+    if (!takeBoot()) return;
+    const P = useProgress.getState();
+    if (P.sess && !location.pathname.startsWith("/lernen/runde")) throw redirect({ to: "/lernen/runde", replace: true });
+    // Erster Start (noch nichts beantwortet, Tutorial nie gesehen): Tutorial zeigen – wie die Live-App ohne Adresse (#…)
+    let seen = true; try { seen = !!localStorage.getItem(KEY_TUT); } catch { /* privat */ }
+    if (location.pathname === "/" && !P.sess && !seen && !Object.keys(P.S.q).length) throw redirect({ to: "/tutorial", replace: true });
+  },
   component: Shell, notFoundComponent: NotFound,
 });
 
 /** Ansicht der Live-App ↔ Pfad der neuen App */
-export const PATH: Record<string, string> = { start: "/", lernen: "/lernen", aufgaben: "/aufgaben", pruefung: "/pruefung", events: "/events", rangliste: "/rangliste", tipps: "/tipps", patchnotes: "/patchnotes", einstellungen: "/einstellungen", belohnungen: "/belohnungen", datenschutz: "/datenschutz", tutor: "/tutor" };
+export const PATH: Record<string, string> = { start: "/", lernen: "/lernen", aufgaben: "/aufgaben", pruefung: "/pruefung", operatoren: "/operatoren", plan: "/plan", tutorial: "/tutorial", events: "/events", rangliste: "/rangliste", tipps: "/tipps", patchnotes: "/patchnotes", einstellungen: "/einstellungen", belohnungen: "/belohnungen", datenschutz: "/datenschutz", tutor: "/tutor" };
 const viewOf = (path: string) => (path === "/" ? "start" : path.split("/")[1] || "start");
 
 let booted = false;

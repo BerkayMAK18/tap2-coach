@@ -1,7 +1,11 @@
 /**
- * Einstellungen – 1:1 wie rSettings() der Live-App: Darstellung, App & Offline, Geräte-Sync, Übertragen per Link/QR,
- * Fortschritt (Sicherung im selben Dateiformat inkl. Belohnungen, Zurücksetzen), Hilfe, Datenschutz.
- * Geräte-Sync: Karte der Live-App (components/SyncCard.tsx); darunter das optionale Konto der neuen App (AccountCard).
+ * Einstellungen – wie rSettings() der Live-App: Darstellung, App & Offline, Synchronisieren, Fortschritt (Sicherung im
+ * selben Dateiformat inkl. Belohnungen, Zurücksetzen), Hilfe, Datenschutz.
+ * Synchronisieren – zwei Wege (14.11.2026):
+ * - Mit Konto (AccountCard): GitHub-Login reicht, ein Stand pro Konto; Stände ohne Konto per Code übernehmen.
+ * - Ohne Konto (SyncCard, 1:1 Live-App): Geräte-Sync per Kurzcode/QR, Ende-zu-Ende-verschlüsselt. Bei angemeldetem
+ *   Konto nur sichtbar, solange dieses Gerät noch mit einer Gruppe verbunden ist (zum Trennen).
+ * „Auf anderes Gerät übertragen“ (Link/QR ohne Server) ist entfallen; empfangene Links (#import=) zeigt ImportCard.
  */
 import { useEffect, useRef, useState } from "react";
 import { createFileRoute } from "@tanstack/react-router";
@@ -20,6 +24,8 @@ import { Ic } from "@/ui-main";
 import { AccountCard } from "@/components/AccountCard";
 import { SyncCard } from "@/components/SyncCard";
 import { supabase } from "@/lib/supabase";
+import { FEATURES } from "@/config";
+import { useAccount } from "@/store/account";
 
 export const Route = createFileRoute("/einstellungen")({ component: Einstellungen });
 
@@ -45,9 +51,8 @@ function Einstellungen() {
         {!pwa.standalone && !pwa.prompt && pwa.ios && <p className="small muted" style={{ marginTop: 8 }}>iPhone/iPad: In Safari auf <b>Teilen</b> tippen und <b>Zum Home-Bildschirm</b> wählen.</p>}
         {!pwa.standalone && !pwa.prompt && !pwa.ios && <p className="small muted" style={{ marginTop: 8 }}>Installieren: im Browser-Menü „App installieren“ bzw. „Zum Startbildschirm hinzufügen“ wählen.</p>}
       </section>
-      <SyncCard />
-      <AccountCard />
-      <TxCard />
+      <SyncWays />
+      <ImportCard />
       <DataCard />
       <section className="card"><h3>Hilfe</h3><p className="tiny muted">App-Version {BUILD}</p><div className="row" style={{ marginTop: 8 }}><button type="button" className="btn small" data-go2="tutorial"><Ic name="map" cls="ic xs" /> Tutorial öffnen</button><button type="button" className="btn small" data-go2="patchnotes">Patch Notes</button><a className="btn small ghost" href={`https://github.com/${REPO}/issues`} target="_blank" rel="noopener">Gemeldete Fehler ansehen</a></div></section>
       <p className="tiny muted" style={{ textAlign: "center", marginTop: 8 }}><button type="button" className="linkbtn" data-go2="datenschutz">Datenschutz</button></p>
@@ -55,30 +60,31 @@ function Einstellungen() {
   );
 }
 
-/** „Auf anderes Gerät übertragen“ (txCardHTML der Live-App) */
-function TxCard() {
-  const { tx, imp, build, receive, apply, cancel } = useTransfer();
-  const [msg, setMsg] = useState(""), [inp, setInp] = useState("");
-  useEffect(() => setMsg(""), [tx?.at]);
-  const recv = imp ? (imp.err ? <div className="sql-msg bad"><Ic name="alert" cls="ic sm" /><div><b>Übertragung nicht möglich</b><p>{imp.err}</p></div></div>
-    : imp.done ? <div className="sql-msg ok"><Ic name="check" cls="ic sm" /><div><b>Lernstand übernommen</b><p>{imp.done}</p></div></div>
-    : imp.inc ? <div className="tx-in"><b>Lernstand von einem anderen Gerät</b><p className="small muted">Stand vom {fmtDay(imp.inc.at)}: {txSummary(imp.inc)}.</p><div className="row"><button type="button" className="btn primary small" onClick={() => apply("merge")}><Ic name="layers" cls="ic xs" /> Zusammenführen (empfohlen)</button><button type="button" className="btn small" onClick={() => apply("replace")}>Ersetzen</button><button type="button" className="btn small ghost" onClick={cancel}>Abbrechen</button></div><p className="tiny muted">Zusammenführen: Pro Frage gilt der neuere Stand, nichts geht verloren. Ersetzen: Dein Stand auf diesem Gerät wird überschrieben.</p></div> : null) : null;
-  const copy = async () => { if (!tx?.link) return; try { await navigator.clipboard.writeText(tx.link); setMsg("Link kopiert."); } catch { prompt("Link kopieren:", tx.link); } };
-  const send = !tx ? <button type="button" className="btn small primary" onClick={() => void build()}><Ic name="layers" cls="ic xs" /> QR-Code &amp; Link erstellen</button>
-    : tx.busy ? <span className="small muted">Wird erstellt …</span>
-    : tx.err ? <p className="small warn-text">{tx.err}</p>
-    : (
-      <div className="tx-out">
-        {tx.qr ? <div className="qr-wrap"><svg className="qr" style={{ width: (tx.qr.n + 8) * tx.qr.k, height: (tx.qr.n + 8) * tx.qr.k }} viewBox={`-4 -4 ${tx.qr.n + 8} ${tx.qr.n + 8}`} role="img" aria-label="QR-Code mit deinem Lernstand" shapeRendering="crispEdges"><rect x={-4} y={-4} width={tx.qr.n + 8} height={tx.qr.n + 8} fill="#fff" /><path d={tx.qr.d} fill="#000" /></svg></div> : <p className="small muted">Für einen QR-Code ist dein Lernstand zu groß – nutze den Link.</p>}
-        <div className="tx-act"><p className="small">Mit der Kamera des anderen Geräts scannen oder den Link dorthin schicken.{tx.partial && <> <b>Der QR-Code enthält deinen Lernstand, Markierungen und Aufgabenpunkte. Eigene Fragen, Prüfungsergebnisse und das Fehlerprotokoll überträgt nur der Link.</b></>}</p>
-          <div className="row"><button type="button" className="btn small" onClick={() => void copy()}><Ic name="check" cls="ic xs" /> Link kopieren</button>{"share" in navigator && <button type="button" className="btn small" onClick={() => void navigator.share({ title: "TAP2 Coach – mein Lernstand", url: tx.link }).catch(() => {})}>Teilen …</button>}<button type="button" className="btn small ghost" onClick={() => void build()}>Neu erstellen</button></div>
-          <p className="tiny muted" id="tx-msg">{msg || `Momentaufnahme von ${tx.at} Uhr.`}</p></div>
-      </div>
-    );
+/** Synchronisieren: mit Konto (ein Stand, Login reicht) oder ohne Konto (Geräte-Sync per Code/QR) */
+function SyncWays() {
+  const user = useAccount((s) => !!s.user), live = useLiveSync((s) => !!s.cfg);
+  if (!FEATURES.account) return <SyncCard />;
   return (
-    <section className="card tx-card"><h3>Auf anderes Gerät übertragen</h3><p className="small muted" style={{ marginTop: 4 }}>Ohne Konto und ohne Server: Dein Lernstand steckt komplett im Link bzw. QR-Code. Auf dem anderen Gerät öffnen – fertig.</p>
-      {recv}<div style={{ marginTop: 12 }}>{send}</div>
-      <details className="tx-paste"><summary className="small">Link oder Code hier einfügen</summary><p className="tiny muted">Für die installierte iPhone-App: Sie hat einen eigenen Speicher, der Link öffnet sich aber in Safari. Kopiere ihn deshalb und füge ihn hier in der App ein.</p><div className="row"><input type="text" id="tx-in" placeholder="https://…#import=…" autoComplete="off" spellCheck={false} value={inp} onChange={(e) => setInp(e.target.value)} /><button type="button" className="btn small" onClick={() => { if (inp.trim()) void receive(inp).then(() => window.scrollTo({ top: 0 })); }}>Übernehmen</button></div></details>
+    <>
+      <p className="small muted tp-ways">Synchronisieren – wähle <b>einen</b> Weg: <b>mit Konto</b> (GitHub-Anmeldung reicht, überall derselbe Stand) oder <b>ohne Konto</b> (Geräte per Code oder QR-Code koppeln, Ende-zu-Ende-verschlüsselt).</p>
+      <AccountCard />
+      {(!user || live) && <>
+        {user && live && <p className="small muted tp-ways">Dieses Gerät ist zusätzlich ohne Konto mit einer Gruppe verbunden. Mit Konto brauchst du das nicht mehr – du kannst es unten trennen (der Stand bleibt).</p>}
+        <SyncCard title="Ohne Konto synchronisieren" />
+      </>}
+    </>
+  );
+}
+
+/** Empfangener Übertragungs-Link (#import= der Live-App): Zusammenführen oder Ersetzen */
+function ImportCard() {
+  const { imp, apply, cancel } = useTransfer();
+  if (!imp) return null;
+  return (
+    <section className="card tx-card"><h3>Lernstand von einem anderen Gerät</h3>
+      {imp.err ? <div className="sql-msg bad"><Ic name="alert" cls="ic sm" /><div><b>Übertragung nicht möglich</b><p>{imp.err}</p></div></div>
+        : imp.done ? <div className="sql-msg ok"><Ic name="check" cls="ic sm" /><div><b>Lernstand übernommen</b><p>{imp.done}</p></div></div>
+        : imp.inc ? <div className="tx-in"><p className="small muted">Stand vom {fmtDay(imp.inc.at)}: {txSummary(imp.inc)}.</p><div className="row"><button type="button" className="btn primary small" onClick={() => apply("merge")}><Ic name="layers" cls="ic xs" /> Zusammenführen (empfohlen)</button><button type="button" className="btn small" onClick={() => apply("replace")}>Ersetzen</button><button type="button" className="btn small ghost" onClick={cancel}>Abbrechen</button></div><p className="tiny muted">Zusammenführen: Pro Frage gilt der neuere Stand, nichts geht verloren. Ersetzen: Dein Stand auf diesem Gerät wird überschrieben.</p></div> : null}
     </section>
   );
 }

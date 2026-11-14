@@ -23,7 +23,7 @@ function Datenschutz() {
           <li>Du kannst ohne Konto lernen. Dein Lernstand bleibt dann ausschließlich in deinem Browser.</li>
           <li>Kein Tracking, keine Werbung, keine Analyse-Werkzeuge, keine Cookies zu Werbezwecken.</li>
           <li>Schriften und Programmbibliotheken liegen auf unserem eigenen Server. Es gibt keine Verbindung zu Google oder anderen Drittanbietern.</li>
-          {f.sync && <li>Wenn du deinen Lernstand in deinem Konto sicherst, wird er vorher in deinem Browser verschlüsselt. Nur du hast den Schlüssel – auch der Betreiber kann ihn nicht lesen.</li>}
+          {f.sync && <li>Mit Konto liegt dein Lernstand in deinem Konto – geschützt durch die Anmeldung, aber nicht Ende-zu-Ende-verschlüsselt. Ohne Konto kannst du deine Geräte per Code koppeln; dann wird er vorher in deinem Browser verschlüsselt und niemand außer dir kann ihn lesen.</li>}
           {f.leaderboard && <li>In der Rangliste erscheinst du nur, wenn du das möchtest, und nur mit einem selbst gewählten Benutzernamen.</li>}
         </Ul>
       </section>
@@ -48,29 +48,29 @@ function Datenschutz() {
           <li>Das Speichern ist für die Funktion der App unbedingt erforderlich (§ 25 Abs. 2 Nr. 2 TDDDG); eine Einwilligung ist dafür nicht nötig.</li>
           <li>Löschen: Einstellungen → „Fortschritt zurücksetzen“, oder die Website-Daten in deinem Browser löschen.</li>
           <li>Sicherungsdateien („Sicherung herunterladen“) entstehen nur auf deinem Gerät. Die App überträgt sie nirgendwohin.</li>
-          <li>Übertragungs-Links und QR-Codes („Auf anderes Gerät übertragen“) enthalten deinen Lernstand im Teil hinter dem #. Dieser Teil wird beim Öffnen nicht an einen Server gesendet. Teile solche Links nur mit dir selbst.</li>
+          <li>Übertragungs-Links aus der Live-App enthalten den Lernstand im Teil hinter dem #. Dieser Teil wird beim Öffnen nicht an einen Server gesendet. Teile solche Links nur mit dir selbst.</li>
         </Ul>
       </Sec>
 
       {f.account && (
         <Sec t="Anmeldung mit GitHub (freiwillig)">
-          <p>Für Sicherung, Geräte-Sync und Rangliste kannst du dich mit deinem GitHub-Konto anmelden. Dabei übermittelt GitHub an uns: deine GitHub-Nutzer-ID, deinen GitHub-Benutzernamen, deine E-Mail-Adresse und den Link zu deinem Profilbild. Wir verwenden davon nur die Nutzer-ID zur Zuordnung deines Kontos.</p>
+          <p>Für den Abgleich mit deinem Konto und die Rangliste kannst du dich mit deinem GitHub-Konto anmelden. Dabei übermittelt GitHub an uns: deine GitHub-Nutzer-ID, deinen GitHub-Benutzernamen, deine E-Mail-Adresse und den Link zu deinem Profilbild. Wir verwenden davon nur die Nutzer-ID zur Zuordnung deines Kontos.</p>
           <Ul>
             <li>Gespeichert werden die Kontodaten bei Supabase (Supabase Inc., Rechenzentrum in Frankfurt am Main, EU) als Auftragsverarbeiter.</li>
             <li>Rechtsgrundlage: Bereitstellung der von dir gewünschten Funktion (Art. 6 Abs. 1 lit. b DSGVO).</li>
             <li>Für die Anmeldung selbst ist GitHub, Inc. (USA) eigenständig verantwortlich; es gilt die Datenschutzerklärung von GitHub.</li>
             <li>Dein Anmelde-Token liegt im lokalen Speicher deines Browsers (technisch notwendig).</li>
-            <li>Die verschlüsselte Sicherung löschst du jederzeit selbst in den Einstellungen („Cloud-Kopie löschen“). Die Löschung des Kontos selbst kannst du über die oben genannte Kontaktmöglichkeit verlangen; ein Knopf dafür folgt.</li>
+            <li>Den Stand in deinem Konto löschst du jederzeit selbst in den Einstellungen („Kopie im Konto löschen“). Die Löschung des Kontos selbst kannst du über die oben genannte Kontaktmöglichkeit verlangen; ein Knopf dafür folgt.</li>
           </Ul>
         </Sec>
       )}
 
       {f.sync && (
-        <Sec t="Verschlüsselte Sicherung und Geräte-Sync (freiwillig)">
-          <p>Dein Lernstand wird in deinem Browser mit einem nur dir bekannten Schlüssel verschlüsselt (AES-GCM, 256 Bit) und erst dann in deinem Konto gespeichert. Gespeichert werden: der verschlüsselte Inhalt, eine Versionsnummer und der Zeitpunkt der letzten Änderung. Der Betreiber kann den Inhalt nicht lesen.</p>
+        <Sec t="Synchronisieren (freiwillig)">
+          <p><b>Mit Konto:</b> Lernstand und Belohnungen (beim KI-Tutor auch dessen Stand) werden in deinem Konto bei Supabase (Rechenzentrum Frankfurt am Main) gespeichert – Inhalt, Versionsnummer und Zeitpunkt der letzten Änderung. So hast du auf jedem angemeldeten Gerät denselben Stand. Zugriff über die App hast nur du (Anmeldung und Zugriffsregeln in der Datenbank). Der Stand ist nicht Ende-zu-Ende-verschlüsselt: Der Betreiber kann technisch auf ihn zugreifen und tut das nur, wenn es für Betrieb oder Fehlerbehebung nötig ist.</p>
+          <p><b>Ohne Konto (Geräte-Sync):</b> Dein Lernstand wird in deinem Browser mit einem nur dir bekannten Schlüssel verschlüsselt (AES-GCM, 256 Bit) und erst dann gespeichert, unter einer Prüfsumme statt eines Namens. Den Schlüssel überträgst du per Kurzcode oder QR-Code auf deine weiteren Geräte. Der Betreiber kann den Inhalt nicht lesen.</p>
           <Ul>
-            <li>Den Schlüssel überträgst du per Kurzcode oder QR-Code auf deine weiteren Geräte. Bewahre ihn auf – ohne ihn ist die Sicherung in der Cloud nicht lesbar. Der Stand auf deinen Geräten bleibt davon unberührt.</li>
-            <li>Zur Wiederherstellung bei Fehlern bleibt je Tag ein älterer verschlüsselter Stand 10 Tage erhalten.</li>
+            <li>Zur Wiederherstellung bei Fehlern bleibt beim Konto je Tag ein älterer Stand 10 Tage erhalten.</li>
             <li>Rechtsgrundlage: Art. 6 Abs. 1 lit. b DSGVO. Löschen: jederzeit in den Einstellungen.</li>
           </Ul>
         </Sec>
@@ -102,7 +102,7 @@ function Datenschutz() {
       <Sec t="Speicherdauer">
         <Ul>
           <li>Lernstand im Browser: bis du ihn löschst.</li>
-          {f.account && <li>Konto, verschlüsselte Sicherung, Ranglisten-Eintrag: bis du sie löschst; Tagessicherungen höchstens 10 Tage.</li>}
+          {f.account && <li>Konto, Stand im Konto, Ranglisten-Eintrag: bis du sie löschst; Tagessicherungen höchstens 10 Tage.</li>}
           <li>Technische Zugriffsdaten beim Hosting: nach den Fristen des Anbieters, nur für Betrieb und Sicherheit.</li>
         </Ul>
       </Sec>

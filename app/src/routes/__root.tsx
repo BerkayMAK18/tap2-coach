@@ -108,11 +108,11 @@ function Shell() {
   );
 }
 
-/** Fußzeile wie in der Live-App. Abweichung mit Grund: Mit Geräte-Sync (Live-Sync oder Konto) liegt zusätzlich eine
- *  verschlüsselte Kopie auf dem Server – dann nennt der Text das, statt „nur lokal“ zu behaupten. */
+/** Fußzeile wie in der Live-App. Abweichung mit Grund: Mit Konto oder Geräte-Sync liegt zusätzlich eine Kopie auf dem
+ *  Server – dann nennt der Text das, statt „nur lokal“ zu behaupten. */
 function Foot() {
-  const live = useLiveSync((s) => !!s.cfg), acc = useAccount((s) => !!s.cfg);
-  return <footer className="foot"><span>TAP2 Prüfungscoach · {live || acc ? "Dein Fortschritt wird in diesem Browser gespeichert und verschlüsselt mit deinen Geräten abgeglichen." : "Dein Fortschritt wird lokal in diesem Browser gespeichert."}</span></footer>;
+  const live = useLiveSync((s) => !!s.cfg), acc = useAccount((s) => !!s.user);
+  return <footer className="foot"><span>TAP2 Prüfungscoach · {acc ? "Dein Fortschritt wird in diesem Browser gespeichert und mit deinem Konto abgeglichen." : live ? "Dein Fortschritt wird in diesem Browser gespeichert und verschlüsselt mit deinen Geräten abgeglichen." : "Dein Fortschritt wird lokal in diesem Browser gespeichert."}</span></footer>;
 }
 
 // Link setzt bei aktiver Route selbst aria-current="page" – nur bei exakt gleichem Pfad, sonst gilt unsere Markierung

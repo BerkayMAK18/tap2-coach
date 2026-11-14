@@ -118,8 +118,18 @@ Jeder Bereich ist ein eigenes Modul (Route + Logik in `lib/` + Tests) und kann u
   den Tokens). Der frühere eigene UI-Baukasten (`src/ui`, Tailwind) ist seit 14.11.2026 vollständig ersetzt.
 - **Gamification/Gacha vollständig** als eigenes Modul (`tap2coach-gami`, gleiches Format).
 - **Optionales Konto mit GitHub** (Supabase, Frankfurt) für Sicherung, Sync und Rangliste – Lernen ohne Konto bleibt.
-- **Datenschutz:** Der Lernstand im Konto ist Ende-zu-Ende-verschlüsselt, der Betreiber kann ihn nicht lesen;
-  Rangliste nur mit selbst gewähltem Benutzernamen und Einwilligung. Details: `docs/DATENSCHUTZ.md`.
+- **Datenschutz:** Rangliste nur mit selbst gewähltem Benutzernamen und Einwilligung. Details: `docs/DATENSCHUTZ.md`.
+
+## Synchronisieren: zwei Wege (14.11.2026)
+
+- **Mit Konto** (`store/account.ts`, `supabase/001_app_sync.sql`): „ein Konto, ein Stand“.
+  - Der GitHub-Login reicht. Lernstand und Belohnungen liegen als JSON im Konto (RLS, nur eigene Zeile), **nicht** E2E.
+  - Abgleich über `lib/konto-sync.ts` (holen → zusammenführen → schreiben mit Versionsprüfung).
+  - Stände ohne Konto lassen sich per Kurzcode oder Schlüssel übernehmen.
+- **Ohne Konto** (`store/livesync.ts`, `tap2_sync` der Live-App): Geräte per Kurzcode/QR koppeln, E2E-verschlüsselt.
+  Das ist auch die Brücke zur Live-App.
+- „Auf anderes Gerät übertragen“ (Link/QR ohne Server) ist in der Dev-App entfallen; empfangene Links funktionieren
+  weiter.
 - **KI-Tutor als Premium-Funktion**, vorerst nur für den Admin (`app_metadata.role = 'admin'`), für andere unsichtbar,
   umgesetzt als Supabase Edge Function. Bezahl-Option später.
 
@@ -135,14 +145,14 @@ Server und Browser teilen sich die Arbeit so (Details: `docs/TUTOR.md`):
   - `graph.ts` (`buildConceptGraph`) berechnet den Stand je Konzept,
   - `lehrplan.ts` berechnet den Lehrplan deterministisch,
   - `tutor-state.ts` hält den Tutor-Stand mit Merge-Regel,
-  - `tutor-sync.ts` gleicht ab (E2E, `app_tutor_state`).
+  - `tutor-sync.ts` gleicht über das Konto ab (`app_tutor_state`, Login reicht; `konto-sync.ts`).
 - **XP:** Eine bewertete Aufgabe zählt wie eine normale Antwort (`gm.answer`, Combo, Serie, Quests, keine Obergrenze). Damit ist sie kompatibel mit Sync und Rangliste der Live-App
   (`gami/tutor-xp.test.ts` gegen das Original).
 - **Speicher:**
 
   | Was | Wo |
   | --- | --- |
-  | Tutor-Stand | `tap2coach-tutor-stand`, synchronisiert über `app_tutor_state`, **nicht** in `tap2_sync` |
+  | Tutor-Stand | `tap2coach-tutor-stand`, im Konto über `app_tutor_state`, **nicht** in `tap2_sync` |
   | Sitzung | `tap2coach-tutor-sitzung`, nur dieses Gerät |
   | Modell | `tap2coach-tutor-modell` |
   | Geräte-ID für XP je Gerät | `tap2coach-tutor-geraet` |
@@ -154,9 +164,9 @@ Server und Browser teilen sich die Arbeit so (Details: `docs/TUTOR.md`):
 | 0 | Gerüst aus learnlab, eigenes Design, Katalogformat | erledigt, Stack am 13.11. auf statische PWA umgestellt |
 | 1a | Design der Live-App übernehmen, Datenschutzhinweis | erledigt (14.11.: Grundgerüst ohne Tailwind, PORTIERUNG.md) |
 | 1b | Funktionsgleichheit inkl. Gamification/Gacha (Tabelle oben) | erledigt (alle Module 1:1, PORTIERUNG.md) |
-| 1c | Konto (GitHub), E2E-Sync, Rangliste mit Benutzername, Konto löschen | offen (braucht Supabase-Dev-Projekt + GitHub-OAuth-App) |
+| 1c | Konto (GitHub, ein Stand pro Konto), Geräte-Sync ohne Konto, Rangliste mit Benutzername, Konto löschen | Konto-Sync fertig (14.11., SQL 001 einspielen); Rangliste und Konto löschen offen |
 | 2 | Katalog-Bibliothek (Suche/Filter, mehrere Kataloge), TAP1, Lehrjahr → Lernfeld, Klausurkalender | offen |
-| 3 | KI-Prüfungstutor (Premium, nur Admin): Sitzung je Thema im IHK-Stil, Konzept-Graph, deterministischer Lehrplan, E2E-verschlüsselter Tutor-Stand, XP – `docs/TUTOR.md` | fertig (14.11., SQL 003 eingespielt, Function deployt) |
+| 3 | KI-Prüfungstutor (Premium, nur Admin): Sitzung je Thema im IHK-Stil, Konzept-Graph, deterministischer Lehrplan, Tutor-Stand im Konto, XP – `docs/TUTOR.md` | fertig (14.11., Function deployt; SQL 004 einspielen) |
 | 4 | Neue App ersetzt die Live-App (gleiche Origin, Lernstände bleiben) | offen |
 
 ## Sicherheit

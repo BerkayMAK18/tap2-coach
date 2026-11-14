@@ -93,9 +93,16 @@ function Datenschutz() {
         </Ul>
       </Sec>
 
+      <Sec t="Vortex (KI-Tutor über deine eigene KI)">
+        <p>Vortex erzeugt einen Text mit Anweisungen, deinem Lernstand zum gewählten Thema (Beherrschung je Konzept, offene Fehlvorstellungen, häufige Fehler – ohne Namen oder Konto-Daten) und den Lerninhalten. Du kopierst ihn selbst in eine KI deiner Wahl. Die App überträgt dabei nichts; für die KI gelten deren Bedingungen und deren Datenschutz.</p>
+        <Ul>
+          <li>Den Ergebnis-Block der KI fügst du selbst wieder ein. Die App prüft ihn und übernimmt nur bekannte Themen und Konzepte in deinen Tutor-Stand (im Browser, mit Konto auch in deinem Konto).</li>
+        </Ul>
+      </Sec>
+
       {f.tutor && (
-        <Sec t="KI-Tutor">
-          <p>Der KI-Tutor ist derzeit nur für den Betreiber freigeschaltet und für andere Konten nicht verfügbar. Eingaben im Tutor werden zur Beantwortung an Anthropic, PBC (USA) übermittelt.</p>
+        <Sec t="Vortex Pro (eingebaute KI)">
+          <p>Vortex Pro ist derzeit nur für den Betreiber freigeschaltet und für andere Konten nicht verfügbar. Eingaben im Tutor werden zur Beantwortung an Anthropic, PBC (USA) übermittelt.</p>
         </Sec>
       )}
 

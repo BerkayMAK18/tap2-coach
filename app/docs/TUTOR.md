@@ -1,8 +1,33 @@
-# Premium: KI-Prüfungstutor für die TAP2
+# Vortex – KI-Prüfungstutor für die TAP2
 
 Stand: 14.11.2026. Premium-Funktion der neuen App, vorerst nur für den Admin, später für alle (mit XP, Serie, Tageszielen).
 
 **Einrichtung:** Edge Function deployt (14.11.2026). Für den Tutor-Stand im Konto `004_app_tutor_state_konto.sql` einspielen (ersetzt 003).
+
+## Zwei Varianten (14.11.2026)
+
+| | **Vortex** (kostenlos) | **Vortex Pro** (Premium) |
+| --- | --- | --- |
+| Für wen | alle, auch ohne Anmeldung | nur das freigeschaltete GitHub-Konto (Admin-Rolle) |
+| KI | die eigene KI der Nutzer (Claude, ChatGPT …) über Kopieren und Einfügen | eingebaut: Claude über die Edge Function |
+| Ablauf | Text kopieren → in der KI lösen → Ergebnis-Block einfügen | Chat in der App mit Aufgabe, Material und Bewertung |
+| Graph, Lehrplan, Fehlvorstellungen | ja, aus dem Ergebnis-Block | ja, jede Runde |
+| XP | wie Antworten (Combo, Serie, Quests), je neuer bewerteter Aufgabe | wie Antworten |
+| Kosten für den Betreiber | keine | API-Kosten (siehe unten) |
+
+**Vortex (Brücke)** – `lib/vortex-bridge.ts`, `components/tutor/BridgePanel.tsx`:
+- **Der Text zum Kopieren** besteht aus den Prüfer-Anweisungen (wie bei Pro), der Übergabe (Stand je Konzept,
+  Fehlvorstellungen, Lernpakete des Themas) und dem Format des Ergebnis-Blocks `vortex-ergebnis` (JSON, `version: 2`):
+  bewertete Aufgaben mit Punkten, Konzepten und Sicherheit, dazu Graph-Updates und ein Fazit.
+- **Der Ergebnis-Block** ist Fremdtext:
+  - Er wird mit Zod geprüft; es zählen nur Konzepte des Themas.
+  - „Sicher, aber falsch“ wird zur Fehlvorstellung.
+  - Die IDs der Belege hängen nur vom Inhalt ab: Zweimal einfügen zählt nur einmal, auch für die XP.
+- **XP:** Jede neue bewertete Aufgabe zählt wie eine Antwort (Entscheidung des Betreibers). Der Block lässt sich von
+  Hand fälschen; das ist bewusst in Kauf genommen, weil die Rangliste nicht auf Wettbewerb ausgelegt ist.
+- **Ohne Konto** bleibt der Tutor-Stand im Browser, mit Konto liegt er im Konto (wie bei Pro). Die App sendet bei der
+  Brücke nichts.
+- Die alte „Claude-Projekt“-Brücke (`tutor-bridge.ts`, Themen-Ebene) ist entfernt.
 
 ## Zugang (Premium)
 

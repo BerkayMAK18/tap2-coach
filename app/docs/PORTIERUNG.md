@@ -28,7 +28,7 @@ mit Tests. Erst danach neue Funktionen. Referenz ist immer `../index.html` auf `
 | Events | rEvents (Kapitel, Lernkarten, Abschlusstest, Belohnung) | **fertig (1:1)**, Abnahme 14.11.2026 (siehe unten) |
 | Tipps | rTipps, Operator-Trainer, Lernplan, Tutorial, Fehlerprotokoll | **fertig (1:1)**, Abnahme 14.11.2026 (siehe unten) |
 | Belohnungen/Rangliste | Original-Modul eingebettet | fertig (1:1) |
-| Einstellungen | Darstellung, App & Offline, Geräte-Sync, Übertragen (Link/QR), Sicherung, Hilfe, Datenschutz | **fertig (1:1) bis auf Geräte-Sync**, Abnahme 14.11.2026 (siehe unten) |
+| Einstellungen | Darstellung, App & Offline, Geräte-Sync, Übertragen (Link/QR), Sicherung, Hilfe, Datenschutz | **fertig (1:1)**, Abnahme 14.11.2026 (siehe unten; Geräte-Sync ohne echten Server geprüft) |
 | Patch Notes | Release-Liste von GitHub | **fertig (1:1)**, Abnahme 14.11.2026 (siehe unten) |
 
 ## Vorgehen
@@ -210,3 +210,29 @@ Bewusste Unterschiede:
   Übertragungs-Links/QR und „Fehler melden“ (beides gibt es jetzt), Stand 14.11.2026. **Korrigiert:**
   `FEATURES.patchNotes` stand auf `false`, obwohl die portierten Patch Notes von GitHub laden – damit fehlte der
   Abschnitt im Hinweis. Jetzt `true`; Verarbeitungsübersicht in DATENSCHUTZ.md ergänzt.
+
+### Geräte-Sync (14.11.2026, Branch `port/sync`)
+
+Karte „Geräte synchronisieren“ wie syncCardHTML()/bindSync() der Live-App (`components/SyncCard.tsx`): Sync einschalten
+(neuer Schlüssel, gleich ein Kopplungscode), Gerät hinzufügen (Kurzcode + QR mit `#verbinden=…`, 10 Minuten gültig),
+Code oder Schlüssel eingeben mit Rückfrage „Dieses Gerät verbinden?“, Angebot aus einer Sicherung mit Sync-Schlüssel,
+Schlüssel anzeigen/kopieren, Gerät trennen, Cloud-Kopie löschen, Testzugang (nur localhost, `tap2coach-sync-dev`).
+Kopplung in `src/lib/pair.ts` mit Tests – **gleiches Verfahren wie die Live-App** (PBKDF2 150 000, AES-GCM,
+Prüfsumme „tap2-pair|CODE“), Codes funktionieren in beiden Richtungen. Der Abgleich selbst (`store/livesync.ts`)
+war schon da; ergänzt: Meldungen wie die Live-App (offline, Grund im Fehlertext, Cloud gelöscht), erneuter Abgleich
+nach einem laufenden, Abgleich beim Verlassen/Zurückkommen/Online, Rücklage `tap2coach-vorsync` vor jedem Verbinden.
+Ein Start über `…#verbinden=CODE` öffnet die Einstellungen und prüft den Code (syncBoot). Die bisherige Karte
+„Mit der Live-App verbinden“ entfällt (dasselbe geht jetzt über „Code eingeben“ mit dem Schlüssel).
+
+Abnahme ohne echten Server: Beide Apps mit demselben, absichtlich nicht erreichbaren Test-Projekt. Markup
+**identisch** für: Testzugang, nicht verbunden, falscher Code, Schlüssel → Rückfrage, Code → „Verbinden gerade nicht
+möglich …“, verbunden mit Abgleichfehler, Schlüssel anzeigen, Trennen-/Löschen-Rückfrage, Löschen fehlgeschlagen,
+Code konnte nicht erstellt werden, getrennt. Fehlertexte gleich. `#verbinden=` und Angebot aus einer Sicherung geprüft.
+**Nicht geprüft:** ein echter Abgleich und echtes Koppeln gegen Supabase (kein Zugang in dieser Sitzung) – dafür im
+Testzugang eine Projekt-URL und den Publishable Key eintragen und zwei Geräte koppeln.
+
+Bewusste Unterschiede:
+- „Schlüssel & Einstellungen“ bleibt nach einem Klick darin aufgeklappt. Die Live-App zeichnet die Karte neu und klappt
+  den Bereich zu – wer „Schlüssel anzeigen“ drückt, sieht den Schlüssel dort erst nach erneutem Aufklappen.
+- Testzugang: nach „Speichern“ lädt die Seite neu (alle Teile nutzen denselben Supabase-Client); die Adresse muss eine
+  `*.supabase.co`-Projekt-URL sein (die Live-App nimmt jede https-Adresse).

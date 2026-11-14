@@ -22,7 +22,7 @@ import { NAV_FOOT, NAV_MAIN, VTITLE } from "@/ui-main/nav";
 import { isPremium } from "@/store/tutor";
 
 /** Menüpunkt Tutor (nicht in der Live-App, daher nicht in der generierten nav.ts) */
-const TUTOR_NAV = { view: "tutor", label: "Tutor", svg: '<path d="M21 12a8 8 0 0 1-11.8 7L4 20l1-4.6A8 8 0 1 1 21 12z"/><path d="M8.5 11h.01M12 11h.01M15.5 11h.01"/>' };
+const TUTOR_NAV = { view: "tutor", label: "Tutor", svg: '<path d="M2 9.5L12 4.5l10 5-10 5z"/><path d="M6 11.5v4.5c0 1.6 2.7 3 6 3s6-1.4 6-3v-4.5"/><path d="M22 9.5V15"/>' }; // Doktorhut
 import { useProgress } from "@/store/progress";
 import { useLiveSync } from "@/store/livesync";
 import { useAccount } from "@/store/account";

@@ -12,20 +12,31 @@ Stand: 13.11.2026. Premium-Funktion der neuen App, vorerst nur für den Admin.
 - Freischalten auf einem Gerät: `/tutor?premium=1` (setzt `tap2coach-premium`). Das schützt nichts Geheimes,
   die Seite zeigt nur den eigenen lokalen Lernstand. Die echte Prüfung kommt mit Stufe 2 serverseitig.
 
-## Tutor-Ansicht (14.11.2026)
+## Tutor-Lernpfad (14.11.2026)
 
-- Menüpunkt **„Tutor“** in der Seitenleiste – nur für Admin: Admin-Konto (`app_metadata.role = 'admin'`) oder auf diesem
-  Gerät freigeschaltet (`/tutor?premium=1`). Die KI selbst prüft weiterhin der Server.
-- Links der **Chat** über die ganze Fläche (Modell Schnell/Gründlich, Kostenschätzung, Strg/Cmd + Enter senden).
-- Rechts eine eigene **Leiste** mit Reitern:
-  - **Lernstand:** Lehrplan nach Prüfungsteil → Thema mit Reife aus dem Lernstand (Wissensgraph) und der
-    **Einschätzung des Tutors** je Thema (Chip „KI“ mit Notiz), belegte Erkenntnisse und Fehlvorstellungen,
-    Fehlerschwerpunkte, großer Graph und die Brücke ohne API.
-  - **Aufgabe:** was der Tutor gerade fragt (Thema, Operator, Punkte, Aufgabentext, Hinweis, „Antwort schreiben“).
-- Auf dem Handy wechseln Chat, Lernstand und Aufgabe über Reiter.
-- Dafür liefert der Tutor zwei zusätzliche Blöcke (`src/lib/tutor-blocks.ts`, mit Tests): `tap2-aufgabe` und
-  `tap2-stand`. Sie werden mit Zod geprüft (nur bekannte Themen-IDs, feste Längen), aus der Chatblase entfernt und
-  rechts angezeigt. Aufgabe nur für die Sitzung (sessionStorage), Einschätzung auf dem Gerät (`tap2coach-tutor-stand`).
+Ablauf nach dem LearnHarness-Prinzip (eigene Umsetzung, kein Code übernommen): **Stand finden → Lehrplan → Lernen.**
+
+- **Wissensbasis** (`src/lib/tutor-kb.ts`): ausschließlich der Katalog der App – Prüfungsteil → Thema (T…) →
+  Lernpaket (P…) → Kernaussage (P….n), dazu Prüfungsrelevanz, Fallen, Lernziele. Der Tutor bekommt Überblick und
+  alle Inhalte im festen System-Teil (Prompt-Caching) und arbeitet nur darauf.
+- **Wissensgraph als Lernermodell:** Beim Start geht eine Übergabe an den Tutor – Reife je Thema aus den Lernrunden,
+  rot/neu, Pflichtthemen, häufigste Fehler, Tutor-Reife und der bisherige Lernpfad. Jede bewertete Antwort fließt
+  zurück (Beleg je Thema → „Tutor-Reife“, violetter Balken im Lernstand).
+- **Werkzeuge statt Textblöcke** (`src/lib/tutor-protocol.ts`, mit Tests): `stand_festhalten`, `lehrplan_setzen`,
+  `frage_stellen`, `antwort_bewerten`, `schritt_abschliessen`. Eingaben werden mit Zod und den bekannten IDs geprüft;
+  Ungültiges geht als Fehler an den Tutor zurück. Immer nur eine offene Frage.
+- **Fragen als Karten:** Auswahl (A–D, bewertet die App selbst) oder freie Antwort im IHK-Stil (bewertet der Tutor mit
+  Punkten); dazu „laut denken“, Sicherheit (unsicher / eher sicher / sicher) und „Ich weiß es nicht“.
+- **Belohnung:** Jede Antwort zählt in die Tagesstatistik (`S.log`, Format v7 unverändert). XP und Quests über das
+  Belohnungs-Modul (`gm.answer`, Pseudo-ID `tutor:<Thema>`): richtig = Auswahl richtig bzw. mindestens die Hälfte der
+  Punkte; unsicher richtig gibt wie in den Lernrunden keine XP.
+- **Speicher (nur dieses Gerät):** Lernpfad `tap2coach-tutor-pfad`, Gespräch `tap2coach-tutor-gespraech`. Das Gespräch
+  wird nie gekürzt (Denk-Blöcke der API bleiben unverändert); wird es zu lang, beginnt ein neues mit Übergabe.
+- **Ansicht:** links der Chat (Ablauf-Leiste, Blasen, Karten für Fragen, Bewertungen, Lehrplan, geschaffte Schritte),
+  rechts die Leiste **Lehrplan** · **Lernstand** · **Frage**; auf dem Handy Reiter.
+- **Edge Function** `supabase/functions/tutor/index.ts`: lässt nur diese fünf Werkzeuge zu, nimmt Inhaltsblöcke an
+  (Text, Werkzeug-Ergebnisse; vom Tutor Text, Werkzeugaufrufe, Denk-Blöcke) und gibt alle Blöcke zurück.
+  **Nach Änderungen im Supabase-Dashboard neu deployen.**
 
 ## Stufe 2 – KI-Tutor (geplant)
 

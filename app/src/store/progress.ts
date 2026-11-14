@@ -12,6 +12,7 @@ import { NORMALIZE_CTX } from "@/content/catalog";
 import { UE, parsePts, saveUebRec, setUebCauseRec, type Cause } from "@/lib/aufgaben";
 import type { SessSrc } from "@/lib/lernen";
 import { guess, answer as srsAnswer } from "@/lib/srs";
+import { today } from "@/lib/dates";
 import { blank, isObj, normalize, type State } from "@/lib/state";
 
 /**
@@ -34,6 +35,8 @@ type Store = {
   sess: Session | null;
   /** Antwort verbuchen; gibt die Ampel vorher und nachher zurück (wie answer() in der Live-App). */
   answer: (id: string, ok: boolean, unsure?: boolean) => [number, number];
+  /** Antwort im Tutor: zählt in die Tagesstatistik (S.log), ohne eine Frage des Katalogs zu ändern. */
+  logTutor: () => void;
   /** „War geraten“: höchstens gelb, morgen wieder. */
   markGuess: (id: string) => void;
   toggleMark: (id: string) => void;
@@ -78,6 +81,7 @@ export const useProgress = create<Store>((set, get) => {
     S: typeof window === "undefined" ? blank() : loadState(),
     storeOk: true,
     sess: typeof window === "undefined" ? null : loadSession(),
+    logTutor: () => { const S = get().S, d = today(); save({ ...S, log: { ...S.log, [d]: (S.log[d] || 0) + 1 } }); },
     answer: (id, ok, unsure = false) => {
       const S = get().S, before = S.q[id] ? S.q[id].s : -1, { q, logDay } = srsAnswer(S, id, ok, unsure);
       save({ ...S, q: { ...S.q, [id]: q }, log: logDay ? { ...S.log, [logDay]: (S.log[logDay] || 0) + 1 } : S.log });

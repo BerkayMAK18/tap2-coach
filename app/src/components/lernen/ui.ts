@@ -8,6 +8,7 @@ import { create } from "zustand";
 import { useNavigate } from "@tanstack/react-router";
 import { startTab, type Plan } from "@/lib/lernen";
 import { useProgress } from "@/store/progress";
+import { examWriting } from "@/store/pruefung";
 
 export type Tf = "alle" | "Teil 1" | "Teil 2" | "SoWi";
 export type TTab = "theorie" | "fragen" | "aufgaben";
@@ -40,7 +41,8 @@ export function useOpenTopic() {
   };
 }
 
-export const openSearch = () => useLernenUI.setState({ srchOpen: true });
+/** Suche öffnen – nicht während eine Prüfung geschrieben wird (wie die Live-App) */
+export const openSearch = () => { if (location.pathname.startsWith("/pruefung") && examWriting()) return; useLernenUI.setState({ srchOpen: true }); };
 
 /** Tastenkürzel zum Öffnen (im Grundgerüst eingebunden) */
 export function useSearchHotkey() {

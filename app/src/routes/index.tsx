@@ -10,6 +10,7 @@ import { daysBetween, today } from "@/lib/dates";
 import { learnList, learnTopic, nextTopic, perDay, tcolOf, type Kind } from "@/lib/lernen";
 import { counts, isDue, reifeLabel } from "@/lib/srs";
 import { useProgress } from "@/store/progress";
+import { usePruefung } from "@/store/pruefung";
 import { Ic, Ring, pctS } from "@/ui-main";
 import { AmpBar, Legend, TodayPlan, type PlanActions } from "@/components/lernen/bits";
 import { useAnimRings, useStartRound } from "@/components/lernen/ui";
@@ -31,7 +32,7 @@ function Start() {
   const kind = (k: Kind) => startRound(learnList(S, k));
   // Tutorial, Lernplan und Operator-Trainer gehören zu „Tipps“ (noch nicht portiert) → dorthin
   const go = (v: string) => void navigate({ to: v === "pruefung" ? "/pruefung" : "/tipps" });
-  const act: PlanActions = { topic: (tid) => startRound(learnTopic(S, tid)), sim: () => go("pruefung"), go, due: () => kind("due") };
+  const act: PlanActions = { topic: (tid) => startRound(learnTopic(S, tid)), sim: (t) => { usePruefung.getState().setPk({ mode: t === "wiso" ? "sim" : "real", teil: t }); go("pruefung"); }, go, due: () => kind("due") };
 
   return (
     <>

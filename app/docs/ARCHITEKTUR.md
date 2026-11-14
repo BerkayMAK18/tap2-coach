@@ -100,7 +100,7 @@ app/
 | Eigene Karten anlegen/löschen | ✓ | ✓ | Löschen mit Sync-Ereignis |
 | SQL-Karten ausführen (sql.js, Vergleich mit Musterlösung), Code-Editor | ✓ | ✓ | `lib/sql.ts`, `lib/editor.ts`, eigene Chunks |
 | Aufgaben (20 Übungsaufgaben, Timer, Punkte, Fehlerursachen) | ✓ | ✓ | `lib/aufgaben.ts`, 1:1 (PORTIERUNG.md) |
-| Prüfung (Simulation, Real-Klausur, Noten, „Bereit für eine 1“) | ✓ | – | Daten vorhanden |
+| Prüfung (Simulation, Real-Klausur, Noten, „Bereit für eine 1“) | ✓ | ✓ | `lib/pruefung.ts`, `store/pruefung.ts`, 1:1 (PORTIERUNG.md) |
 | Tipps, Operator-Trainer, Lernplan, Tutorial | ✓ | – | Operator-Daten liegen noch in der App-Logik |
 | Events (LF11a) | ✓ | – | Daten vorhanden |
 | Belohnungen (XP, Level, Quests, Kalender, Tiere, Skins, Titel) | ✓ | – | eigenes Modul, Format `tap2coach-gami` übernehmen |

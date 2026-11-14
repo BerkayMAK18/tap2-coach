@@ -18,6 +18,7 @@ import { NAV_FOOT, NAV_MAIN, VTITLE } from "@/ui-main/nav";
 import { useProgress } from "@/store/progress";
 import { useLiveSync } from "@/store/livesync";
 import { useAccount } from "@/store/account";
+import { usePruefung } from "@/store/pruefung";
 import { Suche } from "@/components/lernen/Suche";
 import { openSearch, takeBoot, useSearchHotkey } from "@/components/lernen/ui";
 
@@ -33,18 +34,20 @@ const viewOf = (path: string) => (path === "/" ? "start" : path.split("/")[1] ||
 
 let booted = false;
 function Shell() {
-  const S = useProgress((s) => s.S), sess = useProgress((s) => s.sess);
+  const S = useProgress((s) => s.S), sess = useProgress((s) => s.sess), run = usePruefung((s) => s.run);
   const loc = useLocation(), navigate = useNavigate();
   useGamiTick((t) => t.n);
   const view = viewOf(loc.pathname);
-  setGamiContext(view, { sess, run: null });
+  setGamiContext(view, { sess, run });
   useEffect(() => { if (!booted) { booted = true; gm("init"); gm("boot", ""); } }, []);
   useSearchHotkey();
   useEffect(() => { document.title = `${VTITLE[view] ?? "TAP2 Coach"} · TAP2 Prüfungscoach`; }, [view]);
 
   const c = counts(S, allQ(S)), left = daysBetween(today(), EXAM_DAY);
   const navView = view === "operatoren" || view === "plan" ? "tipps" : view;
-  const focus = loc.pathname.startsWith("/lernen/runde");
+  const focus = loc.pathname.startsWith("/lernen/runde") || (view === "pruefung" && !!run && run.phase === "write"); // Fokus wie die Live-App: Lernrunde, Prüfung beim Schreiben
+  // Fokus-Ansicht wie die Live-App an <body> (das Stylesheet blendet mit body.focus die Navigation auf dem Handy aus)
+  useEffect(() => { document.body.classList.toggle("focus", focus); return () => document.body.classList.remove("focus"); }, [focus]);
   const go = (e: React.MouseEvent) => { // Links mit data-go / data-go2 (HUD, eingebettetes Belohnungs-Modul)
     const el = (e.target as HTMLElement).closest<HTMLElement>("[data-go],[data-go2]");
     const to = el && PATH[el.dataset.go ?? el.dataset.go2 ?? ""];
@@ -52,7 +55,7 @@ function Shell() {
   };
 
   return (
-    <div className={`app${focus ? " focus" : ""}`} onClick={go}>
+    <div className="app" onClick={go}>
       <nav className="side" aria-label="Hauptnavigation">
         <div className="brand"><img className="brand-mark" src="/icons/raven.svg" alt="" /><div className="brand-t">TAP2 Coach<span>Fachinformatik AE</span></div></div>
         {NAV_MAIN.map((n) => <NavBtn key={n.view} n={n} current={navView === n.view} />)}

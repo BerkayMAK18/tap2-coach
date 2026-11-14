@@ -24,7 +24,7 @@ mit Tests. Erst danach neue Funktionen. Referenz ist immer `../index.html` auf `
 | Grundgerüst | Seitenleiste, Kopfzeile (Ring, Tage, Figur, Suche, Einstellungen), Hell/Dunkel | in Arbeit |
 | Lernen | Übersicht (rStart), Lernen (Themen, Themenseite, Runde rSess), Suche, SQL-/Code-Karten, eigene Karten | **fertig (1:1)**, Abnahme 13.11.2026 (siehe unten) |
 | Aufgaben | rUeb (20 Aufgaben, Timer, Punkte, Fehlerursachen) | **fertig (1:1)**, Abnahme 14.11.2026 (siehe unten) |
-| Prüfung | rPK (Simulation, Real-Klausur, Bewertung wie ein Prüfer, Ergebnisse, „Bereit für eine 1“) | offen |
+| Prüfung | rPK (Simulation, Real-Klausur, Bewertung wie ein Prüfer, Ergebnisse, „Bereit für eine 1“) | **fertig (1:1)**, Abnahme 14.11.2026 (siehe unten) |
 | Events | rEvents (Kapitel, Lernkarten, Abschlusstest, Belohnung) | offen |
 | Tipps | rTipps, Operator-Trainer, Lernplan, Tutorial, Fehlerprotokoll | offen |
 | Belohnungen/Rangliste | Original-Modul eingebettet | fertig (1:1) |
@@ -89,3 +89,35 @@ Bewusste Unterschiede:
 Gefunden, gehört zum Grundgerüst: Unter Windows (Git `core.autocrlf`) meldete `catalog:check` die Kataloge als
 veraltet (CRLF in `../index.html`) – das Export-Skript vereinheitlicht jetzt die Zeilenenden. `state.test.ts` verglich
 das lokale Datum mit dem UTC-Datum und schlug nachts fehl – korrigiert.
+
+### Prüfung (14.11.2026, Branch `port/pruefung`)
+
+Logik in `src/lib/pruefung.ts` mit Tests (`pruefung.test.ts`): Fragenauswahl der Simulation (schwache Fragen zuerst,
+reihum über die Themen), Aufgaben der Real-Klausur (je Kategorie bis 25 P), Uhr mit Pause, Neuladen (Uhr angehalten),
+Abgeben (Antworten zählen in den Lernstand), Bewertungsstufen, Fehlerursachen ins Fehlerprotokoll, „Bereit für eine 1?“,
+Operator-Hinweise. Laufende Prüfung in `store/pruefung.ts` unter `tap2coach-run` (gleiches Format wie UI.run),
+Ergebnisse in `S.runs` (Format unverändert), Fehlerursachen über `CauseChips`/`logCause` aus Aufgaben.
+
+Abnahme: Live-App und Dev-App mit demselben Lernstand (5 Ergebnisse). Damit beide **dieselbe zufällige Klausur** zeigen,
+wurde der Lauf in der Live-App gestartet und `tap2coach-run` in die Dev-App kopiert. Verglichen wurde das erzeugte Markup
+(Uhrzeit und gemessene Minuten maskiert) – **identisch** für: Start (Modus, Prüfungsteil, Wechsel auf Real-Klausur
+setzt SoWi/Gemischt auf Planen zurück, „Bereit für eine 1?“, Ergebnisliste, Löschen mit Rückfrage) · Simulation (nach
+dem Neuladen angehalten, Tasten 2/C/←/→, Klick, Fragenübersicht, letzte Frage, Rückfrage beim Abgeben – Tasten dann
+gesperrt –, Weiter, Pause, Abbrechen-Rückfrage, Ergebnis mit Auswertung) · Real-Klausur Algorithmen mit SQL-Tabellen
+(Antworten tippen und zwischenspeichern, HTML bleibt Text, Rückfrage, Bewerten mit Stufen, Punkte-Feld, Ursachen wählen
+und abwählen, „Ergebnis speichern“ erst wenn alles bewertet, Ergebnis je Aufgabe) · zurück zur Übersicht. Lernstand,
+Lernstatistik, Fehlerprotokoll (`Real-Klausur Algorithmen · 1a · <start>`) und `S.runs` nach denselben Klicks gleich.
+Zeitablauf gibt automatisch ab („Zeit abgelaufen“). Fokus-Ansicht beim Schreiben, Suche dabei gesperrt, keine
+Konsolenfehler, Handy (375 px) per Screenshot; lint, test, build grün.
+
+Bewusste Unterschiede:
+- Fragenauswahl: Die Live-App würfelt das Gewicht einer Frage bei jedem Vergleich im Sortieren neu (instabiler
+  Vergleich), hier einmal je Frage. Gleiche Regel (rot > neu > gelb > grün, plus Zufall), nur sauber sortiert.
+- Ein fertiges Ergebnis wird beim Verlassen aus `tap2coach-run` entfernt; die Live-App lässt es liegen und ignoriert es
+  beim Neuladen. Sichtbar ist kein Unterschied.
+- Die Zeit läuft bis zur automatischen Abgabe nur, solange die Prüfungsseite offen ist – wie in der Live-App.
+
+Gefunden, gehört zum Grundgerüst: Die Fokus-Klasse saß an `.app`, das Stylesheet erwartet `body.focus` – auf dem Handy
+blieb die Navigationsleiste während der Prüfung sichtbar. Jetzt an `<body>` wie in der Live-App. Die Lernrunde setzte
+die Klasse schon selbst und war nicht betroffen. Übersicht → Lernplan „Prüfung simulieren“ wählt jetzt Modus und Teil vor
+(`data-plan-sim` der Live-App).

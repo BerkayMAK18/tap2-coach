@@ -7,7 +7,7 @@ mit Tests. Erst danach neue Funktionen. Referenz ist immer `../index.html` auf `
 
 1. **Gleiches Markup, gleiche Klassen.** Das Stylesheet der Live-App ist das Design-System (`src/theme/main.css`).
    Komponenten erzeugen dieselben Elemente und Klassen wie die Template-Strings der Live-App (z. B. `section.card`,
-   `.row`, `.btn small primary`, `.chip`, `.ring`). Keine Tailwind-Optik in portierten Ansichten.
+   `.row`, `.btn small primary`, `.chip`, `.ring`). Kein CSS-Framework, kein Reset (`src/styles.css`).
 2. **Gleiche Texte.** Überschriften, Hinweise, Knöpfe 1:1 (Deutsch, du-Form). Abweichungen nur mit Grund im Kommentar.
 3. **Gleiche Logik.** Regeln (Lernstand, XP, Bewertung, Lernplan …) als reine Funktionen in `src/lib/`, mit Tests,
    die das Verhalten der Live-App festhalten. Speicherformate/IDs unverändert (siehe MIGRATION.md).
@@ -21,7 +21,7 @@ mit Tests. Erst danach neue Funktionen. Referenz ist immer `../index.html` auf `
 
 | Modul | Ansichten (Live-App) | Stand |
 | --- | --- | --- |
-| Grundgerüst | Seitenleiste, Kopfzeile (Ring, Tage, Figur, Suche, Einstellungen), Hell/Dunkel | in Arbeit |
+| Grundgerüst | Seitenleiste, Kopfzeile (Ring, Tage, Figur, Suche, Einstellungen), Hell/Dunkel, Grundstile, Schriften | **fertig (1:1)**, Abnahme 14.11.2026 (siehe unten) |
 | Lernen | Übersicht (rStart), Lernen (Themen, Themenseite, Runde rSess), Suche, SQL-/Code-Karten, eigene Karten | **fertig (1:1)**, Abnahme 13.11.2026 (siehe unten) |
 | Aufgaben | rUeb (20 Aufgaben, Timer, Punkte, Fehlerursachen) | **fertig (1:1)**, Abnahme 14.11.2026 (siehe unten) |
 | Prüfung | rPK (Simulation, Real-Klausur, Bewertung wie ein Prüfer, Ergebnisse, „Bereit für eine 1“) | **fertig (1:1)**, Abnahme 14.11.2026 (siehe unten) |
@@ -309,4 +309,33 @@ beide Richtungen (`golden/original-v27.js`), nichts geht verloren. Golden-Tests 
 
 Beim Umstieg einmalig: Zwei Geräte, die schon verschiedene Kontostände hatten, gleichen sich auf den höheren an (der
 alte Stand kennt seine Ausgaben nicht) – zugunsten des Nutzers.
+
+### Grundgerüst (14.11.2026, Branch `port/grundgeruest`)
+
+Grundstile jetzt **exakt** wie die Live-App: `src/styles.css` = Schriften (`theme/fonts.css`, gleiche Schnitte und
+Zeichenbereiche wie dort, nur neutrale Familiennamen) + `theme/main.css` + `theme/app.css` (nur Ansichten, die es in der
+Live-App nicht gibt). Entfernt: Tailwind samt Basis-Reset (setzte u. a. Links ohne Farbe/Unterstreichung und Listen ohne
+Punkte), der alte UI-Baukasten `src/ui` (Radix, lucide), `tokens.css` (setzte z. B. eine globale Rahmenfarbe) und das
+doppelte `figures.css` (alle Abbildungs-Klassen stehen in `main.css`). Die letzten Nutzer des Baukastens – Konto-Karte
+und Tutor (Wissensgraph, KI-Chat, Claude-Brücke, Markdown der KI-Antworten) – nutzen jetzt die Bausteine der Live-App
+(`section.card`, `.row`, `.btn small`, `.segs`, `.tx-paste`, `.chip`, Rückfrage inline wie bei der Sync-Karte).
+
+Gefunden und behoben:
+- Monospace: Die Live-App deklariert JetBrains Mono mit den Schnitten 400 **und** 500, die Dev-App hatte nur 400 –
+  dadurch wirkte Fettdruck im Code-Editor schwächer. Jetzt gleich (geprüft: SQL-Schlüsselwörter gleich dick und breit).
+- Links (z. B. „Spitznamen wählen“) wieder blau unterstrichen wie in der Live-App (vorher vom Tailwind-Reset entfernt).
+- Einstellungen-Knopf in der Kopfzeile ist wie in der Live-App ein Button mit `data-go` (als Link hatte er 1 px weniger
+  Innenabstand). Menüpunkte bleiben echte Links, ohne Unterstreichung (`app.css`).
+
+Abnahme: Live-App und Dev-App im selben Ursprung nebeneinander (gleicher Lern- und Belohnungsstand), für jedes Element
+die berechneten Styles verglichen (Abstände, Schrift, Farben, Rahmen, Listen, Größen u. a., 49 Eigenschaften; Firmenfarbe
+und Schriftnamen gleichgesetzt, Abweichungen unter 0,5 px ignoriert). **Keine Abweichung** in: Übersicht, Lernen,
+Aufgaben, Prüfung, Tipps, Operator-Trainer, Lernplan, Tutorial, Belohnungen, Rangliste, Lernrunde (Auswahlfrage und
+SQL-Karte mit Editor), Suche mit Treffern, Belohnungs-Fenster „alle Teile“, Navigation, Kopf- und Fußzeile – hell,
+dunkel und Handy (375 px). Erwartete Ausnahmen: Events (WPF ausgeblendet), Offline-Hinweis im Entwicklungsmodus,
+Innenleben von CodeMirror (neuere Version, unsichtbare Rahmen der Breite 0). Konto-Karte (mit einer Attrappe als
+Server-Adresse, ohne Verbindung) und Tutor-Seite per Screenshot geprüft. lint, test, tsc, build grün.
+
+Außerdem: Die Kopie von `index.html` auf `dev` (Quelle für `npm run catalog:export`) entspricht wieder `main` (v2.8),
+`catalog:check` unverändert aktuell.
 

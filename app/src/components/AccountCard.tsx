@@ -1,12 +1,12 @@
 /**
- * Einstellungen → „Konto & Sync“. Nur sichtbar, wenn Supabase konfiguriert ist (FEATURES.account).
+ * Einstellungen → „Konto & Sync“ (nur die neue App). Nur sichtbar, wenn Supabase konfiguriert ist (FEATURES.account).
  * Zustände: abgemeldet → angemeldet ohne Schlüssel (neu erstellen / vorhandenen eingeben) → verbunden.
+ * Aufbau und Bausteine wie die Sync-Karte der Live-App (section.card, .row, .btn small, .tx-in, Rückfrage inline).
  */
 import { useState } from "react";
-import { Github, KeyRound, LogOut, RefreshCw, Trash2 } from "lucide-react";
-import { Button, Card, CardEyebrow, ConfirmDialog, InlineError, Input } from "@/ui";
 import { FEATURES } from "@/config";
 import { useAccount } from "@/store/account";
+import { Ic } from "@/ui-main";
 
 export function AccountCard() {
   const a = useAccount();
@@ -14,49 +14,40 @@ export function AccountCard() {
   const [showKey, setShowKey] = useState(false);
   const [askDel, setAskDel] = useState(false);
   if (!FEATURES.account) return null;
+  const time = (t: number) => new Date(t).toLocaleTimeString("de-DE", { hour: "2-digit", minute: "2-digit" });
 
   return (
-    <Card className="space-y-4">
-      <CardEyebrow>Konto & Sync</CardEyebrow>
+    <section className="card" id="account-card"><h3>Konto &amp; Sync</h3>
       {!a.user ? (
         <>
-          <p className="text-body-300">Melde dich mit GitHub an, um deinen Lernstand zu sichern und auf mehreren Geräten zu nutzen. Er wird vorher in deinem Browser verschlüsselt – niemand außer dir kann ihn lesen.</p>
-          <Button variant="ink" onClick={() => void a.signIn()}><Github className="h-4 w-4" />Mit GitHub anmelden</Button>
+          <p className="small muted" style={{ marginTop: 4 }}>Melde dich mit GitHub an, um deinen Lernstand zu sichern und auf mehreren Geräten zu nutzen. Er wird vorher in deinem Browser verschlüsselt – niemand außer dir kann ihn lesen.</p>
+          <div className="row" style={{ marginTop: 12 }}><button type="button" className="btn small primary" onClick={() => void a.signIn()}><Ic name="users" cls="ic xs" /> Mit GitHub anmelden</button></div>
         </>
       ) : !a.cfg ? (
         <>
-          <p className="text-body-300">Angemeldet. Für die verschlüsselte Sicherung brauchst du einen Schlüssel, den nur du hast.</p>
-          <div className="flex flex-wrap gap-2">
-            <Button variant="ink" onClick={() => void a.createKey()} loading={a.busy}><KeyRound className="h-4 w-4" />Neuen Schlüssel erstellen (erstes Gerät)</Button>
-          </div>
-          <div className="space-y-2">
-            <p className="text-body-200 text-slate">Schon auf einem anderen Gerät verbunden? Dort unter „Schlüssel anzeigen“ ablesen und hier eingeben:</p>
-            <div className="flex flex-wrap gap-2">
-              <Input value={keyIn} onChange={(e) => setKeyIn(e.target.value)} placeholder="XXXX-XXXX-XXXX-XXXX-XXXX-XXXX-XXXX-XXXX" className="max-w-md font-mono" aria-label="Sync-Schlüssel" autoComplete="off" spellCheck={false} />
-              <Button variant="outline" onClick={() => void a.useKey(keyIn)} loading={a.busy}>Verbinden</Button>
-            </div>
-          </div>
-          <Button variant="ghost" size="sm" onClick={() => void a.signOut()}><LogOut className="h-4 w-4" />Abmelden</Button>
+          <p className="small muted" style={{ marginTop: 4 }}>Angemeldet. Für die verschlüsselte Sicherung brauchst du einen Schlüssel, den nur du hast.</p>
+          <div className="row" style={{ marginTop: 12 }}><button type="button" className="btn small primary" disabled={a.busy} onClick={() => void a.createKey()}><Ic name="lock" cls="ic xs" /> Neuen Schlüssel erstellen (erstes Gerät)</button></div>
+          <details className="tx-paste" open><summary className="small">Schon auf einem anderen Gerät verbunden?</summary>
+            <p className="tiny muted">Dort unter „Schlüssel anzeigen“ ablesen und hier eingeben.</p>
+            <div className="row sync-row"><input type="text" id="acc-key" placeholder="XXXX-XXXX-XXXX-XXXX-XXXX-XXXX-XXXX-XXXX" aria-label="Sync-Schlüssel" autoComplete="off" spellCheck={false} value={keyIn} onChange={(e) => setKeyIn(e.target.value)} onKeyDown={(e) => { if (e.key === "Enter") void a.useKey(keyIn); }} /><button type="button" className="btn small" disabled={a.busy} onClick={() => void a.useKey(keyIn)}>Verbinden</button></div>
+          </details>
+          <div className="row" style={{ marginTop: 8 }}><button type="button" className="btn small ghost" onClick={() => void a.signOut()}>Abmelden</button></div>
         </>
       ) : (
         <>
-          <p className="text-body-300">Verbunden. Dein Lernstand wird verschlüsselt gesichert und automatisch abgeglichen.{a.lastSync ? ` Zuletzt: ${new Date(a.lastSync).toLocaleTimeString("de-DE", { hour: "2-digit", minute: "2-digit" })}.` : ""}</p>
-          <div className="flex flex-wrap gap-2">
-            <Button variant="ink" onClick={() => void a.syncNow()} loading={a.busy}><RefreshCw className="h-4 w-4" />Jetzt synchronisieren</Button>
-            <Button variant="outline" onClick={() => setShowKey(!showKey)}><KeyRound className="h-4 w-4" />{showKey ? "Schlüssel verbergen" : "Schlüssel anzeigen"}</Button>
-            <Button variant="ghost" onClick={() => setAskDel(true)}><Trash2 className="h-4 w-4" />Cloud-Kopie löschen</Button>
-            <Button variant="ghost" onClick={() => void a.signOut()}><LogOut className="h-4 w-4" />Abmelden</Button>
-          </div>
-          {showKey && (
-            <div className="rounded-lg bg-tone-warning-light p-3 text-body-200">
-              <p className="font-mono text-body-300 select-all">{a.cfg.key}</p>
-              <p className="mt-1">Bewahre ihn sicher auf (z. B. im Passwort-Manager). Ohne Schlüssel ist die Sicherung nicht lesbar – auch nicht für den Betreiber. Gib ihn nur auf deinen eigenen Geräten ein.</p>
-            </div>
-          )}
+          <div className="row" style={{ marginTop: 10 }}>{a.busy ? <span className="small muted">Gleicht ab …</span> : <span className="app-ok"><Ic name="check" cls="ic sm" /> Verbunden{a.lastSync ? " · abgeglichen " + time(a.lastSync) : ""}</span>}</div>
+          <p className="small muted" style={{ marginTop: 4 }}>Dein Lernstand wird verschlüsselt gesichert und automatisch abgeglichen.</p>
+          <div className="row" style={{ marginTop: 12 }}><button type="button" className="btn small primary" disabled={a.busy} onClick={() => void a.syncNow()}><Ic name="again" cls="ic xs" /> Jetzt synchronisieren</button></div>
+          <details className="tx-paste"><summary className="small">Schlüssel &amp; Konto</summary>
+            <p className="tiny muted">Bewahre den Schlüssel sicher auf (z. B. im Passwort-Manager). Ohne ihn ist die Sicherung nicht lesbar – auch nicht für den Betreiber. Gib ihn nur auf deinen eigenen Geräten ein.</p>
+            <div className="row">{showKey ? <><code className="sync-key">{a.cfg.key}</code><button type="button" className="btn small ghost" onClick={() => setShowKey(false)}>Verbergen</button></> : <button type="button" className="btn small ghost" onClick={() => setShowKey(true)}>Schlüssel anzeigen</button>}</div>
+            <div className="row" style={{ marginTop: 8 }}>{askDel ? <><button type="button" className="btn small danger" onClick={() => { void a.deleteCloud(); setAskDel(false); }}>Ja, Cloud-Kopie löschen</button><button type="button" className="btn small ghost" onClick={() => setAskDel(false)}>Abbrechen</button></>
+              : <><button type="button" className="btn small ghost" onClick={() => setAskDel(true)}>Cloud-Kopie löschen</button><button type="button" className="btn small ghost" onClick={() => void a.signOut()}>Abmelden</button></>}</div>
+            {askDel && <p className="tiny muted">Die verschlüsselte Sicherung in deinem Konto wird gelöscht. Der Lernstand auf deinen Geräten bleibt erhalten.</p>}
+          </details>
         </>
       )}
-      {a.err && <InlineError>{a.err}</InlineError>}
-      <ConfirmDialog open={askDel} onOpenChange={setAskDel} title="Cloud-Kopie löschen?" description="Die verschlüsselte Sicherung in deinem Konto wird gelöscht. Der Lernstand auf deinen Geräten bleibt erhalten." confirmLabel="Löschen" tone="destructive" onConfirm={() => { void a.deleteCloud(); setAskDel(false); }} />
-    </Card>
+      {a.err && <p className="small warn-text" style={{ marginTop: 8 }}>{a.err}</p>}
+    </section>
   );
 }

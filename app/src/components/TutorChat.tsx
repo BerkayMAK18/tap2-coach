@@ -8,8 +8,7 @@
  */
 import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "@tanstack/react-router";
-import { Github, Play, RotateCcw, Send } from "lucide-react";
-import { Button, Card, CardEyebrow, InlineError, Textarea } from "@/ui";
+import { Ic } from "@/ui-main";
 import { TAP2, TP, allQ } from "@/content/catalog";
 import { EXAM_DAY } from "@/config";
 import type { KnowledgeGraph } from "@/lib/graph";
@@ -44,10 +43,10 @@ export function TutorChat({ g }: { g: KnowledgeGraph }) {
 
   if (!supabase) return null;
   if (!user) return (
-    <Card className="space-y-3"><CardEyebrow>KI-Tutor</CardEyebrow>
-      <p className="text-body-300">Der Tutor läuft über dein Konto. Bitte einmal mit GitHub anmelden.</p>
-      <Button variant="ink" onClick={() => void signIn()}><Github className="h-4 w-4" />Mit GitHub anmelden</Button>
-    </Card>
+    <section className="card"><h3>KI-Tutor</h3>
+      <p className="small muted" style={{ marginTop: 4 }}>Der Tutor läuft über dein Konto. Bitte einmal mit GitHub anmelden.</p>
+      <div className="row" style={{ marginTop: 12 }}><button type="button" className="btn small primary" onClick={() => void signIn()}><Ic name="users" cls="ic xs" /> Mit GitHub anmelden</button></div>
+    </section>
   );
 
   const start = () => {
@@ -78,39 +77,37 @@ export function TutorChat({ g }: { g: KnowledgeGraph }) {
   };
 
   return (
-    <Card className="space-y-4">
-      <div className="flex flex-wrap items-center gap-3">
-        <CardEyebrow>KI-Tutor</CardEyebrow>
-        <div className="ml-auto flex rounded-full border p-1 text-body-200" role="tablist" aria-label="Modell">
-          {(["haiku", "sonnet"] as const).map((m) => <button key={m} role="tab" aria-selected={model === m} onClick={() => setModel(m)} className={model === m ? "rounded-full bg-ink px-3 py-0.5 text-canvas" : "px-3 py-0.5 text-slate"}>{m === "haiku" ? "Schnell (Haiku)" : "Gründlich (Sonnet)"}</button>)}
-        </div>
-        <span className="text-body-100 text-slate" title="Schätzung aus dem gemeldeten Verbrauch">≈ {cost.toFixed(3)} $ diese Sitzung</span>
+    <section className="card">
+      <div className="row" style={{ justifyContent: "space-between" }}>
+        <h3>KI-Tutor</h3>
+        <div className="segs" role="group" aria-label="Modell">{(["haiku", "sonnet"] as const).map((m) => <button key={m} type="button" className={`seg ${model === m ? "on" : ""}`} aria-pressed={model === m} onClick={() => setModel(m)}>{m === "haiku" ? "Schnell (Haiku)" : "Gründlich (Sonnet)"}</button>)}</div>
       </div>
+      <p className="tiny muted" title="Schätzung aus dem gemeldeten Verbrauch">≈ {cost.toFixed(3)} $ diese Sitzung</p>
       {!msgs.length ? (
-        <Button variant="ink" onClick={start} loading={busy}><Play className="h-4 w-4" />Sitzung starten (Diagnose zu deinen Schwächen)</Button>
+        <div className="row" style={{ marginTop: 12 }}><button type="button" className="btn primary" disabled={busy} onClick={start}><Ic name="play" cls="ic sm" /> Sitzung starten (Diagnose zu deinen Schwächen)</button></div>
       ) : (
         <>
-          <div className="max-h-[60vh] space-y-3 overflow-y-auto rounded-lg bg-muted/40 p-3">
+          <div className="tut-chat">
             {msgs.slice(1).map((m, i) => (
-              <div key={i} className={m.role === "user" ? "ml-auto max-w-[85%] rounded-lg bg-ink p-3 text-canvas" : "max-w-[95%] rounded-lg bg-card p-3"}>
-                {m.role === "assistant" ? <SafeMarkdown text={m.content} /> : <p className="whitespace-pre-wrap leading-relaxed">{m.content}</p>}
-                {m.role === "assistant" && m.content.includes("```" + RESULT_TAG) && <Button size="sm" variant="ink" className="mt-2" onClick={() => takeResult(m.content)}>Ergebnis übernehmen & üben</Button>}
+              <div key={i} className={`tut-msg ${m.role === "user" ? "me" : ""}`}>
+                {m.role === "assistant" ? <SafeMarkdown text={m.content} /> : <p className="tut-pre">{m.content}</p>}
+                {m.role === "assistant" && m.content.includes("```" + RESULT_TAG) && <div className="row" style={{ marginTop: 8 }}><button type="button" className="btn small primary" onClick={() => takeResult(m.content)}>Ergebnis übernehmen &amp; üben</button></div>}
               </div>
             ))}
-            {busy && <p className="text-body-200 text-slate">Tutor denkt …</p>}
+            {busy && <p className="small muted">Tutor denkt …</p>}
             <div ref={end} />
           </div>
-          <div className="flex gap-2">
-            <Textarea value={input} onChange={(e) => setInput(e.target.value)} rows={2} placeholder="Deine Antwort …" onKeyDown={(e) => { if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) void send(input); }} />
-            <div className="flex flex-col gap-2">
-              <Button variant="ink" onClick={() => void send(input)} disabled={busy || !input.trim()} aria-label="Senden"><Send className="h-4 w-4" /></Button>
-              <Button variant="ghost" onClick={() => void send("Ergebnis")} disabled={busy} title="Ergebnis-Block anfordern">Ergebnis</Button>
+          <div className="tut-input">
+            <textarea value={input} rows={2} placeholder="Deine Antwort …" aria-label="Deine Antwort" onChange={(e) => setInput(e.target.value)} onKeyDown={(e) => { if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) void send(input); }} />
+            <div className="tut-btns">
+              <button type="button" className="btn small primary" disabled={busy || !input.trim()} aria-label="Senden" onClick={() => void send(input)}><Ic name="right" cls="ic xs" /> Senden</button>
+              <button type="button" className="btn small ghost" disabled={busy} title="Ergebnis-Block anfordern" onClick={() => void send("Ergebnis")}>Ergebnis</button>
             </div>
           </div>
-          <Button variant="ghost" size="sm" onClick={() => { setMsgs([]); setSystem(""); setCost(0); }}><RotateCcw className="h-4 w-4" />Neue Sitzung</Button>
+          <div className="row" style={{ marginTop: 8 }}><button type="button" className="btn small ghost" onClick={() => { setMsgs([]); setSystem(""); setCost(0); }}><Ic name="again" cls="ic xs" /> Neue Sitzung</button></div>
         </>
       )}
-      {err && <InlineError>{err}</InlineError>}
-    </Card>
+      {err && <p className="small warn-text" style={{ marginTop: 8 }}>{err}</p>}
+    </section>
   );
 }

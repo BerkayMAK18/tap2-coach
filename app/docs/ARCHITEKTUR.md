@@ -25,7 +25,7 @@ Die neue App liest die Live-Inhalte nur über das Export-Skript, sie schreibt ni
 | Schicht | Wahl | Begründung |
 | --- | --- | --- |
 | Build | Vite 8, TypeScript strict | schnell, Standard, gute Fehlermeldungen |
-| UI | React 19, eigener UI-Baukasten (`src/ui`), Tailwind v4 mit eigenen Tokens | wiederverwendbare Bausteine, kein Firmen-Branding |
+| UI | React 19, Stylesheet der Live-App (`src/theme/main.css`), Bausteine in `src/ui-main`, kein CSS-Framework | gleiches Aussehen wie die Live-App, kein Firmen-Branding |
 | Routing | TanStack Router, dateibasiert (`src/routes`), automatische Code-Aufteilung | typsichere Links und Suchparameter, skaliert mit vielen Seiten |
 | Zustand | Zustand (`src/store`) | klein, ohne Boilerplate, einfach testbar |
 | Inhalte | JSON-Kataloge (`src/content/generated`), Schema mit Zod (`src/content/schema.ts`) | Inhalte getrennt vom Code, Grundlage der Katalog-Bibliothek |
@@ -105,8 +105,8 @@ app/
 | Events (LF11a) | ✓ | ✓ | `lib/events.ts`, Belohnung über `store/gami.ts`, 1:1 (PORTIERUNG.md) |
 | Belohnungen (XP, Level, Quests, Kalender, Tiere, Skins, Titel) | ✓ | ✓ | `lib/gami/`, `store/gami.ts`, Format `tap2coach-gami` unverändert, Golden-Tests gegen das Original (PORTIERUNG.md) |
 | Rangliste, Geräte-Sync | ✓ | ✓ | `tap2_lb` bzw. `tap2_sync`, gleiches Protokoll und gleiche IDs |
-| Übertragen per Link/QR | ✓ | – | |
-| Patch Notes, Hell/Dunkel | ✓ | Patch Notes ✓ (`lib/patchnotes.ts`), Hell/Dunkel – | |
+| Übertragen per Link/QR | ✓ | ✓ | `lib/transfer.ts`, gleiches Format (PORTIERUNG.md, Einstellungen) |
+| Patch Notes, Hell/Dunkel | ✓ | ✓ | `lib/patchnotes.ts`, `lib/theme.ts` (`tap2coach-theme`) |
 
 Jeder Bereich ist ein eigenes Modul (Route + Logik in `lib/` + Tests) und kann unabhängig portiert werden.
 
@@ -115,7 +115,7 @@ Jeder Bereich ist ein eigenes Modul (Route + Logik in `lib/` + Tests) und kann u
 - **Design und Bedienung exakt wie die Live-App.** Das Stylesheet der Live-App wird zum Design-System der neuen App,
   die React-Komponenten erzeugen dasselbe Markup (gleiche Klassen). Einzige Änderung: Die Tintenfarbe `#08312A`
   der Live-App (Boehringer-Markenfarbe) wird durch einen neutralen Ton ersetzt (Standard: `#172033`, eine Zeile in
-  den Tokens). Der bisherige eigene UI-Baukasten (`src/ui`) wird schrittweise ersetzt.
+  den Tokens). Der frühere eigene UI-Baukasten (`src/ui`, Tailwind) ist seit 14.11.2026 vollständig ersetzt.
 - **Gamification/Gacha vollständig** als eigenes Modul (`tap2coach-gami`, gleiches Format).
 - **Optionales Konto mit GitHub** (Supabase, Frankfurt) für Sicherung, Sync und Rangliste – Lernen ohne Konto bleibt.
 - **Datenschutz:** Der Lernstand im Konto ist Ende-zu-Ende-verschlüsselt, der Betreiber kann ihn nicht lesen;
@@ -128,8 +128,8 @@ Jeder Bereich ist ein eigenes Modul (Route + Logik in `lib/` + Tests) und kann u
 | Phase | Inhalt | Stand |
 | --- | --- | --- |
 | 0 | Gerüst aus learnlab, eigenes Design, Katalogformat | erledigt, Stack am 13.11. auf statische PWA umgestellt |
-| 1a | Design der Live-App übernehmen, Datenschutzhinweis | **in Arbeit**: Datenschutzhinweis fertig |
-| 1b | Funktionsgleichheit inkl. Gamification/Gacha (Tabelle oben) | in Arbeit: Lernen fertig |
+| 1a | Design der Live-App übernehmen, Datenschutzhinweis | erledigt (14.11.: Grundgerüst ohne Tailwind, PORTIERUNG.md) |
+| 1b | Funktionsgleichheit inkl. Gamification/Gacha (Tabelle oben) | erledigt (alle Module 1:1, PORTIERUNG.md) |
 | 1c | Konto (GitHub), E2E-Sync, Rangliste mit Benutzername, Konto löschen | offen (braucht Supabase-Dev-Projekt + GitHub-OAuth-App) |
 | 2 | Katalog-Bibliothek (Suche/Filter, mehrere Kataloge), TAP1, Lehrjahr → Lernfeld, Klausurkalender | offen |
 | 3 | KI-Tutor (Premium, nur Admin): Stufe 1 Wissensgraph fertig (`/tutor`), Stufe 2 KI siehe `docs/TUTOR.md` | Stufe 2 offen (braucht Login + Claude-API-Key) |

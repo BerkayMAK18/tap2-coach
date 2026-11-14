@@ -3,7 +3,7 @@
  *
  * Statische, lokal-first PWA – kein eigener Server nötig:
  * - TanStack Router (dateibasiert): Seiten liegen in src/routes/, routeTree.gen.ts wird erzeugt.
- * - Tailwind v4 mit eigenen Tokens (src/theme/tokens.css).
+ * - Design = Stylesheet der Live-App (src/styles.css → theme/main.css), kein CSS-Framework.
  * - vite-plugin-pwa mit eigenem Service Worker (src/sw.ts): Seiten Netz zuerst (immer aktuell), Programmdateien
  *   aus dem Vorab-Cache, offline nutzbar – wie sw.js der Live-App.
  * Hosting: beliebiges statisches CDN, z. B. Cloudflare Pages Free (siehe docs/ENTWICKLUNG.md).
@@ -11,7 +11,6 @@
 import path from "node:path";
 import { defineConfig } from "vitest/config";
 import react from "@vitejs/plugin-react";
-import tailwindcss from "@tailwindcss/vite";
 import { tanstackRouter } from "@tanstack/router-plugin/vite";
 import { VitePWA } from "vite-plugin-pwa";
 
@@ -21,7 +20,6 @@ export default defineConfig({
   plugins: [
     tanstackRouter({ target: "react", autoCodeSplitting: true }),
     react(),
-    tailwindcss(),
     VitePWA({
       registerType: "prompt", // Nutzer entscheidet, wann neu geladen wird – nie mitten in einer Lernrunde
       strategies: "injectManifest", // eigener Service Worker (src/sw.ts): Seiten Netz zuerst wie in der Live-App

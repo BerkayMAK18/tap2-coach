@@ -88,7 +88,7 @@ function Shell() {
             <span className="pill days"><Ic name="calendar" /><b>{Math.max(0, left)}</b><span className="lbl">{left === 1 ? "Tag" : "Tage"}</span></span>
             <HudPill view={view} />
             <button type="button" className="iconbtn hb" aria-label="Fragen durchsuchen" title="Suchen (Taste /)" onClick={openSearch}><Ic name="search" /></button>
-            <Link to="/einstellungen" className={`iconbtn hb${view === "einstellungen" ? " on" : ""}`} aria-label="Einstellungen" title="Einstellungen"><Ic name="gear" /></Link>
+            <button type="button" className={`iconbtn hb ${view === "einstellungen" ? "on" : ""}`} data-go="einstellungen" aria-label="Einstellungen" title="Einstellungen"><Ic name="gear" /></button>
           </div>
         </header>
         <main className="content"><section className="view"><Outlet /></section></main>

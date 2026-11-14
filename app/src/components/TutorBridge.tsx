@@ -4,8 +4,7 @@
  */
 import { useState } from "react";
 import { useNavigate } from "@tanstack/react-router";
-import { ClipboardCopy, Download, ExternalLink, Play } from "lucide-react";
-import { Button, Card, CardEyebrow, InlineError, Textarea } from "@/ui";
+import { Ic } from "@/ui-main";
 import { TAP2, TOPICS, TP, allQ } from "@/content/catalog";
 import { EXAM_DAY } from "@/config";
 import type { KnowledgeGraph } from "@/lib/graph";
@@ -60,41 +59,36 @@ export function TutorBridge({ g }: { g: KnowledgeGraph }) {
   };
 
   return (
-    <Card className="space-y-5">
-      <CardEyebrow>KI-Tutor über dein Claude-Projekt</CardEyebrow>
-      <details className="rounded-lg border p-3">
-        <summary className="cursor-pointer font-medium">Einmalig einrichten</summary>
-        <ol className="mt-3 list-decimal space-y-2 pl-5 text-body-300">
+    <div className="tut-bridge">
+      <details className="tx-paste">
+        <summary className="small">Einmalig einrichten</summary>
+        <ol className="small">
           <li>Auf claude.ai (oder in der Claude-App) ein neues <b>Projekt</b> „TAP2 Tutor“ anlegen.</li>
-          <li>Wissensdatei herunterladen und im Projekt unter „Projektwissen“ hochladen: <Button size="sm" variant="outline" onClick={download}><Download className="h-4 w-4" />TAP2-Wissen.md</Button></li>
-          <li>Projekt-Anweisungen kopieren und im Projekt unter „Anweisungen“ einfügen: <Button size="sm" variant="outline" onClick={() => void copy(INSTRUCTIONS, "Anweisungen")}><ClipboardCopy className="h-4 w-4" />Anweisungen kopieren</Button></li>
+          <li>Wissensdatei herunterladen und im Projekt unter „Projektwissen“ hochladen: <button type="button" className="btn small" onClick={download}><Ic name="down" cls="ic xs" /> TAP2-Wissen.md</button></li>
+          <li>Projekt-Anweisungen kopieren und im Projekt unter „Anweisungen“ einfügen: <button type="button" className="btn small" onClick={() => void copy(INSTRUCTIONS, "Anweisungen")}><Ic name="cards" cls="ic xs" /> Anweisungen kopieren</button></li>
         </ol>
-        <p className="mt-2 text-body-200 text-slate">Nur dein privates Konto verwenden. Die Wissensdatei bei größeren Inhaltsänderungen neu hochladen.</p>
+        <p className="tiny muted">Nur dein privates Konto verwenden. Die Wissensdatei bei größeren Inhaltsänderungen neu hochladen.</p>
       </details>
 
-      <div className="space-y-2">
-        <p className="text-body-300"><b>1.</b> Übergabe kopieren und im Projekt einen neuen Chat damit beginnen.</p>
-        <div className="flex flex-wrap gap-2">
-          <Button variant="ink" onClick={() => void copy(buildHandoff(g, EXAM_DAY, data.insights), "Übergabe")}><ClipboardCopy className="h-4 w-4" />An Claude übergeben</Button>
-          <Button variant="ghost" asChild><a href="https://claude.ai/projects" target="_blank" rel="noopener noreferrer"><ExternalLink className="h-4 w-4" />Claude öffnen</a></Button>
-        </div>
+      <p className="small" style={{ marginTop: 12 }}><b>1.</b> Übergabe kopieren und im Projekt einen neuen Chat damit beginnen.</p>
+      <div className="row" style={{ marginTop: 8 }}>
+        <button type="button" className="btn small primary" onClick={() => void copy(buildHandoff(g, EXAM_DAY, data.insights), "Übergabe")}><Ic name="cards" cls="ic xs" /> An Claude übergeben</button>
+        <a className="btn small ghost" href="https://claude.ai/projects" target="_blank" rel="noopener noreferrer"><Ic name="globe" cls="ic xs" /> Claude öffnen</a>
       </div>
 
-      <div className="space-y-2">
-        <p className="text-body-300"><b>2.</b> Am Ende schreibt Claude einen Block <code>tap2-ergebnis</code>. Hier einfügen – der Graph merkt sich, was du belegt kannst, und die vorgeschlagenen Themen starten als Übungsrunde (mit XP).</p>
-        <Textarea value={paste} onChange={(e) => setPaste(e.target.value)} rows={5} placeholder="Antwort oder Ergebnis-Block von Claude einfügen" className="font-mono text-body-200" />
-        <Button variant="ink" onClick={apply} disabled={!paste.trim()}><Play className="h-4 w-4" />Ergebnis übernehmen</Button>
-      </div>
+      <p className="small" style={{ marginTop: 14 }}><b>2.</b> Am Ende schreibt Claude einen Block <code>tap2-ergebnis</code>. Hier einfügen – der Graph merkt sich, was du belegt kannst, und die vorgeschlagenen Themen starten als Übungsrunde (mit XP).</p>
+      <textarea value={paste} rows={5} placeholder="Antwort oder Ergebnis-Block von Claude einfügen" aria-label="Ergebnis von Claude" onChange={(e) => setPaste(e.target.value)} style={{ marginTop: 8 }} />
+      <div className="row" style={{ marginTop: 8 }}><button type="button" className="btn small primary" disabled={!paste.trim()} onClick={apply}><Ic name="play" cls="ic xs" /> Ergebnis übernehmen</button></div>
 
-      {msg && <p role="status" className="text-body-200">{msg}</p>}
-      {err && <InlineError>{err}</InlineError>}
+      {msg && <p role="status" className="small" style={{ marginTop: 8 }}>{msg}</p>}
+      {err && <p className="small warn-text" style={{ marginTop: 8 }}>{err}</p>}
 
       {(data.insights.length > 0 || data.miscon.length > 0) && (
-        <div className="grid gap-4 md:grid-cols-2">
-          <div><p className="font-medium">Belegt verstanden</p><ul className="mt-1 space-y-1 text-body-200">{data.insights.slice(-8).reverse().map((i, k) => <li key={k}><b>{TP[i.thema]?.n ?? i.thema}:</b> {i.aussage}</li>)}</ul></div>
-          <div><p className="font-medium">Fehlvorstellungen</p><ul className="mt-1 space-y-1 text-body-200">{data.miscon.slice(-8).reverse().map((i, k) => <li key={k}><b>{TP[i.thema]?.n ?? i.thema}:</b> {i.aussage}</li>)}</ul></div>
+        <div className="tut-cols" style={{ marginTop: 12 }}>
+          <div><b className="small">Belegt verstanden</b><ul className="small">{data.insights.slice(-8).reverse().map((i, k) => <li key={k}><b>{TP[i.thema]?.n ?? i.thema}:</b> {i.aussage}</li>)}</ul></div>
+          <div><b className="small">Fehlvorstellungen</b><ul className="small">{data.miscon.slice(-8).reverse().map((i, k) => <li key={k}><b>{TP[i.thema]?.n ?? i.thema}:</b> {i.aussage}</li>)}</ul></div>
         </div>
       )}
-    </Card>
+    </div>
   );
 }

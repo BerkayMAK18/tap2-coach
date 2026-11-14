@@ -23,7 +23,7 @@ export const FEATURES = {
   sync: SUPABASE_ON, // Ende-zu-Ende-verschlüsselte Sicherung/Sync im Konto
   leaderboard: false, // Rangliste mit selbst gewähltem Benutzernamen (Einwilligung)
   patchNotes: true, // Release-Liste von der GitHub-API (Seite Patch Notes, portiert 14.11.2026)
-  tutor: false, // KI-Tutor – nur für freigeschaltete Konten (Admin), für andere unsichtbar
+  tutor: false, // Vortex Pro (eingebaute KI, Anthropic) – nur für freigeschaltete Konten (Admin); Vortex (Brücke) ist immer an
 } as const;
 
 /**

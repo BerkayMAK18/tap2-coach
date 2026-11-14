@@ -36,7 +36,7 @@ export type Ev = {
   p?: number; m?: number; sich?: number; n?: string; f?: string; s?: string;
 };
 export type Fv = { id: string; k?: string; t: string; text: string; first: number; seen: number; fix?: number };
-export type Sess = { id: string; t: string; start: number; end?: number; aufgaben: number; punkte: number; max: number; xp: number; model?: string };
+export type Sess = { id: string; t: string; start: number; end?: number; aufgaben: number; punkte: number; max: number; xp: number; model?: "haiku" | "sonnet" | "bruecke" };
 export type TutorState = { v: 2; ev: Ev[]; fv: Record<string, Fv>; sess: Record<string, Sess>; xp: Record<string, Record<string, number>>; reset?: number };
 export const emptyTutor = (): TutorState => ({ v: 2, ev: [], fv: {}, sess: {}, xp: {} });
 /** Ab wann Daten zählen (Stichtag oder letztes Zurücksetzen) */
@@ -52,7 +52,7 @@ const EvZ = z.object({
   sich: z.number().int().min(0).max(3).optional(), n: z.string().max(300).optional(), f: id.optional(), s: id.optional(),
 });
 const FvZ = z.object({ id, k: z.string().max(12).optional(), t: z.string().max(10), text: z.string().min(1).max(300), first: ts, seen: ts, fix: ts.optional() });
-const SessZ = z.object({ id, t: z.string().max(10), start: ts, end: ts.optional(), aufgaben: z.number().int().min(0).max(500), punkte: z.number().min(0).max(5000), max: z.number().min(0).max(5000), xp: z.number().int().min(0).max(100000), model: z.enum(["haiku", "sonnet"]).optional() });
+const SessZ = z.object({ id, t: z.string().max(10), start: ts, end: ts.optional(), aufgaben: z.number().int().min(0).max(500), punkte: z.number().min(0).max(5000), max: z.number().min(0).max(5000), xp: z.number().int().min(0).max(100000), model: z.enum(["haiku", "sonnet", "bruecke"]).optional() });
 const day = /^\d{4}-\d{2}-\d{2}$/, dev = /^[A-Za-z0-9_-]{4,40}$/;
 export type Known = { topics: Set<string>; kern: Set<string> };
 
@@ -130,7 +130,9 @@ export const fvActive = (f: Fv) => !f.fix || f.seen > f.fix;
 /** Wie oft eine Fehlvorstellung belegt ist (aus den Belegen abgeleitet – verträgt jedes Zusammenführen) */
 export const fvCount = (s: TutorState, fid: string) => s.ev.filter((e) => e.f === fid && e.art === "fehlvorstellung").length;
 
-export function addEvidence(s: TutorState, list: Ev[]): TutorState {
+/** Belege hinzufügen – schon vorhandene IDs (z. B. derselbe Ergebnis-Block zweimal eingefügt) zählen nicht doppelt */
+export function addEvidence(s: TutorState, all: Ev[]): TutorState {
+  const have = new Set(s.ev.map((e) => e.id)), list = all.filter((e) => !have.has(e.id) && (have.add(e.id), true));
   if (!list.length) return s;
   const fv = { ...s.fv };
   list.forEach((e) => {

@@ -106,7 +106,7 @@ app/
 | Belohnungen (XP, Level, Quests, Kalender, Tiere, Skins, Titel) | ✓ | – | eigenes Modul, Format `tap2coach-gami` übernehmen |
 | Rangliste, Geräte-Sync | ✓ | – | Supabase, gleiches Protokoll |
 | Übertragen per Link/QR | ✓ | – | |
-| Patch Notes, Hell/Dunkel | ✓ | – | |
+| Patch Notes, Hell/Dunkel | ✓ | Patch Notes ✓ (`lib/patchnotes.ts`), Hell/Dunkel – | |
 
 Jeder Bereich ist ein eigenes Modul (Route + Logik in `lib/` + Tests) und kann unabhängig portiert werden.
 

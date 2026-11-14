@@ -29,7 +29,7 @@ mit Tests. Erst danach neue Funktionen. Referenz ist immer `../index.html` auf `
 | Tipps | rTipps, Operator-Trainer, Lernplan, Tutorial, Fehlerprotokoll | **fertig (1:1)**, Abnahme 14.11.2026 (siehe unten) |
 | Belohnungen/Rangliste | Original-Modul eingebettet | fertig (1:1) |
 | Einstellungen | Darstellung, App & Offline, Geräte-Sync, Übertragen (Link/QR), Sicherung, Hilfe, Datenschutz | teilweise |
-| Patch Notes | Release-Liste von GitHub | offen |
+| Patch Notes | Release-Liste von GitHub | **fertig (1:1)**, Abnahme 14.11.2026 (siehe unten) |
 
 ## Vorgehen
 
@@ -169,3 +169,14 @@ Bewusste Unterschiede:
 Gefunden, gehört zum Grundgerüst: TanStacks `Link` setzt bei aktiver Route selbst `aria-current="page"` – während einer
 Runde unter `/lernen/runde` war „Lernen“ immer mitmarkiert (bei Event-Runden zusätzlich zu „Events“). Die Menü-Links
 gelten jetzt nur bei exakt gleichem Pfad als aktiv, sonst gilt unsere Markierung wie in der Live-App (`navView`).
+
+### Patch Notes (14.11.2026, Branch `port/patchnotes`)
+
+Logik in `src/lib/patchnotes.ts` mit Tests: API-Antwort → Releases (Entwürfe raus, Datum aus „*Veröffentlicht am …*“,
+nur GitHub-Links), Sortierung, Zwischenspeicher `tap2coach-patch` (Format der Live-App, beim Lesen entschärft) und das
+kleine Markdown. Release-Texte sind Fremddaten: Die Live-App setzt sie als HTML ein, hier entsteht daraus eine
+Struktur, die React als Text rendert – mit demselben DOM (auch die Unterliste als `ul` direkt in der Liste).
+
+Abnahme: Beide Apps laden die echten Releases (32) – Markup und Zwischenspeicher **identisch**. Fehlerfall (GitHub nicht
+erreichbar, Kopie älter als 10 Minuten): gleicher Hinweis, Liste aus der letzten Kopie, identisch. Keine Konsolenfehler;
+lint, test, build grün. Die CSP (`public/_headers`) erlaubt `api.github.com` bereits.

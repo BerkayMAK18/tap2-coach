@@ -10,8 +10,12 @@ diesen Hinweis und dieses Dokument mitpflegen.**
 ## Grundsätze
 
 1. **Lernen ohne Konto.** Ohne Anmeldung verlässt der Lernstand den Browser nie.
-2. **Ende-zu-Ende-Verschlüsselung im Konto.** Die Anmeldung mit GitHub dient nur der Zuordnung, der Lernstand
-   wird im Browser verschlüsselt. Der Betreiber sieht in der Datenbank nur Zeichensalat.
+2. **Zwei Wege zum Synchronisieren (Entscheidung 14.11.2026):**
+   - **Mit Konto:** „Ein Konto, ein Stand“. Der GitHub-Login reicht, der Lernstand liegt im Konto und ist durch
+     Anmeldung und RLS geschützt. Er ist **nicht** Ende-zu-Ende-verschlüsselt: Der Betreiber kann ihn technisch lesen.
+     Der Hinweis in der App sagt das offen.
+   - **Ohne Konto (Geräte-Sync):** Ende-zu-Ende-verschlüsselt. Der Schlüssel liegt nur auf den Geräten und wird per
+     Code/QR übertragen. Der Betreiber sieht nur Zeichensalat.
 3. **Pseudonyme Rangliste.** Nur ein selbst gewählter Benutzername, nur mit Einwilligung, jederzeit löschbar.
 4. **Kein Tracking**, keine Analyse, keine Drittanbieter-Ressourcen (Schriften, Skripte liegen lokal).
 5. **Löschen per Knopf** für alles (lokal, Konto, Sicherung, Rangliste).
@@ -23,13 +27,14 @@ diesen Hinweis und dieses Dokument mitpflegen.**
 | Auslieferung der App | IP, Zeit, Datei, User-Agent | Cloudflare (AV) | Art. 6 (1) f | Cloudflare (Logs) | Fristen des Anbieters |
 | Lernstand lokal | Antworten, Markierungen, Ergebnisse, Belohnungen | Browser (localStorage) | § 25 (2) Nr. 2 TDDDG, Art. 6 (1) b | nur Nutzer | Einstellungen → zurücksetzen |
 | Konto (optional) | GitHub-ID, -Name, E-Mail, Avatar-URL | Supabase Auth, Frankfurt (AV) | Art. 6 (1) b | Betreiber im Dashboard (unvermeidbar) | Konto löschen |
-| Sicherung/Sync (optional) | **verschlüsselter** Lernstand, Version, Zeitstempel | Supabase DB, Frankfurt | Art. 6 (1) b | niemand außer Nutzer (Schlüssel nur im Browser) | Konto/Sicherung löschen; Tagesstände max. 10 Tage |
+| Stand im Konto (optional) | Lernstand + Belohnungen (JSON), Version, Zeitstempel (`app_sync`) | Supabase DB, Frankfurt | Art. 6 (1) b | Nutzer über die App; Betreiber technisch (nicht E2E) | „Kopie im Konto löschen“ / Konto löschen; Tagesstände max. 10 Tage |
+| Geräte-Sync ohne Konto (optional) | **verschlüsselter** Lernstand + Belohnungen unter Prüfsumme (`tap2_sync`) | Supabase DB, Frankfurt | Art. 6 (1) b | niemand außer Nutzer (Schlüssel nur im Browser) | „Kopie in der Cloud löschen“ |
 | Rangliste (optional) | Benutzername, Level, XP, Figur, Einwilligungszeitpunkt | Supabase DB, Frankfurt | Art. 6 (1) a | alle Nutzer (nur diese Felder) | Austragen / Konto löschen |
 | Patch Notes (Seite öffnen) | IP an GitHub | GitHub (USA, DPF) | Art. 6 (1) f | GitHub | – |
 | Übertragen per Link/QR | Lernstand im #-Teil des Links | nur auf den Geräten (kein Server) | Art. 6 (1) b | wer den Link hat | Link nicht weitergeben |
 | Fehler melden | was der Nutzer selbst auf GitHub abschickt | GitHub (USA, DPF) | eigenständig GitHub | öffentlich | über GitHub |
 | KI-Tutor (nur Admin) | Eingaben des Admins, Übergabe (Stand je Konzept, Fehlvorstellungen – keine Namen) | Anthropic (USA) | – (nur eigene Daten des Betreibers) | Anthropic | nach Anbieter |
-| Tutor-Stand (nur Admin) | **verschlüsselte** Belege, Fehlvorstellungen, Sitzungen, Tutor-XP; Prüfsumme des Schlüssels (`kid`), Version, Zeitstempel | Supabase DB, Frankfurt (`app_tutor_state`) | – (nur eigene Daten des Betreibers); später Art. 6 (1) b | niemand außer Nutzer (Schlüssel nur im Browser) | Knopf in der App / Konto löschen (Kaskade) |
+| Tutor-Stand (nur Admin) | Belege, Fehlvorstellungen, Sitzungen, Tutor-XP (JSON), Version, Zeitstempel (`app_tutor_state`) | Supabase DB, Frankfurt | – (nur eigene Daten des Betreibers); später Art. 6 (1) b | Nutzer über die App; Betreiber technisch (nicht E2E) | Konto löschen (Kaskade) |
 
 AV = Auftragsverarbeitung. **Supabase:** Der DPA ist Teil der Terms of Service und gilt automatisch für alle
 Organisationen (geprüft am 13.11.2026 unter Organization → Settings → Legal Documents, „View DPA“). Eine Kopie als
@@ -43,14 +48,24 @@ PDF für die eigenen Unterlagen ablegen (Rechenschaftspflicht, Art. 5 Abs. 2 DSG
 - Die App nutzt ausschließlich `auth.uid()`. GitHub-Name und E-Mail werden nirgends in eigene Tabellen kopiert.
 - Anmelde-Token im localStorage (technisch notwendig, kein Einwilligungsbanner nötig).
 
-### Ende-zu-Ende-verschlüsselter Sync
-- Tabelle `sync_state (user_id uuid PK = auth.uid(), rev int, blob text, updated_at)` mit RLS
-  „nur eigene Zeile“. Dazu `sync_history` (ein Stand pro Tag, 10 Tage) wie in der Live-App.
-- `blob` = AES-GCM-verschlüsselter Lernstand. Schlüssel: 160 Bit Zufall, erzeugt im Browser, **nie zum Server**.
-  Übertragung auf weitere Geräte per Kurzcode/QR (bewährtes Verfahren der Live-App, PBKDF2-geschützt).
-- Zusammenführen wie in der Live-App (`syncMerge`): pro Frage gilt der neuere Stand, nichts geht verloren.
-- Vorteil gegenüber dem bisherigen Schlüssel-Sync: Daten sind zusätzlich an das Konto gebunden (RLS),
-  Bremsen pro Konto statt global, Konten sperr- und löschbar.
+### Stand im Konto (mit Konto)
+- Tabelle `app_sync (user_id PK = auth.uid(), rev, data jsonb, updated_at)` und `app_sync_history` (ein Stand pro Tag,
+  10 Tage), `supabase/001_app_sync.sql`.
+  - RLS an, keine Tabellenrechte für `anon`/`authenticated`, zusätzlich eine Richtlinie „nur eigene Zeile“.
+  - Zugriff nur über `app_sync_pull/push/delete` (security definer, `auth.uid()`, Versionsprüfung, Größe ≤ 600 kB).
+- `data` = `{ v, s: Lernstand (v7), g: Belohnungen (Sync-Paket), at }`. Die App prüft alles, was sie liest
+  (`normalize`, `gm.merge`).
+- Zusammenführen wie beim Geräte-Sync: pro Frage gilt der neuere Stand, Belohnungen werden gespiegelt, nichts geht
+  verloren.
+- **Nicht Ende-zu-Ende-verschlüsselt** (bewusst, damit der Login reicht). Wer das nicht möchte, nutzt den Geräte-Sync
+  ohne Konto.
+- Stände ohne Konto lassen sich per Kurzcode oder Schlüssel einmalig ins Konto übernehmen. Die App entschlüsselt sie
+  dafür im Browser und speichert sie danach im Konto.
+
+### Geräte-Sync ohne Konto
+- Wie in der Live-App (`tap2_sync`): Der Lernstand wird im Browser mit AES-GCM verschlüsselt. Der Schlüssel (160 Bit
+  Zufall) geht nie zum Server und wird per Kurzcode/QR übertragen (PBKDF2-geschützt). Der Server kennt nur eine
+  Prüfsumme als ID.
 
 ### Rangliste
 - Tabelle `leaderboard (user_id PK, username unique, xp, level, look, consent_at)`; lesbar für alle nur über eine
@@ -69,11 +84,12 @@ PDF für die eigenen Unterlagen ablegen (Rechenschaftspflicht, Art. 5 Abs. 2 DSG
 - Im Frontend ist der Tutor für alle anderen unsichtbar; maßgeblich ist aber nur die Prüfung im Server.
 - Anweisungen und Werkzeug legt nur der Server fest; an Anthropic gehen die Wissensbasis (Katalog), die Übergabe zum
   Thema (Stand je Konzept, Fehlvorstellungen, häufige Fehler – keine Namen, keine Konto-Daten) und der Gesprächsverlauf.
-- **Tutor-Stand** (`supabase/003_app_tutor_state.sql`): Tabelle `app_tutor_state (user_id PK = auth.uid(), rev, kid,
-  blob, updated_at)`, RLS an, keine Tabellenrechte für `anon`/`authenticated`, zusätzlich Richtlinie „nur eigene
-  Zeile“; Zugriff nur über `app_tutor_state_pull/push/delete` (security definer, `auth.uid()`). `blob` ist mit dem
-  Sync-Schlüssel des Geräts AES-GCM-verschlüsselt (wie der Sync), `kid` eine Prüfsumme des Schlüssels (verrät ihn
-  nicht). Der Betreiber kann den Inhalt nicht lesen. Löschen: Knopf in der App, beim Konto-Löschen per Kaskade.
+- **Tutor-Stand** (`supabase/004_app_tutor_state_konto.sql`, ersetzt 003): Tabelle `app_tutor_state (user_id PK =
+  auth.uid(), rev, data jsonb, updated_at)`.
+  - RLS an, keine Tabellenrechte, Richtlinie „nur eigene Zeile“.
+  - Zugriff nur über `app_tutor_state_pull/push/delete`.
+  - Wie der Stand im Konto **nicht** Ende-zu-Ende-verschlüsselt; der Login reicht.
+  - Löschen beim Konto-Löschen per Kaskade; „Tutor-Wissen zurücksetzen“ in der App leert ihn auf allen Geräten.
 - Der Gesprächsverlauf bleibt nur im Browser (`tap2coach-tutor-sitzung`).
 - Vor einer späteren Bezahl-Option nötig: Einwilligung/Information zur Übermittlung an Anthropic (USA),
   DPA mit Anthropic, Impressum, AGB, Zahlungsanbieter.

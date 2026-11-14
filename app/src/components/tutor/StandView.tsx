@@ -122,17 +122,12 @@ export function StandView({ g }: { g: ConceptGraph }) {
 
 /** Abgleich des Tutor-Stands (alle Geräte) */
 export function SyncNote() {
-  const { sync, syncNow } = useTutor();
+  const sync = useTutor((s) => s.sync);
   return (
     <div className="tutor-teil tp-sync small">
-      {sync.mismatch ? (
-        <>
-          <p className="warn-text" style={{ margin: 0 }}>In deinem Konto liegt ein Tutor-Stand mit einem anderen Sync-Schlüssel. Er wird nicht überschrieben.</p>
-          <button type="button" className="btn small danger" style={{ marginTop: 6 }} onClick={() => { if (confirm("Tutor-Stand in der Cloud durch den Stand dieses Geräts ersetzen? Der andere Stand ist dann weg.")) void syncNow(true); }}>Cloud-Stand ersetzen</button>
-        </>
-      ) : sync.off ? <p className="muted" style={{ margin: 0 }}><Ic name="cloud" cls="ic xs" /> {sync.off}</p>
+      {sync.off ? <p className="muted" style={{ margin: 0 }}><Ic name="cloud" cls="ic xs" /> {sync.off}</p>
         : sync.err ? <p className="warn-text" style={{ margin: 0 }}>{sync.err}</p>
-        : <p className="muted" style={{ margin: 0 }}><Ic name="cloud" cls="ic xs" /> {sync.busy ? "Gleiche ab …" : sync.at ? "Auf allen Geräten gleich (verschlüsselt)." : "Wird beim nächsten Abgleich verschlüsselt gesichert."}</p>}
+        : <p className="muted" style={{ margin: 0 }}><Ic name="cloud" cls="ic xs" /> {sync.busy ? "Gleiche ab …" : sync.at ? "Im Konto gesichert – auf allen deinen Geräten gleich." : "Wird beim nächsten Abgleich im Konto gesichert."}</p>}
     </div>
   );
 }

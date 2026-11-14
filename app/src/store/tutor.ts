@@ -2,32 +2,30 @@
  * Prüfer-Tutor (Premium, vorerst nur Admin): Sitzung, Tutor-Stand, XP und Abgleich.
  *
  * - Sitzung (tap2coach-tutor-sitzung, nur dieses Gerät): Verlauf im Format der Claude-API, nur angehängt.
- * - Tutor-Stand (tap2coach-tutor-stand): Belege, Fehlvorstellungen, Sitzungen, Tutor-XP je Tag – Ende-zu-Ende-verschlüsselt
- *   auf allen Geräten (lib/tutor-sync.ts, Tabelle app_tutor_state). Nicht im Paket tap2_sync.
+ * - Tutor-Stand (tap2coach-tutor-stand): Belege, Fehlvorstellungen, Sitzungen, Tutor-XP je Tag – im Konto auf allen
+ *   angemeldeten Geräten (lib/tutor-sync.ts, Tabelle app_tutor_state, der Login reicht). Nicht im Paket tap2_sync.
  * - Belohnung: Jede bewertete Aufgabe zählt einmal genau wie eine normale Antwort (gm.answer): XP mit Combo-Bonus und
  *   Trank, Federn, Serie, Tagesquests und Tagesstatistik (S.log). „Richtig“ = mindestens die Hälfte der Punkte,
  *   „unsicher“ = als geraten/unsicher markiert (dann wie bei Lernrunden keine XP). Keine Tagesobergrenze.
  * Reine Logik: lib/tutor-session.ts, lib/tutor-schema.ts, lib/tutor-state.ts.
  */
 import { create } from "zustand";
-import { KEYS } from "@/config";
 import { TAP2 } from "@/content/catalog";
-import { isKey, keyRaw } from "@/lib/crypto";
 import { today } from "@/lib/dates";
 import { supabase } from "@/lib/supabase";
 import { kbIds, kbOverview, makeKb } from "@/lib/tutor-kb";
 import { applyReply, chunks, rewardArgs, costOf, newConvo, tooLong, userMsg, userText, type Block, type Convo, type Model, type Sicher, type UserMeta } from "@/lib/tutor-session";
-import { EPOCH, addEvidence, addXpDay, emptyTutor, normalizeTutor, putSession, resetTutor, type TutorState } from "@/lib/tutor-state";
+import { EPOCH, addEvidence, addXpDay, emptyTutor, mergeTutor, normalizeTutor, putSession, resetTutor, type TutorState } from "@/lib/tutor-state";
+import { stab } from "@/lib/gami/state";
 import { syncTutor } from "@/lib/tutor-sync";
 import { gami, gm } from "./gami";
-import { liveGet } from "./livesync";
 import { useProgress } from "./progress";
 
 /** Tutor freigeschaltet auf diesem Gerät (/tutor?premium=1) – zeigt den Menüpunkt; der Server prüft zusätzlich die Admin-Rolle */
 export const PREMIUM_KEY = "tap2coach-premium";
 export const isPremium = () => { try { return localStorage.getItem(PREMIUM_KEY) === "1"; } catch { return false; } };
 
-const K = { stand: "tap2coach-tutor-stand", rev: "tap2coach-tutor-rev", chat: "tap2coach-tutor-sitzung", model: "tap2coach-tutor-modell", dev: "tap2coach-tutor-geraet" };
+const K = { stand: "tap2coach-tutor-stand", chat: "tap2coach-tutor-sitzung", model: "tap2coach-tutor-modell", dev: "tap2coach-tutor-geraet" };
 const read = <T,>(k: string, d: T): T => { try { const v = JSON.parse(localStorage.getItem(k) || "null"); return v ?? d; } catch { return d; } };
 const write = (k: string, v: unknown) => { try { if (v == null) localStorage.removeItem(k); else localStorage.setItem(k, JSON.stringify(v)); } catch { /* privat oder voll */ } };
 
@@ -49,19 +47,12 @@ function loadConvo(): Convo | null {
   return c && typeof c === "object" && Array.isArray(c.msgs) && typeof c.thema === "string" && IDS.topics.has(c.thema) && c.rounds && c.started >= EPOCH ? c : null;
 }
 
-/** Sync-Schlüssel des Geräts: Geräte-Sync (wie die Live-App), sonst Konto-Sync */
-export function syncKey(): string | null {
-  const live = liveGet(); if (live) return live.key;
-  const c = read<{ key?: string } | null>(KEYS.appSync, null);
-  return c?.key && isKey(keyRaw(c.key)) ? c.key : null;
-}
-
-export type SyncInfo = { busy: boolean; at: number; err: string; mismatch: boolean; off: string };
+export type SyncInfo = { busy: boolean; at: number; err: string; off: string };
 // Die alte Funktion lehnt Anfragen ohne System-Teil ab – dann neu deployen
 const OLD_FN = "Auf dem Server läuft noch eine ältere Tutor-Funktion. Bitte den Code aus app/supabase/functions/tutor/index.ts im Supabase-Dashboard unter Edge Functions → „tutor“ einsetzen und deployen.";
 
 type Store = {
-  state: TutorState; rev: number; convo: Convo | null; model: Model; busy: boolean; err: string; sync: SyncInfo;
+  state: TutorState; convo: Convo | null; model: Model; busy: boolean; err: string; sync: SyncInfo;
   setModel: (m: Model) => void;
   /** Sitzung zu einem Thema öffnen – ohne Anfrage an die KI; sie beginnt erst mit meiner ersten Nachricht (spart Kosten) */
   open: (thema: string, fokus?: string[]) => void;
@@ -70,7 +61,7 @@ type Store = {
   send: (m: UserMeta, handoff?: () => string) => Promise<boolean>;
   /** Sitzung schließen (Verlauf weg, Stand bleibt) */
   close: () => void;
-  syncNow: (force?: boolean) => Promise<void>;
+  syncNow: () => Promise<void>;
   /** Tutor-Wissen zurücksetzen – auf allen Geräten (Belege, Fehlvorstellungen, Sitzungen). XP bleiben. */
   reset: () => void;
 };
@@ -122,9 +113,9 @@ export const useTutor = create<Store>((set, get) => {
   }
 
   return {
-    state: loadState(), rev: read<number>(K.rev, 0), convo: typeof window === "undefined" ? null : loadConvo(),
+    state: loadState(), convo: typeof window === "undefined" ? null : loadConvo(),
     model: read<Model>(K.model, "sonnet") === "haiku" ? "haiku" : "sonnet",
-    busy: false, err: "", sync: { busy: false, at: 0, err: "", mismatch: false, off: "" },
+    busy: false, err: "", sync: { busy: false, at: 0, err: "", off: "" },
     setModel: (model) => { write(K.model, model); set({ model }); const c = get().convo; if (c && !c.msgs.length) saveConvo({ ...c, model }); },
     open: (thema, fokus) => {
       if (get().busy || !IDS.topics.has(thema)) return;
@@ -144,24 +135,23 @@ export const useTutor = create<Store>((set, get) => {
       return round(c, { ...m, ...(offen ? { aufgabe: offen.id } : {}) }, [{ type: "text", text: userText(m, offen) }]);
     },
     close: () => { saveConvo(null); set({ err: "" }); },
-    syncNow: async (force = false) => {
-      const key = syncKey();
+    syncNow: async () => {
       if (!supabase) { set({ sync: { ...get().sync, off: "Ohne Server nur auf diesem Gerät." } }); return; }
-      if (!key) { set({ sync: { ...get().sync, off: "Nur auf diesem Gerät – verbinde den Geräte-Sync (Einstellungen), dann ist dein Tutor-Stand auch auf deinen anderen Geräten." } }); return; }
       const { data } = await supabase.auth.getSession();
-      if (!data.session) { set({ sync: { ...get().sync, off: "Melde dich an, damit dein Tutor-Stand auf allen Geräten gleich ist." } }); return; }
+      if (!data.session) { set({ sync: { ...get().sync, off: "Melde dich mit GitHub an, dann ist dein Tutor-Stand auf allen deinen Geräten gleich." } }); return; }
       if (get().sync.busy) { syncSoon(1500); return; }
       set({ sync: { ...get().sync, busy: true, err: "", off: "" } });
       try {
         const rpc = async (fn: string, args: Record<string, unknown>) => { const r = await supabase!.rpc(fn, args); if (r.error) throw new Error(String(r.error.message).slice(0, 160)); return r.data as unknown; };
-        const r = await syncTutor(rpc, key, get().state, get().rev, IDS, force);
-        if (r.mismatch) { set({ sync: { busy: false, at: get().sync.at, err: "", off: "", mismatch: true } }); return; }
-        write(K.rev, r.rev); set({ rev: r.rev });
-        if (r.changed) { write(K.stand, r.state); set({ state: r.state }); }
-        set({ sync: { busy: false, at: Date.now(), err: "", off: "", mismatch: false } });
+        const r = await syncTutor(rpc, get().state, IDS);
+        // Während des Abgleichs Neues (z. B. eine Bewertung) nicht verlieren: mit dem aktuellen Stand zusammenführen
+        const now = mergeTutor(get().state, r.state);
+        if (stab(now) !== stab(get().state)) { write(K.stand, now); set({ state: now }); }
+        if (stab(now) !== stab(r.state)) syncSoon(1500);
+        set({ sync: { busy: false, at: Date.now(), err: "", off: "" } });
       } catch (e) {
         const m = e instanceof Error ? e.message : "unbekannt";
-        set({ sync: { ...get().sync, busy: false, err: /app_tutor_state/.test(m) ? "Tabelle app_tutor_state fehlt – supabase/003_app_tutor_state.sql im SQL-Editor einspielen." : "Abgleich fehlgeschlagen: " + m } });
+        set({ sync: { ...get().sync, busy: false, err: /app_tutor_state/.test(m) ? "Der Tutor-Stand ist auf dem Server noch nicht eingerichtet (supabase/004_app_tutor_state_konto.sql)." : "Abgleich fehlgeschlagen: " + m } });
       }
     },
     reset: () => { saveState(resetTutor(get().state, Date.now())); syncSoon(500); },

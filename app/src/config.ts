@@ -10,7 +10,6 @@ export const KEYS = {
   state: "tap2coach",
   session: "tap2coach-sess",
   beforeImport: "tap2coach-vor-import",
-  appSync: "tap2coach-app-sync", // { key, rev } – Sync-Schlüssel nur auf diesem Gerät
 } as const;
 
 /**

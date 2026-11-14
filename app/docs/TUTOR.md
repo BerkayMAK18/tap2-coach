@@ -2,7 +2,7 @@
 
 Stand: 14.11.2026. Premium-Funktion der neuen App, vorerst nur für den Admin, später für alle (mit XP, Serie, Tageszielen).
 
-**Eingerichtet (14.11.2026):** `003_app_tutor_state.sql` ist eingespielt, die Edge Function ist deployt.
+**Einrichtung:** Edge Function deployt (14.11.2026). Für den Tutor-Stand im Konto `004_app_tutor_state_konto.sql` einspielen (ersetzt 003).
 
 ## Was er tut
 
@@ -55,7 +55,7 @@ dir der Tutor die ganze Sitzung lang Aufgaben im IHK-Stil und **bewertet wie ein
 | Schema (Zod) | `src/lib/tutor-schema.ts` | Jede Runde ist Fremdtext: Längen, nur bekannte Themen-/Konzept-IDs, Material nur als Daten, abschnittsweise geprüft |
 | Sitzung | `src/lib/tutor-session.ts` | Übergabe, Nachrichten, Runden → Aufgaben/Bewertungen/Belege, Feed, Kosten |
 | Tutor-Stand | `src/lib/tutor-state.ts` | Belege, Fehlvorstellungen, Sitzungen, Tutor-XP je Tag; **Merge-Regel** |
-| Abgleich | `src/lib/tutor-sync.ts`, `supabase/003_app_tutor_state.sql` | E2E-verschlüsselt in `app_tutor_state` |
+| Abgleich | `src/lib/tutor-sync.ts`, `src/lib/konto-sync.ts`, `supabase/004_app_tutor_state_konto.sql` | im Konto (`app_tutor_state`), Login reicht |
 | Graph | `src/lib/graph.ts` (`buildConceptGraph`) | Konzepte = Kernaussagen (`P04.2` …), Stand aus Belegen + Fragendaten |
 | Lehrplan | `src/lib/lehrplan.ts` | deterministisch, nicht von der KI |
 | XP | `store/tutor.ts` → `gm.answer` mit `rewardArgs` | wie eine normale Antwort (Combo, Serie, Quests), keine Obergrenze |
@@ -119,10 +119,12 @@ allen Geräten gleich.
 ### Tutor-Stand auf allen Geräten
 
 - **Gespeichert:** Belege, Fehlvorstellungen, Sitzungen und Tutor-XP je Tag – lokal (`tap2coach-tutor-stand`) und in
-  `app_tutor_state` (eine Zeile pro Konto, RLS nur eigene Zeile, Zugriff nur über `app_tutor_state_*`).
-- **Verschlüsselung:** `seal`/`unseal` mit dem vorhandenen Sync-Schlüssel. Das ist der Geräte-Sync `tap2_sync`, sonst
-  der Konto-Sync. Der Server sieht nur `1.<iv>.<ciphertext>` und eine Prüfsumme des Schlüssels (`kid`). Liegt in der
-  Cloud ein Stand mit anderem Schlüssel, wird er nicht überschrieben; ersetzen geht nur auf ausdrücklichen Wunsch.
+  `app_tutor_state` im Konto (`supabase/004_app_tutor_state_konto.sql`; eine Zeile pro Konto, RLS nur eigene Zeile,
+  Zugriff nur über `app_tutor_state_*`).
+- **Der Login reicht** (Entscheidung 14.11.2026, „ein Konto, ein Stand“): kein Schlüssel. Jedes angemeldete Gerät hat
+  denselben Tutor-Stand. Er ist nicht Ende-zu-Ende-verschlüsselt (wie der Stand im Konto).
+- Der Abgleich läuft über `lib/konto-sync.ts` (dieselbe Logik wie der Konto-Sync des Lernstands). Was während eines
+  Abgleichs neu entsteht, wird danach noch eingemischt.
 - **Bewusst nicht im Paket `tap2_sync`:** `main` schreibt dieses Paket neu und würde fremde Teile verwerfen.
 - **Nur auf dem Gerät:** der Gesprächsverlauf (Denk-Blöcke gelten nur in ihrem Verlauf).
 - **Merge-Regel** (`mergeTutor`, kommutativ, assoziativ, idempotent; getestet):
@@ -192,8 +194,9 @@ Längere Pausen (> 1 Std.) schreiben den Cache neu: + ≈ 0,05 $.
 
 ## Einrichtung (erledigt am 14.11.2026; bei Änderungen an Function oder SQL erneut)
 
-1. **SQL einspielen:** `supabase/003_app_tutor_state.sql` im Supabase-Dashboard → SQL Editor ausführen. Es legt nur
-   `app_tutor_state` und die `app_tutor_state_*`-Funktionen an; `tap2_*` bleibt unberührt.
+1. **SQL einspielen:** `supabase/001_app_sync.sql` (Stand im Konto) und `supabase/004_app_tutor_state_konto.sql`
+   (Tutor-Stand im Konto, ersetzt 003) im Supabase-Dashboard → SQL Editor ausführen. Beide legen nur `app_*`-Objekte an;
+   `tap2_*` bleibt unberührt.
 2. **Edge Function deployen:** Code aus `supabase/functions/tutor/index.ts` im Dashboard unter Edge Functions →
    „tutor“ einsetzen und deployen, oder per CLI:
 

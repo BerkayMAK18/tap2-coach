@@ -25,6 +25,7 @@ import { createClient } from "npm:@supabase/supabase-js@2.119.0";
 const ORIGINS = ["https://tap2-coach-dev.akdemir-berkay.workers.dev", "http://localhost:8080"];
 const MODELS: Record<string, string> = { haiku: "claude-haiku-5-5", sonnet: "claude-sonnet-5-5" };
 const LIMITS = { system: 120_000, messages: 120, message: 8_000, total: 400_000, tools: 20_000 };
+const VERSION = 2; // Lernpfad mit Werkzeugen (App prüft das, um eine veraltete Funktion zu erkennen)
 const TOOL_NAMES = ["stand_festhalten", "lehrplan_setzen", "frage_stellen", "antwort_bewerten", "schritt_abschliessen"];
 
 const cors = (origin: string | null) => ({
@@ -70,16 +71,18 @@ Deno.serve(async (req) => {
 
   // 2) Eingaben prüfen
   let body: { model?: string; system?: string; messages?: Msg[]; tools?: unknown };
-  try { body = await req.json(); } catch { return json({ error: "Ungültige Anfrage." }, 400, origin); }
+  try { body = await req.json(); } catch { return json({ error: "Ungültige Anfrage: kein JSON.", v: VERSION }, 400, origin); }
   const model = MODELS[body.model ?? "haiku"];
   const system = typeof body.system === "string" ? body.system : "";
   const messages = Array.isArray(body.messages) ? body.messages : [];
   const tools = body.tools === undefined ? [] : body.tools;
-  if (!model || !system || system.length > LIMITS.system || !messages.length || messages.length > LIMITS.messages
-    || !messages.every(okMsg) || messages[messages.length - 1].role !== "user"
-    || JSON.stringify(messages).length > LIMITS.total || !okTools(tools)) {
-    return json({ error: "Ungültige Anfrage." }, 400, origin);
-  }
+  // Konkreter Grund statt nur „ungültig“ (enthält keine Inhalte, nur welche Prüfung fehlschlug)
+  const bad = !model ? "Modell" : !system ? "System-Teil fehlt" : system.length > LIMITS.system ? `System-Teil zu lang (${system.length})`
+    : !messages.length || messages.length > LIMITS.messages ? `Anzahl Nachrichten (${messages.length})`
+    : !messages.every(okMsg) ? `Nachricht ${messages.findIndex((m) => !okMsg(m)) + 1} ungültig`
+    : messages[messages.length - 1].role !== "user" ? "letzte Nachricht nicht vom Nutzer"
+    : JSON.stringify(messages).length > LIMITS.total ? "Verlauf zu lang" : !okTools(tools) ? "Werkzeuge" : "";
+  if (bad) return json({ error: `Ungültige Anfrage: ${bad}.`, v: VERSION }, 400, origin);
 
   // 3) Tageslimit (zählt pro Anfrage, eigener Nutzer)
   const { data: allowed, error: limErr } = await sb.rpc("app_tutor_take");

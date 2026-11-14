@@ -1,21 +1,27 @@
 /**
- * Tutor (Premium, vorerst nur Admin): links der KI-Chat über die ganze Fläche, rechts eine eigene Leiste mit
- * - „Lernstand“: Lehrplan nach Prüfungsteil → Thema mit Reife aus dem Lernstand (Wissensgraph) und der Einschätzung
- *   des Tutors je Thema, belegte Erkenntnisse, Fehlerschwerpunkte, großer Graph und die Brücke ohne API;
- * - „Aufgabe“: was der Tutor gerade fragt (Operator, Punkte, Aufgabentext, Hinweis).
- * Auf dem Handy wechseln Chat, Lernstand und Aufgabe über Reiter.
+ * Tutor (Premium, vorerst nur Admin): links der Chat über die ganze Fläche, rechts eine Leiste mit
+ * - „Lehrplan“: Ziel, Fortschritt und Schritte des Tutors (Thema, Lernpakete, Beleg);
+ * - „Lernstand“: Wissensgraph nach Prüfungsteil → Thema – Reife aus den Lernrunden, Reife aus den Tutor-Antworten
+ *   und die Einschätzung des Tutors; dazu Erkenntnisse, Fehlvorstellungen, Fehlerschwerpunkte, Brücke ohne API;
+ * - „Frage“: was der Tutor gerade fragt (zum Nachlesen beim Antworten).
+ * Auf dem Handy wechseln Chat, Lehrplan, Lernstand und Frage über Reiter.
+ *
+ * Der Wissensgraph ist die Grundlage: Er geht als Übergabe an den Tutor (Lernstand je Thema, Fehler, Lernpfad),
+ * und jede bewertete Antwort fließt als Beleg zurück (Tutor-Reife je Thema, XP, Tagesstatistik).
  *
  * Menüpunkt nur für Admin (Admin-Konto oder /tutor?premium=1 auf diesem Gerät). Das schützt nichts Geheimes –
  * die Seite zeigt nur den eigenen, lokalen Lernstand; die KI prüft der Server (app_metadata.role = 'admin').
  */
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import { Link, createFileRoute, useNavigate } from "@tanstack/react-router";
 import { z } from "zod";
 import { TAP2, TOPICS, TP, allQ } from "@/content/catalog";
+import { EXAM_DAY } from "@/config";
 import { buildGraph, type GraphNode, type KnowledgeGraph, type Level } from "@/lib/graph";
-import { shuffle } from "@/lib/dates";
+import { daysBetween, shuffle, today } from "@/lib/dates";
+import { handoff, phaseOf, tutorPct, type Pfad } from "@/lib/tutor-protocol";
 import { useProgress } from "@/store/progress";
-import { PREMIUM_KEY, isPremium, useTutor, type SideTab } from "@/store/tutor";
+import { KB, PREMIUM_KEY, isPremium, useTutor, type SideTab } from "@/store/tutor";
 import { Ic } from "@/ui-main";
 import { TutorBridge, loadTutorStore } from "@/components/TutorBridge";
 import { TutorChat } from "@/components/TutorChat";
@@ -30,74 +36,123 @@ const LV: Record<Level, { label: string; chip: string; fill: string }> = {
   schwach: { label: "Schwach", chip: "bad", fill: "var(--bad)" },
   offen: { label: "Offen", chip: "", fill: "var(--line-2)" },
 };
+const TABS: [SideTab, string][] = [["plan", "Lehrplan"], ["stand", "Lernstand"], ["frage", "Frage"]];
 type MobileTab = "chat" | SideTab;
+
+/** Übergabe an den Tutor aus dem Wissensgraphen und dem Lernpfad */
+function makeHandoff(g: KnowledgeGraph, pfad: Pfad) {
+  return handoff({
+    examDays: Math.max(0, daysBetween(today(), EXAM_DAY)),
+    topics: g.nodes.filter((n) => n.kind === "topic").map((n) => ({ id: n.id, name: n.label, muss: n.prio === "Muss", pct: n.pct, level: n.level, rot: n.red, neu: n.fresh, tutor: tutorPct(pfad, n.id) })),
+    errors: g.errors.map((e) => ({ topic: e.topic, q: e.q, wrong: e.wrong })),
+    pfad,
+  });
+}
 
 function Tutor() {
   const { premium } = Route.useSearch();
   const [ok, setOk] = useState(isPremium());
   useEffect(() => { if (premium === "1") { try { localStorage.setItem(PREMIUM_KEY, "1"); } catch { /* privat */ } setOk(true); } }, [premium]);
-  const S = useProgress((s) => s.S), { tab, setTab, task } = useTutor();
+  const S = useProgress((s) => s.S), { tab, setTab, pfad, convo } = useTutor();
   const [mtab, setMtab] = useState<MobileTab>("chat");
-  const input = useRef<HTMLTextAreaElement>(null);
-  // Neue Aufgabe vom Tutor: auf dem Handy bleibt der Chat, ein Punkt am Reiter zeigt sie an
-  const [seen, setSeen] = useState(task?.titel ?? "");
   if (!ok) return <section className="card"><h3>Diese Seite ist nicht verfügbar.</h3><p className="small muted"><Link to="/">Zur Übersicht</Link></p></section>;
 
   const g = buildGraph(S, TOPICS, TAP2.pakete, allQ(S));
-  const side = (t: SideTab) => { setTab(t); setMtab(t); if (t === "aufgabe") setSeen(task?.titel ?? ""); };
-  const answer = () => { setMtab("chat"); requestAnimationFrame(() => input.current?.focus()); };
-  const newTask = !!task && task.titel !== seen;
+  const side = (t: SideTab) => { setTab(t); setMtab(t); };
+  const done = pfad.plan.filter((s) => s.status === "fertig").length;
+  const badge = (k: MobileTab) => (k === "frage" && convo.pending ? <i className="tutor-dot" aria-label="offen" /> : k === "plan" && pfad.plan.length ? <span className="tc-count">{done}/{pfad.plan.length}</span> : null);
 
   return (
     <div className={`tutor-shell m-${mtab}`}>
       <div className="segs tutor-mtabs" role="tablist" aria-label="Tutor">
-        {([["chat", "Chat"], ["lernstand", "Lernstand"], ["aufgabe", "Aufgabe"]] as const).map(([k, l]) => <button key={k} type="button" role="tab" className={`seg ${mtab === k ? "on" : ""}`} aria-selected={mtab === k} onClick={() => (k === "chat" ? setMtab("chat") : side(k))}>{l}{k === "aufgabe" && newTask && <i className="tutor-dot" aria-label="neu" />}</button>)}
+        {([["chat", "Chat"], ...TABS] as [MobileTab, string][]).map(([k, l]) => <button key={k} type="button" role="tab" className={`seg ${mtab === k ? "on" : ""}`} aria-selected={mtab === k} onClick={() => (k === "chat" ? setMtab("chat") : side(k))}>{l}{badge(k)}</button>)}
       </div>
-      <section className="card tutor-main"><TutorChat g={g} inputRef={input} /></section>
-      <aside className="card tutor-side" aria-label="Lernstand und Aufgabe">
+      <section className="card tutor-main"><TutorChat handoff={() => makeHandoff(g, useTutor.getState().pfad)} onPlan={() => side("plan")} /></section>
+      <aside className="card tutor-side" aria-label="Lehrplan, Lernstand und Frage">
         <div className="segs tutor-tabs" role="tablist">
-          {([["lernstand", "Lernstand"], ["aufgabe", "Aufgabe"]] as const).map(([k, l]) => <button key={k} type="button" role="tab" className={`seg ${tab === k ? "on" : ""}`} aria-selected={tab === k} onClick={() => side(k)}>{l}{k === "aufgabe" && newTask && tab !== "aufgabe" && <i className="tutor-dot" aria-label="neu" />}</button>)}
+          {TABS.map(([k, l]) => <button key={k} type="button" role="tab" className={`seg ${tab === k ? "on" : ""}`} aria-selected={tab === k} onClick={() => side(k)}>{l}{badge(k)}</button>)}
         </div>
-        <div className="tutor-side-b">{tab === "aufgabe" ? <Aufgabe onAnswer={answer} /> : <Lernstand g={g} />}</div>
+        <div className="tutor-side-b">{tab === "plan" ? <Lehrplan /> : tab === "frage" ? <Frage onChat={() => setMtab("chat")} /> : <Lernstand g={g} />}</div>
       </aside>
     </div>
   );
 }
 
+/** Lehrplan des Tutors */
+function Lehrplan() {
+  const { pfad, reset } = useTutor(), phase = phaseOf(pfad);
+  if (!pfad.plan.length) return (
+    <div className="tc-side-empty">
+      <Ic name="map" cls="ic" />
+      <p className="small muted">{phase === "plan" ? "Die Diagnose ist fertig – der Tutor erstellt jetzt deinen Lehrplan." : "Noch kein Lehrplan. Der Tutor findet zuerst mit ein paar Fragen heraus, wo du stehst, und baut dann den kürzesten Weg zur Prüfungsreife."}</p>
+      {Object.keys(pfad.stand).length > 0 && <p className="tiny muted">Bisher eingeschätzt: {Object.keys(pfad.stand).length} Themen.</p>}
+    </div>
+  );
+  const done = pfad.plan.filter((s) => s.status === "fertig").length;
+  return (
+    <>
+      <p className="small" style={{ marginTop: 0 }}><b>Ziel:</b> {pfad.ziel}</p>
+      <div className="row"><span className="small muted">{done} von {pfad.plan.length} Schritten</span><span className="spacer" /><b className="small">{Math.round((done / pfad.plan.length) * 100)} %</b></div>
+      <div className="bar" style={{ marginTop: 6 }}><i style={{ width: `${(done / pfad.plan.length) * 100}%`, background: "var(--ok)" }} /></div>
+      <ol className="tc-plan-list">
+        {pfad.plan.map((s) => {
+          const tp = tutorPct({ ...pfad, evidence: pfad.evidence.filter((e) => e.schritt === s.id) }, s.thema);
+          return (
+            <li key={s.id} className={s.status}>
+              <span className="tc-dot" aria-hidden="true">{s.status === "fertig" ? <Ic name="check" cls="ic xs" /> : null}</span>
+              <div>
+                <div className="row" style={{ gap: 6 }}><b className="small">{s.titel}</b>{s.status === "aktiv" && <span className="chip blue">jetzt</span>}</div>
+                <p className="tiny muted" style={{ margin: "2px 0 0" }}>{TP[s.thema]?.n ?? s.thema} · {s.pakete.map((p) => KB.pakete.get(p)?.titel ?? p).join(", ")}</p>
+                <p className="tiny" style={{ margin: "4px 0 0" }}>{s.status === "fertig" && s.beleg ? <>✓ {s.beleg}</> : s.ziel}</p>
+                {tp != null && s.status !== "offen" && <div className="bar tc-mini"><i style={{ width: `${Math.round(tp * 100)}%` }} /></div>}
+              </div>
+            </li>
+          );
+        })}
+      </ol>
+      <details className="tx-paste"><summary className="small">Lernpfad zurücksetzen</summary>
+        <p className="tiny muted">Löscht Lehrplan, Einschätzung und Belege des Tutors auf diesem Gerät. XP und dein Lernstand bleiben.</p>
+        <button type="button" className="btn small danger" onClick={() => { if (confirm("Lernpfad des Tutors wirklich löschen?")) reset(true); }}>Zurücksetzen</button>
+      </details>
+    </>
+  );
+}
+
 /** Was der Tutor gerade fragt */
-function Aufgabe({ onAnswer }: { onAnswer: () => void }) {
-  const task = useTutor((s) => s.task);
-  if (!task) return <p className="small muted">Noch keine Aufgabe. Starte links eine Sitzung – Fragen und Aufgaben des Tutors erscheinen hier, damit du sie beim Antworten im Blick hast.</p>;
+function Frage({ onChat }: { onChat: () => void }) {
+  const q = useTutor((s) => s.convo.pending);
+  if (!q) return <p className="small muted">Gerade keine offene Frage. Stellt der Tutor eine, steht sie hier zum Nachlesen – beantwortet wird sie in der Karte im Chat.</p>;
   return (
     <div className="tutor-task">
       <div className="row" style={{ gap: 6 }}>
-        {task.thema && <span className="chip">{TP[task.thema]?.n ?? task.thema}</span>}
-        {task.operator && <span className="chip violet">{task.operator}</span>}
-        {task.punkte != null && <span className="chip blue">{task.punkte} P</span>}
+        <span className="chip">{TP[q.thema]?.n ?? q.thema}</span>
+        {q.operator && <span className="chip violet">{q.operator}</span>}
+        {q.punkte != null && <span className="chip blue">{q.punkte} P</span>}
       </div>
-      <h3 style={{ marginTop: 10 }}>{task.titel}</h3>
-      <div className="qtext" style={{ marginTop: 8 }}><SafeMarkdown text={task.text} /></div>
-      {task.hinweis && <details className="tx-paste"><summary className="small">Hinweis anzeigen</summary><p className="small">{task.hinweis}</p></details>}
-      <div className="row" style={{ marginTop: 12 }}><button type="button" className="btn small primary" onClick={onAnswer}><Ic name="pencil" cls="ic xs" /> Antwort schreiben</button></div>
+      {q.kontext && <div className="tc-ctx small" style={{ marginTop: 10 }}><SafeMarkdown text={q.kontext} /></div>}
+      <div className="qtext" style={{ marginTop: 10 }}><SafeMarkdown text={q.frage} /></div>
+      {q.optionen && <ol className="small tc-optlist" type="A">{q.optionen.map((o, i) => <li key={i}>{o}</li>)}</ol>}
+      <div className="row tutor-mob-only" style={{ marginTop: 12 }}><button type="button" className="btn small primary" onClick={onChat}><Ic name="pencil" cls="ic xs" /> Zur Antwort</button></div>
     </div>
   );
 }
 
-/** Lernstand nach Lehrplan: Prüfungsteil → Thema, Reife aus dem Lernstand und Einschätzung des Tutors */
+/** Lernstand nach Prüfungsteil → Thema: Reife aus den Lernrunden (Balken), aus den Tutor-Antworten (dünner Balken) und Einschätzung des Tutors */
 function Lernstand({ g }: { g: KnowledgeGraph }) {
-  const { S, startSession } = useProgress(), stand = useTutor((s) => s.stand), navigate = useNavigate();
-  const { insights, miscon } = loadTutorStore();
+  const { S, startSession } = useProgress(), pfad = useTutor((s) => s.pfad), navigate = useNavigate();
+  const bridge = loadTutorStore();
+  const insights = [...bridge.insights.map((i) => ({ thema: i.thema, aussage: i.aussage })), ...pfad.insights], miscon = [...bridge.miscon, ...pfad.miscon];
   const train = (n: GraphNode) => { const qs = shuffle(allQ(S).filter((q) => q.topic === n.id)).slice(0, 20); startSession(`Tutor: ${n.label}`, qs.map((q) => q.id)); void navigate({ to: "/lernen/runde" }); };
   const teile = g.nodes.filter((n) => n.kind === "teil");
   return (
     <>
-      <p className="tiny muted">Balken: Reife aus deinen Antworten. Chip „KI“: Einschätzung des Tutors aus dem Gespräch.</p>
+      <div className="tc-legend tiny muted"><span><i className="b1" /> Lernrunden</span><span><i className="b2" /> Tutor-Antworten</span><span className="chip">KI</span> Einschätzung</div>
       {teile.map((t) => (
         <div key={t.id} className="tutor-teil">
           <div className="row"><b>{t.label}</b><span className="spacer" /><span className={`chip ${LV[t.level].chip}`}>{Math.round(t.pct * 100)} %</span></div>
           <ul className="tutor-topics">
             {g.nodes.filter((n) => n.kind === "topic" && n.parent === t.id).map((n) => {
-              const k = stand[n.id];
+              const k = pfad.stand[n.id], tp = tutorPct(pfad, n.id);
               return (
                 <li key={n.id}>
                   <div className="row" style={{ gap: 6 }}>
@@ -106,6 +161,7 @@ function Lernstand({ g }: { g: KnowledgeGraph }) {
                     <button type="button" className="btn small ghost" onClick={() => train(n)} aria-label={`${n.label} üben`}>Üben</button>
                   </div>
                   <div className="bar" style={{ marginTop: 4 }}><i style={{ width: `${Math.round(n.pct * 100)}%`, background: LV[n.level].fill }} /></div>
+                  {tp != null && <div className="bar violet tc-mini" title={`Tutor: ${Math.round(tp * 100)} %`}><i style={{ width: `${Math.round(tp * 100)}%` }} /></div>}
                   {k?.notiz && <p className="tiny muted" style={{ margin: "4px 0 0" }}>{k.notiz}</p>}
                 </li>
               );

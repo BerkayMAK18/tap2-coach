@@ -11,6 +11,7 @@ import { useAccount } from "@/store/account";
 import { useProgress } from "@/store/progress";
 import { IDS, useTutor } from "@/store/tutor";
 import { Ic } from "@/ui-main";
+import { ask } from "@/ui-main/ask";
 import { SafeMarkdown } from "./SafeMarkdown";
 import { BewertungView, OpChip } from "./tutor/AufgabeView";
 import { fmt, kernLabel, makeHandoff, tn, useGraphs } from "./tutor/shared";
@@ -40,7 +41,7 @@ export function TutorChat() {
         <span className="tiny muted tp-cost" title={`Schätzung aus dem gemeldeten Verbrauch · ${MODEL_LBL[convo.model]}`}>≈ {convo.cost.toFixed(3)} $</span>
         {!convo.msgs.length && <div className="segs" role="group" aria-label="Modell">{(["sonnet", "haiku"] as Model[]).map((m) => <button key={m} type="button" className={`seg ${model === m ? "on" : ""}`} aria-pressed={model === m} onClick={() => setModel(m)}>{MODEL_LBL[m]}</button>)}</div>}
         {!convo.ende && convo.msgs.length > 0 && <button type="button" className="btn small ghost" disabled={busy || !!blocked} title="Der Tutor schließt mit Fazit und nächstem Schritt ab" onClick={() => void send({ kind: "ende" })}><Ic name="flag" cls="ic xs" /> Beenden</button>}
-        <button type="button" className="btn small ghost" disabled={busy} aria-label="Sitzung schließen" title="Sitzung schließen (dein Stand bleibt)" onClick={() => { if (convo.ende || confirm("Sitzung schließen? Der Verlauf wird gelöscht, dein Stand und deine XP bleiben.")) close(); }}><Ic name="x" cls="ic xs" /></button>
+        <button type="button" className="btn small ghost" disabled={busy} aria-label="Sitzung schließen" title="Sitzung schließen (dein Stand bleibt)" onClick={() => void (async () => { if (!convo.msgs.length || convo.ende || await ask({ title: "Sitzung schließen?", text: "Der Verlauf dieser Sitzung wird gelöscht. Dein Stand im Graphen und deine XP bleiben erhalten.", ok: "Schließen", danger: true })) close(); })()}><Ic name="x" cls="ic xs" /></button>
       </div>
       <div className="tutor-msgs" aria-live="polite">
         {!convo.msgs.length && (

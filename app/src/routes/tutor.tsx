@@ -6,19 +6,21 @@
  *   Auf dem Handy wechseln Chat, Aufgabe und Stand über Reiter.
  * - „Lehrplan“: deterministisch berechneter Plan bis zur Prüfung.
  *
- * Menüpunkt nur für Admin (Admin-Konto oder /tutor?premium=1 auf diesem Gerät). Die KI prüft der Server (app_metadata.role).
+ * Premium: nur das freigeschaltete GitHub-Konto (app_metadata.role = "admin"), auf jedem Gerät, auf dem es angemeldet ist.
+ * Andere sehen „gesperrt“. Maßgeblich ist die Prüfung im Server (Edge Function), die Ansicht folgt ihr nur.
  */
 import { useEffect, useState } from "react";
 import { Link, createFileRoute } from "@tanstack/react-router";
-import { z } from "zod";
 import { TAP2, TOPICS, TP, allQ } from "@/content/catalog";
 import { EXAM_DE } from "@/config";
 import { buildGraph } from "@/lib/graph";
 import { xpToday } from "@/lib/tutor-state";
 import { today } from "@/lib/dates";
 import { useProgress } from "@/store/progress";
-import { PREMIUM_KEY, isPremium, useTutor } from "@/store/tutor";
+import { useTutor } from "@/store/tutor";
+import { isAdmin, useAccount } from "@/store/account";
 import { Ic } from "@/ui-main";
+import { ask } from "@/ui-main/ask";
 import { TutorChat } from "@/components/TutorChat";
 import { TutorBridge } from "@/components/TutorBridge";
 import { AufgabeView } from "@/components/tutor/AufgabeView";
@@ -26,20 +28,26 @@ import { LehrplanView } from "@/components/tutor/LehrplanView";
 import { ResetTutor, StandView, SyncNote } from "@/components/tutor/StandView";
 import { LV, pc, useGraphs, useLehrplan } from "@/components/tutor/shared";
 
-export const Route = createFileRoute("/tutor")({ validateSearch: z.object({ premium: z.coerce.string().optional().catch(undefined) }), component: Tutor });
+export const Route = createFileRoute("/tutor")({ component: Tutor });
 
 type Top = "sitzung" | "lehrplan";
 type Side = "aufgabe" | "stand";
 type Mob = "chat" | Side;
 
 function Tutor() {
-  const { premium } = Route.useSearch();
-  const [ok, setOk] = useState(isPremium());
-  useEffect(() => { if (premium === "1") { try { localStorage.setItem(PREMIUM_KEY, "1"); } catch { /* privat */ } setOk(true); } }, [premium]);
+  const ok = useAccount((s) => isAdmin(s.user)), ready = useAccount((s) => s.ready), signedIn = useAccount((s) => !!s.user), signIn = useAccount((s) => s.signIn);
   const [top, setTop] = useState<Top>("sitzung");
   const syncNow = useTutor((s) => s.syncNow);
   useEffect(() => { if (ok) void syncNow(); }, [ok, syncNow]);
-  if (!ok) return <section className="card"><h3>Diese Seite ist nicht verfügbar.</h3><p className="small muted"><Link to="/">Zur Übersicht</Link></p></section>;
+  if (!ok) return !ready ? <section className="card"><p className="small muted">Anmeldung wird geprüft …</p></section> : (
+    <section className="card tp-locked">
+      <span className="tc-ava" aria-hidden="true"><Ic name="lock" cls="ic sm" /></span>
+      <div><h3 style={{ margin: 0 }}>KI-Tutor · Premium</h3>
+        <p className="small muted" style={{ margin: "4px 0 0" }}>{signedIn ? "Der KI-Tutor ist für dein Konto nicht freigeschaltet." : "Der KI-Tutor ist eine Premium-Funktion. Melde dich mit dem freigeschalteten GitHub-Konto an."}</p>
+        <div className="row" style={{ marginTop: 12 }}>{!signedIn && <button type="button" className="btn small primary" onClick={() => void signIn()}><Ic name="users" cls="ic xs" /> Mit GitHub anmelden</button>}<Link className="btn small ghost" to="/">Zur Übersicht</Link></div>
+      </div>
+    </section>
+  );
   return (
     <div className="tp-page">
       <div className="segs tp-top" role="tablist" aria-label="Tutor">
@@ -55,10 +63,10 @@ function PlanTab({ onStarted }: { onStarted: () => void }) {
   return (
     <>
       {err && <p className="small warn-text" role="alert">{err}</p>}
-      <LehrplanView plan={plan} busy={busy} onStart={(tid, fokus) => {
-        if (convo?.msgs.length && !convo.ende && !confirm("Die laufende Sitzung wird beendet. Neue Sitzung öffnen?")) return;
+      <LehrplanView plan={plan} busy={busy} onStart={(tid, fokus) => void (async () => {
+        if (convo?.msgs.length && !convo.ende && !(await ask({ title: "Neue Sitzung öffnen?", text: "Die laufende Sitzung wird beendet. Dein Stand und deine XP bleiben erhalten.", ok: "Neue Sitzung" }))) return;
         open(tid, fokus); onStarted();
-      }} />
+      })()} />
     </>
   );
 }

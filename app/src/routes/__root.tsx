@@ -19,13 +19,13 @@ import { HudPill } from "@/components/gami/Hud";
 import { GamiLayer } from "@/components/gami/Layer";
 import { Ic, Ring, pctS } from "@/ui-main";
 import { NAV_FOOT, NAV_MAIN, VTITLE } from "@/ui-main/nav";
-import { isPremium } from "@/store/tutor";
+import { ConfirmHost } from "@/ui-main/confirm";
 
 /** Menüpunkt Tutor (nicht in der Live-App, daher nicht in der generierten nav.ts) */
 const TUTOR_NAV = { view: "tutor", label: "Tutor", svg: '<path d="M2 9.5L12 4.5l10 5-10 5z"/><path d="M6 11.5v4.5c0 1.6 2.7 3 6 3s6-1.4 6-3v-4.5"/><path d="M22 9.5V15"/>' }; // Doktorhut
 import { useProgress } from "@/store/progress";
 import { useLiveSync } from "@/store/livesync";
-import { useAccount } from "@/store/account";
+import { isAdmin, useAccount } from "@/store/account";
 import { usePruefung } from "@/store/pruefung";
 import { KEY_TUT } from "@/lib/tipps";
 import { Suche } from "@/components/lernen/Suche";
@@ -67,8 +67,8 @@ function Shell() {
   useEffect(() => { document.title = `${VTITLE[view] ?? (view === "tutor" ? "Tutor" : "TAP2 Coach")} · TAP2 Prüfungscoach`; }, [view]);
 
   const c = counts(S, allQ(S)), left = daysBetween(today(), EXAM_DAY);
-  // Tutor (Premium): Menüpunkt nur für Admin – Admin-Konto oder auf diesem Gerät freigeschaltet (/tutor?premium=1)
-  const admin = useAccount((s) => s.user?.app_metadata?.role === "admin"), tutorOn = admin || isPremium() || view === "tutor";
+  // Tutor (Premium): Menüpunkt nur für das freigeschaltete Konto (Admin-Rolle)
+  const tutorOn = useAccount((s) => isAdmin(s.user));
   const navView = view === "operatoren" || view === "plan" ? "tipps" : view === "lernen" && sess?.src?.ev ? "events" : view; // Event-Runde: Menüpunkt Events
   const focus = loc.pathname.startsWith("/lernen/runde") || (view === "pruefung" && !!run && run.phase === "write"); // Fokus wie die Live-App: Lernrunde, Prüfung beim Schreiben
   // Fokus-Ansicht wie die Live-App an <body> (das Stylesheet blendet mit body.focus die Navigation auf dem Handy aus)
@@ -103,6 +103,7 @@ function Shell() {
       </div>
       <UpdatePrompt />
       <GamiLayer />
+      <ConfirmHost />
       <Suche />
     </div>
   );

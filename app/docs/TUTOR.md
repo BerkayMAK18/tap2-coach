@@ -4,6 +4,16 @@ Stand: 14.11.2026. Premium-Funktion der neuen App, vorerst nur für den Admin, s
 
 **Einrichtung:** Edge Function deployt (14.11.2026). Für den Tutor-Stand im Konto `004_app_tutor_state_konto.sql` einspielen (ersetzt 003).
 
+## Zugang (Premium)
+
+- Der Tutor mit Claude ist nur für das freigeschaltete GitHub-Konto nutzbar (`app_metadata.role = 'admin'`), auf
+  **jedem Gerät**, auf dem dieses Konto angemeldet ist. Die Rolle setzt nur der Betreiber per SQL; Nutzer können
+  `app_metadata` nicht selbst ändern.
+- Die App holt die Rolle beim Start frisch vom Server (`supabase.auth.getUser()`). So kennt auch ein älterer Login auf
+  dem Handy eine später gesetzte Rolle.
+- Alle anderen sehen „KI-Tutor · Premium“ als gesperrt. Maßgeblich ist die Prüfung in der Edge Function.
+- Die frühere Freischaltung pro Browser (`/tutor?premium=1`) gibt es nicht mehr.
+
 ## Was er tut
 
 Der Tutor ist auf die **TAP2 (FIAE)** spezialisiert und arbeitet ausschließlich mit den Themen und Lernpaketen des

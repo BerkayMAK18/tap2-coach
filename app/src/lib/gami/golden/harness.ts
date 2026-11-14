@@ -11,6 +11,7 @@ import { blank, dayStr, isObj, mapObj, num, plain, type State } from "@/lib/stat
 import type { Ctx, Fx } from "../core";
 import { TPX } from "../titles";
 import { createGami } from "./original.js";
+import { createGami as createGamiV27 } from "./original-v27.js";
 
 export type World = { S: State; day: string; synced: boolean; syncKey?: string; conf?: boolean; rpc?: (fn: string, a: Record<string, unknown>) => Promise<unknown>; view?: string; ui?: Record<string, unknown> };
 const esc = (s: unknown) => String(s ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c]!);
@@ -20,8 +21,9 @@ const hexOf = (b: ArrayBuffer | Uint8Array) => [...new Uint8Array(b)].map((x) =>
 const QMAP = Object.fromEntries(BASE_Q.map((q) => [q.id, q]));
 
 export type Old = Record<string, (...a: unknown[]) => any>; // eslint-disable-line @typescript-eslint/no-explicit-any
-export function oldGami(w: World): Old {
-  return createGami({
+/** Original der Live-App (aktuell) bzw. Stand v2.7 (Geräte ohne Update) */
+export function oldGami(w: World, v27 = false): Old {
+  return (v27 ? createGamiV27 : createGami)({
     esc, render: () => {}, hud: () => {}, num, today: () => w.day, daysBetween, rpc: (fn: string, a: Record<string, unknown>) => (w.rpc ? w.rpc(fn, a) : Promise.reject(new Error("offline"))), sha, hexOf, plain, isObj, dayStr, mapObj, keyRaw,
     syncConf: () => !!w.conf, syncGet: () => (w.synced ? { key: w.syncKey || "ABCD-EFGH-JKMN-PQRS-TUVW-XYZ2-3456-7890" } : null), syncSoon: () => {},
     TP: TPX, QMAP, EVENTS: ALL_EVENTS, TOPICS,

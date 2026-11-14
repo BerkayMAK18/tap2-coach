@@ -287,3 +287,26 @@ Gefunden, gehört zum Grundgerüst: Tailwinds Basis-Reset (preflight) setzt Link
 Unterstrich – in der Live-App sind Links wie „Spitznamen wählen“ blau unterstrichen. Betrifft alle Ansichten mit
 einfachen Links.
 
+### Belohnungen: Spiegelung zwischen Geräten (14.11.2026, v2.8, zusammen mit der Live-App)
+
+Gefunden beim Vergleich Dev ↔ Live: Nach Ausgaben (Schatzkammer, Boosts) zeigten verbundene Geräte verschiedene
+Federn (z. B. 40 und 370). Ursache war die Abgleich-Regel beider Apps: Federn, Tickets, Pity und Login-Stand kamen nur
+vom Gerät mit mehr XP; Ausgeben ändert die XP nicht. Eine spätere Antwort auf dem anderen Gerät brachte ausgegebene
+Federn sogar zurück. Boosts galten mit dem Höchstwert (benutzte Tränke kamen wieder), Login-Tag, Tagesquests, Serie und
+aktive Boosts wurden gar nicht abgeglichen (Bonus/Quests pro Gerät doppelt abholbar).
+
+Neu in **beiden Apps gleich** (Live-App `index.html` per eigenem PR nach `main`, Golden-Vorlage daraus übernommen):
+Konto `kb` mit Eingängen/Ausgängen (je Zähler gilt das Maximum) für Federn, Tickets und Boosts; XP vom weiter
+fortgeschrittenen Stand; Schatzkammer-Zähler vom Stand mit mehr Zügen; Login-Kalender vom späteren Tag; Tagesquests
+zusammengeführt (Zähler Maximum, abgeholt = abgeholt); Serie und aktive Boosts vom jüngeren Stand (`u`); Event-Kapitel
+mit dem frühesten Zeitpunkt; Teile und Titel im Paket in fester Reihenfolge. Gleichstände entscheidet eine feste Regel.
+Pakete von Geräten ohne Update (v2.7) werden nach der bisherigen Regel übernommen, das Konto zieht nach.
+
+Tests (`lib/gami/spiegel.test.ts`, 16): Ausgaben kommen an (370 → 70 auf beiden), Antwort auf dem anderen Gerät bringt
+nichts zurück, Login einmal pro Tag, Quests/Truhe, Boosts, gleichzeitig verdient und ausgegeben, Umstieg zweier alter
+Stände, drei Geräte über die Cloud mit 300 zufälligen Aktionen → überall dasselbe Paket, Zusammenspiel mit v2.7 in
+beide Richtungen (`golden/original-v27.js`), nichts geht verloren. Golden-Tests gegen die neue Live-App weiter grün.
+
+Beim Umstieg einmalig: Zwei Geräte, die schon verschiedene Kontostände hatten, gleichen sich auf den höheren an (der
+alte Stand kennt seine Ausgaben nicht) – zugunsten des Nutzers.
+

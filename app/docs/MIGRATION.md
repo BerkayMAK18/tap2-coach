@@ -24,6 +24,10 @@ dem localStorage – niemand muss etwas tun. Dafür gilt dauerhaft:
 ## 3. Belohnungen (XP-System, Gacha)
 - Das Belohnungs-Modul wird 1:1 portiert: gleiche Item-/Skin-/Titel-IDs, gleiche Regeln, gleicher Speicher
   `tap2coach-gami`, gleiches Packformat für Sync und Übertragung.
+- **Spiegelung (v2.8, Live-App und Dev-App gleich):** Das Packformat ist nur **erweitert** (`k` Konto, `lc` Login-Tag,
+  `qd` Tagesquests, `r` Serie/aktive Boosts, `u` Zeitpunkt) – ältere Versionen ignorieren die Felder und arbeiten wie
+  bisher. Im Stand liegt dazu `kb` (Eingänge/Ausgänge von Federn, Tickets, Boosts) und `u`. Regeln nur gemeinsam in
+  beiden Apps ändern; die Golden-Tests prüfen, dass beide gleich rechnen.
 
 ## 4. Sync: alter Schlüssel-Sync → Konto-Sync
 - Verschlüsselung und Inhaltsformat sind identisch (`seal({ v: 1, s, g, ev, at })`). Die neue App schreibt deshalb

@@ -88,6 +88,7 @@ export function onAnswer(G: GState, ctx: Ctx, q: Pick<Question, "id" | "topic">,
     else G.combo = 0;
   }
   if (new Date().getHours() < 4) (G.flags = G.flags || {}).nacht = 1;
+  G.u = Date.now(); // Serie/Boosts geändert (Abgleich zwischen Geräten)
   titleCheck(G, ctx);
   ctx.fx.save(); ctx.fx.lbSoon();
   if (msg) ctx.fx.float(msg, sure);
@@ -170,7 +171,7 @@ export function pull(G: GState, ctx: Ctx, n: number): PullResult | null {
 // ---- Garderobe
 export function equip(G: GState, id: string) { const it = IT[id]; if (!it || !G.owned[it.id]) return false; G.equip[it.char!][it.slot] = it.id; G.lookAt = Date.now(); return true; }
 export function setTitle(G: GState, id: string) { if (id && !(G.titles || {})[id]) return false; G.title = id; G.titleAt = G.lookAt = Date.now(); return true; }
-export function applyBoost(G: GState, ctx: Ctx, id: string) { if ((G.boosts as Record<string, number>)[id] < 1) return false; (G.boosts as Record<string, number>)[id]--; if (id === "xp2") G.xp2Left = 10; else G.shieldOn = true; ctx.fx.save(); ctx.fx.toast(`${IT[id]!.icon} ${IT[id]!.name} aktiviert`); return true; }
+export function applyBoost(G: GState, ctx: Ctx, id: string) { if ((G.boosts as Record<string, number>)[id] < 1) return false; (G.boosts as Record<string, number>)[id]--; if (id === "xp2") G.xp2Left = 10; else G.shieldOn = true; G.u = Date.now(); ctx.fx.save(); ctx.fx.toast(`${IT[id]!.icon} ${IT[id]!.name} aktiviert`); return true; }
 
 // ---- Events: Sonderbelohnungen, nur bis zum Klausurtermin
 const evRec = (G: GState, e: EventCatalog): EvRec => (G.ev[e.id] = G.ev[e.id] || {});

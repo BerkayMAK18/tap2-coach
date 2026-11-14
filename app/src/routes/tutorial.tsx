@@ -38,7 +38,7 @@ function Tutorial() {
   return (
     <>
       <section className="card tut-plan">
-        <div className="row" style={{ alignItems: "flex-start" }}><img src="/icons/raven.svg" alt="" className="tut-raven" /><div style={{ flex: 1, minWidth: 220 }}><h2>Dein Plan bis zum {EXAM_DE}</h2><p className="muted" style={{ marginTop: 6 }}>{left > 0 && <>Noch <b className="ink">{left} {left === 1 ? "Tag" : "Tage"}</b>. </>}{need ? <>Beantworte jeden Tag etwa <b className="ink">{perDay} Fragen</b>{dueN ? " plus die fälligen Wiederholungen" : ""}, dann ist bis zum Vortag alles grün.</> : "Alle Fragen sind grün – jetzt geht es ums Festigen."} Aktuell: {pctS(c.pct)} prüfungsreif.</p></div></div>
+        <div className="row" style={{ alignItems: "flex-start" }}><img src="/icons/vortex.svg" alt="" className="tut-raven" /><div style={{ flex: 1, minWidth: 220 }}><h2>Dein Plan bis zum {EXAM_DE}</h2><p className="muted" style={{ marginTop: 6 }}>{left > 0 && <>Noch <b className="ink">{left} {left === 1 ? "Tag" : "Tage"}</b>. </>}{need ? <>Beantworte jeden Tag etwa <b className="ink">{perDay} Fragen</b>{dueN ? " plus die fälligen Wiederholungen" : ""}, dann ist bis zum Vortag alles grün.</> : "Alle Fragen sind grün – jetzt geht es ums Festigen."} Aktuell: {pctS(c.pct)} prüfungsreif.</p></div></div>
       </section>
       <section className="sec"><div className="sec-head"><h2>Der Lernpfad</h2></div>
         <ol className="tut-steps">{steps.map(([i, h, t, a], n) => <li key={n}><span className="ts-n">{n + 1}</span><div className="ts-b"><b><Ic name={i} cls="ic sm" /> {h}</b><p className="small muted">{t}</p><div className="row">{a}</div></div></li>)}</ol>

@@ -168,3 +168,6 @@ main.content.wide { max-width: none; }
 .vx-n { width: 32px; height: 32px; border-radius: 50%; display: grid; place-items: center; font-weight: 800; background: var(--blue); color: var(--on-blue); }
 .vx-note { display: flex; gap: 6px; align-items: center; margin: 8px 2px 0; padding-top: 10px; border-top: 1px solid var(--line); }
 .vx-pro { display: flex; gap: 6px; align-items: center; margin: 6px 0 0; }
+/* Vortex-Logo als Avatar (public/icons/vortex.svg) */
+.vx-mark { flex: none; width: 36px; height: 36px; border-radius: 11px; display: block; }
+.vx-mark.sm { width: 28px; height: 28px; border-radius: 8px; }

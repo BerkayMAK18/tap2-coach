@@ -36,7 +36,7 @@ export function TutorChat() {
   return (
     <div className="tutor-chat">
       <div className="tutor-head">
-        <div className="tc-title"><span className="tc-ava" aria-hidden="true"><Ic name="sparkles" cls="ic sm" /></span><div><b>{tn(convo.thema)}</b><span className="tiny muted">{convo.msgs.length ? MODEL_LBL[convo.model] : "noch nicht gestartet"} · {done.length} bewertet{max ? ` · ${fmt(pts)}/${fmt(max)} P.` : ""}{xp ? ` · +${xp} XP` : ""}</span></div></div>
+        <div className="tc-title"><img className="vx-mark" src="/icons/vortex.svg" alt="" /><div><b>{tn(convo.thema)}</b><span className="tiny muted">{convo.msgs.length ? MODEL_LBL[convo.model] : "noch nicht gestartet"} · {done.length} bewertet{max ? ` · ${fmt(pts)}/${fmt(max)} P.` : ""}{xp ? ` · +${xp} XP` : ""}</span></div></div>
         <span className="spacer" />
         <span className="tiny muted tp-cost" title={`Schätzung aus dem gemeldeten Verbrauch · ${MODEL_LBL[convo.model]}`}>≈ {convo.cost.toFixed(3)} $</span>
         {!convo.msgs.length && <div className="segs" role="group" aria-label="Modell">{(["sonnet", "haiku"] as Model[]).map((m) => <button key={m} type="button" className={`seg ${model === m ? "on" : ""}`} aria-pressed={model === m} onClick={() => setModel(m)}>{MODEL_LBL[m]}</button>)}</div>}
@@ -45,13 +45,13 @@ export function TutorChat() {
       </div>
       <div className="tutor-msgs" aria-live="polite">
         {!convo.msgs.length && (
-          <div className="tc-row"><span className="tc-ava sm" aria-hidden="true"><Ic name="sparkles" cls="ic xs" /></span><div className="tc-bubble">
+          <div className="tc-row"><img className="vx-mark sm" src="/icons/vortex.svg" alt="" /><div className="tc-bubble">
             <p><b>{tn(convo.thema)}</b> – bereit, wenn du es bist.</p>
             <p className="small muted">Schreib deine erste Nachricht, z. B. „Los geht's“ oder was dir bei dem Thema schwerfällt. Erst dann bekommt der Tutor deinen Stand und stellt die erste Aufgabe – vorher entstehen keine Kosten.</p>
           </div></div>
         )}
         {feed.map((f, n) => <FeedItem key={n} f={f} />)}
-        {busy && <div className="tc-row"><span className="tc-ava sm" aria-hidden="true"><Ic name="sparkles" cls="ic xs" /></span><div className="tc-bubble tc-typing" aria-label="Tutor schreibt"><i /><i /><i /></div></div>}
+        {busy && <div className="tc-row"><img className="vx-mark sm" src="/icons/vortex.svg" alt="" /><div className="tc-bubble tc-typing" aria-label="Tutor schreibt"><i /><i /><i /></div></div>}
         <div ref={end} />
       </div>
       {err && <p className="small warn-text tutor-err" role="alert">{err}</p>}
@@ -75,7 +75,7 @@ function FeedItem({ f }: { f: Feed }) {
         </div></div>
       );
     }
-    case "tutor": return <div className="tc-row"><span className="tc-ava sm" aria-hidden="true"><Ic name="sparkles" cls="ic xs" /></span><div className="tc-bubble"><SafeMarkdown text={f.text} /></div></div>;
+    case "tutor": return <div className="tc-row"><img className="vx-mark sm" src="/icons/vortex.svg" alt="" /><div className="tc-bubble"><SafeMarkdown text={f.text} /></div></div>;
     case "aufgabe": {
       const done = !!convo.bewertungen[f.key];
       return (

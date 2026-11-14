@@ -24,7 +24,7 @@ export function BridgePanel() {
   return (
     <div className="tutor-chat vx-bridge">
       <div className="tutor-head">
-        <div className="tc-title"><span className="tc-ava" aria-hidden="true"><Ic name="sparkles" cls="ic sm" /></span><div><b>{tn(bridge.thema)}</b><span className="tiny muted">Vortex · mit deiner eigenen KI</span></div></div>
+        <div className="tc-title"><img className="vx-mark" src="/icons/vortex.svg" alt="" /><div><b>{tn(bridge.thema)}</b><span className="tiny muted">Vortex · mit deiner eigenen KI</span></div></div>
         <span className="spacer" />
         <button type="button" className="btn small ghost" aria-label="Thema schließen" title="Thema schließen (dein Stand bleibt)" onClick={closeBridge}><Ic name="x" cls="ic xs" /></button>
       </div>

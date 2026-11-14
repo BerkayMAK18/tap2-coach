@@ -22,7 +22,7 @@ import { NAV_FOOT, NAV_MAIN, VTITLE } from "@/ui-main/nav";
 import { ConfirmHost } from "@/ui-main/confirm";
 
 /** Menüpunkt Vortex (KI-Tutor, nicht in der Live-App, daher nicht in der generierten nav.ts) */
-const TUTOR_NAV = { view: "tutor", label: "Vortex", svg: '<path d="M2 9.5L12 4.5l10 5-10 5z"/><path d="M6 11.5v4.5c0 1.6 2.7 3 6 3s6-1.4 6-3v-4.5"/><path d="M22 9.5V15"/>' }; // Doktorhut
+const TUTOR_NAV = { view: "tutor", label: "Vortex", svg: '<path d="M12 12.2c.9-.5 1.9.2 1.8 1.2-.2 1.5-2 2.2-3.3 1.6-1.8-.8-2.3-3.1-1.4-4.7 1.2-2.1 4.1-2.6 6-1.3 2.4 1.6 2.8 5 1.2 7.3-2 2.8-6 3.2-8.7 1.2C4.6 15.2 4.2 10.4 6.6 7.3 9.4 3.7 15 3.3 18.4 6.2"/>' }; // Wirbel (wie das Vortex-Logo)
 import { useProgress } from "@/store/progress";
 import { useLiveSync } from "@/store/livesync";
 import { useAccount } from "@/store/account";
@@ -80,7 +80,7 @@ function Shell() {
   return (
     <div className="app" onClick={go}>
       <nav className="side" aria-label="Hauptnavigation">
-        <div className="brand"><img className="brand-mark" src="/icons/raven.svg" alt="" /><div className="brand-t">TAP2 Coach<span>Fachinformatik AE</span></div></div>
+        <div className="brand"><img className="brand-mark" src="/icons/vortex.svg" alt="" /><div className="brand-t">TAP2 Coach<span>Fachinformatik AE</span></div></div>
         {NAV_MAIN.map((n) => <NavBtn key={n.view} n={n} current={navView === n.view} />)}
         {/* Vortex für alle: kostenlos über die eigene KI, Vortex Pro (eingebaute KI) nur fürs freigeschaltete Konto */}
         <NavBtn n={TUTOR_NAV} current={navView === "tutor"} />

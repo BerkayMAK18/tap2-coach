@@ -174,3 +174,42 @@ export type NormTabelle = z.infer<typeof NormTabelle>;
 export type NormAbh = z.infer<typeof NormAbh>;
 export type NormStufe = z.infer<typeof NormStufe>;
 export type NormBeispiel = z.infer<typeof NormBeispiel>;
+
+/**
+ * Beziehungen visuell (nur neue App): Beispiele in src/content/beziehungen.json, zugeordnet über Katalog-IDs
+ * (MC „m88“, Karte „k:db8“, Lernpaket-Abschnitt „P04:m:n-Beziehungen auflösen“). Nur Daten, kein HTML.
+ * - vorher: neutrales Beziehungsbild für die Frage (Entitäten + Kardinalitäten, noch ohne Fremdschlüssel);
+ *   verdeckt = Kardinalitäten als „?“ (wenn genau sie gefragt sind); null = kein Bild vor der Antwort
+ * - tabellen: Lösung als Relationenmodell (PK/FK, FK nennt die Zieltabelle), Reihenfolge = Anordnung von links nach rechts
+ * - abgelehnt: Beispiel für referentielle Integrität (Einfügen mit unbekanntem Schlüssel, Löschen eines referenzierten Datensatzes)
+ */
+export const BezSpalte = z.object({ n: NormName, pk: z.boolean().optional(), fk: NormName.optional(), unique: z.boolean().optional() });
+export const BezTabelle = z.object({ name: NormName, spalten: z.array(BezSpalte).min(1).max(8), zeilen: z.array(z.array(z.string().max(40))).max(5).default([]) });
+/** Ende einer Beziehungslinie: Entität, Höchstzahl (1, n, m) und optional Mindestzahl (für Krähenfuß/Min-Max) */
+export const BezEnde = z.object({ t: NormName, k: z.enum(["1", "n", "m"]), min: z.union([z.literal(0), z.literal(1)]).optional() });
+export const BezVorher = z.object({
+  a: BezEnde,
+  b: BezEnde,
+  verdeckt: z.boolean().optional(),
+  notation: z.enum(["zahl", "kraehenfuss"]).default("zahl"),
+});
+export const BezAbgelehnt = z.object({
+  art: z.enum(["einfuegen", "loeschen"]),
+  tabelle: NormName,
+  zeile: z.array(z.string().max(40)).min(1),
+  grund: z.string().min(1).max(160),
+});
+export const BezBeispiel = z.object({
+  titel: z.string().min(1).max(80),
+  refs: z.array(z.string().min(1)).min(1),
+  vorher: BezVorher.nullable(),
+  tabellen: z.array(BezTabelle).min(2).max(3),
+  abgelehnt: z.array(BezAbgelehnt).max(2).default([]),
+});
+export const BezDatei = z.object({ schema: z.literal(1), beispiele: z.array(BezBeispiel) });
+export type BezSpalte = z.infer<typeof BezSpalte>;
+export type BezTabelle = z.infer<typeof BezTabelle>;
+export type BezEnde = z.infer<typeof BezEnde>;
+export type BezVorher = z.infer<typeof BezVorher>;
+export type BezAbgelehnt = z.infer<typeof BezAbgelehnt>;
+export type BezBeispiel = z.infer<typeof BezBeispiel>;

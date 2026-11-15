@@ -27,6 +27,17 @@ export const FEATURES = {
 } as const;
 
 /**
+ * Rangliste in der Testphase der neuen App (Dev-Seite, Demo-Tester): Die Bestenliste ist dieselbe wie in der Live-App.
+ * Wer schon eingetragen ist (über die Live-App oder ein verbundenes Gerät), wird weiter aktualisiert und kann den
+ * Namen ändern oder sich austragen – neue Einträge sind aber erst möglich, wenn die neue App die Live-App ersetzt.
+ * So landen keine Testnamen bei den echten Nutzern. Beim Umstieg auf true setzen.
+ */
+export const LB_NEW_JOINS = false;
+
+/** Tutor über die eigene KI (Brücke): Ergebnis-Blöcke schreibt man selbst ein – XP daher höchstens für so viele Aufgaben pro Tag. */
+export const BRIDGE_XP_TASKS_PER_DAY = 8;
+
+/**
  * Verantwortlicher nach Art. 4 Nr. 7 DSGVO – Pflichtangabe im Datenschutzhinweis.
  * Kontakt bewusst über das GitHub-Profil (keine Firmenadresse). Kommt später eine eigene E-Mail dazu, hier ergänzen.
  */

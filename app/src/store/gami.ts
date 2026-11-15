@@ -13,6 +13,7 @@ import { supabase } from "@/lib/supabase";
 import { claimable, claimLogin, claimQuest, chipText, equip, evFinal as evFinalCore, evInfo as evInfoCore, evKap as evKapCore, evWear, loginOffer, loginToast, onAnswer, onGuess, openChest, pull, rollDay, setTitle, titleCheck, applyBoost, type Ctx, type LoginOffer, type PullResult } from "@/lib/gami/core";
 import { KEY_GAMI } from "@/lib/gami/items";
 import { NAME_RE, lbGet, lbId, lbSet, lookOf, type LbData } from "@/lib/gami/lb";
+import { LB_NEW_JOINS } from "@/config";
 import { firstStart, merge as mergeCore, pack as packCore, parseStored, type GState } from "@/lib/gami/state";
 import { useProgress } from "./progress";
 
@@ -166,6 +167,8 @@ export async function lbLoad(force?: boolean) {
 export async function lbJoin(nameIn: unknown) {
   const name = String(nameIn || "").trim();
   if (!NAME_RE.test(name)) { lbSetState({ err: "3–16 Zeichen: Buchstaben, Ziffern, _ . -" }); return bump(); }
+  // Testphase: nur bestehende Einträge (Namen ändern, Eintrag nach Wechsel der ID mitnehmen), keine neuen
+  const lb0 = lbGet(); if (!LB_NEW_JOINS && !lb0.joined && !lb0.id) { lbSetState({ err: "In der Testversion kannst du dich noch nicht neu eintragen." }); return bump(); }
   lbSetState({ busy: true, err: "" }); bump();
   try {
     const id = await myId(), lb = lbGet(), g = gami();

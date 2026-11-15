@@ -1,0 +1,146 @@
+{
+ "10fod6e": {
+  "python": "for i in range(1, n):\n    aktuell = a[i]\n    j = i - 1\n    while j >= 0 and a[j] > aktuell:\n        a[j + 1] = a[j]\n        j = j - 1\n    a[j + 1] = aktuell",
+  "javascript": "for (let i = 1; i <= n - 1; i++) {\n  let aktuell = a[i];\n  let j = i - 1;\n  while (j >= 0 && a[j] > aktuell) {\n    a[j + 1] = a[j];\n    j = j - 1;\n  }\n  a[j + 1] = aktuell;\n}"
+ },
+ "13bh9n5": {
+  "python": "def auswerten(werte: list[float], grenze: float) -> \"Auswertung\":\n    if len(werte) == 0:\n        return None\n    summe = 0.0\n    anzahlUeber = 0\n    maxWert = werte[0]\n    maxIndex = 0\n    for i in range(0, len(werte)):\n        summe = summe + werte[i]\n        if werte[i] > grenze:\n            anzahlUeber = anzahlUeber + 1\n        if werte[i] > maxWert:\n            maxWert = werte[i]\n            maxIndex = i\n    return Auswertung(summe / len(werte), anzahlUeber, maxWert, maxIndex)",
+  "javascript": "/** @param {number[]} werte @param {number} grenze @returns {Auswertung|null} */\nfunction auswerten(werte, grenze) {\n  if (werte.length === 0) {\n    return null;\n  }\n  let summe = 0.0;\n  let anzahlUeber = 0;\n  let maxWert = werte[0];\n  let maxIndex = 0;\n  for (let i = 0; i <= werte.length - 1; i++) {\n    summe = summe + werte[i];\n    if (werte[i] > grenze) {\n      anzahlUeber = anzahlUeber + 1;\n    }\n    if (werte[i] > maxWert) {\n      maxWert = werte[i];\n      maxIndex = i;\n    }\n  }\n  return new Auswertung(summe / werte.length, anzahlUeber, maxWert, maxIndex);\n}"
+ },
+ "13ekumi": {
+  "python": "def binaereSuche(werte: list, n: int, gesucht) -> int:\n    links = 0\n    rechts = n - 1\n    while links <= rechts:\n        mitte = (links + rechts) // 2   # ganzzahlig\n        if werte[mitte] == gesucht:\n            return mitte\n        elif werte[mitte] < gesucht:\n            links = mitte + 1\n        else:\n            rechts = mitte - 1\n    return -1",
+  "javascript": "function binaereSuche(werte, n, gesucht) {\n  let links = 0;\n  let rechts = n - 1;\n  while (links <= rechts) {\n    let mitte = Math.floor((links + rechts) / 2);   // ganzzahlig\n    if (werte[mitte] === gesucht) {\n      return mitte;\n    } else if (werte[mitte] < gesucht) {\n      links = mitte + 1;\n    } else {\n      rechts = mitte - 1;\n    }\n  }\n  return -1;\n}"
+ },
+ "15b322q": {
+  "python": "for i in range(0, n - 1):\n    for j in range(0, n - 1 - i):\n        if a[j].getWert() > a[j + 1].getWert():\n            tmp = a[j]\n            a[j] = a[j + 1]\n            a[j + 1] = tmp",
+  "javascript": "for (let i = 0; i <= n - 2; i++) {\n  for (let j = 0; j <= n - 2 - i; j++) {\n    if (a[j].getWert() > a[j + 1].getWert()) {\n      let tmp = a[j];\n      a[j] = a[j + 1];\n      a[j + 1] = tmp;\n    }\n  }\n}"
+ },
+ "15bcfcs": {
+  "python": "for f in range(0, anzahlFilialen):\n    summe = 0\n    for m in range(0, 12):\n        summe = summe + verkauf[f][m]\n    print(\"Filiale \" + str(f) + \": \" + str(summe))",
+  "javascript": "for (let f = 0; f <= anzahlFilialen - 1; f++) {\n  let summe = 0;\n  for (let m = 0; m <= 11; m++) {\n    summe = summe + verkauf[f][m];\n  }\n  console.log(\"Filiale \" + f + \": \" + summe);\n}"
+ },
+ "171y0xn": {
+  "python": "# a)\ndef besterMonat(umsatz: list[list[float]]) -> int:\n    besterIndex = 0\n    besteSumme = -1\n    for m in range(0, 12):\n        summe = 0\n        for f in range(0, len(umsatz)):\n            summe = summe + umsatz[f][m]\n        if summe > besteSumme:\n            besteSumme = summe\n            besterIndex = m\n    return besterIndex + 1\n\n\n# b)\ndef zielErreicht(umsatz: list[list[float]], ziel: float) -> int:\n    anzahl = 0\n    for f in range(0, len(umsatz)):\n        immer = True\n        for m in range(0, 12):\n            if umsatz[f][m] < ziel:\n                immer = False\n        if immer:\n            anzahl = anzahl + 1\n    return anzahl",
+  "javascript": "// a)\n/** @param {number[][]} umsatz @returns {number} */\nfunction besterMonat(umsatz) {\n  let besterIndex = 0;\n  let besteSumme = -1;\n  for (let m = 0; m <= 11; m++) {\n    let summe = 0;\n    for (let f = 0; f <= umsatz.length - 1; f++) {\n      summe = summe + umsatz[f][m];\n    }\n    if (summe > besteSumme) {\n      besteSumme = summe;\n      besterIndex = m;\n    }\n  }\n  return besterIndex + 1;\n}\n\n// b)\n/** @param {number[][]} umsatz @param {number} ziel @returns {number} */\nfunction zielErreicht(umsatz, ziel) {\n  let anzahl = 0;\n  for (let f = 0; f <= umsatz.length - 1; f++) {\n    let immer = true;\n    for (let m = 0; m <= 11; m++) {\n      if (umsatz[f][m] < ziel) {\n        immer = false;\n      }\n    }\n    if (immer) {\n      anzahl = anzahl + 1;\n    }\n  }\n  return anzahl;\n}"
+ },
+ "17xzn5": {
+  "python": "def durchschnitt(minuten: list[int]) -> float:\n    summe = 0\n    for i in range(0, n):\n        summe = summe + minuten[i]\n    return summe / float(n)",
+  "javascript": "/** @param {number[]} minuten @returns {number} */\nfunction durchschnitt(minuten) {\n  let summe = 0;\n  for (let i = 0; i <= n - 1; i++) {\n    summe = summe + minuten[i];\n  }\n  return summe / n;\n}"
+ },
+ "18jbbsi": {
+  "python": "maxWert = werte[0]\nmaxPos = 0\nfor i in range(1, len(werte)):\n    if werte[i] > maxWert:\n        maxWert = werte[i]\n        maxPos = i",
+  "javascript": "let maxWert = werte[0];\nlet maxPos = 0;\nfor (let i = 1; i <= werte.length - 1; i++) {\n  if (werte[i] > maxWert) {\n    maxWert = werte[i];\n    maxPos = i;\n  }\n}"
+ },
+ "1aokbl7": {
+  "python": "for z in range(0, len(feld)):\n    summe = 0\n    for s in range(0, len(feld[z])):\n        summe = summe + feld[z][s]\n    # summe der Zeile z verwenden",
+  "javascript": "for (let z = 0; z <= feld.length - 1; z++) {\n  let summe = 0;\n  for (let s = 0; s <= feld[z].length - 1; s++) {\n    summe = summe + feld[z][s];\n  }\n  // summe der Zeile z verwenden\n}"
+ },
+ "1d3nqlj": {
+  "python": "def fakultaet(n: int) -> int:\n    if n <= 1:\n        return 1                    # Anker\n    return n * fakultaet(n - 1)     # Schritt",
+  "javascript": "/** @param {number} n @returns {number} */\nfunction fakultaet(n) {\n  if (n <= 1) {\n    return 1;                     // Anker\n  }\n  return n * fakultaet(n - 1);    // Schritt\n}"
+ },
+ "1ebfb30": {
+  "python": "for i in range(0, n - 1):\n    for j in range(0, n - 1 - i):\n        if a[j] > a[j + 1]:\n            tmp = a[j]\n            a[j] = a[j + 1]\n            a[j + 1] = tmp",
+  "javascript": "for (let i = 0; i <= n - 2; i++) {\n  for (let j = 0; j <= n - 2 - i; j++) {\n    if (a[j] > a[j + 1]) {\n      let tmp = a[j];\n      a[j] = a[j + 1];\n      a[j + 1] = tmp;\n    }\n  }\n}"
+ },
+ "1f2ydvp": {
+  "python": "def binaereSuche(werte: list[int], n: int, x: int) -> int:\n    links = 0\n    rechts = n - 1\n    while links <= rechts:\n        mitte = (links + rechts) // 2\n        if werte[mitte] == x:\n            return mitte\n        elif werte[mitte] < x:\n            links = mitte + 1\n        else:\n            rechts = mitte - 1\n    return -1",
+  "javascript": "function binaereSuche(werte, n, x) {\n  let links = 0;\n  let rechts = n - 1;\n  while (links <= rechts) {\n    let mitte = Math.floor((links + rechts) / 2);\n    if (werte[mitte] === x) {\n      return mitte;\n    } else if (werte[mitte] < x) {\n      links = mitte + 1;\n    } else {\n      rechts = mitte - 1;\n    }\n  }\n  return -1;\n}"
+ },
+ "1kg0vkq": {
+  "python": "def besterTag(umsatz: list[float]) -> int:\n    maxIndex = 0\n    for i in range(1, n):\n        if umsatz[i] > umsatz[maxIndex]:\n            maxIndex = i\n    return maxIndex",
+  "javascript": "/** @param {number[]} umsatz @returns {number} */\nfunction besterTag(umsatz) {\n  let maxIndex = 0;\n  for (let i = 1; i <= n - 1; i++) {\n    if (umsatz[i] > umsatz[maxIndex]) {\n      maxIndex = i;\n    }\n  }\n  return maxIndex;\n}"
+ },
+ "1lihgq2": {
+  "python": "def sucheLinear(nummern: list[int], gesucht: int) -> int:\n    for i in range(0, n):\n        if nummern[i] == gesucht:\n            return i\n    return -1",
+  "javascript": "/** @param {number[]} nummern @param {number} gesucht @returns {number} */\nfunction sucheLinear(nummern, gesucht) {\n  for (let i = 0; i <= n - 1; i++) {\n    if (nummern[i] === gesucht) {\n      return i;\n    }\n  }\n  return -1;\n}"
+ },
+ "1ogs7u9": {
+  "python": "summe = 0\nfor i in range(1, 5):\n    summe = summe + i * 2",
+  "javascript": "let summe = 0;\nfor (let i = 1; i <= 4; i++) {\n  summe = summe + i * 2;\n}"
+ },
+ "1ppr5h": {
+  "python": "summe = 0\nanzahl = 0\nfor i in range(0, len(werte)):\n    if werte[i] > grenze:\n        summe = summe + werte[i]\n        anzahl = anzahl + 1\nif anzahl > 0:\n    schnitt = summe / anzahl",
+  "javascript": "let summe = 0;\nlet anzahl = 0;\nfor (let i = 0; i <= werte.length - 1; i++) {\n  if (werte[i] > grenze) {\n    summe = summe + werte[i];\n    anzahl = anzahl + 1;\n  }\n}\nif (anzahl > 0) {\n  schnitt = summe / anzahl;\n}"
+ },
+ "1rolnoz": {
+  "python": "def offene(bestellungen: list[Bestellung]) -> list[Bestellung]:\n    ergebnis = []\n    for i in range(0, len(bestellungen)):\n        b = bestellungen[i]\n        if b.getStatus() == \"offen\":\n            ergebnis.append(b)\n    return ergebnis",
+  "javascript": "/** @param {Bestellung[]} bestellungen @returns {Bestellung[]} */\nfunction offene(bestellungen) {\n  let ergebnis = [];\n  for (let i = 0; i <= bestellungen.length - 1; i++) {\n    let b = bestellungen[i];\n    if (b.getStatus() === \"offen\") {\n      ergebnis.push(b);\n    }\n  }\n  return ergebnis;\n}"
+ },
+ "1sb26vp": {
+  "python": "for i in range(0, n - 1):\n    minIndex = i\n    for j in range(i + 1, n):\n        if a[j] < a[minIndex]:\n            minIndex = j\n    tmp = a[i]\n    a[i] = a[minIndex]\n    a[minIndex] = tmp",
+  "javascript": "for (let i = 0; i <= n - 2; i++) {\n  let minIndex = i;\n  for (let j = i + 1; j <= n - 1; j++) {\n    if (a[j] < a[minIndex]) {\n      minIndex = j;\n    }\n  }\n  let tmp = a[i];\n  a[i] = a[minIndex];\n  a[minIndex] = tmp;\n}"
+ },
+ "1slmscw": {
+  "python": "def quersumme(n: int) -> int:\n    if n < 10:\n        return n\n    return (n % 10) + quersumme(n // 10)\n\n# Vorteil: kurz und elegant bei rekursiven Problemen.\n# Nachteil: Speicherbedarf auf dem Stack, Gefahr Stack Overflow.",
+  "javascript": "/** @param {number} n @returns {number} */\nfunction quersumme(n) {\n  if (n < 10) {\n    return n;\n  }\n  return (n % 10) + quersumme(Math.floor(n / 10));\n}\n\n// Vorteil: kurz und elegant bei rekursiven Problemen.\n// Nachteil: Speicherbedarf auf dem Stack, Gefahr Stack Overflow."
+ },
+ "1vy8rj6": {
+  "python": "def pruefePasswort(pw: str) -> bool:\n    if len(pw) < 10:\n        return False\n    ziffer = False\n    gross = False\n    for i in range(0, len(pw)):\n        c = pw[i]\n        if c.isdigit(): ziffer = True\n        if c.isupper(): gross = True\n    return ziffer and gross",
+  "javascript": "/** @param {string} pw @returns {boolean} */\nfunction pruefePasswort(pw) {\n  if (pw.length < 10) {\n    return false;\n  }\n  let ziffer = false;\n  let gross = false;\n  for (let i = 0; i <= pw.length - 1; i++) {\n    let c = pw.charAt(i);\n    if (c >= \"0\" && c <= \"9\") { ziffer = true; }\n    if (c >= \"A\" && c <= \"Z\") { gross = true; }\n  }\n  return ziffer && gross;\n}"
+ },
+ "1yshxu6": {
+  "python": "def nachbestellen(lager: list[\"Artikel\"], lieferant: str) -> list[int]:\n    ergebnis = []\n    for i in range(0, len(lager)):\n        a = lager[i]\n        if a.getLieferant() == lieferant and a.getBestand() < a.getMindestbestand():\n            ergebnis.append(a.getNr())\n    return ergebnis",
+  "javascript": "/** @param {Artikel[]} lager @param {string} lieferant @returns {number[]} */\nfunction nachbestellen(lager, lieferant) {\n  let ergebnis = [];\n  for (let i = 0; i <= lager.length - 1; i++) {\n    let a = lager[i];\n    if (a.getLieferant() === lieferant && a.getBestand() < a.getMindestbestand()) {\n      ergebnis.push(a.getNr());\n    }\n  }\n  return ergebnis;\n}"
+ },
+ "2f6wrz": {
+  "python": "def unterMindestbestand(lager: list) -> list:\n    ergebnis = []\n    for i in range(0, len(lager)):\n        a = lager[i]\n        if a.getBestand() < a.getMindestbestand():\n            ergebnis.append(a)\n    return ergebnis",
+  "javascript": "function unterMindestbestand(lager) {\n  let ergebnis = [];\n  for (let i = 0; i <= lager.length - 1; i++) {\n    let a = lager[i];\n    if (a.getBestand() < a.getMindestbestand()) {\n      ergebnis.push(a);\n    }\n  }\n  return ergebnis;\n}"
+ },
+ "breabz": {
+  "python": "# a) Selection Sort\nfor i in range(0, len(artikel) - 1):\n    maxPos = i\n    for j in range(i + 1, len(artikel)):\n        if artikel[j].getPreis() > artikel[maxPos].getPreis():\n            maxPos = j\n    tmp = artikel[i]\n    artikel[i] = artikel[maxPos]\n    artikel[maxPos] = tmp\n\n# b) Insertion Sort\nfor i in range(1, len(artikel)):\n    aktuell = artikel[i]\n    j = i - 1\n    while j >= 0 and artikel[j].getPreis() < aktuell.getPreis():\n        artikel[j + 1] = artikel[j]\n        j = j - 1\n    artikel[j + 1] = aktuell\n\n# c) Insertion Sort: Bei fast sortierten Daten kaum innere Durchläufe, nahe O(n).\n#    Selection Sort sucht immer den ganzen Rest ab und bleibt bei O(n²).",
+  "javascript": "// a) Selection Sort\nfor (let i = 0; i <= artikel.length - 2; i++) {\n  let maxPos = i;\n  for (let j = i + 1; j <= artikel.length - 1; j++) {\n    if (artikel[j].getPreis() > artikel[maxPos].getPreis()) {\n      maxPos = j;\n    }\n  }\n  let tmp = artikel[i];\n  artikel[i] = artikel[maxPos];\n  artikel[maxPos] = tmp;\n}\n\n// b) Insertion Sort\nfor (let i = 1; i <= artikel.length - 1; i++) {\n  let aktuell = artikel[i];\n  let j = i - 1;\n  while (j >= 0 && artikel[j].getPreis() < aktuell.getPreis()) {\n    artikel[j + 1] = artikel[j];\n    j = j - 1;\n  }\n  artikel[j + 1] = aktuell;\n}\n\n// c) Insertion Sort: Bei fast sortierten Daten kaum innere Durchläufe, nahe O(n).\n//    Selection Sort sucht immer den ganzen Rest ab und bleibt bei O(n²)."
+ },
+ "fttq8q": {
+  "python": "def fakultaet(n: int) -> int:\n    if n <= 1: return 1\n    return n * fakultaet(n - 1)",
+  "javascript": "/** @param {number} n @returns {number} */\nfunction fakultaet(n) {\n  if (n <= 1) { return 1; }\n  return n * fakultaet(n - 1);\n}"
+ },
+ "glm0ga": {
+  "python": "for i in range(0, len(mitarbeiter) - 1):\n    for j in range(0, len(mitarbeiter) - 1 - i):\n        if mitarbeiter[j].getEintritt() > mitarbeiter[j + 1].getEintritt():\n            tmp = mitarbeiter[j]\n            mitarbeiter[j] = mitarbeiter[j + 1]\n            mitarbeiter[j + 1] = tmp",
+  "javascript": "for (let i = 0; i <= mitarbeiter.length - 2; i++) {\n  for (let j = 0; j <= mitarbeiter.length - 2 - i; j++) {\n    if (mitarbeiter[j].getEintritt() > mitarbeiter[j + 1].getEintritt()) {\n      let tmp = mitarbeiter[j];\n      mitarbeiter[j] = mitarbeiter[j + 1];\n      mitarbeiter[j + 1] = tmp;\n    }\n  }\n}"
+ },
+ "lhrm61": {
+  "python": "for i in range(1, n):\n    wert = zeit[i]\n    j = i - 1\n    while j >= 0 and zeit[j] > wert:\n        zeit[j + 1] = zeit[j]\n        j = j - 1\n    zeit[j + 1] = wert",
+  "javascript": "for (let i = 1; i <= n - 1; i++) {\n  let wert = zeit[i];\n  let j = i - 1;\n  while (j >= 0 && zeit[j] > wert) {\n    zeit[j + 1] = zeit[j];\n    j = j - 1;\n  }\n  zeit[j + 1] = wert;\n}"
+ },
+ "nvbty6": {
+  "python": "def statistik(ma: list[\"Mitarbeiter\"]) -> list[\"AbtStat\"]:\n    ergebnis = []\n    for i in range(0, len(ma)):\n        m = ma[i]\n        stat = None\n        for j in range(0, len(ergebnis)):\n            if ergebnis[j].getAbteilung() == m.getAbteilung():\n                stat = ergebnis[j]\n        if stat is None:\n            stat = AbtStat(m.getAbteilung())\n            ergebnis.append(stat)\n        stat.setSumme(stat.getSumme() + m.getGehalt())\n        stat.setAnzahl(stat.getAnzahl() + 1)\n    return ergebnis",
+  "javascript": "/** @param {Mitarbeiter[]} ma @returns {AbtStat[]} */\nfunction statistik(ma) {\n  let ergebnis = [];\n  for (let i = 0; i <= ma.length - 1; i++) {\n    let m = ma[i];\n    let stat = null;\n    for (let j = 0; j <= ergebnis.length - 1; j++) {\n      if (ergebnis[j].getAbteilung() === m.getAbteilung()) {\n        stat = ergebnis[j];\n      }\n    }\n    if (stat === null) {\n      stat = new AbtStat(m.getAbteilung());\n      ergebnis.push(stat);\n    }\n    stat.setSumme(stat.getSumme() + m.getGehalt());\n    stat.setAnzahl(stat.getAnzahl() + 1);\n  }\n  return ergebnis;\n}"
+ },
+ "q135p7": {
+  "python": "for i in range(0, n - 1):\n    minPos = i\n    for j in range(i + 1, n):\n        if a[j] < a[minPos]: minPos = j\n    tmp = a[i]; a[i] = a[minPos]; a[minPos] = tmp",
+  "javascript": "for (let i = 0; i <= n - 2; i++) {\n  let minPos = i;\n  for (let j = i + 1; j <= n - 1; j++) {\n    if (a[j] < a[minPos]) { minPos = j; }\n  }\n  let tmp = a[i]; a[i] = a[minPos]; a[minPos] = tmp;\n}"
+ },
+ "qi829z": {
+  "python": "def zaehleUeber(liste: list, grenze: float) -> int:\n    zaehler = 0\n    for i in range(0, len(liste)):\n        if liste[i].getWert() > grenze:\n            zaehler = zaehler + 1\n    return zaehler",
+  "javascript": "/** @param {Messung[]} liste @param {number} grenze @returns {number} */\nfunction zaehleUeber(liste, grenze) {\n  let zaehler = 0;\n  for (let i = 0; i <= liste.length - 1; i++) {\n    if (liste[i].getWert() > grenze) {\n      zaehler = zaehler + 1;\n    }\n  }\n  return zaehler;\n}"
+ },
+ "qlflpc": {
+  "python": "def methode(param: Typ) -> Rückgabetyp:\n    for i in range(0, len(liste)):\n        if bedingung:\n            ...\n        else:\n            ...\n    return ergebnis",
+  "javascript": "/** @param {Typ} param @returns {Rückgabetyp} */\nfunction methode(param) {\n  for (let i = 0; i <= liste.length - 1; i++) {\n    if (bedingung) {\n      /* ... */\n    } else {\n      /* ... */\n    }\n  }\n  return ergebnis;\n}"
+ },
+ "rurfrq": {
+  "python": "# Werden min und max nicht mit demselben Startwert (werte[0]) initialisiert, etwa min mit einem großen und max mit einem kleinen Wert, setzt der erste Wert nur min. Er wird wegen „sonst“ nie auf max geprüft – bei streng fallenden Daten bleibt max falsch.\n# Korrektur: zwei getrennte wenn-Abfragen:\nif werte[i] < min:\n    min = werte[i]\nif werte[i] > max:\n    max = werte[i]",
+  "javascript": "// Werden min und max nicht mit demselben Startwert (werte[0]) initialisiert, etwa min mit einem großen und max mit einem kleinen Wert, setzt der erste Wert nur min. Er wird wegen „sonst“ nie auf max geprüft – bei streng fallenden Daten bleibt max falsch.\n// Korrektur: zwei getrennte wenn-Abfragen:\nif (werte[i] < min) {\n  min = werte[i];\n}\nif (werte[i] > max) {\n  max = werte[i];\n}"
+ },
+ "rwe8s": {
+  "python": "if werte[i] < min: min = werte[i]\nelif werte[i] > max: max = werte[i]",
+  "javascript": "if (werte[i] < min) { min = werte[i]; }\nelse if (werte[i] > max) { max = werte[i]; }"
+ },
+ "sq4rqb": {
+  "python": "def hatDuplikat(nummern: list[int]) -> bool:\n    for i in range(0, n - 1):\n        for j in range(i + 1, n):\n            if nummern[i] == nummern[j]:\n                return True\n    return False",
+  "javascript": "/** @param {number[]} nummern @returns {boolean} */\nfunction hatDuplikat(nummern) {\n  for (let i = 0; i <= n - 2; i++) {\n    for (let j = i + 1; j <= n - 1; j++) {\n      if (nummern[i] === nummern[j]) {\n        return true;\n      }\n    }\n  }\n  return false;\n}"
+ },
+ "vvi0xu": {
+  "python": "def istFrei(buchungen: list[\"Buchung\"], raum: int, start: int, ende: int) -> bool:\n    for i in range(0, len(buchungen)):\n        b = buchungen[i]\n        if b.getRaum() == raum and start < b.getEnde() and b.getStart() < ende:\n            return False\n    return True",
+  "javascript": "/** @param {Buchung[]} buchungen @param {number} raum @param {number} start @param {number} ende @returns {boolean} */\nfunction istFrei(buchungen, raum, start, ende) {\n  for (let i = 0; i <= buchungen.length - 1; i++) {\n    let b = buchungen[i];\n    if (b.getRaum() === raum && start < b.getEnde() && b.getStart() < ende) {\n      return false;\n    }\n  }\n  return true;\n}"
+ },
+ "ys522d": {
+  "python": "def istRaumFrei(buchungen: list, raum, start, ende) -> bool:\n    for i in range(0, len(buchungen)):\n        if buchungen[i].getRaum() == raum and start < buchungen[i].getEnde() and buchungen[i].getStart() < ende:\n            return False\n    return True",
+  "javascript": "function istRaumFrei(buchungen, raum, start, ende) {\n  for (let i = 0; i <= buchungen.length - 1; i++) {\n    if (buchungen[i].getRaum() === raum && start < buchungen[i].getEnde() && buchungen[i].getStart() < ende) {\n      return false;\n    }\n  }\n  return true;\n}"
+ },
+ "zy1u0n": {
+  "python": "for i in range(0, len(daten)):\n    d = daten[i]\n    gruppe = None\n    for j in range(0, len(ergebnis)):\n        if ergebnis[j].getName() == d.getName():\n            gruppe = ergebnis[j]\n    if gruppe == None:\n        gruppe = Gruppe(d.getName())\n        ergebnis.append(gruppe)\n    gruppe.setSumme(gruppe.getSumme() + d.getWert())",
+  "javascript": "for (let i = 0; i <= daten.length - 1; i++) {\n  let d = daten[i];\n  let gruppe = null;\n  for (let j = 0; j <= ergebnis.length - 1; j++) {\n    if (ergebnis[j].getName() === d.getName()) {\n      gruppe = ergebnis[j];\n    }\n  }\n  if (gruppe === null) {\n    gruppe = new Gruppe(d.getName());\n    ergebnis.push(gruppe);\n  }\n  gruppe.setSumme(gruppe.getSumme() + d.getWert());\n}"
+ }
+}

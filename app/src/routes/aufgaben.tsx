@@ -16,6 +16,7 @@ import { dec, tcolOf } from "@/lib/lernen";
 import { useProgress } from "@/store/progress";
 import { tmState, useTimer } from "@/store/timer";
 import { Ic } from "@/ui-main";
+import { CodeVariants } from "@/components/CodeVariants";
 import { TimerBox } from "@/components/lernen/bits";
 import { useOpenTopic } from "@/components/lernen/ui";
 import { CauseChips } from "@/components/aufgaben/CauseChips";
@@ -80,7 +81,7 @@ function UebPage({ u }: { u: Aufgabe }) {
         )}
         {showSol && ust !== "run" && (ust !== "idle" || uFree) && (
           <>
-            <pre style={{ marginTop: 14 }}>{u.loesung}</pre>
+            <CodeVariants pseudo={u.loesung}><pre style={{ marginTop: 14 }}>{u.loesung}</pre></CodeVariants>
             <div className="row" style={{ marginTop: 14, alignItems: "flex-end" }}>
               <label className="f" htmlFor="u-pts">Deine Punkte (0–{u.max})<input type="number" id="u-pts" min={0} max={u.max} step={0.5} value={pts} onChange={(e) => setPts(e.target.value)} /></label>
               <button type="button" className="btn primary" onClick={save}>Speichern</button>

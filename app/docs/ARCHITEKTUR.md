@@ -135,6 +135,12 @@ Jeder Bereich ist ein eigenes Modul (Route + Logik in `lib/` + Tests) und kann u
   beim Abmelden bleibt er beim Konto. Ohne Konto gilt die Regel der Live-App (Sync-Schlüssel bzw. Gerät).
 - **Logo:** Vortex-Wirbel (`public/icons/vortex.svg`; daraus `favicon.png`, `icon-192/512.png`, `apple-touch-icon.png`)
   ersetzt in der Dev-App den Raben (Markenzeichen, Tutorial, Menü-Icon und Avatar des Tutors).
+- **Pseudocode mit Python/JavaScript** (15.11.2026, nur Dev-App): Zu den Pseudocode-Beispielen (Lernpakete, Code-Karten,
+  Fragetexte, Musterlösungen der Aufgaben, Erwartungshorizonte) gibt es Python- und JavaScript-Fassungen in
+  `src/content/code-variants.json`. Zugeordnet wird über eine Prüfsumme des Pseudocode-Texts (`lib/code-variants.ts`).
+  `components/CodeVariants.tsx` zeigt oben die Sprache (Umschalter, gemerkt in `tap2coach-codesprache`) und darunter den
+  Pseudocode. Ändert die Live-App einen Block, erscheint nur noch der Pseudocode; `code-variants.test.ts` meldet die
+  veraltete Fassung. Die Inhalte selbst bleiben in der Live-App (Pseudocode wie in der IHK-Prüfung).
 - **Name:** Die Dev-App heißt „Vortex“ (Seitenleiste, Fenstertitel, PWA-Manifest, Fußzeile). Der KI-Tutor darin heißt
   „Tutor“ bzw. „Tutor Pro“. Texte, die 1:1 aus der Live-App stammen („Coach“), sind unverändert.
 - **KI-Tutor als Premium-Funktion**, vorerst nur für den Admin (`app_metadata.role = 'admin'`), für andere unsichtbar,

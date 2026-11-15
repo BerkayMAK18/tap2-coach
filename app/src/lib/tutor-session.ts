@@ -23,7 +23,8 @@ export type ApiMsg = { role: "user" | "assistant"; content: Block[] };
 const isUse = (b: Block): b is ToolUse => b.type === "tool_use" && typeof (b as ToolUse).id === "string" && (b as ToolUse).name === TOOL_NAME;
 const isText = (b: Block): b is TextBlock => b.type === "text" && typeof (b as TextBlock).text === "string";
 
-export type Model = "haiku" | "sonnet";
+/** sonnet/haiku: Tutor Pro (Claude, nur Admin); free: kostenloser Tutor (Gratis-Stufe eines anderen Anbieters, Server-Secrets) */
+export type Model = "haiku" | "sonnet" | "free";
 /** Sicherheit: 0 geraten · 1 unsicher · 2 ziemlich sicher · 3 sicher */
 export const SICHER = ["geraten", "unsicher", "ziemlich sicher", "sicher"] as const;
 export type Sicher = 0 | 1 | 2 | 3;
@@ -200,7 +201,7 @@ export function feedOf(c: Convo, ids: KnownIds): Feed[] {
 // ---------- Kosten (nur Anzeige; abgerechnet wird bei Anthropic)
 export type Usage = { input_tokens?: number; output_tokens?: number; cache_read_input_tokens?: number; cache_creation_input_tokens?: number; cache_creation?: { ephemeral_5m_input_tokens?: number; ephemeral_1h_input_tokens?: number } };
 /** $ pro 1 Mio. Tokens (Stand Nov. 2026): Eingabe, Ausgabe, Cache lesen. Cache schreiben: 1,25× (5 Min.) bzw. 2× (1 Std.) Eingabe. Haiku-Cache-Lesen geschätzt. */
-export const PRICE: Record<Model, { in: number; out: number; read: number }> = { sonnet: { in: 2, out: 10, read: 0.1 }, haiku: { in: 0.1, out: 0.5, read: 0.01 } };
+export const PRICE: Record<Model, { in: number; out: number; read: number }> = { sonnet: { in: 2, out: 10, read: 0.1 }, haiku: { in: 0.1, out: 0.5, read: 0.01 }, free: { in: 0, out: 0, read: 0 } };
 export function costOf(model: Model, u: Usage): number {
   const p = PRICE[model], w1h = u.cache_creation?.ephemeral_1h_input_tokens, w5 = u.cache_creation?.ephemeral_5m_input_tokens;
   const write = w1h != null || w5 != null ? (w1h ?? 0) * 2 + (w5 ?? 0) * 1.25 : (u.cache_creation_input_tokens ?? 0) * 2; // ohne Aufschlüsselung: 1 Std. angenommen

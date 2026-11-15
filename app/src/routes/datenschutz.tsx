@@ -7,7 +7,7 @@
  */
 import { createFileRoute } from "@tanstack/react-router";
 import type { ReactNode } from "react";
-import { CONTROLLER, FEATURES, PRIVACY_VERSION } from "@/config";
+import { CONTROLLER, FEATURES, FREE_AI, PRIVACY_VERSION } from "@/config";
 
 export const Route = createFileRoute("/datenschutz")({ component: Datenschutz });
 
@@ -92,6 +92,16 @@ function Datenschutz() {
           <li>„Fehler melden“ öffnet ein vorausgefülltes Formular auf GitHub. Gesendet wird erst, wenn du es dort selbst abschickst. Gemeldete Fehler sind öffentlich sichtbar; es gilt die Datenschutzerklärung von GitHub.</li>
         </Ul>
       </Sec>
+
+      {f.account && (
+        <Sec t="Kostenloser KI-Tutor in der App (mit Anmeldung, Einwilligung)">
+          <p>Wenn du den kostenlosen KI-Tutor in der App nutzt, gehen deine Nachrichten im Tutor und dein Stand zum gewählten Thema (Beherrschung je Konzept, offene Fehlvorstellungen, Lerninhalte – ohne Namen, E-Mail oder Konto-Daten) über unseren Server an den KI-Anbieter {FREE_AI.provider}. Dort werden sie zur Beantwortung verarbeitet, nach den Bedingungen des Anbieters (Gratis-Stufe).</p>
+          <Ul>
+            <li>Rechtsgrundlage: deine Einwilligung (Art. 6 Abs. 1 lit. a DSGVO), die du vor der ersten Nachricht gibst. Ohne Einwilligung kannst du den Tutor mit deiner eigenen KI (Brücke) nutzen.</li>
+            <li>Eine Übermittlung in die USA findet statt. Unser Server speichert dabei keine Inhalte, nur Zähler je Konto und Tag (für die Tageslimits), höchstens 30 Tage.</li>
+          </Ul>
+        </Sec>
+      )}
 
       <Sec t="KI-Tutor über deine eigene KI">
         <p>Der Tutor erzeugt einen Text mit Anweisungen, deinem Lernstand zum gewählten Thema (Beherrschung je Konzept, offene Fehlvorstellungen, häufige Fehler – ohne Namen oder Konto-Daten) und den Lerninhalten. Du kopierst ihn selbst in eine KI deiner Wahl. Die App überträgt dabei nichts; für die KI gelten deren Bedingungen und deren Datenschutz.</p>

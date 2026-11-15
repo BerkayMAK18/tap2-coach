@@ -20,6 +20,7 @@ import { stab } from "@/lib/gami/state";
 import { syncTutor } from "@/lib/tutor-sync";
 import { parseBridge } from "@/lib/vortex-bridge";
 import { gami, gm } from "./gami";
+import { isAdmin, useAccount } from "./account";
 import { useProgress } from "./progress";
 
 // Früher (bis 14.11.2026): Freischaltung pro Browser über /tutor?premium=1 – jetzt nur noch über das Konto (isAdmin)
@@ -74,6 +75,12 @@ type Store = {
 
 let syncTimer: ReturnType<typeof setTimeout> | undefined;
 
+/** Modell für eine neue Sitzung: Tutor Pro (gewähltes Claude-Modell) nur mit Admin-Rolle, sonst der kostenlose Tutor */
+const modelNow = (): Model => (isAdmin(useAccount.getState().user) ? useTutor.getState().model : "free");
+const KEY_CONSENT = "tap2coach-ki-einwilligung";
+/** Einwilligung zur Übermittlung an den Anbieter des kostenlosen Tutors (Version in config.ts) */
+export const freeConsent = { ok: (v: string) => { try { return localStorage.getItem(KEY_CONSENT) === v; } catch { return false; } }, set: (v: string) => { try { localStorage.setItem(KEY_CONSENT, v); } catch { /* privat */ } } };
+
 export const useTutor = create<Store>((set, get) => {
   const saveState = (state: TutorState) => { write(K.stand, state); set({ state }); syncSoon(); };
   const saveConvo = (convo: Convo | null) => { write(K.chat, convo); set({ convo }); };
@@ -85,6 +92,7 @@ export const useTutor = create<Store>((set, get) => {
     if (error) {
       const ctx = (error as { context?: Response }).context, j = ctx ? await ctx.json().catch(() => null) : null;
       const msg = String(j?.error ?? "");
+      if (c.model === "free" && /nicht freigeschaltet/.test(msg)) throw new Error(OLD_FN); // alte Funktion kennt den kostenlosen Tutor nicht
       throw new Error(/System-Teil fehlt|^Ungültige Anfrage\.$|Werkzeuge$/.test(msg) || (j && j.v != null && j.v < 3) ? OLD_FN : msg || "Der Tutor ist gerade nicht erreichbar.");
     }
     if (data?.stop === "refusal") throw new Error(String(data?.text || "Keine Antwort erhalten."));
@@ -143,12 +151,12 @@ export const useTutor = create<Store>((set, get) => {
       return { ok: true, msg: `Übernommen: ${fresh.length} ${fresh.length === 1 ? "Aufgabe" : "Aufgaben"}${pts}, ${newEv.filter((e) => e.art !== "bewertung").length} Einträge für den Graphen${xp ? `, +${xp} XP` : ""}.${r.skipped ? ` ${r.skipped} unbrauchbare Einträge übersprungen.` : ""}${r.fazit ? `\n${r.fazit}` : ""}` };
     },
     state: loadState(), convo: typeof window === "undefined" ? null : loadConvo(),
-    model: read<Model>(K.model, "sonnet") === "haiku" ? "haiku" : "sonnet",
+    model: read<Model>(K.model, "sonnet") === "haiku" ? "haiku" : "sonnet", // Wahl für Tutor Pro; ohne Admin-Rolle gilt immer „free“
     busy: false, err: "", sync: { busy: false, at: 0, err: "", off: "" },
     setModel: (model) => { write(K.model, model); set({ model }); const c = get().convo; if (c && !c.msgs.length) saveConvo({ ...c, model }); },
     open: (thema, fokus) => {
       if (get().busy || !IDS.topics.has(thema)) return;
-      saveConvo({ ...newConvo(`s${Date.now().toString(36)}${randId(4)}`, thema, get().model, Date.now()), ...(fokus?.length ? { fokus } : {}) });
+      saveConvo({ ...newConvo(`s${Date.now().toString(36)}${randId(4)}`, thema, modelNow(), Date.now()), ...(fokus?.length ? { fokus } : {}) });
       set({ err: "" });
     },
     send: async (m, handoff) => {
@@ -156,7 +164,7 @@ export const useTutor = create<Store>((set, get) => {
       if (m.kind === "antwort" && !m.text?.trim()) return false;
       if (!c.msgs.length) { // erste Nachricht: Übergabe + meine Nachricht, erst jetzt fragt die App die KI
         if (m.kind !== "antwort" || !handoff) return false;
-        const first = { ...c, model: get().model, started: Date.now() };
+        const first = { ...c, model: modelNow(), started: Date.now() };
         return round(first, { kind: "antwort", text: m.text }, chunks(`${handoff()}\n\nMeine erste Nachricht:\n"""\n${(m.text ?? "").trim().slice(0, 5000)}\n"""`));
       }
       if (tooLong(c)) { set({ err: "Diese Sitzung ist sehr lang geworden. Beende sie und starte eine neue – dein Stand bleibt erhalten." }); return false; }

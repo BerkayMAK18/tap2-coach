@@ -21,7 +21,7 @@ const SUPABASE_ON = Boolean(import.meta.env.VITE_SUPABASE_URL && import.meta.env
 export const FEATURES = {
   account: SUPABASE_ON, // Anmeldung mit GitHub (Supabase Auth) – an, sobald die Build-Variablen gesetzt sind
   sync: SUPABASE_ON, // Ende-zu-Ende-verschlüsselte Sicherung/Sync im Konto
-  leaderboard: false, // Rangliste mit selbst gewähltem Benutzernamen (Einwilligung)
+  leaderboard: SUPABASE_ON, // Rangliste mit selbst gewähltem Benutzernamen (freiwillig) – dieselbe Bestenliste wie die Live-App
   patchNotes: true, // Release-Liste von der GitHub-API (Seite Patch Notes, portiert 14.11.2026)
   tutor: false, // Tutor Pro (eingebaute KI, Anthropic) – nur für freigeschaltete Konten (Admin); Tutor (Brücke) ist immer an
 } as const;
@@ -47,7 +47,7 @@ export const CONTROLLER = {
 } as const;
 
 /** Stand des Datenschutzhinweises – bei jeder inhaltlichen Änderung anpassen. */
-export const PRIVACY_VERSION = "2026-11-14";
+export const PRIVACY_VERSION = "2026-11-15";
 
 /**
  * Kostenloser Tutor: Anbieter der Gratis-Stufe (Server-Secrets FREE_AI_URL/FREE_AI_KEY/FREE_AI_MODEL in der Edge Function).

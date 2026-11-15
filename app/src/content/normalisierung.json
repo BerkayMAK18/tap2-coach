@@ -1,0 +1,381 @@
+{
+  "schema": 1,
+  "beispiele": [
+    {
+      "titel": "Kfz-Werkstatt: Aufträge in einer Tabelle",
+      "refs": ["D2", "o83"],
+      "abhIn": 1,
+      "abh": [
+        { "von": ["AuftragNr"], "nach": ["Datum", "Kennzeichen"], "art": "teilweise" },
+        { "von": ["Leistung"], "nach": ["Preis"], "art": "teilweise" },
+        { "von": ["Kennzeichen"], "nach": ["KundenNr"], "art": "transitiv" },
+        { "von": ["KundenNr"], "nach": ["KundenName", "KundenOrt"], "art": "transitiv" }
+      ],
+      "stufen": [
+        {
+          "nf": 0,
+          "text": "Die Spalte Leistungen enthält mehrere Werte, Leistung und Preis stehen zusammen in einem Feld. Damit ist schon die 1. NF verletzt. Name und Ort von Weber stehen doppelt (Redundanz).",
+          "tabellen": [
+            {
+              "name": "Auftrag",
+              "spalten": [{ "n": "AuftragNr", "pk": true }, { "n": "Datum" }, { "n": "KundenNr" }, { "n": "KundenName" }, { "n": "KundenOrt" }, { "n": "Kennzeichen" }, { "n": "Leistungen", "mehrwertig": true }],
+              "zeilen": [
+                ["1001", "03.11.26", "17", "Weber", "Mainz", "MZ-AB 12", "Ölwechsel 89 €, Bremsen 240 €"],
+                ["1002", "04.11.26", "17", "Weber", "Mainz", "MZ-AB 12", "Inspektion 199 €"],
+                ["1003", "04.11.26", "22", "Kaya", "Wiesbaden", "WI-K 77", "Ölwechsel 89 €"]
+              ]
+            }
+          ]
+        },
+        {
+          "nf": 1,
+          "text": "Je Leistung eine eigene Zeile, Bezeichnung und Preis in getrennten Spalten: Alle Werte sind jetzt atomar. Eindeutig ist eine Zeile erst über AuftragNr und Leistung zusammen, das ist der zusammengesetzte Primärschlüssel.",
+          "tabellen": [
+            {
+              "name": "Auftrag",
+              "spalten": [{ "n": "AuftragNr", "pk": true }, { "n": "Datum" }, { "n": "KundenNr" }, { "n": "KundenName" }, { "n": "KundenOrt" }, { "n": "Kennzeichen" }, { "n": "Leistung", "pk": true, "aus": ["Leistungen"] }, { "n": "Preis", "aus": ["Leistungen"] }],
+              "zeilen": [
+                ["1001", "03.11.26", "17", "Weber", "Mainz", "MZ-AB 12", "Ölwechsel", "89 €"],
+                ["1001", "03.11.26", "17", "Weber", "Mainz", "MZ-AB 12", "Bremsen", "240 €"],
+                ["1002", "04.11.26", "17", "Weber", "Mainz", "MZ-AB 12", "Inspektion", "199 €"],
+                ["1003", "04.11.26", "22", "Kaya", "Wiesbaden", "WI-K 77", "Ölwechsel", "89 €"]
+              ]
+            }
+          ]
+        },
+        {
+          "nf": 2,
+          "text": "Was nur von einem Teil des Schlüssels abhängt, kommt in eine eigene Tabelle: Datum, Kunde und Fahrzeug hängen nur an der AuftragNr, der Preis nur an der Leistung. Die Leistung bekommt die LeistungNr als Schlüssel. Welche Leistung zu welchem Auftrag gehört, steht in Auftragsposition (mit Menge).",
+          "tabellen": [
+            {
+              "name": "Auftrag",
+              "spalten": [{ "n": "AuftragNr", "pk": true }, { "n": "Datum" }, { "n": "KundenNr" }, { "n": "KundenName" }, { "n": "KundenOrt" }, { "n": "Kennzeichen" }],
+              "zeilen": [
+                ["1001", "03.11.26", "17", "Weber", "Mainz", "MZ-AB 12"],
+                ["1002", "04.11.26", "17", "Weber", "Mainz", "MZ-AB 12"],
+                ["1003", "04.11.26", "22", "Kaya", "Wiesbaden", "WI-K 77"]
+              ]
+            },
+            {
+              "name": "Leistung",
+              "spalten": [{ "n": "LeistungNr", "pk": true, "neu": true }, { "n": "Bezeichnung", "aus": ["Leistung"] }, { "n": "Preis" }],
+              "zeilen": [["1", "Ölwechsel", "89 €"], ["2", "Bremsen", "240 €"], ["3", "Inspektion", "199 €"]]
+            },
+            {
+              "name": "Auftragsposition",
+              "spalten": [{ "n": "AuftragNr", "pk": true, "fk": "Auftrag" }, { "n": "LeistungNr", "pk": true, "fk": "Leistung" }, { "n": "Menge", "neu": true }],
+              "zeilen": [["1001", "1", "1"], ["1001", "2", "1"], ["1002", "3", "1"], ["1003", "1", "1"]]
+            }
+          ]
+        },
+        {
+          "nf": 3,
+          "text": "Transitive Abhängigkeiten auflösen: Das Kennzeichen bestimmt den Kunden, die KundenNr bestimmt Name und Ort. Kunde und Fahrzeug werden eigene Tabellen, Auftrag behält nur das Kennzeichen als Fremdschlüssel.",
+          "tabellen": [
+            {
+              "name": "Kunde",
+              "spalten": [{ "n": "KundenNr", "pk": true }, { "n": "Name", "aus": ["KundenName"] }, { "n": "Ort", "aus": ["KundenOrt"] }],
+              "zeilen": [["17", "Weber", "Mainz"], ["22", "Kaya", "Wiesbaden"]]
+            },
+            {
+              "name": "Fahrzeug",
+              "spalten": [{ "n": "Kennzeichen", "pk": true }, { "n": "KundenNr", "fk": "Kunde" }],
+              "zeilen": [["MZ-AB 12", "17"], ["WI-K 77", "22"]]
+            },
+            {
+              "name": "Auftrag",
+              "spalten": [{ "n": "AuftragNr", "pk": true }, { "n": "Datum" }, { "n": "Kennzeichen", "fk": "Fahrzeug" }],
+              "zeilen": [["1001", "03.11.26", "MZ-AB 12"], ["1002", "04.11.26", "MZ-AB 12"], ["1003", "04.11.26", "WI-K 77"]]
+            },
+            {
+              "name": "Leistung",
+              "spalten": [{ "n": "LeistungNr", "pk": true }, { "n": "Bezeichnung" }, { "n": "Preis" }],
+              "zeilen": [["1", "Ölwechsel", "89 €"], ["2", "Bremsen", "240 €"], ["3", "Inspektion", "199 €"]]
+            },
+            {
+              "name": "Auftragsposition",
+              "spalten": [{ "n": "AuftragNr", "pk": true, "fk": "Auftrag" }, { "n": "LeistungNr", "pk": true, "fk": "Leistung" }, { "n": "Menge" }],
+              "zeilen": [["1001", "1", "1"], ["1001", "2", "1"], ["1002", "3", "1"], ["1003", "1", "1"]]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "titel": "Bestellung: von der Liste bis zur 3. NF",
+      "refs": ["P04:Normalformen"],
+      "abhIn": 1,
+      "abh": [
+        { "von": ["BestNr"], "nach": ["Datum", "KundenNr"], "art": "teilweise" },
+        { "von": ["ArtikelNr"], "nach": ["Bezeichnung"], "art": "teilweise" },
+        { "von": ["KundenNr"], "nach": ["Name", "PLZ"], "art": "transitiv" },
+        { "von": ["PLZ"], "nach": ["Ort"], "art": "transitiv" }
+      ],
+      "stufen": [
+        {
+          "nf": 0,
+          "text": "Mehrere Artikel stehen in einem Feld: nicht atomar, die 1. NF ist verletzt.",
+          "tabellen": [
+            {
+              "name": "Bestellung",
+              "spalten": [{ "n": "BestNr", "pk": true }, { "n": "Datum" }, { "n": "KundenNr" }, { "n": "Name" }, { "n": "PLZ" }, { "n": "Ort" }, { "n": "Artikel", "mehrwertig": true }],
+              "zeilen": [
+                ["1", "02.03.", "7", "Krause", "55116", "Mainz", "4711 Maus, 4712 Kabel"],
+                ["2", "05.03.", "7", "Krause", "55116", "Mainz", "4711 Maus"]
+              ]
+            }
+          ]
+        },
+        {
+          "nf": 1,
+          "text": "Je Artikel eine Zeile, Nummer und Bezeichnung getrennt. Der Primärschlüssel ist jetzt zusammengesetzt: BestNr und ArtikelNr.",
+          "tabellen": [
+            {
+              "name": "Bestellung",
+              "spalten": [{ "n": "BestNr", "pk": true }, { "n": "Datum" }, { "n": "KundenNr" }, { "n": "Name" }, { "n": "PLZ" }, { "n": "Ort" }, { "n": "ArtikelNr", "pk": true, "aus": ["Artikel"] }, { "n": "Bezeichnung", "aus": ["Artikel"] }],
+              "zeilen": [
+                ["1", "02.03.", "7", "Krause", "55116", "Mainz", "4711", "Maus"],
+                ["1", "02.03.", "7", "Krause", "55116", "Mainz", "4712", "Kabel"],
+                ["2", "05.03.", "7", "Krause", "55116", "Mainz", "4711", "Maus"]
+              ]
+            }
+          ]
+        },
+        {
+          "nf": 2,
+          "text": "Teilabhängigkeiten auslagern: Bestelldaten hängen nur an BestNr, die Bezeichnung nur an ArtikelNr. Die Zuordnung steht in Position.",
+          "tabellen": [
+            {
+              "name": "Bestellung",
+              "spalten": [{ "n": "BestNr", "pk": true }, { "n": "Datum" }, { "n": "KundenNr" }, { "n": "Name" }, { "n": "PLZ" }, { "n": "Ort" }],
+              "zeilen": [["1", "02.03.", "7", "Krause", "55116", "Mainz"], ["2", "05.03.", "7", "Krause", "55116", "Mainz"]]
+            },
+            {
+              "name": "Artikel",
+              "spalten": [{ "n": "ArtikelNr", "pk": true }, { "n": "Bezeichnung" }],
+              "zeilen": [["4711", "Maus"], ["4712", "Kabel"]]
+            },
+            {
+              "name": "Position",
+              "spalten": [{ "n": "BestNr", "pk": true, "fk": "Bestellung" }, { "n": "ArtikelNr", "pk": true, "fk": "Artikel" }],
+              "zeilen": [["1", "4711"], ["1", "4712"], ["2", "4711"]]
+            }
+          ]
+        },
+        {
+          "nf": 3,
+          "text": "Transitive Abhängigkeiten auflösen: BestNr → KundenNr → Name, PLZ und PLZ → Ort. Kunde und Ort werden eigene Tabellen.",
+          "tabellen": [
+            {
+              "name": "Bestellung",
+              "spalten": [{ "n": "BestNr", "pk": true }, { "n": "Datum" }, { "n": "KundenNr", "fk": "Kunde" }],
+              "zeilen": [["1", "02.03.", "7"], ["2", "05.03.", "7"]]
+            },
+            {
+              "name": "Kunde",
+              "spalten": [{ "n": "KundenNr", "pk": true }, { "n": "Name" }, { "n": "PLZ", "fk": "Ort" }],
+              "zeilen": [["7", "Krause", "55116"]]
+            },
+            {
+              "name": "Ort",
+              "spalten": [{ "n": "PLZ", "pk": true }, { "n": "Ort" }],
+              "zeilen": [["55116", "Mainz"]]
+            },
+            {
+              "name": "Artikel",
+              "spalten": [{ "n": "ArtikelNr", "pk": true }, { "n": "Bezeichnung" }],
+              "zeilen": [["4711", "Maus"], ["4712", "Kabel"]]
+            },
+            {
+              "name": "Position",
+              "spalten": [{ "n": "BestNr", "pk": true, "fk": "Bestellung" }, { "n": "ArtikelNr", "pk": true, "fk": "Artikel" }],
+              "zeilen": [["1", "4711"], ["1", "4712"], ["2", "4711"]]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "titel": "Tierarztpraxis: Impfungen in einem Feld",
+      "refs": ["k:db0"],
+      "abh": [],
+      "stufen": [
+        {
+          "nf": 0,
+          "text": "Das Feld Impfungen enthält mehrere Impfungen mit Datum: nicht atomar, die 1. NF ist verletzt.",
+          "tabellen": [
+            {
+              "name": "Tier",
+              "spalten": [{ "n": "TierNr", "pk": true }, { "n": "Name" }, { "n": "Impfungen", "mehrwertig": true }],
+              "zeilen": [["1", "Bello", "Tollwut 03/25, Staupe 05/25"], ["2", "Minka", "Tollwut 04/25"]]
+            }
+          ]
+        },
+        {
+          "nf": 1,
+          "text": "Die Impfungen bekommen eine eigene Tabelle, je Impfung eine Zeile. Der Fremdschlüssel TierNr verbindet sie mit dem Tier.",
+          "tabellen": [
+            {
+              "name": "Tier",
+              "spalten": [{ "n": "TierNr", "pk": true }, { "n": "Name" }],
+              "zeilen": [["1", "Bello"], ["2", "Minka"]]
+            },
+            {
+              "name": "Impfung",
+              "spalten": [{ "n": "ImpfID", "pk": true, "neu": true }, { "n": "TierNr", "fk": "Tier" }, { "n": "Impfstoff", "aus": ["Impfungen"] }, { "n": "Datum", "aus": ["Impfungen"] }],
+              "zeilen": [["1", "1", "Tollwut", "03/25"], ["2", "1", "Staupe", "05/25"], ["3", "2", "Tollwut", "04/25"]]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "titel": "Bildungsträger: Kursname in der Belegung",
+      "refs": ["k:db1"],
+      "abhIn": 0,
+      "abh": [
+        { "von": ["SchuelerNr", "KursNr"], "nach": ["Note"], "art": "voll" },
+        { "von": ["KursNr"], "nach": ["Kursname"], "art": "teilweise" }
+      ],
+      "stufen": [
+        {
+          "nf": 1,
+          "text": "Belegung ist in der 1. NF, der Primärschlüssel ist (SchuelerNr, KursNr). Der Kursname hängt aber nur von der KursNr ab und steht bei jedem Teilnehmer erneut.",
+          "tabellen": [
+            {
+              "name": "Belegung",
+              "spalten": [{ "n": "SchuelerNr", "pk": true }, { "n": "KursNr", "pk": true }, { "n": "Kursname" }, { "n": "Note" }],
+              "zeilen": [["1", "D1", "Datenbanken", "2"], ["1", "P1", "Programmierung", "1"], ["2", "D1", "Datenbanken", "3"]]
+            }
+          ]
+        },
+        {
+          "nf": 2,
+          "text": "Kursname wandert in die Tabelle Kurs. Die Note hängt vom ganzen Schlüssel ab und bleibt in Belegung, KursNr wird dort zum Fremdschlüssel.",
+          "tabellen": [
+            {
+              "name": "Belegung",
+              "spalten": [{ "n": "SchuelerNr", "pk": true }, { "n": "KursNr", "pk": true, "fk": "Kurs" }, { "n": "Note" }],
+              "zeilen": [["1", "D1", "2"], ["1", "P1", "1"], ["2", "D1", "3"]]
+            },
+            {
+              "name": "Kurs",
+              "spalten": [{ "n": "KursNr", "pk": true }, { "n": "Kursname" }],
+              "zeilen": [["D1", "Datenbanken"], ["P1", "Programmierung"]]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "titel": "Mitarbeiter mit Abteilungsname",
+      "refs": ["k:db2"],
+      "abhIn": 0,
+      "abh": [
+        { "von": ["PersNr"], "nach": ["Name", "AbtNr"], "art": "voll" },
+        { "von": ["AbtNr"], "nach": ["AbtName"], "art": "transitiv" }
+      ],
+      "stufen": [
+        {
+          "nf": 2,
+          "text": "Mitarbeiter ist in der 2. NF (einspaltiger Schlüssel). Aber PersNr → AbtNr → AbtName: Der Abteilungsname hängt von einem Nichtschlüsselattribut ab.",
+          "tabellen": [
+            {
+              "name": "Mitarbeiter",
+              "spalten": [{ "n": "PersNr", "pk": true }, { "n": "Name" }, { "n": "AbtNr" }, { "n": "AbtName" }],
+              "zeilen": [["101", "Schulz", "10", "Vertrieb"], ["102", "Yilmaz", "10", "Vertrieb"], ["103", "Berg", "20", "IT"]]
+            }
+          ]
+        },
+        {
+          "nf": 3,
+          "text": "AbtName wandert in die Tabelle Abteilung. In Mitarbeiter bleibt AbtNr als Fremdschlüssel.",
+          "tabellen": [
+            {
+              "name": "Mitarbeiter",
+              "spalten": [{ "n": "PersNr", "pk": true }, { "n": "Name" }, { "n": "AbtNr", "fk": "Abteilung" }],
+              "zeilen": [["101", "Schulz", "10"], ["102", "Yilmaz", "10"], ["103", "Berg", "20"]]
+            },
+            {
+              "name": "Abteilung",
+              "spalten": [{ "n": "AbtNr", "pk": true }, { "n": "AbtName" }],
+              "zeilen": [["10", "Vertrieb"], ["20", "IT"]]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "titel": "Halter mit mehreren Telefonnummern",
+      "refs": ["m84"],
+      "abh": [],
+      "stufen": [
+        {
+          "nf": 0,
+          "text": "Zwei Telefonnummern in einem Feld: nicht atomar, die 1. NF ist verletzt.",
+          "tabellen": [
+            {
+              "name": "Halter",
+              "spalten": [{ "n": "HalterNr", "pk": true }, { "n": "Name" }, { "n": "Telefonnummern", "mehrwertig": true }],
+              "zeilen": [["1", "Krause", "0611-123, 0171-456"], ["2", "Demir", "06131-789"]]
+            }
+          ]
+        },
+        {
+          "nf": 1,
+          "text": "Jede Nummer in eine eigene Zeile der Tabelle Telefon, verbunden über den Fremdschlüssel HalterNr.",
+          "tabellen": [
+            {
+              "name": "Halter",
+              "spalten": [{ "n": "HalterNr", "pk": true }, { "n": "Name" }],
+              "zeilen": [["1", "Krause"], ["2", "Demir"]]
+            },
+            {
+              "name": "Telefon",
+              "spalten": [{ "n": "HalterNr", "pk": true, "fk": "Halter" }, { "n": "Nummer", "pk": true, "aus": ["Telefonnummern"] }],
+              "zeilen": [["1", "0611-123"], ["1", "0171-456"], ["2", "06131-789"]]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "titel": "Kunde mit PLZ und Ort",
+      "refs": ["m85"],
+      "abhIn": 0,
+      "abh": [
+        { "von": ["KundenNr"], "nach": ["Name", "PLZ"], "art": "voll" },
+        { "von": ["PLZ"], "nach": ["Ort"], "art": "transitiv" }
+      ],
+      "stufen": [
+        {
+          "nf": 2,
+          "text": "KundenNr → PLZ → Ort: Der Ort hängt über die PLZ nur indirekt vom Schlüssel ab. Mainz steht bei jedem Kunden mit 55116 erneut.",
+          "tabellen": [
+            {
+              "name": "Kunde",
+              "spalten": [{ "n": "KundenNr", "pk": true }, { "n": "Name" }, { "n": "PLZ" }, { "n": "Ort" }],
+              "zeilen": [["1", "Krause", "55116", "Mainz"], ["2", "Demir", "65183", "Wiesbaden"], ["3", "Berg", "55116", "Mainz"]]
+            }
+          ]
+        },
+        {
+          "nf": 3,
+          "text": "Ort wandert mit der PLZ als Schlüssel in eine eigene Tabelle. In Kunde bleibt die PLZ als Fremdschlüssel.",
+          "tabellen": [
+            {
+              "name": "Kunde",
+              "spalten": [{ "n": "KundenNr", "pk": true }, { "n": "Name" }, { "n": "PLZ", "fk": "Ort" }],
+              "zeilen": [["1", "Krause", "55116"], ["2", "Demir", "65183"], ["3", "Berg", "55116"]]
+            },
+            {
+              "name": "Ort",
+              "spalten": [{ "n": "PLZ", "pk": true }, { "n": "Ort" }],
+              "zeilen": [["55116", "Mainz"], ["65183", "Wiesbaden"]]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

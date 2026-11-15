@@ -214,3 +214,74 @@ a, button { -webkit-tap-highlight-color: transparent; }
 @media (prefers-reduced-motion: reduce) { .cv-bar i { transition: none; } }
 @media (max-width: 600px) { .cv-lines li { grid-template-columns: 1fr; gap: 2px; } .cv-bars { height: 140px; gap: 4px; } }
 .tp-way { margin-top: 12px; gap: 10px; flex-wrap: wrap; }
+/* Normalisierung visuell (components/NormVisual.tsx): Stufen, Schlüssel, verschobene Spalten, Abhängigkeits-Diagramm */
+.nf { --nf-moved: rgba(255, 208, 61, 0.32); --nf-ren: var(--violet-soft); --nf-neu: var(--blue-soft-2); --nf-multi: var(--red-soft); }
+:root[data-theme="dark"] .nf { --nf-moved: rgba(255, 208, 61, 0.2); --nf-ren: rgba(146, 139, 222, 0.3); --nf-neu: rgba(106, 210, 226, 0.24); --nf-multi: rgba(238, 101, 65, 0.3); }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .nf { --nf-moved: rgba(255, 208, 61, 0.2); --nf-ren: rgba(146, 139, 222, 0.3); --nf-neu: rgba(106, 210, 226, 0.24); --nf-multi: rgba(238, 101, 65, 0.3); } }
+.nf-box { display: grid; gap: 10px; padding: 12px 14px; border-radius: var(--r-sm); background: var(--surface-2); min-width: 0; }
+.nf-head { gap: 8px; }
+.nf-text { margin: 0; line-height: 1.5; }
+.nf-steps { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+.nf-steps li { display: flex; align-items: center; gap: 6px; }
+.nf-steps li + li::before { content: ""; width: 14px; height: 2px; background: var(--line-2); border-radius: 2px; }
+.nf-step { border: 1.5px solid var(--line-2); background: var(--surface); color: var(--ink); font: inherit; font-size: 0.8rem; font-weight: 700; padding: 4px 11px; border-radius: 999px; cursor: pointer; }
+.nf-step.done { border-color: var(--ok); }
+.nf-step.on { background: var(--blue); border-color: var(--blue); color: var(--on-blue); }
+.nf-tabs { display: flex; flex-wrap: wrap; gap: 12px; align-items: flex-start; min-width: 0; }
+.nf-tab { margin: 0; display: grid; gap: 6px; flex: 0 1 auto; max-width: 100%; min-width: 0; }
+.nf-tab figcaption { display: flex; align-items: center; gap: 8px; font-size: 0.9rem; }
+.nf-tab .tblwrap { background: var(--surface); }
+.nf-tab.nf-tnew .tblwrap { border-color: var(--blue); }
+.nf-tab th { vertical-align: top; text-transform: none; letter-spacing: 0; color: var(--ink); font-size: 0.8rem; }
+.nf-tab th > span { display: block; }
+.nf-cn.nf-pk, .nf-fd-h.nf-pk { text-decoration: underline; text-underline-offset: 3px; text-decoration-thickness: 2px; }
+.nf-keys { display: flex !important; gap: 4px; margin-top: 3px; }
+.nf-k { display: inline-block; font-family: var(--body); font-size: 0.66rem; font-weight: 800; letter-spacing: 0.03em; padding: 1px 6px; border-radius: 999px; line-height: 1.4; }
+.nf-k.pk { background: var(--yellow); color: #172033; }
+.nf-k.fk { background: var(--violet); color: #fff; }
+.nf-from { font-family: var(--body); font-size: 0.68rem; font-weight: 600; color: var(--muted); margin-top: 2px; }
+.nf-tab .nf-moved, .nf-sw.nf-moved { background: var(--nf-moved); }
+.nf-tab .nf-ren, .nf-sw.nf-ren { background: var(--nf-ren); }
+.nf-tab .nf-neu, .nf-sw.nf-neu { background: var(--nf-neu); }
+.nf-tab .nf-multi, .nf-sw.nf-multi { background: var(--nf-multi); }
+.nf-tab td.nf-multi { white-space: normal; min-width: 150px; }
+.nf-weg { margin: 0; display: flex; flex-wrap: wrap; gap: 4px; }
+.nf-weg .chip { font-weight: 600; white-space: normal; }
+.nf-weg s { color: var(--muted); }
+.nf-leg { margin: 0; display: flex; flex-wrap: wrap; gap: 4px 14px; }
+.nf-leg > span { display: inline-flex; align-items: center; gap: 5px; }
+.nf-sw { display: inline-block; width: 14px; height: 14px; border-radius: 4px; border: 1px solid var(--line-2); }
+/* Abhängigkeiten: Raster aus Spalten, je Abhängigkeit eine Zeile mit Punkt (Determinante), Pfeil (abhängig) und Linie */
+.nf-scroll { overflow-x: auto; min-width: 0; }
+.nf-fd { display: grid; row-gap: 2px; padding-bottom: 4px; }
+.nf-fd > .nf-fd-row:first-child > .nf-fd-h:first-child { border-left-width: 1px; }
+.nf-fd-row { display: contents; }
+.nf-fd-h { margin-bottom: 4px; font-family: var(--mono); font-size: 0.74rem; font-weight: 700; text-align: center; padding: 6px 5px; background: var(--surface); border: 1px solid var(--line); border-left-width: 0; display: grid; place-items: center; line-height: 1.25; }
+.nf-a-voll { color: var(--ok); } .nf-a-teilweise { color: var(--warn); } .nf-a-transitiv { color: var(--violet); }
+.nf-c { position: relative; height: 24px; display: grid; place-items: center; }
+.nf-c.l::before, .nf-c.r::after { content: ""; position: absolute; top: calc(50% - 1px); border-top: 2.5px solid currentColor; }
+.nf-c.l::before { left: 0; right: 50%; } .nf-c.r::after { left: 50%; right: 0; }
+.nf-dot { position: relative; z-index: 1; display: inline-block; width: 11px; height: 11px; border-radius: 50%; background: currentColor; box-shadow: 0 0 0 2px var(--surface-2); }
+.nf-arr { position: relative; z-index: 1; display: inline-block; width: 0; height: 0; border-left: 7px solid transparent; border-right: 7px solid transparent; border-bottom: 11px solid currentColor; }
+.nf-leg .nf-dot, .nf-leg .nf-arr { color: var(--ink); box-shadow: none; }
+.nf-fd-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; }
+.nf-fd-list li { display: grid; grid-template-columns: auto auto minmax(0, 1fr); gap: 4px 10px; align-items: baseline; }
+.nf-fd-list code { font-family: var(--mono); font-size: 0.8rem; color: var(--ink); }
+.nf-art { display: inline-flex; align-items: center; gap: 5px; font-size: 0.74rem; font-weight: 800; }
+.nf-art .nf-dot { width: 9px; height: 9px; box-shadow: none; }
+.nf-rel ul { list-style: none; margin: 4px 0; padding: 0; display: grid; gap: 4px; }
+.nf-rel li { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; font-size: 0.88rem; }
+.nf-rel p { margin: 0; }
+.nf-swipe { display: none; margin: 0; }
+/* Ausgangstabelle im Aufgabentext */
+.nf-srctab { margin: 10px 0; white-space: normal; }
+@media (max-width: 600px) {
+  .nf-box { padding: 10px; }
+  .nf-steps { gap: 4px; }
+  .nf-steps li { gap: 4px; }
+  .nf-steps li + li::before { width: 6px; }
+  .nf-step { padding: 3px 8px; font-size: 0.74rem; }
+  .nf-fd-list li { grid-template-columns: auto minmax(0, 1fr); }
+  .nf-swipe { display: block; }
+  .nf-fd-list li > .small { grid-column: 1 / -1; }
+}

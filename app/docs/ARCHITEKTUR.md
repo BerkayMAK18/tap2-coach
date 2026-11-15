@@ -146,6 +146,14 @@ Jeder Bereich ist ein eigenes Modul (Route + Logik in `lib/` + Tests) und kann u
   - Reiter „Ablauf“ für Sortier- und Suchverfahren (Bubble, Selection, Insertion, binäre und lineare Suche, Maximum):
     `lib/code-visual.ts` simuliert die Schritte rein und deterministisch. Die aktiven Pseudocode-Zeilen werden über
     Muster gefunden. Die Anzeige hat Balken, Variablen, Vor/Zurück/Abspielen und „Neue Zahlen“.
+- **Normalisierung visuell** (15.11.2026, nur Dev-App): Beispiele in `src/content/normalisierung.json` (Zod-Schema
+  `NormBeispiel` in `content/schema.ts`), zugeordnet über Katalog-IDs: Aufgabe `D2`, offene Frage `o83`, Karten
+  `k:db0`–`k:db2`, MC `m84`/`m85`, Lernpaket-Abschnitt `P04:Normalformen`. `components/NormVisual.tsx` legt Reiter über die
+  bisherige Musterlösung: „Schritt für Schritt“ (Ausgang → 1./2./3. NF, PK/FK markiert, verschobene, umbenannte und neue
+  Spalten hervorgehoben), „Abhängigkeiten“ (Pfeil-Diagramm), „Ergebnis“ (Tabellen mit Beziehungen) und „Musterlösung“.
+  `TextMitTabellen` zeigt „a | b“-Zeilen in Aufgabentexten als Tabelle. `lib/normalisierung.ts` prüft jedes Beispiel
+  (Schlüssel, Fremdschlüssel, kein Attribut verloren, Beispieldaten); `normalisierung.test.ts` gleicht die letzte Stufe
+  mit den Relationen der Text-Musterlösung ab. Ändert die Live-App den Text, meldet der Test die Abweichung.
 - **Name:** Die Dev-App heißt „Vortex“ (Seitenleiste, Fenstertitel, PWA-Manifest, Fußzeile). Der KI-Tutor darin heißt
   „Tutor“ bzw. „Tutor Pro“. Texte, die 1:1 aus der Live-App stammen („Coach“), sind unverändert.
 - **KI-Tutor als Premium-Funktion**, vorerst nur für den Admin (`app_metadata.role = 'admin'`), für andere unsichtbar,

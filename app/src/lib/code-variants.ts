@@ -7,8 +7,9 @@
  */
 import raw from "@/content/code-variants.json";
 
-export type CodeVariant = { python: string; javascript: string };
-export type CodeLang = keyof CodeVariant;
+/** erklaerung: je Pseudocode-Zeile eine kurze Erklärung (gleiche Zeilenzahl wie der vereinheitlichte Pseudocode) */
+export type CodeVariant = { python: string; javascript: string; erklaerung?: string[] };
+export type CodeLang = "python" | "javascript";
 const VARIANTS = raw as Record<string, CodeVariant | null>;
 
 /** Pseudocode wie dargestellt vereinheitlichen (Zeilenenden, Leerzeichen am Zeilenende, Rand) */

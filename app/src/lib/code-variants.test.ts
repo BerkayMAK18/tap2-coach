@@ -33,6 +33,16 @@ describe("Python-/JavaScript-Fassungen", () => {
       expect(v.python + v.javascript).not.toMatch(/\t/);
     });
   });
+  it("n (Anzahl der Elemente) ist definiert, wenn der Code es nutzt – als Parameter oder per len()/.length", () => {
+    const strip = (c: string) => c.replace(/#.*|\/\/.*|\/\*[\s\S]*?\*\//g, "");
+    const fehlt: string[] = [];
+    Object.entries(raw as Record<string, { python: string; javascript: string }>).forEach(([k, v]) => {
+      const py = strip(v.python), js = strip(v.javascript);
+      if (/\bn\b/.test(py) && !/^\s*n = len\(\w+\)|def \w+\([^)]*\bn\b/m.test(py)) fehlt.push(k + " python");
+      if (/\bn\b/.test(js) && !/^\s*const n = \w+\.length;|function \w+\([^)]*\bn\b/m.test(js)) fehlt.push(k + " javascript");
+    });
+    expect(fehlt).toEqual([]);
+  });
   it("Zuordnung über den Pseudocode-Text, unabhängig von Leerzeichen am Zeilenende", () => {
     const p = TAP2.pakete.find((x) => x.id === "P02")!.kern.find((k) => k[2])![2]!;
     expect(variantsFor(p)).not.toBeNull();

@@ -141,6 +141,11 @@ Jeder Bereich ist ein eigenes Modul (Route + Logik in `lib/` + Tests) und kann u
   `components/CodeVariants.tsx` zeigt oben die Sprache (Umschalter, gemerkt in `tap2coach-codesprache`) und darunter den
   Pseudocode. Ändert die Live-App einen Block, erscheint nur noch der Pseudocode; `code-variants.test.ts` meldet die
   veraltete Fassung. Die Inhalte selbst bleiben in der Live-App (Pseudocode wie in der IHK-Prüfung).
+  - Reiter „Zeile für Zeile“: je Pseudocode-Zeile eine kurze Erklärung (`erklaerung` in derselben Datei, Zeilenzahl
+    per Test geprüft).
+  - Reiter „Ablauf“ für Sortier- und Suchverfahren (Bubble, Selection, Insertion, binäre und lineare Suche, Maximum):
+    `lib/code-visual.ts` simuliert die Schritte rein und deterministisch. Die aktiven Pseudocode-Zeilen werden über
+    Muster gefunden. Die Anzeige hat Balken, Variablen, Vor/Zurück/Abspielen und „Neue Zahlen“.
 - **Name:** Die Dev-App heißt „Vortex“ (Seitenleiste, Fenstertitel, PWA-Manifest, Fußzeile). Der KI-Tutor darin heißt
   „Tutor“ bzw. „Tutor Pro“. Texte, die 1:1 aus der Live-App stammen („Coach“), sind unverändert.
 - **KI-Tutor als Premium-Funktion**, vorerst nur für den Admin (`app_metadata.role = 'admin'`), für andere unsichtbar,

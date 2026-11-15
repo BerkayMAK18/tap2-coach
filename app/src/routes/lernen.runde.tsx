@@ -21,6 +21,7 @@ import { useProgress, type Session } from "@/store/progress";
 import { Ic } from "@/ui-main";
 import { CodeVariants } from "@/components/CodeVariants";
 import { NormVisual } from "@/components/NormVisual";
+import { BezLoesung, BezVorher } from "@/components/BezVisual";
 import { AmpBar, Amp, Ewh, Fig, Front, Legend, Trans } from "@/components/lernen/bits";
 import { CodeEditor } from "@/components/lernen/CodeEditor";
 import { SqlAuto, SqlPanel } from "@/components/lernen/Sql";
@@ -172,7 +173,7 @@ function QuestionView({ sess: s, q, at, close }: { sess: Session; q: Question; a
     foot = picked && r ? (
       <div className={`feedback ${ok ? "ok" : "bad"}`}>
         <span className="fi"><Ic name={ok ? "check" : "x"} /></span>
-        <div><div className="row" style={{ gap: 10 }}><b>{ok ? "Richtig" : "Falsch"}</b><Trans f={r.f} t={r.t} /><span className="nexttxt">{nextTxt(S, q.id)}</span></div><p>{q.why}</p></div>
+        <div><div className="row" style={{ gap: 10 }}><b>{ok ? "Richtig" : "Falsch"}</b><Trans f={r.f} t={r.t} /><span className="nexttxt">{nextTxt(S, q.id)}</span></div><p>{q.why}</p><BezLoesung id={q.id} /></div>
         {ok && <button type="button" className="btn ghost small" id="s-guess" title="Taste G" onClick={markGuess}>War geraten</button>}
         <button type="button" className="btn primary" id="s-next" onClick={sessNext}>{at + 1 < s.ids.length ? "Weiter" : "Auswertung"} <Ic name="right" cls="ic sm" /></button>
       </div>
@@ -195,6 +196,7 @@ function QuestionView({ sess: s, q, at, close }: { sess: Session; q: Question; a
           {has && <div><span className="alab">Deine Lösung</span><CodeEditor key="u" lang={lang} edit={false} doc={mine} label="Deine Lösung (nur lesen)" />{lang === "sql" && <SqlAuto id={q.id} code={mine} verdict />}</div>}
           <div className="sol"><span className="alab">Musterlösung</span>{lang === "pseudo" && q.type === "card" ? <CodeVariants pseudo={q.a}><CodeEditor key="s" lang={lang} edit={false} doc={q.a} label="Musterlösung" /></CodeVariants> : <CodeEditor key="s" lang={lang} edit={false} doc={q.type === "card" ? q.a : ""} label="Musterlösung" />}{lang === "sql" && <SqlAuto id={q.id} code={cfg.sol ?? ""} verdict={false} />}</div>
         </div>
+        <BezLoesung id={q.id} />
         <p className="cmp-hint">{has ? "Vergleiche Struktur und Logik, nicht jedes Zeichen: Andere Variablennamen oder eine gleichwertige Lösung zählen in der Prüfung genauso." : "Tipp: Beim nächsten Mal erst selbst tippen, so merkst du dir die Struktur deutlich besser."}</p>
         <Ewh q={q} />
       </>
@@ -206,6 +208,7 @@ function QuestionView({ sess: s, q, at, close }: { sess: Session; q: Question; a
       <>
         {own && <div className="answer-wrap own"><span className="alab">Deine Antwort</span><div className="answer">{s.own}</div></div>}
         <div className="answer-wrap"><span className="alab">{q.type === "card" && q.note ? "Musterlösung" : "Antwort"}</span><NormVisual id={q.id}><CodeVariants pseudo={q.type === "card" ? q.a : ""}><div className={`answer ${looksCode(q) ? "mono" : ""}`}>{q.type === "card" ? q.a : ""}</div></CodeVariants></NormVisual></div>
+        <BezLoesung id={q.id} />
         <Fig q={q} /><Ewh q={q} />
         {own && <p className="cmp-hint">Vergleiche: Sind alle Aspekte aus dem Erwartungshorizont drin? Passt deine Antwort zum Operator?</p>}
       </>
@@ -236,6 +239,7 @@ function QuestionView({ sess: s, q, at, close }: { sess: Session; q: Question; a
       <section className="card qcard">
         <div className="qlab"><span className="stat-chip"><Amp s={sv} />{ST_LBL[sv]}</span><span className="chip">{q.type === "mc" ? "Auswahlfrage" : q.own ? "Eigene Frage" : "Wissensfrage"}</span>{multi && <span className="chip tchip">{mixed ? "Wiederholung · " : ""}{t.n}</span>}</div>
         <Front text={q.q} />
+        <BezVorher id={q.id} offen={q.type === "mc" ? s.pick !== null : !!s.rev} />
         {body}
       </section>
       {foot}

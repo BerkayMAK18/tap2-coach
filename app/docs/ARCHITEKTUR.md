@@ -154,6 +154,17 @@ Jeder Bereich ist ein eigenes Modul (Route + Logik in `lib/` + Tests) und kann u
   `TextMitTabellen` zeigt „a | b“-Zeilen in Aufgabentexten als Tabelle. `lib/normalisierung.ts` prüft jedes Beispiel
   (Schlüssel, Fremdschlüssel, kein Attribut verloren, Beispieldaten); `normalisierung.test.ts` gleicht die letzte Stufe
   mit den Relationen der Text-Musterlösung ab. Ändert die Live-App den Text, meldet der Test die Abweichung.
+- **Beziehungen visuell** (15.11.2026, nur Dev-App): Beispiele in `src/content/beziehungen.json` (Zod-Schema
+  `BezBeispiel` in `content/schema.ts`), zugeordnet über Katalog-IDs: MC `m87`, `m88`, `m94`, `m213`, `m214`, Karten
+  `k:db7`–`k:db10`, `k:db17`, `k:sql19`, Lernpaket-Abschnitte `P04:m:n-Beziehungen auflösen`, `G03:Kardinalitäten lesen`,
+  `G03:Krähenfuß-Notation`. `components/BezVisual.tsx`: `BezVorher` zeigt in der Lernrunde unter der Frage ein neutrales
+  Beziehungsbild (zwei Entitäten, Kardinalitäten bzw. Krähenfuß, noch ohne Fremdschlüssel; „?“, wenn die Kardinalität
+  gefragt ist) und deckt es nach der Antwort auf. `BezLoesung` zeigt in der Erklärung das Relationenmodell als
+  Mini-Tabellen mit PK/FK/UNIQUE und Pfeil FK → PK, bei referentieller Integrität mit Beispieldaten und abgelehntem
+  INSERT/DELETE. SVG aus Daten, Geometrie rein in `lib/beziehungen.ts` (Monoschrift, keine DOM-Messung); ist der Platz zu
+  schmal (z. B. 375 px), stehen die Kästen untereinander. `pruefeBez` prüft jedes Beispiel (Schlüssel, FK-Seite passt zum
+  Bild, Zwischentabelle bei m:n, UNIQUE bei 1:1, Beispieldaten, Verstoß wirklich gegeben); die Tests gleichen Tabellen,
+  Schlüssel und „Tabelle.Spalte“ mit Erklärung bzw. Musterlösung ab.
 - **Name:** Die Dev-App heißt „Vortex“ (Seitenleiste, Fenstertitel, PWA-Manifest, Fußzeile). Der KI-Tutor darin heißt
   „Tutor“ bzw. „Tutor Pro“. Texte, die 1:1 aus der Live-App stammen („Coach“), sind unverändert.
 - **KI-Tutor als Premium-Funktion**, vorerst nur für den Admin (`app_metadata.role = 'admin'`), für andere unsichtbar,

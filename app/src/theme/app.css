@@ -174,3 +174,11 @@ main.content.wide { max-width: none; }
 /* Handy: keine eckige Tipp-Markierung des Browsers – Rückmeldung beim Antippen gerundet wie Auswahl und Fokusrand */
 a, button { -webkit-tap-highlight-color: transparent; }
 @media (max-width: 900px) { .nav-i:active { background: var(--surface-2); } }
+/* Pseudocode-Beispiele mit Python-/JavaScript-Fassung (components/CodeVariants.tsx) */
+.cv { display: grid; gap: 8px; margin: 8px 0; }
+.cv-head { display: flex; align-items: center; gap: 8px; }
+.cv-tabs .seg { padding: 4px 10px; font-size: 0.78rem; }
+.cv-code { margin: 0; }
+.cv-pseudo { display: grid; gap: 4px; padding-left: 10px; border-left: 3px solid var(--violet); }
+.cv-pseudo > pre { margin: 0; }
+.cv-lbl { font-size: 0.74rem; font-weight: 800; color: var(--muted); text-transform: uppercase; letter-spacing: 0.04em; }

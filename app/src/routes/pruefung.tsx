@@ -22,6 +22,7 @@ import { useProgress } from "@/store/progress";
 import { usePruefung } from "@/store/pruefung";
 import { fmtClock } from "@/store/timer";
 import { Ic, Ring, pctS } from "@/ui-main";
+import { CodeVariants } from "@/components/CodeVariants";
 
 export const Route = createFileRoute("/pruefung")({ component: Pruefung });
 
@@ -201,7 +202,7 @@ function RealGrade({ r }: { r: PkRun }) {
             return (
               <div key={ii} className="sub-q"><div className="row"><b>{LETTERS[ii]})</b>{op && <span className="chip violet">{op[0]}</span>}<span className="spacer" /><span className="small muted">{it.p} P</span></div><div className="qtext small">{it.q}</div>
                 {op && <p className="ophint">{op[1]}</p>}
-                <div className="grade-grid"><div><span className="small muted">Deine Antwort</span><pre className="mine">{it.ans || "(leer)"}</pre></div><div><span className="small muted">Erwartungshorizont</span><pre>{it.a}</pre></div></div>
+                <div className="grade-grid"><div><span className="small muted">Deine Antwort</span><pre className="mine">{it.ans || "(leer)"}</pre></div><div><span className="small muted">Erwartungshorizont</span><CodeVariants pseudo={it.a}><pre>{it.a}</pre></CodeVariants></div></div>
                 <div className="row steps">{steps(it.p).map((v, k) => <button key={k} type="button" className={`btn small ${it.got === v ? "sel" : ""}`} aria-pressed={it.got === v} onClick={() => patch((x) => setGot(x, ai, ii, v))}>{STEP_LBL[k]}{k && k < 4 ? ` · ${dec(v)}` : ""}</button>)}<label className="f inline" htmlFor={`g-${ai}-${ii}`}>Punkte <GotInput id={`g-${ai}-${ii}`} max={it.p} got={it.got} onSet={(v) => patch((x) => setGot(x, ai, ii, v))} /></label></div>
                 {it.got !== null && it.got < it.p && <div className="cause-box"><span className="small muted">Warum fehlen {dec(it.p - it.got)} P?</span><CauseChips sel={it.cause} onPick={(c) => patch((x) => toggleCause(x, ai, ii, c))} /></div>}
               </div>

@@ -1,6 +1,6 @@
 # Datenschutz-Konzept (DSGVO)
 
-Stand: 13.11.2026. Leitlinie: **Privacy by Design** (Art. 25 DSGVO) – so wenig Daten wie möglich, und was der
+Stand: 15.11.2026 (Sicherheitsprüfung vor dem Teilen mit Demo-Testern). Leitlinie: **Privacy by Design** (Art. 25 DSGVO) – so wenig Daten wie möglich, und was der
 Betreiber nicht lesen muss, kann er auch nicht lesen. Kein Ersatz für eine Rechtsberatung.
 
 Der Text für Nutzerinnen und Nutzer steht in der App unter `/datenschutz` (`src/routes/datenschutz.tsx`).
@@ -16,9 +16,11 @@ diesen Hinweis und dieses Dokument mitpflegen.**
      Der Hinweis in der App sagt das offen.
    - **Ohne Konto (Geräte-Sync):** Ende-zu-Ende-verschlüsselt. Der Schlüssel liegt nur auf den Geräten und wird per
      Code/QR übertragen. Der Betreiber sieht nur Zeichensalat.
-3. **Pseudonyme Rangliste.** Nur ein selbst gewählter Benutzername, nur mit Einwilligung, jederzeit löschbar.
+3. **Pseudonyme Rangliste.** Nur ein selbst gewählter Benutzername, nur wer selbst „Mitmachen“ wählt, jederzeit löschbar.
+   Dieselbe Bestenliste wie die Live-App (`tap2_lb`); in der Testphase der neuen App keine neuen Einträge (`LB_NEW_JOINS`).
 4. **Kein Tracking**, keine Analyse, keine Drittanbieter-Ressourcen (Schriften, Skripte liegen lokal).
-5. **Löschen per Knopf** für alles (lokal, Konto, Sicherung, Rangliste).
+5. **Löschen per Knopf** für alles (lokal, Stand im Konto, Tutor-Stand, Rangliste). Das Konto selbst löscht vorerst der
+   Betreiber auf Anfrage (Knopf geplant, siehe unten).
 
 ## Verarbeitungsübersicht (Art. 30 DSGVO, vereinfacht)
 
@@ -29,13 +31,14 @@ diesen Hinweis und dieses Dokument mitpflegen.**
 | Konto (optional) | GitHub-ID, -Name, E-Mail, Avatar-URL | Supabase Auth, Frankfurt (AV) | Art. 6 (1) b | Betreiber im Dashboard (unvermeidbar) | Konto löschen |
 | Stand im Konto (optional) | Lernstand + Belohnungen (JSON), Version, Zeitstempel (`app_sync`) | Supabase DB, Frankfurt | Art. 6 (1) b | Nutzer über die App; Betreiber technisch (nicht E2E) | „Kopie im Konto löschen“ / Konto löschen; Tagesstände max. 10 Tage |
 | Geräte-Sync ohne Konto (optional) | **verschlüsselter** Lernstand + Belohnungen unter Prüfsumme (`tap2_sync`) | Supabase DB, Frankfurt | Art. 6 (1) b | niemand außer Nutzer (Schlüssel nur im Browser) | „Kopie in der Cloud löschen“ |
-| Rangliste (optional) | Benutzername, Level, XP, Figur, Einwilligungszeitpunkt | Supabase DB, Frankfurt | Art. 6 (1) a | alle Nutzer (nur diese Felder) | Austragen / Konto löschen |
+| Rangliste (optional) | Benutzername, Level, XP, Figur/Titel unter pseudonymer ID (`tap2_lb`, gemeinsam mit der Live-App) | Supabase DB, Frankfurt | Art. 6 (1) a (Mitmachen) | alle Nutzer (nur diese Felder); Betreiber kann Konto-Einträge zuordnen | Austragen |
+| Server-Protokolle | IP, Zeit, Anfrage (Auth, Datenbank, Edge Function) | Supabase (AV) | Art. 6 (1) f | Betreiber im Dashboard | Fristen des Anbieters |
 | Patch Notes (Seite öffnen) | IP an GitHub | GitHub (USA, DPF) | Art. 6 (1) f | GitHub | – |
 | Übertragen per Link/QR | Lernstand im #-Teil des Links | nur auf den Geräten (kein Server) | Art. 6 (1) b | wer den Link hat | Link nicht weitergeben |
 | Fehler melden | was der Nutzer selbst auf GitHub abschickt | GitHub (USA, DPF) | eigenständig GitHub | öffentlich | über GitHub |
 | KI-Tutor (nur Admin) | Eingaben des Admins, Übergabe (Stand je Konzept, Fehlvorstellungen – keine Namen) | Anthropic (USA) | – (nur eigene Daten des Betreibers) | Anthropic | nach Anbieter |
 | Kostenloser KI-Tutor (mit Anmeldung) | Nachrichten im Tutor, Stand zum Thema (ohne Namen/Konto-Daten) | KI-Anbieter der Gratis-Stufe (Standard: Groq, USA) über die Edge Function | Art. 6 (1) a (Einwilligung vor der ersten Nachricht) | Anbieter nach seinen Bedingungen; Server speichert nur Zähler | Zähler 30 Tage |
-| Tutor-Stand (nur Admin) | Belege, Fehlvorstellungen, Sitzungen, Tutor-XP (JSON), Version, Zeitstempel (`app_tutor_state`) | Supabase DB, Frankfurt | – (nur eigene Daten des Betreibers); später Art. 6 (1) b | Nutzer über die App; Betreiber technisch (nicht E2E) | Konto löschen (Kaskade) |
+| Tutor-Stand (mit Konto) | Belege, Fehlvorstellungen, Sitzungen, Tutor-XP (JSON), Version, Zeitstempel (`app_tutor_state`) | Supabase DB, Frankfurt | Art. 6 (1) b | Nutzer über die App; Betreiber technisch (nicht E2E) | „Tutor-Wissen zurücksetzen“ / Konto löschen (Kaskade) |
 
 AV = Auftragsverarbeitung. **Supabase:** Der DPA ist Teil der Terms of Service und gilt automatisch für alle
 Organisationen (geprüft am 13.11.2026 unter Organization → Settings → Legal Documents, „View DPA“). Eine Kopie als
@@ -69,14 +72,22 @@ PDF für die eigenen Unterlagen ablegen (Rechenschaftspflicht, Art. 5 Abs. 2 DSG
   Prüfsumme als ID.
 
 ### Rangliste
-- Tabelle `leaderboard (user_id PK, username unique, xp, level, look, consent_at)`; lesbar für alle nur über eine
-  Funktion, die **keine** `user_id` herausgibt. Benutzername wird beim ersten Mitmachen gewählt (Regeln wie bisher:
-  3–16 Zeichen, keine reservierten Namen), Teilnahme nur mit aktiver Einwilligung (Häkchen, nicht vorausgewählt).
-- XP-Plausibilitätsgrenzen serverseitig wie bisher (nur steigend, Tageslimit).
+- Dieselbe Tabelle wie die Live-App: `tap2_lb` (Funktionen `tap2_lb_join/push/top/leave`, `tools/supabase-leaderboard.sql`).
+  Gespeichert: pseudonyme ID, Benutzername, XP, Level, Aussehen. Lesbar für alle nur über `tap2_lb_top`, das **keine** ID
+  herausgibt.
+- ID: ohne Konto eine Prüfsumme des Sync-Schlüssels bzw. eines zufälligen Gerätewerts; mit Konto seit 15.11.2026
+  `app_lb_id()` = HMAC-SHA256 der Nutzer-ID mit einem Server-Geheimnis (`app_secret`, für niemanden lesbar,
+  `supabase/006_app_haertung.sql`). Wer nur die Nutzer-ID kennt, kann den Eintrag nicht umbenennen oder löschen.
+- Teilnahme nur durch aktives „Mitmachen“ mit selbst gewähltem Namen (3–16 Zeichen, keine reservierten Namen).
+- XP-Plausibilitätsgrenzen serverseitig wie in der Live-App (nur steigend, Tageslimit, Bremse für neue Einträge).
+- **Testphase der neuen App** (`LB_NEW_JOINS = false` in `src/config.ts`): keine neuen Einträge, damit keine Testnamen
+  bei den echten Nutzern landen. Bestehende Einträge werden weiter aktualisiert. Beim Umstieg auf `true` setzen.
 
 ### Konto löschen
-- Supabase Edge Function `delete-account`: prüft das JWT, löscht Sync-Daten, Ranglisten-Eintrag und den Auth-Nutzer
-  (dafür braucht die Funktion den Service-Key – er liegt nur als Secret in der Edge Function, nie im Frontend).
+- **Noch nicht umgesetzt.** Bis dahin auf Anfrage: Betreiber löscht den Nutzer im Supabase-Dashboard (Authentication →
+  Users); `app_*`-Tabellen löschen per Kaskade mit, den Ranglisten-Eintrag trägt die Person vorher selbst aus.
+- Geplant: Edge Function `delete-account` (prüft das JWT, löscht Stände, Ranglisten-Eintrag und den Auth-Nutzer; der
+  Service-Key liegt nur als Secret in der Function, nie im Frontend).
 
 ### Kostenloser KI-Tutor (alle angemeldeten Konten)
 - Edge Function `tutor`, Modus „free“: OpenAI-kompatibler Anbieter mit Gratis-Stufe (Secrets `FREE_AI_URL`, `FREE_AI_KEY`,
@@ -84,8 +95,13 @@ PDF für die eigenen Unterlagen ablegen (Rechenschaftspflicht, Art. 5 Abs. 2 DSG
 - Einwilligung in der App vor der ersten Nachricht (Version in `src/config.ts` → `FREE_AI.consentVersion`); ohne sie
   bleibt die Brücke. Anbietername steht in `FREE_AI.provider` und im Datenschutzhinweis – bei einem Wechsel anpassen.
 - Gespeichert werden nur Zähler je Konto und Tag (`app_tutor_free_usage`, `app_tutor_free_total`,
-  `supabase/005_app_tutor_free.sql`), keine Inhalte.
+  `supabase/005_app_tutor_free.sql`, Limits seit 006: 30 Anfragen pro Konto und Tag, 6 pro Minute, 900 gesamt), keine Inhalte.
+- Die Edge Function leitet nur weiter, speichert keine Inhalte und kürzt den Chat-Text der Antwort auf 4.000 Zeichen.
 - Vor dem Freischalten die aktuellen Bedingungen des Anbieters prüfen (Datennutzung der Gratis-Stufe, Speicherdauer).
+
+### Speicher
+- Gesamtgrenze 150 MB für alle `app_*`-Stände (`app_storage_ok()`, 006), damit die gemeinsame Datenbank nie vollläuft –
+  sonst fiele auch die Live-App aus. Zusätzlich im Supabase-Dashboard einen Speicher-Alarm einrichten.
 
 ### KI-Tutor (Premium, vorerst nur Admin)
 - Supabase Edge Function `tutor` mit Claude API, Schlüssel als Supabase-Secret.
@@ -109,7 +125,9 @@ PDF für die eigenen Unterlagen ablegen (Rechenschaftspflicht, Art. 5 Abs. 2 DSG
 - [x] Verantwortlicher und Kontakt (über GitHub) in `src/config.ts` (`CONTROLLER`) eingetragen.
 - [x] DPA Supabase: automatisch über die Terms of Service; Kopie als PDF privat ablegen.
 - [ ] Optional: eigene Kontakt-E-Mail nur für die App (GitHub hat keine privaten Nachrichten).
-- [ ] Supabase: E-Mail-Provider und anonyme Anmeldung aus, nur GitHub an.
+- [x] Supabase: E-Mail-Provider und anonyme Anmeldung aus, nur GitHub an (geprüft 15.11.2026 über `/auth/v1/settings`).
+- [ ] `supabase/006_app_haertung.sql` einspielen und die Edge Function `tutor` (v5) deployen.
+- [ ] Knopf „Konto löschen“ (Edge Function `delete-account`).
 - [x] Impressum: entfällt, solange die App kostenlos ist (§ 5 DDG gilt für geschäftsmäßige, meist entgeltliche
       Dienste). Mit einer Premium-/Bezahl-Option Pflicht.
 - [x] Live-App (`main`): Datenschutzhinweis als Seite ergänzt (v2.7.5).

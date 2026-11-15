@@ -87,7 +87,9 @@ describe("Zusammenführen (unpack + merge)", () => {
     const raw = JSON.stringify(st), w = world(S_LEARN);
     const o = oldWith(raw, w); o.merge(clone(p));
     const { G } = newWith(raw, w); merge(G, clone(p));
-    expect(clone(G)).toEqual(o.data());
+    // Bewusste Abweichung (Sicherheit): Prototyp-Namen wie „constructor“ sind nie ein Gegenstand – das Original behält sie als Datenmüll
+    const noProto = <T,>(d: T) => { const x = d as { owned?: { constructor?: unknown } }; if (x.owned) delete x.owned.constructor; return d; };
+    expect(noProto(clone(G))).toEqual(noProto(o.data()));
     expect(clone(pack(G))).toEqual(o.pack());
   });
   it("hin und zurück landen beide Geräte beim selben Stand", () => {

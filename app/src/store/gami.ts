@@ -13,6 +13,7 @@ import { supabase } from "@/lib/supabase";
 import { claimable, claimLogin, claimQuest, chipText, equip, evFinal as evFinalCore, evInfo as evInfoCore, evKap as evKapCore, evWear, loginOffer, loginToast, onAnswer, onGuess, openChest, pull, rollDay, setTitle, titleCheck, applyBoost, type Ctx, type LoginOffer, type PullResult } from "@/lib/gami/core";
 import { KEY_GAMI } from "@/lib/gami/items";
 import { NAME_RE, lbGet, lbId, lbSet, lookOf, type LbData } from "@/lib/gami/lb";
+import { LB_NEW_JOINS } from "@/config";
 import { firstStart, merge as mergeCore, pack as packCore, parseStored, type GState } from "@/lib/gami/state";
 import { useProgress } from "./progress";
 
@@ -150,7 +151,23 @@ async function rpc(fn: string, args: Record<string, unknown>) {
   return data as Record<string, unknown> | null;
 }
 const LB = () => useGami.getState().lb;
-const myId = () => lbId(SYNC.get()?.key, ACC());
+/**
+ * Eintrags-ID. Mit Konto: vom Server mit einem Geheimnis abgeleitet (app_lb_id, supabase/006_app_haertung.sql) – wer nur
+ * die Nutzer-ID kennt, kann den Eintrag nicht umbenennen oder löschen. Solange die Funktion fehlt (SQL noch nicht
+ * eingespielt): bisherige Ableitung aus der Nutzer-ID. Wechselt die ID, nimmt lbLoad/lbPush den Eintrag mit Namen mit.
+ */
+const ACC_LB: { uid: string; id: string } = { uid: "", id: "" };
+async function myId(): Promise<string> {
+  const uid = ACC();
+  if (uid && supabase) {
+    if (ACC_LB.uid === uid && ACC_LB.id) return ACC_LB.id;
+    const { data, error } = await supabase.rpc("app_lb_id");
+    if (!error && typeof data === "string" && /^[0-9a-f]{64}$/.test(data)) { Object.assign(ACC_LB, { uid, id: data }); return data; }
+    // Nur wenn die Funktion fehlt (PGRST202) die alte Ableitung – bei Netzfehlern abbrechen, sonst würde die ID hin und her springen
+    if (error?.code !== "PGRST202") throw new Error("Ranglisten-ID gerade nicht abrufbar");
+  }
+  return lbId(SYNC.get()?.key, uid);
+}
 export async function lbLoad(force?: boolean) {
   if (!syncConf() || (!force && Date.now() - LB().at < 60000)) return;
   lbSetState({ at: Date.now() });
@@ -166,6 +183,8 @@ export async function lbLoad(force?: boolean) {
 export async function lbJoin(nameIn: unknown) {
   const name = String(nameIn || "").trim();
   if (!NAME_RE.test(name)) { lbSetState({ err: "3–16 Zeichen: Buchstaben, Ziffern, _ . -" }); return bump(); }
+  // Testphase: nur bestehende Einträge (Namen ändern, Eintrag nach Wechsel der ID mitnehmen), keine neuen
+  const lb0 = lbGet(); if (!LB_NEW_JOINS && !lb0.joined && !lb0.id) { lbSetState({ err: "In der Testversion kannst du dich noch nicht neu eintragen." }); return bump(); }
   lbSetState({ busy: true, err: "" }); bump();
   try {
     const id = await myId(), lb = lbGet(), g = gami();

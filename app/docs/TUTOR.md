@@ -41,8 +41,9 @@ mit einem einfacheren, kostenlosen Modell. Ohne Anmeldung, oder wenn man es möc
     erlauben wenig Tokens pro Minute).
   - `toOpenAi`/`fromOpenAi` wandeln zwischen dem Blockformat der App und dem OpenAI-Format um. Schreibt das Modell das
     JSON in den Text statt als Werkzeugaufruf, wird es trotzdem als Runde gelesen. Getestet in `tutor-free.test.ts`.
-- **Limits:** `app_tutor_take_free()` erlaubt 40 Anfragen je Konto und Tag (etwa 2 Sitzungen) und 900 für alle zusammen,
-  passend zum Freikontingent von rund 1.000 Anfragen pro Tag.
+- **Limits:** `app_tutor_take_free()` erlaubt seit `006_app_haertung.sql` 30 Anfragen je Konto und Tag, höchstens 6 pro
+  Minute, und 900 für alle zusammen (atomar gezählt), passend zum Freikontingent von rund 1.000 Anfragen pro Tag.
+  Die Function kürzt den Chat-Text der Antwort auf 4.000 Zeichen, damit sie nicht als allgemeiner Chatbot taugt.
 - **App:**
   - Unter „So möchtest du lernen“ wählt man „In der App (kostenlos)“ oder „Mit eigener KI“.
   - Vor der ersten Nachricht erscheint eine Einwilligung zur Übermittlung an den Anbieter.
@@ -51,8 +52,9 @@ mit einem einfacheren, kostenlosen Modell. Ohne Anmeldung, oder wenn man es möc
   1. Beim Anbieter ein Konto anlegen und einen API-Schlüssel erzeugen. Bei Groq geht das in der GroqCloud-Konsole.
   2. In Supabase unter Edge Functions → Secrets `FREE_AI_KEY` setzen. Optional `FREE_AI_URL` und `FREE_AI_MODEL` für einen
      anderen OpenAI-kompatiblen Anbieter oder ein anderes Modell.
-  3. `supabase/005_app_tutor_free.sql` im SQL-Editor einspielen.
-  4. Die Edge Function neu deployen.
+  3. `supabase/005_app_tutor_free.sql` und danach `supabase/006_app_haertung.sql` im SQL-Editor einspielen.
+  4. Die Edge Function neu deployen. Erlaubte Herkunft: Secret `APP_ORIGINS` (Komma-Liste); ohne Secret nur die Dev-Seite.
+     Für lokale Tests z. B. `https://tap2-coach-dev.akdemir-berkay.workers.dev,http://localhost:8080`.
   5. Bei einem Anbieterwechsel `FREE_AI.provider` in `src/config.ts` anpassen; der Text steht in Einwilligung und
      Datenschutzhinweis.
 
@@ -238,7 +240,7 @@ Tagesobergrenze**.
   - fester Marker am System-Teil (Werkzeug + Anweisungen + Wissensbasis),
   - automatisches Caching für den wachsenden Verlauf.
 - Kostenanzeige im Kopf der Sitzung, geschätzt aus `usage`.
-- Admin-Sperre (`app_metadata.role = 'admin'`) und Tageslimit (`app_tutor_take`, 120 Anfragen) bleiben.
+- Admin-Sperre (`app_metadata.role = 'admin'`) und Tageslimit (`app_tutor_take`, seit `006_app_haertung.sql` 40 Anfragen) bleiben.
 
 **Grobe Kosten je Sitzung** (8 Aufgaben ≈ 17 Runden; Preise Nov. 2026):
 - Annahmen: System-Teil ≈ 10 000 Token, Übergabe ≈ 3 000 Token, je Runde ≈ 300 Token Eingabe und

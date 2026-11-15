@@ -60,6 +60,7 @@ function Datenschutz() {
             <li>Rechtsgrundlage: Bereitstellung der von dir gewünschten Funktion (Art. 6 Abs. 1 lit. b DSGVO).</li>
             <li>Für die Anmeldung selbst ist GitHub, Inc. (USA) eigenständig verantwortlich; es gilt die Datenschutzerklärung von GitHub.</li>
             <li>Dein Anmelde-Token liegt im lokalen Speicher deines Browsers (technisch notwendig).</li>
+            <li>Supabase protokolliert bei Anmeldung und Anfragen technisch notwendige Daten (u. a. IP-Adresse, Zeitpunkt) für Betrieb und Sicherheit, nach den Fristen des Anbieters. Wir werten diese Protokolle nicht aus.</li>
             <li>Den Stand in deinem Konto löschst du jederzeit selbst in den Einstellungen („Kopie im Konto löschen“). Die Löschung des Kontos selbst kannst du über die oben genannte Kontaktmöglichkeit verlangen; ein Knopf dafür folgt.</li>
           </Ul>
         </Sec>
@@ -78,9 +79,11 @@ function Datenschutz() {
 
       {f.leaderboard && (
         <Sec t="Rangliste (freiwillig, mit Einwilligung)">
-          <p>Wenn du an der Rangliste teilnimmst, sehen alle Nutzerinnen und Nutzer deinen selbst gewählten Benutzernamen, dein Level, deine XP und deine Figur. Dein GitHub-Name und deine E-Mail-Adresse erscheinen dort nie.</p>
+          <p>Wenn du an der Rangliste teilnimmst, sehen alle Nutzerinnen und Nutzer deinen selbst gewählten Benutzernamen, dein Level, deine XP, deine Figur und deinen Titel – in dieser App und in der bisherigen Version des Prüfungscoachs (dieselbe öffentliche Bestenliste). Dein GitHub-Name und deine E-Mail-Adresse erscheinen dort nie.</p>
           <Ul>
-            <li>Rechtsgrundlage: deine Einwilligung (Art. 6 Abs. 1 lit. a DSGVO). Du kannst sie jederzeit widerrufen („Austragen“); der Eintrag wird sofort gelöscht.</li>
+            <li>Gespeichert werden nur diese Angaben unter einer zufällig wirkenden Kennung bei Supabase (Frankfurt am Main). Mit Konto ist die Kennung aus deinem Konto abgeleitet: Andere können sie nicht deinem Konto zuordnen, der Betreiber technisch schon.</li>
+            <li>Rechtsgrundlage: deine Einwilligung (Art. 6 Abs. 1 lit. a DSGVO), die du mit „Mitmachen“ gibst. Du kannst sie jederzeit widerrufen („Austragen“); der Eintrag wird sofort gelöscht.</li>
+            <li>In der Testphase dieser Version kannst du dich nicht neu eintragen; bestehende Einträge werden weiter aktualisiert.</li>
             <li>Wähle bitte nicht deinen echten Namen.</li>
           </Ul>
         </Sec>
@@ -98,7 +101,7 @@ function Datenschutz() {
           <p>Wenn du den kostenlosen KI-Tutor in der App nutzt, gehen deine Nachrichten im Tutor und dein Stand zum gewählten Thema (Beherrschung je Konzept, offene Fehlvorstellungen, Lerninhalte – ohne Namen, E-Mail oder Konto-Daten) über unseren Server an den KI-Anbieter {FREE_AI.provider}. Dort werden sie zur Beantwortung verarbeitet, nach den Bedingungen des Anbieters (Gratis-Stufe).</p>
           <Ul>
             <li>Rechtsgrundlage: deine Einwilligung (Art. 6 Abs. 1 lit. a DSGVO), die du vor der ersten Nachricht gibst. Ohne Einwilligung kannst du den Tutor mit deiner eigenen KI (Brücke) nutzen.</li>
-            <li>Eine Übermittlung in die USA findet statt. Unser Server speichert dabei keine Inhalte, nur Zähler je Konto und Tag (für die Tageslimits), höchstens 30 Tage.</li>
+            <li>Eine Übermittlung in die USA findet statt. Die Nachrichten laufen über eine Server-Funktion bei Supabase („Edge Function“), die sie nur weiterleitet. Unser Server speichert dabei keine Inhalte, nur Zähler je Konto und Tag (für die Tageslimits), höchstens 30 Tage.</li>
           </Ul>
         </Sec>
       )}

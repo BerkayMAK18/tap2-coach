@@ -11,7 +11,8 @@
  */
 import { create } from "zustand";
 import { TAP2 } from "@/content/catalog";
-import { today } from "@/lib/dates";
+import { iso, today } from "@/lib/dates";
+import { BRIDGE_XP_TASKS_PER_DAY } from "@/config";
 import { supabase } from "@/lib/supabase";
 import { kbIds, kbOverview, makeKb } from "@/lib/tutor-kb";
 import { applyReply, chunks, rewardArgs, costOf, newConvo, tooLong, userMsg, userText, type Block, type Convo, type Model, type Sicher, type UserMeta } from "@/lib/tutor-session";
@@ -137,7 +138,10 @@ export const useTutor = create<Store>((set, get) => {
       const fresh = r.tasks.filter((t) => !have.has(t.ev)), newEv = r.evidence.filter((e) => !have.has(e.id));
       if (!newEv.length) return { ok: false, msg: "Dieser Ergebnis-Block wurde schon übernommen." };
       let st = addEvidence(before, r.evidence), xp = 0;
-      fresh.forEach((t, i) => { // jede neue bewertete Aufgabe zählt wie eine Antwort (Combo, Serie, Quests)
+      // Selbst eingefügte Blöcke: XP nur für BRIDGE_XP_TASKS_PER_DAY Aufgaben pro Tag (der Graph lernt trotzdem mit)
+      const d0 = today(), usedToday = Object.values(before.sess).filter((x) => x.model === "bruecke" && iso(new Date(x.start)) === d0).reduce((n, x) => n + x.aufgaben, 0);
+      const paid = Math.max(0, Math.min(fresh.length, BRIDGE_XP_TASKS_PER_DAY - usedToday));
+      fresh.slice(0, paid).forEach((t, i) => { // jede neue bewertete Aufgabe zählt wie eine Antwort (Combo, Serie, Quests)
         const a = rewardArgs({ punkte: t.punkte, max: t.max, sich: t.sich }), b0 = gami().earned;
         gm.answer({ id: `vortex:${r.hash}:${i}`, topic: r.thema }, a.ok, a.unsure, a.f, a.t);
         xp += Math.max(0, gami().earned - b0);
@@ -148,7 +152,7 @@ export const useTutor = create<Store>((set, get) => {
       if (fresh.length) st = putSession(st, { id: `vb-${r.hash}`, t: r.thema, start: now, end: now, aufgaben: fresh.length, punkte: fresh.reduce((x, t) => x + t.punkte, 0), max: fresh.reduce((x, t) => x + t.max, 0), xp, model: "bruecke" });
       saveState(st);
       const pts = fresh.length ? ` (${fresh.reduce((x, t) => x + t.punkte, 0)}/${fresh.reduce((x, t) => x + t.max, 0)} P.)` : "";
-      return { ok: true, msg: `Übernommen: ${fresh.length} ${fresh.length === 1 ? "Aufgabe" : "Aufgaben"}${pts}, ${newEv.filter((e) => e.art !== "bewertung").length} Einträge für den Graphen${xp ? `, +${xp} XP` : ""}.${r.skipped ? ` ${r.skipped} unbrauchbare Einträge übersprungen.` : ""}${r.fazit ? `\n${r.fazit}` : ""}` };
+      return { ok: true, msg: `Übernommen: ${fresh.length} ${fresh.length === 1 ? "Aufgabe" : "Aufgaben"}${pts}, ${newEv.filter((e) => e.art !== "bewertung").length} Einträge für den Graphen${xp ? `, +${xp} XP` : ""}${paid < fresh.length ? ` (XP-Grenze für die Brücke heute erreicht: ${BRIDGE_XP_TASKS_PER_DAY} Aufgaben)` : ""}.${r.skipped ? ` ${r.skipped} unbrauchbare Einträge übersprungen.` : ""}${r.fazit ? `\n${r.fazit}` : ""}` };
     },
     state: loadState(), convo: typeof window === "undefined" ? null : loadConvo(),
     model: read<Model>(K.model, "sonnet") === "haiku" ? "haiku" : "sonnet", // Wahl für Tutor Pro; ohne Admin-Rolle gilt immer „free“

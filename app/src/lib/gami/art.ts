@@ -132,7 +132,8 @@ export const BG: Record<string, (id: string) => string> = {
 
 // Tiere: Grundfigur + Anker (Kopf: x, y, Drehung, Größe · Auge: x, y, Größe · Hals: x, y, Größe)
 export type Animal = { name: string; banner: string; base: string; a: { hat: [number, number, number, number]; eye: [number, number, number]; neck: [number, number, number] }; body: string; eye: string };
-export const ANIMALS: Record<string, Animal> = {
+// Ohne Prototyp (Object.create(null)): Werte aus Sync/Import wie „constructor“ dürfen hier nie als Tier gelten.
+export const ANIMALS: Record<string, Animal> = Object.assign(Object.create(null) as Record<string, Animal>, {
   rabe: { name: "Rabe", banner: "Raben-Kollektion", base: "tuerkis", a: { hat: [268, 150, -8, 1], eye: [240, 222, 1], neck: [260, 310, 1] },
     body: `<path d="M138 470 C132 372 176 300 258 288 C346 276 404 344 410 470 Z" fill="#0B2A33"/><path d="M296 322 C356 340 388 404 392 470 L352 470 C346 414 326 372 286 346 Z" fill="#17414D"/><path d="M176 238 C176 168 222 140 268 140 C324 140 356 184 352 238 C348 294 306 318 262 318 C214 318 176 292 176 238 Z" fill="#0B2A33"/><path d="M190 262 L206 300 L214 278 L228 318 L238 290 L254 330 L262 300 L280 322 L268 270 Z" fill="#0B2A33"/><path d="M196 204 C150 206 112 226 74 266 C120 262 160 262 202 272 Z" fill="#0B2A33"/><path d="M74 266 C120 262 160 262 202 272 L200 254 C160 252 118 256 74 266 Z" fill="#17414D"/>`,
     eye: `<circle cx="240" cy="222" r="15" fill="#F6F5F3"/><circle cx="236" cy="222" r="8" fill="#0B2A33"/>` },
@@ -148,7 +149,7 @@ export const ANIMALS: Record<string, Animal> = {
   pinguin: { name: "Pinguin", banner: "Pinguin-Kollektion", base: "eisblau", a: { hat: [268, 154, -6, 0.95], eye: [236, 214, 0.85], neck: [262, 320, 1] },
     body: `<path d="M148 470 C138 380 178 300 262 292 C352 284 406 362 406 470 Z" fill="#22303F"/><path d="M168 470 C160 400 186 338 236 314 C276 330 296 404 290 470 Z" fill="#F6F8FB"/><path d="M178 234 C178 170 222 142 270 142 C328 142 356 186 352 240 C348 294 306 318 262 318 C214 318 180 292 178 234 Z" fill="#22303F"/><path d="M194 236 C190 196 220 176 250 180 C286 186 302 216 296 252 C292 276 278 292 256 298 C228 304 206 290 198 268 C195 258 194 248 194 236 Z" fill="#F6F8FB"/><path d="M318 330 C362 346 392 400 388 462 C384 470 374 470 370 462 C352 420 332 388 304 362 C298 346 302 332 318 330 Z" fill="#3E556E"/><path d="M322 338 C356 354 380 398 382 448" stroke="#5E7A96" stroke-width="5" fill="none" stroke-linecap="round"/><path d="M206 230 C180 232 152 242 126 258 C156 260 184 258 208 250 Z" fill="#F59A2E"/><path d="M128 258 C156 261 184 259 208 251 L206 262 C182 270 154 268 128 258 Z" fill="#D46E17"/>`,
     eye: `<circle cx="236" cy="214" r="11" fill="#14202A"/><circle cx="232" cy="210" r="3.5" fill="#fff"/>` }
-};
+});
 export const CHARS = Object.keys(ANIMALS);
 // Oberteile aus Events: über den Rumpf des Tiers gelegt (Clip auf die Rumpfform), Ausschnitt unterhalb des Kopfes. [Rumpf, Mitte x, Oberkante y]
 export const TORSO: Record<string, [string, number, number]> = { rabe: ["M138 470 C132 372 176 300 258 288 C346 276 404 344 410 470 Z", 262, 322], katze: ["M140 470 C136 380 180 316 260 306 C344 296 400 360 406 470 Z", 264, 330], hund: ["M140 470 C136 380 182 316 262 306 C346 296 402 360 408 470 Z", 266, 330], maus: ["M146 470 C142 384 186 322 262 312 C342 302 396 364 402 470 Z", 264, 334], pinguin: ["M148 470 C138 380 178 300 262 292 C352 284 406 362 406 470 Z", 266, 330] };

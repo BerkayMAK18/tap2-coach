@@ -17,7 +17,10 @@
  *   Wissensbasis (Text) und Verlauf; Felder „system“ oder „tools“ in der Anfrage werden abgelehnt.
  * - Tageslimit pro Konto über app_tutor_take() (supabase/002_app_tutor.sql), zusätzlich Größenlimits je Anfrage.
  *   Kostenobergrenze: Prepaid-Guthaben ohne automatische Aufladung + Ausgabenlimit in der Anthropic Console.
- * - CORS nur für die Dev-App und localhost.
+ * - CORS nur für die eigene App: Secret APP_ORIGINS (Komma-Liste, z. B. für lokale Tests zusätzlich http://localhost:8080),
+ *   ohne Secret nur die Dev-Seite. Beim Umstieg die neue Adresse der App dort eintragen.
+ * - Antworten des kostenlosen Tutors: Chat-Text („nachricht“) wird serverseitig auf 4.000 Zeichen gekürzt (wie die Prüfung in der App) – die
+ *   Function taugt so nicht als allgemeiner Chatbot. Fehlermeldungen nennen keine internen Namen (Details nur im Log).
  *
  * Ablauf einer Runde: Der Tutor schreibt (optional nach Denk-Blöcken) genau einen Aufruf von pruefer_runde mit Chat-Text,
  * ggf. neuer Aufgabe samt Material, Bewertung und Graph-Updates. Die App prüft die Eingabe mit Zod (lib/tutor-schema.ts),
@@ -35,12 +38,12 @@
 import Anthropic from "npm:@anthropic-ai/sdk@1.3.0";
 import { createClient } from "npm:@supabase/supabase-js@2.119.0";
 
-const ORIGINS = ["https://tap2-coach-dev.akdemir-berkay.workers.dev", "http://localhost:8080"];
+const ORIGINS = (Deno.env.get("APP_ORIGINS") || "https://tap2-coach-dev.akdemir-berkay.workers.dev").split(",").map((o) => o.trim()).filter(Boolean);
 const MODELS: Record<string, string> = { haiku: "claude-haiku-5-5", sonnet: "claude-sonnet-5-5" };
 // Effort: Sonnet „medium“ (Bewerten braucht Sorgfalt), Haiku „low“ (günstig, schnell)
 const EFFORT: Record<string, string> = { haiku: "low", sonnet: "medium" };
 const LIMITS = { wissen: 60_000, messages: 120, message: 8_000, total: 500_000, blocks: 20 };
-const VERSION = 4; // 4: kostenloser Tutor für alle angemeldeten Konten (die App erkennt daran eine veraltete Funktion)
+const VERSION = 5; // 5: Härtung (Kürzung, Fehlermeldungen, Origins); 4: kostenloser Tutor für alle angemeldeten Konten
 const FREE = { url: "https://api.groq.com/openai/v1/chat/completions", model: "openai/gpt-oss-120b", tail: 10, maxTokens: 2500 };
 
 // TOOL-START (reines JSON – tutor-tool.test.ts liest diesen Abschnitt und vergleicht ihn mit dem Zod-Schema der App)
@@ -224,6 +227,19 @@ const okMsg = (m: Msg) => !!m && (m.role === "user" || m.role === "assistant")
   && (typeof m.content === "string" ? m.content.length > 0 && m.content.length <= LIMITS.message
     : Array.isArray(m.content) && m.content.length > 0 && m.content.length <= LIMITS.blocks && m.content.every((b) => okBlock(m.role, b)));
 
+/** Chat-Text der Antwort kürzen (4.000 Zeichen wie die Prüfung in der App) – nie ein allgemeiner Chatbot mit langen Texten */
+const MAX_NACHRICHT = 4000;
+function trimContent(content: Block[]): Block[] {
+  return content.map((b) => {
+    if (b.type === "text" && typeof b.text === "string" && b.text.length > MAX_NACHRICHT) return { ...b, text: b.text.slice(0, MAX_NACHRICHT) };
+    if (b.type === "tool_use" && b.input && typeof b.input === "object") {
+      const inp = b.input as Record<string, unknown>;
+      if (typeof inp.nachricht === "string" && inp.nachricht.length > MAX_NACHRICHT) return { ...b, input: { ...inp, nachricht: inp.nachricht.slice(0, MAX_NACHRICHT) } };
+    }
+    return b;
+  });
+}
+
 Deno.serve(async (req) => {
   const origin = req.headers.get("origin");
   if (req.method === "OPTIONS") return new Response(null, { headers: cors(origin) });
@@ -240,7 +256,7 @@ Deno.serve(async (req) => {
   let body: { model?: string; wissen?: string; messages?: Msg[]; system?: unknown; tools?: unknown };
   try { body = await req.json(); } catch { return json({ error: "Ungültige Anfrage: kein JSON.", v: VERSION }, 400, origin); }
   const free = !admin || body.model === "free"; // ohne Admin-Rolle immer der kostenlose Tutor
-  const key = free ? "free" : body.model ?? "sonnet", model = free ? "free" : MODELS[key];
+  const key = free ? "free" : body.model ?? "sonnet", model = free ? "free" : Object.hasOwn(MODELS, key) ? MODELS[key] : "";
   const wissen = typeof body.wissen === "string" ? body.wissen : "";
   const messages = Array.isArray(body.messages) ? body.messages : [];
   // Konkreter Grund statt nur „ungültig“ (enthält keine Inhalte, nur welche Prüfung fehlschlug)
@@ -256,7 +272,7 @@ Deno.serve(async (req) => {
 
   // 3) Tageslimit (zählt pro Anfrage, eigener Nutzer)
   const { data: allowed, error: limErr } = await sb.rpc("app_tutor_take");
-  if (limErr) return json({ error: "Limit-Prüfung fehlgeschlagen." }, 500, origin);
+  if (limErr) { console.error("app_tutor_take", limErr.message); return json({ error: "Der Tutor ist gerade nicht verfügbar." }, 500, origin); }
   if (!allowed) return json({ error: "Tageslimit erreicht. Morgen geht es weiter." }, 429, origin);
 
   // 4) Claude aufrufen
@@ -284,22 +300,23 @@ Deno.serve(async (req) => {
     const r = res as unknown as Anthropic.Message;
     if (r.stop_reason === "refusal") return json({ text: "Dazu kann ich hier nicht antworten. Formuliere es bitte anders.", usage: r.usage, stop: "refusal", v: VERSION }, 200, origin);
     // content: alle Blöcke (Text, Werkzeugaufruf, Denk-Blöcke) – die App hängt sie unverändert an den Verlauf
+    // Unverändert zurück (Denk-Blöcke und Verlauf müssen exakt bleiben); Tutor Pro gibt es nur für den Admin
     return json({ content: r.content, usage: r.usage, stop: r.stop_reason, model, v: VERSION }, 200, origin);
   } catch (e) {
     if (e instanceof Anthropic.RateLimitError) return json({ error: "Gerade zu viele Anfragen. Kurz warten." }, 429, origin);
-    if (e instanceof Anthropic.AuthenticationError) return json({ error: "API-Schlüssel ungültig (Secret ANTHROPIC_API_KEY prüfen)." }, 500, origin);
+    if (e instanceof Anthropic.AuthenticationError) { console.error("Anthropic: Schlüssel ungültig"); return json({ error: "Der Tutor ist gerade nicht verfügbar." }, 500, origin); }
     if (e instanceof Anthropic.BadRequestError) return json({ error: "Anfrage abgelehnt – evtl. Guthaben aufgebraucht oder Verlauf ungültig." }, 400, origin);
-    if (e instanceof Anthropic.APIError) return json({ error: `KI-Dienst nicht erreichbar (${e.status}).` }, 502, origin);
-    return json({ error: "Unbekannter Fehler." }, 500, origin);
+    if (e instanceof Anthropic.APIError) { console.error("Anthropic", e.status); return json({ error: "KI-Dienst gerade nicht erreichbar." }, 502, origin); }
+    console.error("tutor", e); return json({ error: "Unbekannter Fehler." }, 500, origin);
   }
 });
 
 /** Kostenloser Tutor: OpenAI-kompatibler Anbieter mit Gratis-Stufe (Secrets FREE_AI_URL, FREE_AI_KEY, FREE_AI_MODEL) */
 async function freeTutor(sb: ReturnType<typeof createClient>, messages: Msg[], origin: string | null) {
   const key = Deno.env.get("FREE_AI_KEY");
-  if (!key) return json({ error: "Der kostenlose Tutor ist auf dem Server noch nicht eingerichtet (Secret FREE_AI_KEY).", v: VERSION }, 503, origin);
+  if (!key) { console.error("Secret FREE_AI_KEY fehlt"); return json({ error: "Der kostenlose Tutor ist auf dem Server noch nicht eingerichtet.", v: VERSION }, 503, origin); }
   const { data: allowed, error: limErr } = await sb.rpc("app_tutor_take_free");
-  if (limErr) return json({ error: "Limit-Prüfung fehlgeschlagen (supabase/005_app_tutor_free.sql eingespielt?).", v: VERSION }, 500, origin);
+  if (limErr) { console.error("app_tutor_take_free", limErr.message); return json({ error: "Der kostenlose Tutor ist gerade nicht verfügbar.", v: VERSION }, 500, origin); }
   if (!allowed) return json({ error: "Das kostenlose Kontingent für heute ist aufgebraucht. Morgen geht es weiter – oder nutze die Brücke mit deiner eigenen KI.", v: VERSION }, 429, origin);
   const model = Deno.env.get("FREE_AI_MODEL") || FREE.model, url = Deno.env.get("FREE_AI_URL") || FREE.url;
   const tools = [{ type: "function", function: { name: TOOL.name, description: TOOL.description, parameters: TOOL.input_schema } }];
@@ -310,12 +327,12 @@ async function freeTutor(sb: ReturnType<typeof createClient>, messages: Msg[], o
     if (res.status === 400) res = await call({ tool_choice: "auto" }); // manche Anbieter kennen „required“/parallel_tool_calls nicht
     if (res.status === 429) return json({ error: "Der kostenlose Tutor ist gerade ausgelastet. Versuche es in einer Minute erneut – oder nutze die Brücke.", v: VERSION }, 429, origin);
     if (res.status === 413) return json({ error: "Die Sitzung ist für das kostenlose Modell zu lang geworden. Beende sie und starte eine neue.", v: VERSION }, 413, origin);
-    if (!res.ok) return json({ error: `Kostenloser KI-Dienst nicht erreichbar (${res.status}).`, v: VERSION }, 502, origin);
+    if (!res.ok) { console.error("free AI", res.status); return json({ error: "Kostenloser KI-Dienst gerade nicht erreichbar.", v: VERSION }, 502, origin); }
     const j = await res.json() as { choices?: { message?: { content?: string | null; tool_calls?: { id?: string; function?: { name?: string; arguments?: string } }[] }; finish_reason?: string }[]; usage?: { prompt_tokens?: number; completion_tokens?: number } };
     const ch = j.choices?.[0];
     if (!ch?.message) return json({ error: "Keine Antwort vom kostenlosen KI-Dienst.", v: VERSION }, 502, origin);
     const out = fromOpenAi(ch.message, String(ch.finish_reason ?? ""), TOOL.name, Date.now().toString(36));
-    return json({ content: out.content, usage: { input_tokens: j.usage?.prompt_tokens ?? 0, output_tokens: j.usage?.completion_tokens ?? 0 }, stop: out.stop, model, free: true, v: VERSION }, 200, origin);
+    return json({ content: trimContent(out.content as Block[]), usage: { input_tokens: j.usage?.prompt_tokens ?? 0, output_tokens: j.usage?.completion_tokens ?? 0 }, stop: out.stop, model, free: true, v: VERSION }, 200, origin);
   } catch {
     return json({ error: "Kostenloser KI-Dienst nicht erreichbar.", v: VERSION }, 502, origin);
   }

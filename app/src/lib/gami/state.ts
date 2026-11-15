@@ -40,6 +40,8 @@ export function book(G: GState) {
 }
 /** JSON mit sortierten Schlüsseln (feste Regel für Gleichstände – gleiches Ergebnis auf allen Geräten) */
 export const stab = (v: unknown): string => (Array.isArray(v) ? "[" + v.map(stab).join(",") + "]" : v && typeof v === "object" ? "{" + Object.keys(v).sort().map((k) => JSON.stringify(k) + ":" + stab((v as Loose)[k])).join(",") + "}" : JSON.stringify(v ?? null));
+/** Schlüssel aus fremden Daten (Sync, Import-Link): nie Prototyp-Namen, sonst könnten sie Object.prototype verändern. */
+const safeKey = (k: string) => k !== "__proto__" && k !== "constructor" && k !== "prototype";
 const DAYK = ["answered", "correct", "maxCombo", "sowi", "t2", "green", "fixed", "fresh"];
 const cleanToday = (t: Loose): Today => { const o: Loose = { day: t.day }; DAYK.forEach((k) => { o[k] = Math.max(0, num(t[k])); }); return o as Today; };
 const cleanQuests = (q: unknown): Quests | null => {
@@ -128,7 +130,7 @@ export function merge(G: GState, p: unknown) {
   const neu = isObj(inc.kb) && !Array.isArray(inc.kb);
   Object.keys(inc.owned || {}).forEach((id) => { if (IT[id]) G.owned[id] = 1; });
   Object.keys(inc.titles || {}).forEach((id) => { if (TI[id] && !G.titles[id]) G.titles[id] = +inc.titles[id] || 1; }); // Titel: Vereinigung
-  Object.entries(inc.ev || {}).forEach(([k, r]) => { if (!r || typeof r !== "object") return; const m = G.ev[k] = G.ev[k] || {}; m.best = Math.max(+(m.best as number) || 0, +(r.best as number) || 0); (["done", "got"] as const).forEach((f) => { if (+(r[f] as number) && (!+(m[f] as number) || +(r[f] as number) < +(m[f] as number))) m[f] = +(r[f] as number); }); m.kap = Object.assign({}, r.kap || {}, m.kap || {}); Object.entries(isObj(r.kap) ? r.kap : {}).forEach(([x, v]) => { if (+(v as number) && (!+(m.kap![x] as number) || +(v as number) < +(m.kap![x] as number))) m.kap![x] = +(v as number); }); }); // Kapitel: frühester Zeitpunkt (gleich auf allen Geräten) // Events: nie verlieren
+  Object.entries(inc.ev || {}).forEach(([k, r]) => { if (!r || typeof r !== "object" || !safeKey(k)) return; const m = G.ev[k] = (Object.hasOwn(G.ev, k) && G.ev[k]) || {}; m.best = Math.max(+(m.best as number) || 0, +(r.best as number) || 0); (["done", "got"] as const).forEach((f) => { if (+(r[f] as number) && (!+(m[f] as number) || +(r[f] as number) < +(m[f] as number))) m[f] = +(r[f] as number); }); m.kap = Object.assign({}, r.kap || {}, m.kap || {}); Object.entries(isObj(r.kap) ? r.kap : {}).forEach(([x, v]) => { if (+(v as number) && (!+(m.kap![x] as number) || +(v as number) < +(m.kap![x] as number))) m.kap![x] = +(v as number); }); }); // Kapitel: frühester Zeitpunkt (gleich auf allen Geräten) // Events: nie verlieren
   if (!neu) { G.boosts.xp2 = Math.max(G.boosts.xp2, +inc.boosts.xp2 || 0); G.boosts.shield = Math.max(G.boosts.shield, +inc.boosts.shield || 0); }
   if (inc.title !== undefined && (+(inc.titleAt as number) || 0) > (+(G.titleAt as number) || 0) && (!inc.title || G.titles[inc.title])) { G.title = inc.title; G.titleAt = +(inc.titleAt as number); } // Titel: die zuletzt getroffene Wahl
   const ahead = (+inc.earned || 0) > G.earned, tie = (+inc.earned || 0) === G.earned, incA = +(inc.lookAt as number) || 0, myA = +(G.lookAt as number) || 0;

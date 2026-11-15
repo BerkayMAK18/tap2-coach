@@ -20,7 +20,9 @@ import { ComboChip, EvPreview, HudPill } from "./Hud";
 import { ModalContent } from "./Layer";
 import { Rangliste } from "./Rangliste";
 
-const M = vi.hoisted(() => ({ conf: false, rpc: null as null | ((fn: string, a: Record<string, unknown>) => Promise<unknown>) }));
+const M = vi.hoisted(() => ({ joins: true, conf: false, rpc: null as null | ((fn: string, a: Record<string, unknown>) => Promise<unknown>) }));
+// Parität mit der Live-App bei offenem Mitmachen (in der Testphase ist es auf der Dev-Seite zu: LB_NEW_JOINS, eigener Test unten)
+vi.mock("@/config", async (orig) => ({ ...(await orig<typeof import("@/config")>()), get LB_NEW_JOINS() { return M.joins; } }));
 vi.mock("@tanstack/react-router", () => ({ Link: ({ to, children }: { to: string; children: unknown }) => <a href={to}>{children as never}</a> }));
 vi.mock("@/lib/supabase", () => ({ get supabase() { return M.conf ? { rpc: async (fn: string, a: Record<string, unknown>) => { try { return { data: await M.rpc!(fn, a), error: null }; } catch (e) { return { data: null, error: { message: String((e as Error).message) } }; } } } : null; } }));
 
@@ -208,5 +210,23 @@ describe("Rangliste", () => {
     lbAct.leaveAsk(); expect(R(<Rangliste />)).toBe(askOld);
     lbAct.edit(); expect(R(<Rangliste />)).toBe(editOld);
     lbAct.cancel(); expect(R(<Rangliste />)).toBe(cancelOld);
+  });
+  it("Testphase (LB_NEW_JOINS aus): kein neuer Eintrag, bestehende bleiben", async () => {
+    const calls: string[] = [], d = LBS["nicht dabei"];
+    const rpc = async (fn: string) => { calls.push(fn); return fn === "tap2_lb_top" ? JSON.parse(JSON.stringify(d)) : { ok: true }; };
+    M.joins = false; M.conf = true; M.rpc = rpc;
+    try {
+      setup(JSON.stringify(ADV), world({ conf: true, rpc })); localStorage.setItem("tap2coach-lb", JSON.stringify({ token: "ef".repeat(20) }));
+      await lbLoad(true);
+      const html = R(<Rangliste />);
+      expect(html).toContain("In der Testversion kannst du dich noch nicht neu eintragen");
+      expect(html).not.toContain("gm-lb-name");
+      lbAct.join("NeuerTester"); await settle();
+      expect(calls).not.toContain("tap2_lb_join");
+      // schon eingetragen (z. B. über die Live-App): Namen ändern bleibt möglich
+      localStorage.setItem("tap2coach-lb", JSON.stringify({ joined: true, name: "CodeRabe", token: "ef".repeat(20) }));
+      lbAct.join("CodeRabe2"); await settle();
+      expect(calls).toContain("tap2_lb_join");
+    } finally { M.joins = true; }
   });
 });

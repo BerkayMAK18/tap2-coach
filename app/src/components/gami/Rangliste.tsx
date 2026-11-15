@@ -4,6 +4,7 @@
  * Namen und Daten vom Server sind Fremddaten: nur als Text; Figuren nur aus bekannten Teilen (lookEq).
  */
 import { useEffect, useRef } from "react";
+import { LB_NEW_JOINS } from "@/config";
 import { lbGet, lookEq, type LbEntry } from "@/lib/gami/lb";
 import { num } from "@/lib/state";
 import { supabase } from "@/lib/supabase";
@@ -20,7 +21,9 @@ export function Rangliste() {
     <>
       <section className="card gm-lbhead"><div className="gm-ava"><Fig c={G.char} eq={G.equip[G.char]} /></div><div><h2>Rangliste</h2><p className="small muted">{`Wer sammelt die meisten XP? Du bist Level ${G.level} mit ${G.earned.toLocaleString("de-DE")} XP.`}</p></div></section>
       {!conf ? <section className="card"><h3>Bestenliste</h3><p className="small muted">Die Bestenliste ist in dieser Version nicht verfügbar.</p></section> : <>
-        {!lb.joined || lbs.edit ? (
+        {!lb.joined && !LB_NEW_JOINS ? (
+          <section className="card"><h3>Mitmachen</h3><p className="small muted">In der Testversion kannst du dich noch nicht neu eintragen – die Bestenliste ist dieselbe wie in der bisherigen App, und dort sollen keine Testnamen landen. Wer schon dabei ist (z. B. über ein verbundenes Gerät), wird hier weiter aktualisiert.</p></section>
+        ) : !lb.joined || lbs.edit ? (
           <section className="card"><h3>{lb.joined ? "Namen ändern" : "Mitmachen"}</h3><p className="small muted">Wähle einen Spitznamen. Für alle sichtbar sind nur dein Name, dein Level, deine XP und deine Figur. Nimm bitte nicht deinen echten Namen. Du kannst dich jederzeit wieder austragen.</p>
             <div className="row" style={{ marginTop: 10 }}><input ref={input} type="text" className="gm-in" id="gm-lb-name" maxLength={16} placeholder="z. B. CodeRabe" defaultValue={String(lb.name || "")} autoComplete="off" spellCheck={false} aria-label="Spitzname" onKeyDown={(e) => { if (e.key === "Enter") lbAct.join(e.currentTarget.value); }} /><button type="button" className="btn primary small" data-gm-lbjoin="" disabled={lbs.busy} onClick={() => lbAct.join(input.current ? input.current.value : "")}>{lb.joined ? "Speichern" : "Mitmachen"}</button>{lb.joined ? <button type="button" className="btn small ghost" data-gm-lbcancel="" onClick={lbAct.cancel}>Abbrechen</button> : null}</div>
             {lbs.err ? <p className="small warn-text" style={{ marginTop: 6 }}>{lbs.err}</p> : null}</section>

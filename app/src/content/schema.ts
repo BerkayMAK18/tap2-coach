@@ -140,3 +140,37 @@ export const CatalogIndex = z.object({
   quelle: z.object({ datei: z.string(), hash: z.string() }),
   kataloge: z.array(z.object({ id: z.string(), datei: z.string(), titel: z.string(), art: z.string(), enabled: z.boolean(), tags: z.array(z.string()), fragen: z.number(), ende: z.string().optional() })),
 });
+
+/**
+ * Normalisierung visuell (nur neue App): Beispiele in src/content/normalisierung.json, zugeordnet über Katalog-IDs
+ * (Aufgabe „D2“, offene Frage „o83“, Karte „k:db0“, MC „m85“, Lernpaket-Abschnitt „P04:Normalformen“).
+ * Nur Daten – die App stellt sie selbst als Tabellen und Diagramme dar, nie als HTML.
+ * Spalte: pk/fk (Zieltabelle derselben Stufe), aus = Spalten der Vorstufe, aus denen sie entsteht (umbenannt/aufgeteilt),
+ * neu = kommt ohne Vorlage hinzu (künstlicher Schlüssel, Menge), mehrwertig = nicht atomar (verletzt die 1. NF).
+ */
+const NormName = z.string().regex(/^[A-Za-zÄÖÜäöüß][A-Za-z0-9ÄÖÜäöüß_]{0,39}$/);
+export const NormSpalte = z.object({
+  n: NormName,
+  pk: z.boolean().optional(),
+  fk: NormName.optional(),
+  aus: z.array(NormName).min(1).optional(),
+  neu: z.boolean().optional(),
+  mehrwertig: z.boolean().optional(),
+});
+export const NormTabelle = z.object({ name: NormName, spalten: z.array(NormSpalte).min(1).max(10), zeilen: z.array(z.array(z.string().max(80))).max(8).default([]) });
+/** Funktionale Abhängigkeit von → nach; art: voll (in Ordnung), teilweise (verletzt 2. NF), transitiv (verletzt 3. NF) */
+export const NormAbh = z.object({ von: z.array(NormName).min(1), nach: z.array(NormName).min(1), art: z.enum(["voll", "teilweise", "transitiv"]) });
+export const NormStufe = z.object({ nf: z.number().int().min(0).max(3), text: z.string().min(1).max(400), tabellen: z.array(NormTabelle).min(1).max(6) });
+export const NormBeispiel = z.object({
+  titel: z.string().min(1).max(80),
+  refs: z.array(z.string().min(1)).min(1),
+  abhIn: z.number().int().min(0).default(0), // Stufe, auf deren (einziger) Tabelle die Abhängigkeiten gezeigt werden
+  abh: z.array(NormAbh).default([]),
+  stufen: z.array(NormStufe).min(1).max(4),
+});
+export const NormDatei = z.object({ schema: z.literal(1), beispiele: z.array(NormBeispiel) });
+export type NormSpalte = z.infer<typeof NormSpalte>;
+export type NormTabelle = z.infer<typeof NormTabelle>;
+export type NormAbh = z.infer<typeof NormAbh>;
+export type NormStufe = z.infer<typeof NormStufe>;
+export type NormBeispiel = z.infer<typeof NormBeispiel>;

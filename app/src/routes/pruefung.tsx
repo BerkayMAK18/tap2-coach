@@ -23,6 +23,7 @@ import { usePruefung } from "@/store/pruefung";
 import { fmtClock } from "@/store/timer";
 import { Ic, Ring, pctS } from "@/ui-main";
 import { CodeVariants } from "@/components/CodeVariants";
+import { NormVisual, TextMitTabellen } from "@/components/NormVisual";
 
 export const Route = createFileRoute("/pruefung")({ component: Pruefung });
 
@@ -168,7 +169,7 @@ function RealWrite({ r }: { r: PkRun }) {
         <section key={ai} className="card"><div className="row"><h3>{ai + 1}. Aufgabe: {a.title}</h3><span className="spacer" /><span className="chip blue">{a.items.reduce((b, i) => b + i.p, 0)} P</span></div>
           {a.items.some((i) => i.schema) && <Tables />}
           {a.items.map((it, ii) => (
-            <div key={ii} className="sub-q"><div className="row"><b>{LETTERS[ii]})</b><span className="spacer" /><span className="small muted">{it.p} Punkte</span></div><div className="qtext">{it.q}</div><label className="sr" htmlFor={`ans-${ai}-${ii}`}>Antwort zu Aufgabe {ai + 1}{LETTERS[ii]}</label><textarea id={`ans-${ai}-${ii}`} rows={it.p >= 15 ? 12 : 5} placeholder="Deine Antwort" value={it.ans} onChange={(e) => patch((x) => setAns(x, ai, ii, e.target.value))} /></div>
+            <div key={ii} className="sub-q"><div className="row"><b>{LETTERS[ii]})</b><span className="spacer" /><span className="small muted">{it.p} Punkte</span></div><TextMitTabellen className="qtext" text={it.q} /><label className="sr" htmlFor={`ans-${ai}-${ii}`}>Antwort zu Aufgabe {ai + 1}{LETTERS[ii]}</label><textarea id={`ans-${ai}-${ii}`} rows={it.p >= 15 ? 12 : 5} placeholder="Deine Antwort" value={it.ans} onChange={(e) => patch((x) => setAns(x, ai, ii, e.target.value))} /></div>
           ))}
         </section>
       ))}
@@ -200,9 +201,9 @@ function RealGrade({ r }: { r: PkRun }) {
           {a.items.map((it, ii) => {
             const op = opHint(it.q);
             return (
-              <div key={ii} className="sub-q"><div className="row"><b>{LETTERS[ii]})</b>{op && <span className="chip violet">{op[0]}</span>}<span className="spacer" /><span className="small muted">{it.p} P</span></div><div className="qtext small">{it.q}</div>
+              <div key={ii} className="sub-q"><div className="row"><b>{LETTERS[ii]})</b>{op && <span className="chip violet">{op[0]}</span>}<span className="spacer" /><span className="small muted">{it.p} P</span></div><TextMitTabellen className="qtext small" text={it.q} />
                 {op && <p className="ophint">{op[1]}</p>}
-                <div className="grade-grid"><div><span className="small muted">Deine Antwort</span><pre className="mine">{it.ans || "(leer)"}</pre></div><div><span className="small muted">Erwartungshorizont</span><CodeVariants pseudo={it.a}><pre>{it.a}</pre></CodeVariants></div></div>
+                <div className="grade-grid"><div><span className="small muted">Deine Antwort</span><pre className="mine">{it.ans || "(leer)"}</pre></div><div><span className="small muted">Erwartungshorizont</span><NormVisual id={it.id}><CodeVariants pseudo={it.a}><pre>{it.a}</pre></CodeVariants></NormVisual></div></div>
                 <div className="row steps">{steps(it.p).map((v, k) => <button key={k} type="button" className={`btn small ${it.got === v ? "sel" : ""}`} aria-pressed={it.got === v} onClick={() => patch((x) => setGot(x, ai, ii, v))}>{STEP_LBL[k]}{k && k < 4 ? ` · ${dec(v)}` : ""}</button>)}<label className="f inline" htmlFor={`g-${ai}-${ii}`}>Punkte <GotInput id={`g-${ai}-${ii}`} max={it.p} got={it.got} onSet={(v) => patch((x) => setGot(x, ai, ii, v))} /></label></div>
                 {it.got !== null && it.got < it.p && <div className="cause-box"><span className="small muted">Warum fehlen {dec(it.p - it.got)} P?</span><CauseChips sel={it.cause} onPick={(c) => patch((x) => toggleCause(x, ai, ii, c))} /></div>}
               </div>

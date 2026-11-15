@@ -20,6 +20,7 @@ import { ComboChip } from "@/components/gami/Hud";
 import { useProgress, type Session } from "@/store/progress";
 import { Ic } from "@/ui-main";
 import { CodeVariants } from "@/components/CodeVariants";
+import { NormVisual } from "@/components/NormVisual";
 import { AmpBar, Amp, Ewh, Fig, Front, Legend, Trans } from "@/components/lernen/bits";
 import { CodeEditor } from "@/components/lernen/CodeEditor";
 import { SqlAuto, SqlPanel } from "@/components/lernen/Sql";
@@ -164,6 +165,7 @@ function QuestionView({ sess: s, q, at, close }: { sess: Session; q: Question; a
           </button>
         ))}</div>
         {picked && <Fig q={q} />}
+        {picked && <NormVisual id={q.id} />}
       </>
     );
     const r = s.res[q.id];
@@ -203,7 +205,7 @@ function QuestionView({ sess: s, q, at, close }: { sess: Session; q: Question; a
     body = s.rev ? (
       <>
         {own && <div className="answer-wrap own"><span className="alab">Deine Antwort</span><div className="answer">{s.own}</div></div>}
-        <div className="answer-wrap"><span className="alab">{q.type === "card" && q.note ? "Musterlösung" : "Antwort"}</span><CodeVariants pseudo={q.type === "card" ? q.a : ""}><div className={`answer ${looksCode(q) ? "mono" : ""}`}>{q.type === "card" ? q.a : ""}</div></CodeVariants></div>
+        <div className="answer-wrap"><span className="alab">{q.type === "card" && q.note ? "Musterlösung" : "Antwort"}</span><NormVisual id={q.id}><CodeVariants pseudo={q.type === "card" ? q.a : ""}><div className={`answer ${looksCode(q) ? "mono" : ""}`}>{q.type === "card" ? q.a : ""}</div></CodeVariants></NormVisual></div>
         <Fig q={q} /><Ewh q={q} />
         {own && <p className="cmp-hint">Vergleiche: Sind alle Aspekte aus dem Erwartungshorizont drin? Passt deine Antwort zum Operator?</p>}
       </>

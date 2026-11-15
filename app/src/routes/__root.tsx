@@ -16,6 +16,7 @@ import { EVENTS } from "@/content/catalog";
 import { evOn } from "@/lib/events";
 import { gm, setGamiContext, useGami } from "@/store/gami";
 import { HudPill } from "@/components/gami/Hud";
+import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { GamiLayer } from "@/components/gami/Layer";
 import { Ic, Ring, pctS } from "@/ui-main";
 import { NAV_FOOT, NAV_MAIN, VTITLE } from "@/ui-main/nav";
@@ -92,16 +93,16 @@ function Shell() {
           <div className="hud" id="hud">
             <button type="button" className="pill" data-go="start" title="Anteil der Fragen auf Grün, gelbe zählen halb"><Ring frac={c.pct} size={22} sw={4} /><span className="lbl">Prüfungsreife</span><b>{pctS(c.pct)}</b></button>
             <span className="pill days"><Ic name="calendar" /><b>{Math.max(0, left)}</b><span className="lbl">{left === 1 ? "Tag" : "Tage"}</span></span>
-            <HudPill view={view} />
+            <ErrorBoundary fallback={null}><HudPill view={view} /></ErrorBoundary>
             <button type="button" className="iconbtn hb" aria-label="Fragen durchsuchen" title="Suchen (Taste /)" onClick={openSearch}><Ic name="search" /></button>
             <button type="button" className={`iconbtn hb ${view === "einstellungen" ? "on" : ""}`} data-go="einstellungen" aria-label="Einstellungen" title="Einstellungen"><Ic name="gear" /></button>
           </div>
         </header>
-        <main className={`content${view === "tutor" ? " wide" : ""}`}><section className="view"><Outlet /></section></main>
+        <main className={`content${view === "tutor" ? " wide" : ""}`}><section className="view"><ErrorBoundary resetKey={loc.pathname}><Outlet /></ErrorBoundary></section></main>
         <Foot />
       </div>
       <UpdatePrompt />
-      <GamiLayer />
+      <ErrorBoundary fallback={null}><GamiLayer /></ErrorBoundary>
       <ConfirmHost />
       <Suche />
     </div>

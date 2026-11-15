@@ -1,8 +1,16 @@
 /**
  * Supabase Edge Function „tutor“ – KI-Prüfungstutor für die TAP2 (Premium, vorerst nur Admin).
  *
+ * Zwei Modi (14./15.11.2026):
+ * - Tutor Pro (nur app_metadata.role = "admin"): Claude (Sonnet 5.5 / Haiku 5.5), siehe unten.
+ * - Kostenloser Tutor (alle anderen angemeldeten Konten, Admin optional mit model = "free"): ein OpenAI-kompatibler
+ *   Anbieter mit Gratis-Stufe (Secrets FREE_AI_URL, FREE_AI_KEY, FREE_AI_MODEL; Standard: Groq, openai/gpt-oss-120b).
+ *   Gleiches Werkzeug, kompakter Prompt, nur der jüngste Verlauf (Gratis-Stufen erlauben wenig Tokens pro Minute).
+ *   Verlauf und Antwort werden zwischen dem Blockformat der App und dem OpenAI-Format umgewandelt (toOpenAi/fromOpenAi).
+ *   Eigenes Tageslimit je Konto und eine Gesamtgrenze pro Tag: app_tutor_take_free() (supabase/005_app_tutor_free.sql).
+ *
  * Sicherheit:
- * - Nur mit gültigem Login (JWT) UND app_metadata.role = "admin". app_metadata können Nutzer nicht selbst ändern.
+ * - Nur mit gültigem Login (JWT). Tutor Pro zusätzlich nur mit app_metadata.role = "admin" (Nutzer können das nicht ändern).
  * - Der Claude-API-Schlüssel kommt aus dem Secret ANTHROPIC_API_KEY (Supabase → Edge Functions → Secrets),
  *   nie aus dem Code oder vom Browser.
  * - Anweisungen und das einzige Werkzeug („pruefer_runde“, festes Schema) legt NUR dieser Server fest. Der Browser schickt
@@ -32,7 +40,8 @@ const MODELS: Record<string, string> = { haiku: "claude-haiku-5-5", sonnet: "cla
 // Effort: Sonnet „medium“ (Bewerten braucht Sorgfalt), Haiku „low“ (günstig, schnell)
 const EFFORT: Record<string, string> = { haiku: "low", sonnet: "medium" };
 const LIMITS = { wissen: 60_000, messages: 120, message: 8_000, total: 500_000, blocks: 20 };
-const VERSION = 3; // Prüfer-Tutor mit festem Werkzeug (die App erkennt daran eine veraltete Funktion)
+const VERSION = 4; // 4: kostenloser Tutor für alle angemeldeten Konten (die App erkennt daran eine veraltete Funktion)
+const FREE = { url: "https://api.groq.com/openai/v1/chat/completions", model: "openai/gpt-oss-120b", tail: 10, maxTokens: 2500 };
 
 // TOOL-START (reines JSON – tutor-tool.test.ts liest diesen Abschnitt und vergleicht ihn mit dem Zod-Schema der App)
 const TOOL = {
@@ -142,6 +151,54 @@ Melde in graph, was du über mein Wissen gelernt hast – nur mit Konzept-IDs (K
 - Grundlage ist ausschließlich die Wissensbasis und das Thema der Sitzung. Erfinde keine Prüfungsinhalte außerhalb davon.
 - Sage ich, dass ich aufhören will, oder sind etwa 8 Aufgaben geschafft, schließe mit abschluss (Fazit, nächster Schritt) ab.`;
 
+const SYSTEM_FREE = `Du bist ein Prüfungstutor für die IHK-Abschlussprüfung Teil 2, Fachinformatiker Anwendungsentwicklung. Deutsch, duzen, kurz und klar.
+Die Sitzung gilt einem Thema (erste Nachricht: mein Stand je Konzept und die Lerninhalte). Stelle eine Aufgabe nach der anderen im IHK-Stil (Operator, Punkte, bei Bedarf Material als Tabelle/Code/Regeln in aufgabe.material) und bewerte meine Antworten wie ein Prüfer mit Teilpunkten und Begründung (bewertung). Verrate Lösungen nicht vorschnell. „Ich stehe auf dem Schlauch“ = kleiner Teilschritt statt Lösung. „Sicher, aber falsch“ = Fehlvorstellung im graph melden.
+Antworte IMMER mit genau einem Aufruf des Werkzeugs pruefer_runde – dein Text steht in nachricht. Konzept-IDs (z. B. P04.2) nur aus meiner ersten Nachricht. Erwartungshorizont (aufgabe.erwartung) muss die Punkte ergeben.`;
+
+// CONVERT-START (reine Funktionen ohne Deno – tutor-free.test.ts liest diesen Abschnitt und prüft ihn)
+type OaCall = { id: string; type: "function"; function: { name: string; arguments: string } };
+type OaMsg = { role: "system" | "user" | "assistant" | "tool"; content: string | null; tool_calls?: OaCall[]; tool_call_id?: string };
+type AppBlock = { type: string; [k: string]: unknown };
+type AppMsg = { role: "user" | "assistant"; content: string | AppBlock[] };
+
+/** Verlauf der App (Blöcke wie bei Claude) → OpenAI-Format. Behält die erste Nachricht (Übergabe) und die jüngsten tail Nachrichten. */
+function toOpenAi(system: string, messages: AppMsg[], tail: number): OaMsg[] {
+  const out: OaMsg[] = [];
+  for (const m of messages) {
+    if (typeof m.content === "string") { out.push({ role: m.role, content: m.content }); continue; }
+    if (m.role === "user") {
+      m.content.filter((b) => b.type === "tool_result").forEach((b) => out.push({ role: "tool", tool_call_id: String(b.tool_use_id), content: String(b.content ?? "ok") }));
+      const t = m.content.filter((b) => b.type === "text").map((b) => String(b.text)).join("\n\n");
+      if (t) out.push({ role: "user", content: t });
+    } else {
+      const text = m.content.filter((b) => b.type === "text").map((b) => String(b.text)).join("\n").trim();
+      const calls: OaCall[] = m.content.filter((b) => b.type === "tool_use").map((b) => ({ id: String(b.id), type: "function", function: { name: String(b.name), arguments: JSON.stringify(b.input ?? {}) } }));
+      out.push({ role: "assistant", content: text || null, ...(calls.length ? { tool_calls: calls } : {}) });
+    }
+  }
+  let msgs = out;
+  if (out.length > tail + 1) { let rest = out.slice(-tail); while (rest.length && rest[0].role === "tool") rest = rest.slice(1); msgs = [out[0], ...rest]; }
+  return [{ role: "system", content: system }, ...msgs];
+}
+
+/** Antwort im OpenAI-Format → Blöcke der App. Nur das Werkzeug pruefer_runde zählt; JSON im Text wird als Aufruf gedeutet. */
+function fromOpenAi(msg: { content?: string | null; tool_calls?: { id?: string; function?: { name?: string; arguments?: string } }[] }, finish: string, toolName: string, idSeed: string): { content: AppBlock[]; stop: string } {
+  const content: AppBlock[] = [];
+  let text = String(msg.content ?? "").trim();
+  const parse = (s: string): unknown => { try { return JSON.parse(s); } catch { return undefined; } };
+  const okId = (id: unknown, i: number) => (typeof id === "string" && /^[A-Za-z0-9_-]{1,64}$/.test(id) ? id : `call_${idSeed}_${i}`);
+  let call = (msg.tool_calls ?? []).find((c) => c?.function?.name === toolName);
+  let input = call ? parse(call.function?.arguments || "{}") : undefined;
+  if (!call && text) { // manche Modelle schreiben das JSON in den Text
+    const j = text.replace(/^```(?:json)?\s*|\s*```$/g, ""), v = j.startsWith("{") ? parse(j) : undefined;
+    if (v && typeof v === "object" && "nachricht" in (v as Record<string, unknown>)) { call = { id: undefined, function: { name: toolName } }; input = v; text = ""; }
+  }
+  if (text) content.push({ type: "text", text });
+  if (call) content.push({ type: "tool_use", id: okId(call.id, 0), name: toolName, input: input && typeof input === "object" ? input : {} });
+  return { content: content.length ? content : [{ type: "text", text: "(keine Antwort)" }], stop: call ? "tool_use" : finish === "length" ? "max_tokens" : "end_turn" };
+}
+// CONVERT-END
+
 const cors = (origin: string | null) => ({
   "Access-Control-Allow-Origin": origin && ORIGINS.includes(origin) ? origin : ORIGINS[0],
   "Access-Control-Allow-Headers": "authorization, apikey, content-type, x-client-info",
@@ -177,12 +234,13 @@ Deno.serve(async (req) => {
   const sb = createClient(Deno.env.get("SUPABASE_URL")!, Deno.env.get("SUPABASE_ANON_KEY")!, { global: { headers: { Authorization: auth } } });
   const { data: u } = await sb.auth.getUser();
   if (!u?.user) return json({ error: "Nicht angemeldet." }, 401, origin);
-  if (u.user.app_metadata?.role !== "admin") return json({ error: "Der Tutor ist für dein Konto nicht freigeschaltet." }, 403, origin);
+  const admin = u.user.app_metadata?.role === "admin";
 
   // 2) Eingaben prüfen
   let body: { model?: string; wissen?: string; messages?: Msg[]; system?: unknown; tools?: unknown };
   try { body = await req.json(); } catch { return json({ error: "Ungültige Anfrage: kein JSON.", v: VERSION }, 400, origin); }
-  const key = body.model ?? "sonnet", model = MODELS[key];
+  const free = !admin || body.model === "free"; // ohne Admin-Rolle immer der kostenlose Tutor
+  const key = free ? "free" : body.model ?? "sonnet", model = free ? "free" : MODELS[key];
   const wissen = typeof body.wissen === "string" ? body.wissen : "";
   const messages = Array.isArray(body.messages) ? body.messages : [];
   // Konkreter Grund statt nur „ungültig“ (enthält keine Inhalte, nur welche Prüfung fehlschlug)
@@ -193,6 +251,8 @@ Deno.serve(async (req) => {
     : messages[0].role !== "user" || messages[messages.length - 1].role !== "user" ? "erste und letzte Nachricht müssen vom Nutzer sein"
     : JSON.stringify(messages).length > LIMITS.total ? "Verlauf zu lang" : "";
   if (bad) return json({ error: `Ungültige Anfrage: ${bad}.`, v: VERSION }, 400, origin);
+
+  if (free) return freeTutor(sb, messages, origin);
 
   // 3) Tageslimit (zählt pro Anfrage, eigener Nutzer)
   const { data: allowed, error: limErr } = await sb.rpc("app_tutor_take");
@@ -233,3 +293,30 @@ Deno.serve(async (req) => {
     return json({ error: "Unbekannter Fehler." }, 500, origin);
   }
 });
+
+/** Kostenloser Tutor: OpenAI-kompatibler Anbieter mit Gratis-Stufe (Secrets FREE_AI_URL, FREE_AI_KEY, FREE_AI_MODEL) */
+async function freeTutor(sb: ReturnType<typeof createClient>, messages: Msg[], origin: string | null) {
+  const key = Deno.env.get("FREE_AI_KEY");
+  if (!key) return json({ error: "Der kostenlose Tutor ist auf dem Server noch nicht eingerichtet (Secret FREE_AI_KEY).", v: VERSION }, 503, origin);
+  const { data: allowed, error: limErr } = await sb.rpc("app_tutor_take_free");
+  if (limErr) return json({ error: "Limit-Prüfung fehlgeschlagen (supabase/005_app_tutor_free.sql eingespielt?).", v: VERSION }, 500, origin);
+  if (!allowed) return json({ error: "Das kostenlose Kontingent für heute ist aufgebraucht. Morgen geht es weiter – oder nutze die Brücke mit deiner eigenen KI.", v: VERSION }, 429, origin);
+  const model = Deno.env.get("FREE_AI_MODEL") || FREE.model, url = Deno.env.get("FREE_AI_URL") || FREE.url;
+  const tools = [{ type: "function", function: { name: TOOL.name, description: TOOL.description, parameters: TOOL.input_schema } }];
+  const base = { model, messages: toOpenAi(SYSTEM_FREE, messages as AppMsg[], FREE.tail), tools, max_tokens: FREE.maxTokens, temperature: 0.4 };
+  const call = (extra: Record<string, unknown>) => fetch(url, { method: "POST", headers: { Authorization: `Bearer ${key}`, "Content-Type": "application/json" }, body: JSON.stringify({ ...base, ...extra }) });
+  try {
+    let res = await call({ tool_choice: "required", parallel_tool_calls: false });
+    if (res.status === 400) res = await call({ tool_choice: "auto" }); // manche Anbieter kennen „required“/parallel_tool_calls nicht
+    if (res.status === 429) return json({ error: "Der kostenlose Tutor ist gerade ausgelastet. Versuche es in einer Minute erneut – oder nutze die Brücke.", v: VERSION }, 429, origin);
+    if (res.status === 413) return json({ error: "Die Sitzung ist für das kostenlose Modell zu lang geworden. Beende sie und starte eine neue.", v: VERSION }, 413, origin);
+    if (!res.ok) return json({ error: `Kostenloser KI-Dienst nicht erreichbar (${res.status}).`, v: VERSION }, 502, origin);
+    const j = await res.json() as { choices?: { message?: { content?: string | null; tool_calls?: { id?: string; function?: { name?: string; arguments?: string } }[] }; finish_reason?: string }[]; usage?: { prompt_tokens?: number; completion_tokens?: number } };
+    const ch = j.choices?.[0];
+    if (!ch?.message) return json({ error: "Keine Antwort vom kostenlosen KI-Dienst.", v: VERSION }, 502, origin);
+    const out = fromOpenAi(ch.message, String(ch.finish_reason ?? ""), TOOL.name, Date.now().toString(36));
+    return json({ content: out.content, usage: { input_tokens: j.usage?.prompt_tokens ?? 0, output_tokens: j.usage?.completion_tokens ?? 0 }, stop: out.stop, model, free: true, v: VERSION }, 200, origin);
+  } catch {
+    return json({ error: "Kostenloser KI-Dienst nicht erreichbar.", v: VERSION }, 502, origin);
+  }
+}

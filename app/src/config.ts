@@ -37,3 +37,9 @@ export const CONTROLLER = {
 
 /** Stand des Datenschutzhinweises – bei jeder inhaltlichen Änderung anpassen. */
 export const PRIVACY_VERSION = "2026-11-14";
+
+/**
+ * Kostenloser Tutor: Anbieter der Gratis-Stufe (Server-Secrets FREE_AI_URL/FREE_AI_KEY/FREE_AI_MODEL in der Edge Function).
+ * Wird in der Einwilligung und im Datenschutzhinweis genannt – bei einem Wechsel des Anbieters hier mit anpassen.
+ */
+export const FREE_AI = { provider: "Groq, Inc. (USA)", consentVersion: "2026-11-15" } as const;

@@ -34,6 +34,7 @@ diesen Hinweis und dieses Dokument mitpflegen.**
 | Übertragen per Link/QR | Lernstand im #-Teil des Links | nur auf den Geräten (kein Server) | Art. 6 (1) b | wer den Link hat | Link nicht weitergeben |
 | Fehler melden | was der Nutzer selbst auf GitHub abschickt | GitHub (USA, DPF) | eigenständig GitHub | öffentlich | über GitHub |
 | KI-Tutor (nur Admin) | Eingaben des Admins, Übergabe (Stand je Konzept, Fehlvorstellungen – keine Namen) | Anthropic (USA) | – (nur eigene Daten des Betreibers) | Anthropic | nach Anbieter |
+| Kostenloser KI-Tutor (mit Anmeldung) | Nachrichten im Tutor, Stand zum Thema (ohne Namen/Konto-Daten) | KI-Anbieter der Gratis-Stufe (Standard: Groq, USA) über die Edge Function | Art. 6 (1) a (Einwilligung vor der ersten Nachricht) | Anbieter nach seinen Bedingungen; Server speichert nur Zähler | Zähler 30 Tage |
 | Tutor-Stand (nur Admin) | Belege, Fehlvorstellungen, Sitzungen, Tutor-XP (JSON), Version, Zeitstempel (`app_tutor_state`) | Supabase DB, Frankfurt | – (nur eigene Daten des Betreibers); später Art. 6 (1) b | Nutzer über die App; Betreiber technisch (nicht E2E) | Konto löschen (Kaskade) |
 
 AV = Auftragsverarbeitung. **Supabase:** Der DPA ist Teil der Terms of Service und gilt automatisch für alle
@@ -76,6 +77,15 @@ PDF für die eigenen Unterlagen ablegen (Rechenschaftspflicht, Art. 5 Abs. 2 DSG
 ### Konto löschen
 - Supabase Edge Function `delete-account`: prüft das JWT, löscht Sync-Daten, Ranglisten-Eintrag und den Auth-Nutzer
   (dafür braucht die Funktion den Service-Key – er liegt nur als Secret in der Edge Function, nie im Frontend).
+
+### Kostenloser KI-Tutor (alle angemeldeten Konten)
+- Edge Function `tutor`, Modus „free“: OpenAI-kompatibler Anbieter mit Gratis-Stufe (Secrets `FREE_AI_URL`, `FREE_AI_KEY`,
+  `FREE_AI_MODEL`; Standard Groq mit `openai/gpt-oss-120b`). Der Schlüssel liegt nur als Secret im Server.
+- Einwilligung in der App vor der ersten Nachricht (Version in `src/config.ts` → `FREE_AI.consentVersion`); ohne sie
+  bleibt die Brücke. Anbietername steht in `FREE_AI.provider` und im Datenschutzhinweis – bei einem Wechsel anpassen.
+- Gespeichert werden nur Zähler je Konto und Tag (`app_tutor_free_usage`, `app_tutor_free_total`,
+  `supabase/005_app_tutor_free.sql`), keine Inhalte.
+- Vor dem Freischalten die aktuellen Bedingungen des Anbieters prüfen (Datennutzung der Gratis-Stufe, Speicherdauer).
 
 ### KI-Tutor (Premium, vorerst nur Admin)
 - Supabase Edge Function `tutor` mit Claude API, Schlüssel als Supabase-Secret.

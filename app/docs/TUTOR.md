@@ -29,6 +29,33 @@ Stand: 14.11.2026. Die App heißt seit 14.11.2026 „Vortex“; der KI-Tutor hei
   Brücke nichts.
 - Die alte „Claude-Projekt“-Brücke (`tutor-bridge.ts`, Themen-Ebene) ist entfernt.
 
+## Kostenloser KI-Tutor (15.11.2026)
+
+Angemeldete Nutzer ohne Premium bekommen denselben Chat wie Tutor Pro (Aufgaben, Material, Bewertung, Graph, XP), aber
+mit einem einfacheren, kostenlosen Modell. Ohne Anmeldung, oder wenn man es möchte, bleibt die Brücke zur eigenen KI.
+
+- **Server:** Modus „free“ in `supabase/functions/tutor/index.ts`.
+  - Gilt automatisch für alle Konten ohne Admin-Rolle; der Admin kann ihn mit `model = "free"` testen.
+  - Anbieter ist ein OpenAI-kompatibler Dienst (Standard Groq, Modell `openai/gpt-oss-120b`).
+  - Gleiches Werkzeug `pruefer_runde`, kompakter Prompt, nur Übergabe plus die jüngsten 10 Nachrichten (Gratis-Stufen
+    erlauben wenig Tokens pro Minute).
+  - `toOpenAi`/`fromOpenAi` wandeln zwischen dem Blockformat der App und dem OpenAI-Format um. Schreibt das Modell das
+    JSON in den Text statt als Werkzeugaufruf, wird es trotzdem als Runde gelesen. Getestet in `tutor-free.test.ts`.
+- **Limits:** `app_tutor_take_free()` erlaubt 40 Anfragen je Konto und Tag (etwa 2 Sitzungen) und 900 für alle zusammen,
+  passend zum Freikontingent von rund 1.000 Anfragen pro Tag.
+- **App:**
+  - Unter „So möchtest du lernen“ wählt man „In der App (kostenlos)“ oder „Mit eigener KI“.
+  - Vor der ersten Nachricht erscheint eine Einwilligung zur Übermittlung an den Anbieter.
+  - Es gibt keine Kostenanzeige und keine Modellwahl.
+- **Einrichten (Betreiber):**
+  1. Beim Anbieter ein Konto anlegen und einen API-Schlüssel erzeugen. Bei Groq geht das in der GroqCloud-Konsole.
+  2. In Supabase unter Edge Functions → Secrets `FREE_AI_KEY` setzen. Optional `FREE_AI_URL` und `FREE_AI_MODEL` für einen
+     anderen OpenAI-kompatiblen Anbieter oder ein anderes Modell.
+  3. `supabase/005_app_tutor_free.sql` im SQL-Editor einspielen.
+  4. Die Edge Function neu deployen.
+  5. Bei einem Anbieterwechsel `FREE_AI.provider` in `src/config.ts` anpassen; der Text steht in Einwilligung und
+     Datenschutzhinweis.
+
 ## Zugang (Premium)
 
 - Der Tutor mit Claude ist nur für das freigeschaltete GitHub-Konto nutzbar (`app_metadata.role = 'admin'`), auf

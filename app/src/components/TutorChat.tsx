@@ -9,7 +9,9 @@ import { feedOf, SICHER, type Feed, type Model, type Sicher } from "@/lib/tutor-
 import { supabase } from "@/lib/supabase";
 import { useAccount } from "@/store/account";
 import { useProgress } from "@/store/progress";
-import { IDS, useTutor } from "@/store/tutor";
+import { IDS, freeConsent, useTutor } from "@/store/tutor";
+import { isAdmin } from "@/store/account";
+import { FREE_AI } from "@/config";
 import { Ic } from "@/ui-main";
 import { ask } from "@/ui-main/ask";
 import { SafeMarkdown } from "./SafeMarkdown";
@@ -17,11 +19,11 @@ import { BewertungView, OpChip } from "./tutor/AufgabeView";
 import { fmt, kernLabel, makeHandoff, tn, useGraphs } from "./tutor/shared";
 import { weakest } from "@/lib/graph";
 
-const MODEL_LBL: Record<Model, string> = { sonnet: "Sonnet", haiku: "Haiku" };
+const MODEL_LBL: Record<Model, string> = { sonnet: "Sonnet", haiku: "Haiku", free: "Kostenlos" };
 const ART: Record<string, string> = { beleg: "sitzt", luecke: "Lücke", fehlvorstellung: "Fehlvorstellung", behoben: "ausgeräumt" };
 
 export function TutorChat() {
-  const user = useAccount((s) => s.user), signIn = useAccount((s) => s.signIn);
+  const user = useAccount((s) => s.user), signIn = useAccount((s) => s.signIn), admin = isAdmin(user);
   const { convo, busy, err, send, close, model, setModel } = useTutor();
   const end = useRef<HTMLDivElement>(null);
   const feed = convo ? feedOf(convo, IDS) : [];
@@ -38,8 +40,8 @@ export function TutorChat() {
       <div className="tutor-head">
         <div className="tc-title"><img className="vx-mark" src="/icons/vortex.svg" alt="" /><div><b>{tn(convo.thema)}</b><span className="tiny muted">{convo.msgs.length ? MODEL_LBL[convo.model] : "noch nicht gestartet"} · {done.length} bewertet{max ? ` · ${fmt(pts)}/${fmt(max)} P.` : ""}{xp ? ` · +${xp} XP` : ""}</span></div></div>
         <span className="spacer" />
-        <span className="tiny muted tp-cost" title={`Schätzung aus dem gemeldeten Verbrauch · ${MODEL_LBL[convo.model]}`}>≈ {convo.cost.toFixed(3)} $</span>
-        {!convo.msgs.length && <div className="segs" role="group" aria-label="Modell">{(["sonnet", "haiku"] as Model[]).map((m) => <button key={m} type="button" className={`seg ${model === m ? "on" : ""}`} aria-pressed={model === m} onClick={() => setModel(m)}>{MODEL_LBL[m]}</button>)}</div>}
+        {convo.model !== "free" && <span className="tiny muted tp-cost" title={`Schätzung aus dem gemeldeten Verbrauch · ${MODEL_LBL[convo.model]}`}>≈ {convo.cost.toFixed(3)} $</span>}
+        {!convo.msgs.length && admin && <div className="segs" role="group" aria-label="Modell">{(["sonnet", "haiku"] as Model[]).map((m) => <button key={m} type="button" className={`seg ${model === m ? "on" : ""}`} aria-pressed={model === m} onClick={() => setModel(m)}>{MODEL_LBL[m]}</button>)}</div>}
         {!convo.ende && convo.msgs.length > 0 && <button type="button" className="btn small ghost" disabled={busy || !!blocked} title="Der Tutor schließt mit Fazit und nächstem Schritt ab" onClick={() => void send({ kind: "ende" })}><Ic name="flag" cls="ic xs" /> Beenden</button>}
         <button type="button" className="btn small ghost" disabled={busy} aria-label="Sitzung schließen" title="Sitzung schließen (dein Stand bleibt)" onClick={() => void (async () => { if (!convo.msgs.length || convo.ende || await ask({ title: "Sitzung schließen?", text: "Der Verlauf dieser Sitzung wird gelöscht. Dein Stand im Graphen und deine XP bleiben erhalten.", ok: "Schließen", danger: true })) close(); })()}><Ic name="x" cls="ic xs" /></button>
       </div>
@@ -107,6 +109,13 @@ function Composer({ busy, offen, first }: { busy: boolean; offen: boolean; first
   const go = async () => {
     if (!t.trim() || busy) return;
     const meta = { kind: "antwort" as const, text: t, ...(ged.trim() ? { gedanke: ged } : {}), ...(sich != null ? { sich } : {}) };
+    // Kostenloser Tutor: einmal einwilligen, dass Nachrichten an den externen Anbieter gehen
+    const m = useTutor.getState().convo?.model;
+    if (m === "free" && !freeConsent.ok(FREE_AI.consentVersion)) {
+      const yes = await ask({ title: "Kostenlosen KI-Tutor nutzen?", text: `Deine Nachrichten und dein Stand zum Thema (Beherrschung je Konzept, Fehlvorstellungen – ohne Namen oder Konto-Daten) werden zur Beantwortung an ${FREE_AI.provider} übermittelt und dort nach dessen Bedingungen verarbeitet. Ohne Einwilligung kannst du die Brücke mit deiner eigenen KI nutzen.`, ok: "Einverstanden", icon: "shield" });
+      if (!yes) return;
+      freeConsent.set(FREE_AI.consentVersion);
+    }
     const keep = { t, ged, sich }; reset();
     if (!(await send(meta, handoff))) { setT(keep.t); setGed(keep.ged); setSich(keep.sich); if (keep.ged) setShowGed(true); }
   };

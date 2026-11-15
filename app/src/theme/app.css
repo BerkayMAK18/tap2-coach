@@ -213,3 +213,4 @@ a, button { -webkit-tap-highlight-color: transparent; }
 .cv-src code { font-family: var(--mono); font-size: 0.8rem; white-space: pre-wrap; }
 @media (prefers-reduced-motion: reduce) { .cv-bar i { transition: none; } }
 @media (max-width: 600px) { .cv-lines li { grid-template-columns: 1fr; gap: 2px; } .cv-bars { height: 140px; gap: 4px; } }
+.tp-way { margin-top: 12px; gap: 10px; flex-wrap: wrap; }

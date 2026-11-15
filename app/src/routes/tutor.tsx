@@ -1,7 +1,8 @@
 /**
- * Tutor – Prüfungstutor für die TAP2. Zwei Varianten:
- * - „Tutor“ (kostenlos, für alle, auch ohne Anmeldung): Brücke zur eigenen KI (components/tutor/BridgePanel.tsx).
- * - „Tutor Pro“ (Premium, nur das freigeschaltete Konto): eingebaute KI (Claude) mit Chat, Aufgabe und Bewertung.
+ * Tutor – Prüfungstutor für die TAP2. Wege:
+ * - In der App (nur mit Anmeldung): Chat mit Aufgabe und Bewertung – „Tutor Pro“ (Claude) für das freigeschaltete Konto,
+ *   sonst der kostenlose KI-Tutor (Gratis-Stufe eines anderen Anbieters, einfacheres Modell).
+ * - Mit eigener KI (für alle, auch ohne Anmeldung): Brücke (components/tutor/BridgePanel.tsx).
  * Beide teilen Themenwahl, Lehrplan und Graph (Tutor-Stand). Zwei Tabs:
  * - „Sitzung“: ohne Sitzung die Themenwahl (Empfehlung aus dem Lehrplan). Ein Klick öffnet nur den Chat zum Thema –
  *   die KI wird erst mit der ersten Nachricht gefragt (keine Kosten fürs Hineinschauen). Mit Sitzung zwei Spalten:
@@ -34,14 +35,21 @@ export const Route = createFileRoute("/tutor")({ component: Tutor });
 
 type Top = "sitzung" | "lehrplan";
 type Side = "aufgabe" | "stand";
+/** In der App (Tutor Pro für den Admin, sonst kostenloser KI-Tutor; nur mit Anmeldung) oder Brücke zur eigenen KI */
+type Way = "app" | "bruecke";
+const KEY_WAY = "tap2coach-tutor-weg";
+const readWay = (): Way => { try { return localStorage.getItem(KEY_WAY) === "bruecke" ? "bruecke" : "app"; } catch { return "app"; } };
 type Mob = "chat" | Side;
 
 function Tutor() {
-  const pro = useAccount((s) => isAdmin(s.user)), ready = useAccount((s) => s.ready);
-  const [top, setTop] = useState<Top>("sitzung");
+  const pro = useAccount((s) => isAdmin(s.user)), ready = useAccount((s) => s.ready), signedIn = useAccount((s) => !!s.user);
+  const [top, setTop] = useState<Top>("sitzung"), [stored, setStored] = useState<Way>(readWay);
   const syncNow = useTutor((s) => s.syncNow);
   useEffect(() => { void syncNow(); }, [syncNow]);
   if (supabase && !ready) return <section className="card"><p className="small muted">Anmeldung wird geprüft …</p></section>;
+  const inApp = signedIn && stored === "app"; // ohne Anmeldung nur die Brücke
+  const setWay = (w: Way) => { setStored(w); try { localStorage.setItem(KEY_WAY, w); } catch { /* privat */ } };
+  const way = { pro, inApp, signedIn, setWay };
   return (
     <div className="tp-page">
       <div className="row tp-topbar">
@@ -49,20 +57,21 @@ function Tutor() {
           {([["sitzung", "Sitzung"], ["lehrplan", "Lehrplan"]] as [Top, string][]).map(([k, l]) => <button key={k} type="button" role="tab" aria-selected={top === k} className={`seg ${top === k ? "on" : ""}`} onClick={() => setTop(k)}>{l}</button>)}
         </div>
         <span className="spacer" />
-        <span className={`chip ${pro ? "violet" : ""}`}>{pro ? "Tutor Pro" : "Tutor"}</span>
+        <span className={`chip ${pro && inApp ? "violet" : ""}`}>{pro && inApp ? "Tutor Pro" : inApp ? "Tutor · kostenlos" : "Tutor · eigene KI"}</span>
       </div>
-      {top === "lehrplan" ? <PlanTab pro={pro} onStarted={() => setTop("sitzung")} /> : pro ? <SessionTab /> : <FreeTab />}
+      {top === "lehrplan" ? <PlanTab inApp={inApp} onStarted={() => setTop("sitzung")} /> : inApp ? <SessionTab way={way} /> : <FreeTab way={way} />}
     </div>
   );
 }
+type WayProps = { pro: boolean; inApp: boolean; signedIn: boolean; setWay: (w: Way) => void };
 
-function PlanTab({ pro, onStarted }: { pro: boolean; onStarted: () => void }) {
+function PlanTab({ inApp, onStarted }: { inApp: boolean; onStarted: () => void }) {
   const plan = useLehrplan(), { busy, err, convo, open, openBridge } = useTutor();
   return (
     <>
       {err && <p className="small warn-text" role="alert">{err}</p>}
       <LehrplanView plan={plan} busy={busy} onStart={(tid, fokus) => void (async () => {
-        if (!pro) { openBridge(tid, fokus); onStarted(); return; }
+        if (!inApp) { openBridge(tid, fokus); onStarted(); return; }
         if (convo?.msgs.length && !convo.ende && !(await ask({ title: "Neue Sitzung öffnen?", text: "Die laufende Sitzung wird beendet. Dein Stand und deine XP bleiben erhalten.", ok: "Neue Sitzung" }))) return;
         open(tid, fokus); onStarted();
       })()} />
@@ -71,9 +80,9 @@ function PlanTab({ pro, onStarted }: { pro: boolean; onStarted: () => void }) {
 }
 
 /** Tutor (kostenlos): links die Brücke zur eigenen KI, rechts „Dein Stand“; ohne Thema die Themenwahl */
-function FreeTab() {
+function FreeTab({ way }: { way: WayProps }) {
   const bridge = useTutor((s) => s.bridge), graphs = useGraphs(), [mob, setMob] = useState<"chat" | "stand">("chat");
-  if (!bridge) return <Themenwahl pro={false} />;
+  if (!bridge) return <Themenwahl way={way} />;
   return (
     <div className={`tutor-shell m-${mob}`}>
       <div className="segs tutor-mtabs" role="tablist" aria-label="Tutor">
@@ -87,10 +96,10 @@ function FreeTab() {
   );
 }
 
-function SessionTab() {
+function SessionTab({ way }: { way: WayProps }) {
   const convo = useTutor((s) => s.convo), graphs = useGraphs();
   const [side, setSide] = useState<Side | null>(null), [mob, setMob] = useState<Mob>("chat");
-  if (!convo) return <Themenwahl pro />;
+  if (!convo) return <Themenwahl way={way} />;
   const cur = side ?? (convo.offen ? "aufgabe" : "stand"); // ohne Aufgabe zuerst der Stand
   const key = convo.offen ?? convo.order[convo.order.length - 1];
   const a = key ? convo.aufgaben[key] : undefined, r = key ? convo.bewertungen[key] : undefined;
@@ -115,9 +124,10 @@ function SessionTab() {
 }
 
 /** Themenwahl: alle Katalogthemen nach Prüfungsteil, Empfehlung aus dem Lehrplan */
-function Themenwahl({ pro }: { pro: boolean }) {
-  const graphs = useGraphs(), plan = useLehrplan(), { busy, err, model, setModel, state, open: openPro, openBridge } = useTutor();
-  const open = pro ? openPro : openBridge;
+function Themenwahl({ way }: { way: WayProps }) {
+  const { pro, inApp, signedIn, setWay } = way, signIn = useAccount((s) => s.signIn);
+  const graphs = useGraphs(), plan = useLehrplan(), { busy, err, model, setModel, state, open: openApp, openBridge } = useTutor();
+  const open = inApp ? openApp : openBridge;
   const rec = plan.empfehlung?.kind === "sitzung" ? plan.empfehlung : null;
   const xpHeute = xpToday(state, today());
   // Reihenfolge: Teil 1, Teil 2, Teil 1 + 2, WiSo (Prüfungsteil laut Katalog)
@@ -127,10 +137,10 @@ function Themenwahl({ pro }: { pro: boolean }) {
       <section className="card tp-hero">
         <div className="row" style={{ gap: 10, flexWrap: "wrap" }}>
           <img className="vx-mark" src="/icons/vortex.svg" alt="" />
-          <div style={{ flex: 1, minWidth: 220 }}><h2 style={{ margin: 0 }}>{pro ? "Tutor Pro" : "Tutor"}</h2><p className="small muted" style={{ margin: "4px 0 0" }}>{pro
-            ? <>Wähle ein Thema – der Chat öffnet sich. Sobald du deine erste Nachricht schreibst, löchert dich der Tutor eine ganze Sitzung lang mit Aufgaben im IHK-Stil und bewertet wie ein Prüfer mit Teilpunkten. Prüfung am {EXAM_DE}.</>
+          <div style={{ flex: 1, minWidth: 220 }}><h2 style={{ margin: 0 }}>{pro && inApp ? "Tutor Pro" : "Tutor"}</h2><p className="small muted" style={{ margin: "4px 0 0" }}>{inApp
+            ? <>Wähle ein Thema – der Chat öffnet sich. Sobald du deine erste Nachricht schreibst, löchert dich der Tutor eine ganze Sitzung lang mit Aufgaben im IHK-Stil und bewertet wie ein Prüfer mit Teilpunkten.{pro ? "" : " Kostenlos, mit einem einfacheren Modell als Tutor Pro."} Prüfung am {EXAM_DE}.</>
             : <>Dein Prüfungstutor für die TAP2 – mit deiner eigenen KI, kostenlos. Wähle ein Thema: Der Tutor stellt dir eine ganze Sitzung lang Aufgaben im IHK-Stil, bewertet wie ein Prüfer mit Teilpunkten, und dein Graph lernt mit. Prüfung am {EXAM_DE}.</>}</p></div>
-          {pro && <div className="segs" role="group" aria-label="Modell">{(["sonnet", "haiku"] as const).map((m) => <button key={m} type="button" className={`seg ${model === m ? "on" : ""}`} aria-pressed={model === m} onClick={() => setModel(m)}>{m === "sonnet" ? "Gründlich (Sonnet)" : "Schnell (Haiku)"}</button>)}</div>}
+          {pro && inApp && <div className="segs" role="group" aria-label="Modell">{(["sonnet", "haiku"] as const).map((m) => <button key={m} type="button" className={`seg ${model === m ? "on" : ""}`} aria-pressed={model === m} onClick={() => setModel(m)}>{m === "sonnet" ? "Gründlich (Sonnet)" : "Schnell (Haiku)"}</button>)}</div>}
         </div>
         {rec && (
           <div className="tp-rec">
@@ -140,7 +150,19 @@ function Themenwahl({ pro }: { pro: boolean }) {
         )}
         {err && <p className="small warn-text" role="alert" style={{ margin: "10px 0 0" }}>{err}</p>}
         <p className="tiny muted" style={{ margin: "10px 0 0" }}>Tutor-XP heute: {xpHeute} · jede bewertete Aufgabe zählt wie eine Antwort: XP mit Combo, Serie und Tagesziele (richtig ab der Hälfte der Punkte).</p>
-        {!pro && <p className="tiny muted vx-pro"><Ic name="lock" cls="ic xs" /> <b>Tutor Pro</b> mit eingebauter KI – direkt in der App, ohne Kopieren – ist eine Premium-Funktion.</p>}
+        <div className="row tp-way">
+          {signedIn ? <>
+            <span className="small muted">So möchtest du lernen:</span>
+            <div className="segs" role="radiogroup" aria-label="Weg">
+              <button type="button" role="radio" aria-checked={inApp} className={`seg ${inApp ? "on" : ""}`} onClick={() => setWay("app")}>{pro ? "In der App (Pro)" : "In der App (kostenlos)"}</button>
+              <button type="button" role="radio" aria-checked={!inApp} className={`seg ${!inApp ? "on" : ""}`} onClick={() => setWay("bruecke")}>Mit eigener KI</button>
+            </div>
+          </> : <>
+            <span className="small muted">Mit Anmeldung bekommst du den kostenlosen KI-Tutor direkt in der App – ohne Kopieren.</span>
+            <button type="button" className="btn small" onClick={() => void signIn()}><Ic name="users" cls="ic xs" /> Mit GitHub anmelden</button>
+          </>}
+        </div>
+        {!pro && <p className="tiny muted vx-pro"><Ic name="lock" cls="ic xs" /> <b>Tutor Pro</b> mit stärkerer KI ist eine Premium-Funktion.</p>}
       </section>
       {TEILE.map(([label, part]) => {
         const list = TOPICS.filter((t) => t.teil === part);

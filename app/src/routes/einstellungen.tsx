@@ -21,6 +21,7 @@ import { liveGet, useLiveSync } from "@/store/livesync";
 import { installApp, usePwa } from "@/store/pwa";
 import { useTransfer } from "@/store/transfer";
 import { Ic } from "@/ui-main";
+import { ask } from "@/ui-main/ask";
 import { AccountCard } from "@/components/AccountCard";
 import { SyncCard } from "@/components/SyncCard";
 import { supabase } from "@/lib/supabase";
@@ -62,13 +63,14 @@ function Einstellungen() {
 
 /** Synchronisieren: mit Konto (ein Stand, Login reicht) oder ohne Konto (Geräte-Sync per Code/QR) */
 function SyncWays() {
-  const user = useAccount((s) => !!s.user), live = useLiveSync((s) => !!s.cfg);
+  const user = useAccount((s) => !!s.user), live = useLiveSync((s) => !!s.cfg), pending = useLiveSync((s) => !!s.ask || !!s.inErr); // Kopplungs-Link geöffnet
   if (!FEATURES.account) return <SyncCard />;
   return (
     <>
       <p className="small muted tp-ways">Synchronisieren – wähle <b>einen</b> Weg: <b>mit Konto</b> (GitHub-Anmeldung reicht, überall derselbe Stand) oder <b>ohne Konto</b> (Geräte per Code oder QR-Code koppeln, Ende-zu-Ende-verschlüsselt).</p>
       <AccountCard />
-      {(!user || live) && <>
+      {(!user || live || pending) && <>
+        {user && !live && pending && <p className="small muted tp-ways">Du hast einen Kopplungs-Link geöffnet. Mit Konto brauchst du keine Kopplung – du kannst sie aber trotzdem annehmen oder abbrechen.</p>}
         {user && live && <p className="small muted tp-ways">Dieses Gerät ist zusätzlich ohne Konto mit einer Gruppe verbunden. Mit Konto brauchst du das nicht mehr – du kannst es unten trennen (der Stand bleibt).</p>}
         <SyncCard title="Ohne Konto synchronisieren" />
       </>}
@@ -84,7 +86,7 @@ function ImportCard() {
     <section className="card tx-card"><h3>Lernstand von einem anderen Gerät</h3>
       {imp.err ? <div className="sql-msg bad"><Ic name="alert" cls="ic sm" /><div><b>Übertragung nicht möglich</b><p>{imp.err}</p></div></div>
         : imp.done ? <div className="sql-msg ok"><Ic name="check" cls="ic sm" /><div><b>Lernstand übernommen</b><p>{imp.done}</p></div></div>
-        : imp.inc ? <div className="tx-in"><p className="small muted">Stand vom {fmtDay(imp.inc.at)}: {txSummary(imp.inc)}.</p><div className="row"><button type="button" className="btn primary small" onClick={() => apply("merge")}><Ic name="layers" cls="ic xs" /> Zusammenführen (empfohlen)</button><button type="button" className="btn small" onClick={() => apply("replace")}>Ersetzen</button><button type="button" className="btn small ghost" onClick={cancel}>Abbrechen</button></div><p className="tiny muted">Zusammenführen: Pro Frage gilt der neuere Stand, nichts geht verloren. Ersetzen: Dein Stand auf diesem Gerät wird überschrieben.</p></div> : null}
+        : imp.inc ? <div className="tx-in"><p className="small muted">Stand vom {fmtDay(imp.inc.at)}: {txSummary(imp.inc)}.</p><div className="row"><button type="button" className="btn primary small" onClick={() => apply("merge")}><Ic name="layers" cls="ic xs" /> Zusammenführen (empfohlen)</button><button type="button" className="btn small" onClick={() => void (async () => { if (await ask({ title: "Deinen Stand ersetzen?", text: "Dein bisheriger Lernstand auf diesem Gerät wird durch den Stand aus dem Link ersetzt. Ersetze nur, wenn der Link von dir selbst stammt. Der bisherige Stand bleibt als Sicherung in diesem Browser.", ok: "Ersetzen", danger: true })) apply("replace"); })()}>Ersetzen</button><button type="button" className="btn small ghost" onClick={cancel}>Abbrechen</button></div><p className="tiny muted">Zusammenführen: Pro Frage gilt der neuere Stand, nichts geht verloren. Ersetzen: Dein Stand auf diesem Gerät wird überschrieben.</p></div> : null}
     </section>
   );
 }

@@ -9,25 +9,25 @@
  * Der Wissensgraph ist die Grundlage: Er geht als Übergabe an den Tutor (Lernstand je Thema, Fehler, Lernpfad),
  * und jede bewertete Antwort fließt als Beleg zurück (Tutor-Reife je Thema, XP, Tagesstatistik).
  *
- * Menüpunkt nur für Admin (Admin-Konto oder /tutor?premium=1 auf diesem Gerät). Das schützt nichts Geheimes –
- * die Seite zeigt nur den eigenen, lokalen Lernstand; die KI prüft der Server (app_metadata.role = 'admin').
+ * Nur für das Admin-Konto (app_metadata.role = 'admin'): Menüpunkt und Seite sind für alle anderen unsichtbar;
+ * die KI prüft der Server zusätzlich.
  */
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { Link, createFileRoute, useNavigate } from "@tanstack/react-router";
-import { z } from "zod";
 import { TAP2, TOPICS, TP, allQ } from "@/content/catalog";
 import { EXAM_DAY } from "@/config";
 import { buildGraph, type GraphNode, type KnowledgeGraph, type Level } from "@/lib/graph";
 import { daysBetween, shuffle, today } from "@/lib/dates";
 import { handoff, phaseOf, tutorPct, type Pfad } from "@/lib/tutor-protocol";
 import { useProgress } from "@/store/progress";
-import { KB, PREMIUM_KEY, isPremium, useTutor, type SideTab } from "@/store/tutor";
+import { KB, useTutor, type SideTab } from "@/store/tutor";
+import { isAdmin, useAccount } from "@/store/account";
 import { Ic } from "@/ui-main";
 import { TutorBridge, loadTutorStore } from "@/components/TutorBridge";
 import { TutorChat } from "@/components/TutorChat";
 import { SafeMarkdown } from "@/components/SafeMarkdown";
 
-export const Route = createFileRoute("/tutor")({ validateSearch: z.object({ premium: z.coerce.string().optional().catch(undefined) }), component: Tutor });
+export const Route = createFileRoute("/tutor")({ component: Tutor });
 
 // Einordnung → Chip der Live-App (ok/warn/bad) und Farbe im Graphen (Ampelfarben aus main.css)
 const LV: Record<Level, { label: string; chip: string; fill: string }> = {
@@ -50,11 +50,10 @@ function makeHandoff(g: KnowledgeGraph, pfad: Pfad) {
 }
 
 function Tutor() {
-  const { premium } = Route.useSearch();
-  const [ok, setOk] = useState(isPremium());
-  useEffect(() => { if (premium === "1") { try { localStorage.setItem(PREMIUM_KEY, "1"); } catch { /* privat */ } setOk(true); } }, [premium]);
+  const ok = useAccount((s) => isAdmin(s.user)), ready = useAccount((s) => s.ready);
   const S = useProgress((s) => s.S), { tab, setTab, pfad, convo } = useTutor();
   const [mtab, setMtab] = useState<MobileTab>("chat");
+  if (!ready) return null; // Anmeldung wird noch geprüft
   if (!ok) return <section className="card"><h3>Diese Seite ist nicht verfügbar.</h3><p className="small muted"><Link to="/">Zur Übersicht</Link></p></section>;
 
   const g = buildGraph(S, TOPICS, TAP2.pakete, allQ(S));

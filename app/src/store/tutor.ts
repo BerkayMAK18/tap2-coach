@@ -17,9 +17,8 @@ import { today } from "@/lib/dates";
 import { gm } from "./gami";
 import { useProgress } from "./progress";
 
-/** Tutor freigeschaltet auf diesem Gerät (/tutor?premium=1) – zeigt den Menüpunkt; der Server prüft zusätzlich die Admin-Rolle */
-export const PREMIUM_KEY = "tap2coach-premium";
-export const isPremium = () => { try { return localStorage.getItem(PREMIUM_KEY) === "1"; } catch { return false; } };
+// Früher: Freischaltung per /tutor?premium=1 auf dem Gerät – gibt es nicht mehr, der Tutor ist nur für Admin-Konten
+try { localStorage.removeItem("tap2coach-premium"); } catch { /* privat */ }
 
 const KEY_PFAD = "tap2coach-tutor-pfad", KEY_CHAT = "tap2coach-tutor-gespraech";
 const read = <T,>(k: string, d: T): T => { try { const v = JSON.parse(localStorage.getItem(k) || "null"); return v ?? d; } catch { return d; } };

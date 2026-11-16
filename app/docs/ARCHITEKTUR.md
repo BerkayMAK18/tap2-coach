@@ -85,6 +85,11 @@ app/
 - Events: `enabled: false` blendet einen Katalog aus. **WPF PM ist deaktiviert** (Schalter im Export-Skript).
 - Abbildungen (UML, Netzplan, Gantt …) sind fertige SVGs aus dem eigenen Katalog und werden direkt eingefügt.
   Sie stammen nie aus Nutzerdaten.
+- **SoWi nur Multiple Choice (nur neue App, 16.11.2026):** In der Prüfung ist SoWi reines Multiple Choice. Darum
+  zeigt die Lernrunde SoWi-Karteikarten als Auswahlfrage. Die falschen Antworten (je drei, fachlich plausibel) und
+  die auf gleiche Länge gekürzte richtige Option stehen in `src/content/sowi-mc/` – eigene Inhalte, nicht aus dem
+  Export. Umwandlung in `src/lib/sowi-mc.ts`; Frage-IDs und Lernstand bleiben gleich. Tests prüfen Abdeckung aller
+  SoWi-Karten und dass die Länge die Lösung nicht verrät.
 
 ## Portierung aus der Live-App
 

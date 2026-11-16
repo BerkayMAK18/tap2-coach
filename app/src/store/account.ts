@@ -18,6 +18,8 @@ import { useProgress } from "./progress";
 type SyncCfg = { key: string; rev: number };
 type Store = {
   user: User | null;
+  /** Anmeldestatus geprüft (ohne Server sofort) */
+  ready: boolean;
   cfg: SyncCfg | null;
   busy: boolean;
   err: string;
@@ -40,8 +42,12 @@ const friendly = (e: unknown) => {
   return "Synchronisieren hat nicht geklappt. Dein Lernstand ist lokal gespeichert.";
 };
 
+/** Admin-Konto (app_metadata kann der Nutzer nicht selbst setzen) – z. B. für den KI-Tutor */
+export const isAdmin = (u: User | null | undefined) => u?.app_metadata?.role === "admin";
+
 export const useAccount = create<Store>((set, get) => ({
   user: null,
+  ready: !supabase,
   cfg: typeof window === "undefined" ? null : readCfg(),
   busy: false,
   err: "",
@@ -97,8 +103,8 @@ export const useAccount = create<Store>((set, get) => ({
 
 // Anmeldestatus verfolgen und automatisch synchronisieren
 if (typeof window !== "undefined" && supabase) {
-  supabase.auth.getSession().then(({ data }) => { useAccount.setState({ user: data.session?.user ?? null }); void useAccount.getState().syncNow(); });
-  supabase.auth.onAuthStateChange((_e, session) => useAccount.setState({ user: session?.user ?? null }));
+  supabase.auth.getSession().then(({ data }) => { useAccount.setState({ user: data.session?.user ?? null, ready: true }); void useAccount.getState().syncNow(); });
+  supabase.auth.onAuthStateChange((_e, session) => useAccount.setState({ user: session?.user ?? null, ready: true }));
   let timer: ReturnType<typeof setTimeout> | undefined;
   useProgress.subscribe((s, prev) => {
     if (s.S === prev.S || useAccount.getState().busy) return;

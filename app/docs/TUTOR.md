@@ -9,8 +9,9 @@ Stand: 13.11.2026. Premium-Funktion der neuen App, vorerst nur für den Admin.
   **Fehlerschwerpunkte** (häufig falsch beantwortete, noch nicht grüne Fragen).
 - `src/routes/tutor.tsx`: Seite `/tutor` mit Graph, Schwächen, Stärken, offenen Themen und Fehlerschwerpunkten;
   „Üben“ startet direkt eine passende Lernrunde. Kein Menüeintrag.
-- Freischalten auf einem Gerät: `/tutor?premium=1` (setzt `tap2coach-premium`). Das schützt nichts Geheimes,
-  die Seite zeigt nur den eigenen lokalen Lernstand. Die echte Prüfung kommt mit Stufe 2 serverseitig.
+- Zugang nur für das Admin-Konto (`app_metadata.role = 'admin'`): Menüpunkt und Seite sind für alle anderen
+  unsichtbar. Die frühere Freischaltung per `/tutor?premium=1` gibt es nicht mehr (16.11.2026). Der Server prüft
+  die Admin-Rolle zusätzlich.
 
 ## Tutor-Lernpfad (14.11.2026)
 

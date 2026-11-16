@@ -18,7 +18,7 @@ import { pairHash, pairOpen, parsePairInput } from "@/lib/pair";
 import { isObj, normalize, type State } from "@/lib/state";
 import { canon, evMerge, mergeStates, type Ev } from "@/lib/sync-merge";
 import { supabase } from "@/lib/supabase";
-import { connectGamiAccount, gm, lbLoad, useGami } from "./gami";
+import { connectGamiAccount, gm, lbLoad, loginCheck, useGami } from "./gami";
 import { lbGet, lbSet } from "@/lib/gami/lb";
 import { syncId } from "./livesync";
 import { useProgress } from "./progress";
@@ -96,6 +96,7 @@ export const useAccount = create<Store>((set, get) => ({
       const r = await kontoSync(rpc, accDoc, local);
       if (canon(r.state.s) !== canon(useProgress.getState().S)) useProgress.getState().applySynced(r.state.s);
       set({ lastSync: Date.now() });
+      if (r.changed) void loginCheck(); // ein eingemischter Stand ändert nie, ob heute schon abgeholt wurde – das weiß der Server
     } catch (e) { set({ err: friendly(e) }); }
     finally { set({ busy: false }); if (again) { again = false; setTimeout(() => void get().syncNow(), 1500); } }
   },
@@ -142,6 +143,7 @@ if (typeof window !== "undefined" && supabase) {
     // Rolle (app_metadata) frisch vom Server: ein älterer Login auf einem Gerät kennt eine später gesetzte Rolle sonst nicht
     if (data.session) { try { const { data: u } = await supabase!.auth.getUser(); if (u.user) useAccount.setState({ user: u.user }); } catch { /* offline: gespeicherten Stand nutzen */ } }
     useAccount.setState({ ready: true });
+    void loginCheck(); // Login-Bonus: Stand des Servers (heute schon abgeholt?)
     void useAccount.getState().syncNow();
     if (useAccount.getState().user) setTimeout(() => void lbLoad(true), 2000); // Ranglisten-Eintrag des Kontos erkennen bzw. mitnehmen
   });

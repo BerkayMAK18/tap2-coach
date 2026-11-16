@@ -140,3 +140,76 @@ export const CatalogIndex = z.object({
   quelle: z.object({ datei: z.string(), hash: z.string() }),
   kataloge: z.array(z.object({ id: z.string(), datei: z.string(), titel: z.string(), art: z.string(), enabled: z.boolean(), tags: z.array(z.string()), fragen: z.number(), ende: z.string().optional() })),
 });
+
+/**
+ * Normalisierung visuell (nur neue App): Beispiele in src/content/normalisierung.json, zugeordnet über Katalog-IDs
+ * (Aufgabe „D2“, offene Frage „o83“, Karte „k:db0“, MC „m85“, Lernpaket-Abschnitt „P04:Normalformen“).
+ * Nur Daten – die App stellt sie selbst als Tabellen und Diagramme dar, nie als HTML.
+ * Spalte: pk/fk (Zieltabelle derselben Stufe), aus = Spalten der Vorstufe, aus denen sie entsteht (umbenannt/aufgeteilt),
+ * neu = kommt ohne Vorlage hinzu (künstlicher Schlüssel, Menge), mehrwertig = nicht atomar (verletzt die 1. NF).
+ */
+const NormName = z.string().regex(/^[A-Za-zÄÖÜäöüß][A-Za-z0-9ÄÖÜäöüß_]{0,39}$/);
+export const NormSpalte = z.object({
+  n: NormName,
+  pk: z.boolean().optional(),
+  fk: NormName.optional(),
+  aus: z.array(NormName).min(1).optional(),
+  neu: z.boolean().optional(),
+  mehrwertig: z.boolean().optional(),
+});
+export const NormTabelle = z.object({ name: NormName, spalten: z.array(NormSpalte).min(1).max(10), zeilen: z.array(z.array(z.string().max(80))).max(8).default([]) });
+/** Funktionale Abhängigkeit von → nach; art: voll (in Ordnung), teilweise (verletzt 2. NF), transitiv (verletzt 3. NF) */
+export const NormAbh = z.object({ von: z.array(NormName).min(1), nach: z.array(NormName).min(1), art: z.enum(["voll", "teilweise", "transitiv"]) });
+export const NormStufe = z.object({ nf: z.number().int().min(0).max(3), text: z.string().min(1).max(400), tabellen: z.array(NormTabelle).min(1).max(6) });
+export const NormBeispiel = z.object({
+  titel: z.string().min(1).max(80),
+  refs: z.array(z.string().min(1)).min(1),
+  abhIn: z.number().int().min(0).default(0), // Stufe, auf deren (einziger) Tabelle die Abhängigkeiten gezeigt werden
+  abh: z.array(NormAbh).default([]),
+  stufen: z.array(NormStufe).min(1).max(4),
+});
+export const NormDatei = z.object({ schema: z.literal(1), beispiele: z.array(NormBeispiel) });
+export type NormSpalte = z.infer<typeof NormSpalte>;
+export type NormTabelle = z.infer<typeof NormTabelle>;
+export type NormAbh = z.infer<typeof NormAbh>;
+export type NormStufe = z.infer<typeof NormStufe>;
+export type NormBeispiel = z.infer<typeof NormBeispiel>;
+
+/**
+ * Beziehungen visuell (nur neue App): Beispiele in src/content/beziehungen.json, zugeordnet über Katalog-IDs
+ * (MC „m88“, Karte „k:db8“, Lernpaket-Abschnitt „P04:m:n-Beziehungen auflösen“). Nur Daten, kein HTML.
+ * - vorher: neutrales Beziehungsbild für die Frage (Entitäten + Kardinalitäten, noch ohne Fremdschlüssel);
+ *   verdeckt = Kardinalitäten als „?“ (wenn genau sie gefragt sind); null = kein Bild vor der Antwort
+ * - tabellen: Lösung als Relationenmodell (PK/FK, FK nennt die Zieltabelle), Reihenfolge = Anordnung von links nach rechts
+ * - abgelehnt: Beispiel für referentielle Integrität (Einfügen mit unbekanntem Schlüssel, Löschen eines referenzierten Datensatzes)
+ */
+export const BezSpalte = z.object({ n: NormName, pk: z.boolean().optional(), fk: NormName.optional(), unique: z.boolean().optional() });
+export const BezTabelle = z.object({ name: NormName, spalten: z.array(BezSpalte).min(1).max(8), zeilen: z.array(z.array(z.string().max(40))).max(5).default([]) });
+/** Ende einer Beziehungslinie: Entität, Höchstzahl (1, n, m) und optional Mindestzahl (für Krähenfuß/Min-Max) */
+export const BezEnde = z.object({ t: NormName, k: z.enum(["1", "n", "m"]), min: z.union([z.literal(0), z.literal(1)]).optional() });
+export const BezVorher = z.object({
+  a: BezEnde,
+  b: BezEnde,
+  verdeckt: z.boolean().optional(),
+  notation: z.enum(["zahl", "kraehenfuss"]).default("zahl"),
+});
+export const BezAbgelehnt = z.object({
+  art: z.enum(["einfuegen", "loeschen"]),
+  tabelle: NormName,
+  zeile: z.array(z.string().max(40)).min(1),
+  grund: z.string().min(1).max(160),
+});
+export const BezBeispiel = z.object({
+  titel: z.string().min(1).max(80),
+  refs: z.array(z.string().min(1)).min(1),
+  vorher: BezVorher.nullable(),
+  tabellen: z.array(BezTabelle).min(2).max(3),
+  abgelehnt: z.array(BezAbgelehnt).max(2).default([]),
+});
+export const BezDatei = z.object({ schema: z.literal(1), beispiele: z.array(BezBeispiel) });
+export type BezSpalte = z.infer<typeof BezSpalte>;
+export type BezTabelle = z.infer<typeof BezTabelle>;
+export type BezEnde = z.infer<typeof BezEnde>;
+export type BezVorher = z.infer<typeof BezVorher>;
+export type BezAbgelehnt = z.infer<typeof BezAbgelehnt>;
+export type BezBeispiel = z.infer<typeof BezBeispiel>;

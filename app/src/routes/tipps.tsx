@@ -7,6 +7,7 @@ import { EXAM_DE } from "@/config";
 import { OPDRILLS, TECHNIK, weakTopics } from "@/lib/tipps";
 import { useProgress } from "@/store/progress";
 import { Ic } from "@/ui-main";
+import { CodeVariants } from "@/components/CodeVariants";
 import { TopicRow } from "@/components/lernen/bits";
 import { useOpenTopic } from "@/components/lernen/ui";
 import { ErrSummary } from "@/components/tipps/ErrSummary";
@@ -24,7 +25,7 @@ function Tipps() {
       <ErrSummary />
       {X && (
         <section className="card"><div className="row"><h3>So holst du die Punkte</h3><span className="spacer" /><span className="small muted">Prüfungstechnik</span></div><p className="small muted" style={{ marginTop: 4 }}>{X.relevanz}</p>
-          <div className="kern-list">{X.kern.map(([h, t, c], i) => <details key={i} className="kern" open={i === 0}><summary><span className="kn">{i + 1}</span><span>{h}</span><Ic name="down" cls="ic chev" /></summary><div className="kb"><p>{t}</p>{c && <pre>{c}</pre>}</div></details>)}</div>
+          <div className="kern-list">{X.kern.map(([h, t, c], i) => <details key={i} className="kern" open={i === 0}><summary><span className="kn">{i + 1}</span><span>{h}</span><Ic name="down" cls="ic chev" /></summary><div className="kb"><p>{t}</p>{c && <CodeVariants pseudo={c} />}</div></details>)}</div>
           {X.fallen && X.fallen.length > 0 && <div className="sub-box fallen-box"><h4><Ic name="alert" cls="ic sm" /> Hier verlieren Prüflinge Punkte</h4><ul className="fallen">{X.fallen.map((x, i) => <li key={i}><span>{x}</span></li>)}</ul></div>}
         </section>
       )}

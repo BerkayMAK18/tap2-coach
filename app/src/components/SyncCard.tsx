@@ -13,7 +13,8 @@ import { Ic } from "@/ui-main";
 
 const syncTime = (t: number) => new Date(t).toLocaleTimeString("de-DE", { hour: "2-digit", minute: "2-digit" });
 
-export function SyncCard() {
+/** title: Überschrift – in der Dev-App mit Konto „Ohne Konto synchronisieren“ (Gegenstück zu „Mit Konto synchronisieren“) */
+export function SyncCard({ title = "Geräte synchronisieren" }: { title?: string }) {
   const L = useLiveSync(), nQ = useProgress((s) => Object.keys(s.S.q).length);
   const [inp, setInp] = useState(""), [url, setUrl] = useState(""), [anon, setAnon] = useState("");
   if (!supabase && !isLocalHost) return null;
@@ -73,7 +74,7 @@ export function SyncCard() {
     );
   }
   return (
-    <section className="card" id="sync-card"><h3>Geräte synchronisieren</h3>{dev}{body}
+    <section className="card" id="sync-card"><h3>{title}</h3>{dev}{body}
       {supabase && <p className="tiny muted" style={{ marginTop: 10 }}>Datenschutz: Dein Lernstand wird im Browser verschlüsselt und so auf einem Server (Supabase) abgelegt. Ohne deinen Schlüssel kann ihn niemand lesen – auch nicht der Betreiber. Kein Name, keine E-Mail. Der Stand auf deinem Gerät bleibt immer erhalten.</p>}
     </section>
   );

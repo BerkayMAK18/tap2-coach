@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import { EVENTS } from "@/content/catalog";
 import { EV_FINAL, evAllQ, evOn, evPassFallback, evReady, evStatusTxt, kapMastered, learnEv, learnEvFinal } from "./events";
 import { blank, type State } from "./state";
+import { addDays } from "./dates";
 
 const e = EVENTS[0];
 const sureState = (share: number): State => {
@@ -16,8 +17,9 @@ describe("Events", () => {
   });
   it("Zeitraum und Status-Text", () => {
     expect([evOn(e, e.start), evOn(e, e.ende), evOn(e, "2026-01-01")]).toEqual([true, true, false]);
-    expect(evStatusTxt(e, {}, "2026-12-16")).toBe("noch 2 Tage");
-    expect(evStatusTxt(e, {}, "2026-12-17")).toBe("noch 1 Tag");
+    expect(e.ende).toBe("2026-12-10"); // Klausur LF11a am 10.12. (Live-App und neue App gleich)
+    expect(evStatusTxt(e, {}, addDays(e.ende, -2))).toBe("noch 2 Tage");
+    expect(evStatusTxt(e, {}, addDays(e.ende, -1))).toBe("noch 1 Tag");
     expect(evStatusTxt(e, {}, e.ende)).toBe("letzter Tag");
     expect(evStatusTxt(e, {}, "2027-01-01")).toBe("beendet");
     expect(evStatusTxt(e, {}, "2026-11-01")).toBe("startet am 10. November");

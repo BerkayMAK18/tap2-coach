@@ -16,6 +16,8 @@ import { dec, tcolOf } from "@/lib/lernen";
 import { useProgress } from "@/store/progress";
 import { tmState, useTimer } from "@/store/timer";
 import { Ic } from "@/ui-main";
+import { CodeVariants } from "@/components/CodeVariants";
+import { NormVisual, TextMitTabellen } from "@/components/NormVisual";
 import { TimerBox } from "@/components/lernen/bits";
 import { useOpenTopic } from "@/components/lernen/ui";
 import { CauseChips } from "@/components/aufgaben/CauseChips";
@@ -73,14 +75,14 @@ function UebPage({ u }: { u: Aufgabe }) {
           <>
             <div className="tm-bar">{ust === "idle" ? <span className="small muted">Ohne Zeitmessung geöffnet</span> : <TimerBox k={tkey} min={u.min} compact={false} />}</div>
             {u.schema && <div style={{ marginTop: 16 }}><span className="small muted">Tabellen</span><pre>{TAP2.sqlSchema}</pre></div>}
-            <div className="qtext" style={{ marginTop: 16 }}>{u.text}</div>
+            <div style={{ marginTop: 16 }}><TextMitTabellen className="qtext" text={u.text} /></div>
             <p className="small muted" style={{ marginTop: 12 }}>{ust === "run" ? "Löse die Aufgabe auf Papier wie in der Prüfung. Wenn du fertig bist: Stopp drücken, dann siehst du die Musterlösung." : "Löse die Aufgabe auf Papier wie in der Prüfung, erst dann die Lösung ansehen."}</p>
             {ust !== "run" && <div className="row" style={{ marginTop: 14 }}><button type="button" className={`btn ${showSol ? "" : "primary"}`} onClick={() => setShowSol(!showSol)}>{showSol ? "Lösung ausblenden" : "Musterlösung zeigen"}</button></div>}
           </>
         )}
         {showSol && ust !== "run" && (ust !== "idle" || uFree) && (
           <>
-            <pre style={{ marginTop: 14 }}>{u.loesung}</pre>
+            <NormVisual id={u.id}><CodeVariants pseudo={u.loesung}><pre style={{ marginTop: 14 }}>{u.loesung}</pre></CodeVariants></NormVisual>
             <div className="row" style={{ marginTop: 14, alignItems: "flex-end" }}>
               <label className="f" htmlFor="u-pts">Deine Punkte (0–{u.max})<input type="number" id="u-pts" min={0} max={u.max} step={0.5} value={pts} onChange={(e) => setPts(e.target.value)} /></label>
               <button type="button" className="btn primary" onClick={save}>Speichern</button>

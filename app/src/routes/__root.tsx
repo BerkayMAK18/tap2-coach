@@ -16,12 +16,14 @@ import { EVENTS } from "@/content/catalog";
 import { evOn } from "@/lib/events";
 import { gm, setGamiContext, useGami } from "@/store/gami";
 import { HudPill } from "@/components/gami/Hud";
+import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { GamiLayer } from "@/components/gami/Layer";
 import { Ic, Ring, pctS } from "@/ui-main";
 import { NAV_FOOT, NAV_MAIN, VTITLE } from "@/ui-main/nav";
+import { ConfirmHost } from "@/ui-main/confirm";
 
-/** Menüpunkt Tutor (nicht in der Live-App, daher nicht in der generierten nav.ts) */
-const TUTOR_NAV = { view: "tutor", label: "Tutor", svg: '<path d="M2 9.5L12 4.5l10 5-10 5z"/><path d="M6 11.5v4.5c0 1.6 2.7 3 6 3s6-1.4 6-3v-4.5"/><path d="M22 9.5V15"/>' }; // Doktorhut
+/** Menüpunkt Tutor (KI-Tutor, nicht in der Live-App, daher nicht in der generierten nav.ts) */
+const TUTOR_NAV = { view: "tutor", label: "Tutor", svg: '<path d="M12 12.2c.9-.5 1.9.2 1.8 1.2-.2 1.5-2 2.2-3.3 1.6-1.8-.8-2.3-3.1-1.4-4.7 1.2-2.1 4.1-2.6 6-1.3 2.4 1.6 2.8 5 1.2 7.3-2 2.8-6 3.2-8.7 1.2C4.6 15.2 4.2 10.4 6.6 7.3 9.4 3.7 15 3.3 18.4 6.2"/>' }; // Wirbel (wie das Vortex-Logo)
 import { useProgress } from "@/store/progress";
 import { useLiveSync } from "@/store/livesync";
 import { isAdmin, useAccount } from "@/store/account";
@@ -63,11 +65,10 @@ function Shell() {
   setGamiContext(view, { sess, run });
   useEffect(() => { if (!booted) { booted = true; gm.boot(BOOT_HASH.startsWith("verbinden=") ? "import=" : BOOT_HASH); } }, []);
   useSearchHotkey();
-  useEffect(() => { document.title = `${VTITLE[view] ?? (view === "tutor" ? "Tutor" : "TAP2 Coach")} · TAP2 Prüfungscoach`; }, [view]);
+  useEffect(() => { document.title = `${VTITLE[view] ?? (view === "tutor" ? "Tutor" : "Vortex")} · Vortex`; }, [view]);
 
   const c = counts(S, allQ(S)), left = daysBetween(today(), EXAM_DAY);
-  // Tutor (Premium): Menüpunkt nur für das Admin-Konto
-  const tutorOn = useAccount((s) => isAdmin(s.user)); // nur das Admin-Konto mit Claude-Zugang sieht den Tutor
+  const tutorOn = useAccount((s) => isAdmin(s.user)); // Menüpunkt Tutor nur fürs Admin-Konto
   const navView = view === "operatoren" || view === "plan" ? "tipps" : view === "lernen" && sess?.src?.ev ? "events" : view; // Event-Runde: Menüpunkt Events
   const focus = loc.pathname.startsWith("/lernen/runde") || (view === "pruefung" && !!run && run.phase === "write"); // Fokus wie die Live-App: Lernrunde, Prüfung beim Schreiben
   // Fokus-Ansicht wie die Live-App an <body> (das Stylesheet blendet mit body.focus die Navigation auf dem Handy aus)
@@ -81,37 +82,39 @@ function Shell() {
   return (
     <div className="app" onClick={go}>
       <nav className="side" aria-label="Hauptnavigation">
-        <div className="brand"><img className="brand-mark" src="/icons/raven.svg" alt="" /><div className="brand-t">TAP2 Coach<span>Fachinformatik AE</span></div></div>
+        <div className="brand"><img className="brand-mark" src="/icons/vortex.svg" alt="" /><div className="brand-t">Vortex</div></div>
         {NAV_MAIN.map((n) => <NavBtn key={n.view} n={n} current={navView === n.view} />)}
+        {/* Tutor vorerst nur für das freigeschaltete Konto (Claude) – für alle anderen unsichtbar */}
         {tutorOn && <NavBtn n={TUTOR_NAV} current={navView === "tutor"} />}
         <div className="side-foot">{NAV_FOOT.map((n) => <NavBtn key={n.view} n={n} current={navView === n.view} />)}</div>
       </nav>
       <div className="col">
         <header className="top" id="topbar">
-          <div className="top-l"><h1 id="page-title">{VTITLE[view] ?? (view === "tutor" ? "Tutor" : "TAP2 Coach")}</h1></div>
+          <div className="top-l"><h1 id="page-title">{VTITLE[view] ?? (view === "tutor" ? "Tutor" : "Vortex")}</h1></div>
           <div className="hud" id="hud">
             <button type="button" className="pill" data-go="start" title="Anteil der Fragen auf Grün, gelbe zählen halb"><Ring frac={c.pct} size={22} sw={4} /><span className="lbl">Prüfungsreife</span><b>{pctS(c.pct)}</b></button>
             <span className="pill days"><Ic name="calendar" /><b>{Math.max(0, left)}</b><span className="lbl">{left === 1 ? "Tag" : "Tage"}</span></span>
-            <HudPill view={view} />
+            <ErrorBoundary fallback={null}><HudPill view={view} /></ErrorBoundary>
             <button type="button" className="iconbtn hb" aria-label="Fragen durchsuchen" title="Suchen (Taste /)" onClick={openSearch}><Ic name="search" /></button>
             <button type="button" className={`iconbtn hb ${view === "einstellungen" ? "on" : ""}`} data-go="einstellungen" aria-label="Einstellungen" title="Einstellungen"><Ic name="gear" /></button>
           </div>
         </header>
-        <main className={`content${view === "tutor" ? " wide" : ""}`}><section className="view"><Outlet /></section></main>
+        <main className={`content${view === "tutor" ? " wide" : ""}`}><section className="view"><ErrorBoundary resetKey={loc.pathname}><Outlet /></ErrorBoundary></section></main>
         <Foot />
       </div>
       <UpdatePrompt />
-      <GamiLayer />
+      <ErrorBoundary fallback={null}><GamiLayer /></ErrorBoundary>
+      <ConfirmHost />
       <Suche />
     </div>
   );
 }
 
-/** Fußzeile wie in der Live-App. Abweichung mit Grund: Mit Geräte-Sync (Live-Sync oder Konto) liegt zusätzlich eine
- *  verschlüsselte Kopie auf dem Server – dann nennt der Text das, statt „nur lokal“ zu behaupten. */
+/** Fußzeile wie in der Live-App. Abweichung mit Grund: Mit Konto oder Geräte-Sync liegt zusätzlich eine Kopie auf dem
+ *  Server – dann nennt der Text das, statt „nur lokal“ zu behaupten. */
 function Foot() {
-  const live = useLiveSync((s) => !!s.cfg), acc = useAccount((s) => !!s.cfg);
-  return <footer className="foot"><span>TAP2 Prüfungscoach · {live || acc ? "Dein Fortschritt wird in diesem Browser gespeichert und verschlüsselt mit deinen Geräten abgeglichen." : "Dein Fortschritt wird lokal in diesem Browser gespeichert."}</span></footer>;
+  const live = useLiveSync((s) => !!s.cfg), acc = useAccount((s) => !!s.user);
+  return <footer className="foot"><span>Vortex · {acc ? "Dein Fortschritt wird in diesem Browser gespeichert und mit deinem Konto abgeglichen." : live ? "Dein Fortschritt wird in diesem Browser gespeichert und verschlüsselt mit deinen Geräten abgeglichen." : "Dein Fortschritt wird lokal in diesem Browser gespeichert."}</span></footer>;
 }
 
 // Link setzt bei aktiver Route selbst aria-current="page" – nur bei exakt gleichem Pfad, sonst gilt unsere Markierung

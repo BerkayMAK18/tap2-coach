@@ -28,8 +28,14 @@ export const lookEq = (str: unknown): [string, Equip, string] => {
 const te = new TextEncoder();
 const sha = async (s: string) => new Uint8Array(await crypto.subtle.digest("SHA-256", te.encode(s)));
 export const hexOf = (b: ArrayBuffer | Uint8Array) => [...new Uint8Array(b)].map((x) => x.toString(16).padStart(2, "0")).join("");
-/** Eintrags-ID wie lbId() der Live-App: sha256("tap2-lb|s|" + Schlüssel) bzw. sha256("tap2-lb|t|" + Gerätetoken) */
-export async function lbId(syncKey: string | null | undefined) {
+/**
+ * Eintrags-ID. Mit Konto (Dev-App, seit 14.11.2026): sha256("tap2-lb|u|" + Nutzer-ID) – ein Eintrag pro Konto, auf
+ * allen angemeldeten Geräten gleich. Sonst wie lbId() der Live-App: sha256("tap2-lb|s|" + Sync-Schlüssel) (verbundene
+ * Geräte teilen sich einen Eintrag) bzw. sha256("tap2-lb|t|" + Gerätetoken). Wechselt die ID (z. B. nach dem Anmelden),
+ * nimmt lbLoad/lbPush den Eintrag mit Namen mit (lbJoin verlässt die alte ID).
+ */
+export async function lbId(syncKey: string | null | undefined, userId?: string | null) {
+  if (userId) return hexOf(await sha("tap2-lb|u|" + userId));
   if (syncKey) return hexOf(await sha("tap2-lb|s|" + keyRaw(syncKey)));
   const lb = lbGet(); if (!lb.token) { lb.token = hexOf(crypto.getRandomValues(new Uint8Array(20))); lbSet(lb); }
   return hexOf(await sha("tap2-lb|t|" + lb.token));

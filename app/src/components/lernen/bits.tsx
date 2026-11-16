@@ -11,6 +11,7 @@ import { counts, isDue, type Counts } from "@/lib/srs";
 import { useProgress } from "@/store/progress";
 import { fmtClock, tmLeft, tmState, useTimer } from "@/store/timer";
 import { Ic, pctS } from "@/ui-main";
+import { CodeVariants } from "@/components/CodeVariants";
 
 /** Ampelpunkt: neu (ohne Klasse), s0 rot, s1 gelb, s2 grün */
 export const Amp = ({ s, title }: { s: number; title?: string }) => <i className={`amp${s >= 0 ? " s" + s : ""}`} title={title} />;
@@ -48,7 +49,7 @@ export function Front({ text }: { text: string }) {
   const [sit, task] = qParts(text);
   return (
     <>
-      {sit && <div className="situ">{situBlocks(sit).map((b, i) => (b.code ? <pre key={i} className="situ-code">{b.text}</pre> : b.text))}</div>}
+      {sit && <div className="situ">{situBlocks(sit).map((b, i) => (b.code ? <CodeVariants key={i} pseudo={b.text} className="situ-code" /> : b.text))}</div>}
       <div className="front">{task}</div>
     </>
   );

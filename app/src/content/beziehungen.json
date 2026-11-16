@@ -1,0 +1,107 @@
+{
+  "schema": 1,
+  "beispiele": [
+    {
+      "titel": "Abteilung und Mitarbeiter (1:n)",
+      "refs": ["m88"],
+      "vorher": {"a": {"t": "Abteilung", "k": "1"}, "b": {"t": "Mitarbeiter", "k": "n"}},
+      "tabellen": [
+        {"name": "Abteilung", "spalten": [{"n": "AbteilungsNr", "pk": true}, {"n": "Name"}]},
+        {"name": "Mitarbeiter", "spalten": [{"n": "MitarbeiterNr", "pk": true}, {"n": "Name"}, {"n": "AbteilungsNr", "fk": "Abteilung"}]}
+      ]
+    },
+    {
+      "titel": "Person und Personalausweis (1:1)",
+      "refs": ["m213", "G03:Kardinalitäten lesen"],
+      "vorher": {"a": {"t": "Person", "k": "1"}, "b": {"t": "Personalausweis", "k": "1"}, "verdeckt": true},
+      "tabellen": [
+        {"name": "Person", "spalten": [{"n": "PersonID", "pk": true}, {"n": "Name"}]},
+        {"name": "Personalausweis", "spalten": [{"n": "AusweisNr", "pk": true}, {"n": "Ablaufdatum"}, {"n": "PersonID", "fk": "Person", "unique": true}]}
+      ]
+    },
+    {
+      "titel": "Kunde und Bestellung (1:n)",
+      "refs": ["k:db8", "G03:Kardinalitäten lesen"],
+      "vorher": {"a": {"t": "Kunde", "k": "1"}, "b": {"t": "Bestellung", "k": "n"}},
+      "tabellen": [
+        {"name": "Kunde", "spalten": [{"n": "KundenNr", "pk": true}, {"n": "Name"}]},
+        {"name": "Bestellung", "spalten": [{"n": "BestellNr", "pk": true}, {"n": "Datum"}, {"n": "KundenNr", "fk": "Kunde"}]}
+      ]
+    },
+    {
+      "titel": "Schüler und Kurse (m:n mit Zwischentabelle)",
+      "refs": ["m87", "k:db7", "P04:m:n-Beziehungen auflösen", "G03:Kardinalitäten lesen"],
+      "vorher": {"a": {"t": "Schueler", "k": "m"}, "b": {"t": "Kurs", "k": "n"}},
+      "tabellen": [
+        {"name": "Schueler", "spalten": [{"n": "SchuelerNr", "pk": true}, {"n": "Name"}]},
+        {"name": "Belegung", "spalten": [{"n": "SchuelerNr", "pk": true, "fk": "Schueler"}, {"n": "KursNr", "pk": true, "fk": "Kurs"}, {"n": "Anmeldedatum"}]},
+        {"name": "Kurs", "spalten": [{"n": "KursNr", "pk": true}, {"n": "Titel"}]}
+      ]
+    },
+    {
+      "titel": "Bestellung, Position, Artikel (zusammengesetzter Schlüssel)",
+      "refs": ["m214"],
+      "vorher": null,
+      "tabellen": [
+        {"name": "Bestellung", "spalten": [{"n": "BestellNr", "pk": true}, {"n": "Datum"}]},
+        {"name": "Position", "spalten": [{"n": "BestellNr", "pk": true, "fk": "Bestellung"}, {"n": "ArtikelNr", "pk": true, "fk": "Artikel"}, {"n": "Menge"}]},
+        {"name": "Artikel", "spalten": [{"n": "ArtikelNr", "pk": true}, {"n": "Bezeichnung"}]}
+      ]
+    },
+    {
+      "titel": "Tabelle Position mit zwei Fremdschlüsseln",
+      "refs": ["k:sql19"],
+      "vorher": null,
+      "tabellen": [
+        {"name": "Bestellung", "spalten": [{"n": "BID", "pk": true}, {"n": "Datum"}]},
+        {"name": "Position", "spalten": [{"n": "BID", "pk": true, "fk": "Bestellung"}, {"n": "ArtNr", "pk": true, "fk": "Artikel"}, {"n": "Menge"}]},
+        {"name": "Artikel", "spalten": [{"n": "ArtNr", "pk": true}, {"n": "Bezeichnung"}]}
+      ]
+    },
+    {
+      "titel": "Relationenmodell Fahrradverleih",
+      "refs": ["k:db9"],
+      "vorher": null,
+      "tabellen": [
+        {"name": "Kunde", "spalten": [{"n": "KundenNr", "pk": true}, {"n": "Name"}]},
+        {"name": "Ausleihe", "spalten": [{"n": "AusleihNr", "pk": true}, {"n": "Datum"}, {"n": "KundenNr", "fk": "Kunde"}, {"n": "FahrradNr", "fk": "Fahrrad"}]},
+        {"name": "Fahrrad", "spalten": [{"n": "FahrradNr", "pk": true}, {"n": "Modell"}]}
+      ]
+    },
+    {
+      "titel": "Referentielle Integrität in der Bibliothek",
+      "refs": ["m94"],
+      "vorher": {"a": {"t": "Buch", "k": "1"}, "b": {"t": "Ausleihe", "k": "n"}},
+      "tabellen": [
+        {"name": "Buch", "spalten": [{"n": "BuchNr", "pk": true}, {"n": "Titel"}], "zeilen": [["1", "Momo"], ["2", "Faust"]]},
+        {"name": "Ausleihe", "spalten": [{"n": "AusleihNr", "pk": true}, {"n": "BuchNr", "fk": "Buch"}, {"n": "Datum"}], "zeilen": [["A1", "1", "03.11."], ["A2", "1", "10.11."]]}
+      ],
+      "abgelehnt": [
+        {"art": "einfuegen", "tabelle": "Ausleihe", "zeile": ["A3", "99", "12.11."], "grund": "Ein Buch mit BuchNr 99 gibt es nicht."},
+        {"art": "loeschen", "tabelle": "Buch", "zeile": ["1", "Momo"], "grund": "Die Ausleihen A1 und A2 verweisen noch auf Buch 1."}
+      ]
+    },
+    {
+      "titel": "Referentielle Integrität im Fahrradverleih",
+      "refs": ["k:db10"],
+      "vorher": {"a": {"t": "Fahrrad", "k": "1"}, "b": {"t": "Ausleihe", "k": "n"}},
+      "tabellen": [
+        {"name": "Fahrrad", "spalten": [{"n": "FahrradNr", "pk": true}, {"n": "Modell"}], "zeilen": [["F1", "Citybike"], ["F2", "E-Bike"]]},
+        {"name": "Ausleihe", "spalten": [{"n": "AusleihNr", "pk": true}, {"n": "FahrradNr", "fk": "Fahrrad"}, {"n": "Datum"}], "zeilen": [["A1", "F1", "03.11."], ["A2", "F2", "04.11."]]}
+      ],
+      "abgelehnt": [
+        {"art": "loeschen", "tabelle": "Fahrrad", "zeile": ["F1", "Citybike"], "grund": "Ausleihe A1 verweist noch auf F1. Mit ON DELETE CASCADE würde A1 stattdessen mitgelöscht."},
+        {"art": "einfuegen", "tabelle": "Ausleihe", "zeile": ["A3", "F9", "05.11."], "grund": "Ein Fahrrad F9 gibt es nicht."}
+      ]
+    },
+    {
+      "titel": "Mitglied und Vertrag (Krähenfuß)",
+      "refs": ["k:db17", "G03:Krähenfuß-Notation"],
+      "vorher": {"a": {"t": "Mitglied", "k": "1", "min": 1}, "b": {"t": "Vertrag", "k": "n", "min": 0}, "notation": "kraehenfuss"},
+      "tabellen": [
+        {"name": "Mitglied", "spalten": [{"n": "MitgliedNr", "pk": true}, {"n": "Name"}]},
+        {"name": "Vertrag", "spalten": [{"n": "VertragNr", "pk": true}, {"n": "Beginn"}, {"n": "MitgliedNr", "fk": "Mitglied"}]}
+      ]
+    }
+  ]
+}

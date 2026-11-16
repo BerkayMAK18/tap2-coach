@@ -7,7 +7,7 @@
  */
 import { createFileRoute } from "@tanstack/react-router";
 import type { ReactNode } from "react";
-import { CONTROLLER, FEATURES, PRIVACY_VERSION } from "@/config";
+import { CONTROLLER, FEATURES, FREE_AI, PRIVACY_VERSION } from "@/config";
 
 export const Route = createFileRoute("/datenschutz")({ component: Datenschutz });
 
@@ -23,7 +23,7 @@ function Datenschutz() {
           <li>Du kannst ohne Konto lernen. Dein Lernstand bleibt dann ausschließlich in deinem Browser.</li>
           <li>Kein Tracking, keine Werbung, keine Analyse-Werkzeuge, keine Cookies zu Werbezwecken.</li>
           <li>Schriften und Programmbibliotheken liegen auf unserem eigenen Server. Es gibt keine Verbindung zu Google oder anderen Drittanbietern.</li>
-          {f.sync && <li>Wenn du deinen Lernstand in deinem Konto sicherst, wird er vorher in deinem Browser verschlüsselt. Nur du hast den Schlüssel – auch der Betreiber kann ihn nicht lesen.</li>}
+          {f.sync && <li>Mit Konto liegt dein Lernstand in deinem Konto – geschützt durch die Anmeldung, aber nicht Ende-zu-Ende-verschlüsselt. Ohne Konto kannst du deine Geräte per Code koppeln; dann wird er vorher in deinem Browser verschlüsselt und niemand außer dir kann ihn lesen.</li>}
           {f.leaderboard && <li>In der Rangliste erscheinst du nur, wenn du das möchtest, und nur mit einem selbst gewählten Benutzernamen.</li>}
         </Ul>
       </section>
@@ -48,29 +48,30 @@ function Datenschutz() {
           <li>Das Speichern ist für die Funktion der App unbedingt erforderlich (§ 25 Abs. 2 Nr. 2 TDDDG); eine Einwilligung ist dafür nicht nötig.</li>
           <li>Löschen: Einstellungen → „Fortschritt zurücksetzen“, oder die Website-Daten in deinem Browser löschen.</li>
           <li>Sicherungsdateien („Sicherung herunterladen“) entstehen nur auf deinem Gerät. Die App überträgt sie nirgendwohin.</li>
-          <li>Übertragungs-Links und QR-Codes („Auf anderes Gerät übertragen“) enthalten deinen Lernstand im Teil hinter dem #. Dieser Teil wird beim Öffnen nicht an einen Server gesendet. Teile solche Links nur mit dir selbst.</li>
+          <li>Übertragungs-Links aus der Live-App enthalten den Lernstand im Teil hinter dem #. Dieser Teil wird beim Öffnen nicht an einen Server gesendet. Teile solche Links nur mit dir selbst.</li>
         </Ul>
       </Sec>
 
       {f.account && (
         <Sec t="Anmeldung mit GitHub (freiwillig)">
-          <p>Für Sicherung, Geräte-Sync und Rangliste kannst du dich mit deinem GitHub-Konto anmelden. Dabei übermittelt GitHub an uns: deine GitHub-Nutzer-ID, deinen GitHub-Benutzernamen, deine E-Mail-Adresse und den Link zu deinem Profilbild. Wir verwenden davon nur die Nutzer-ID zur Zuordnung deines Kontos.</p>
+          <p>Für den Abgleich mit deinem Konto und die Rangliste kannst du dich mit deinem GitHub-Konto anmelden. Dabei übermittelt GitHub an uns: deine GitHub-Nutzer-ID, deinen GitHub-Benutzernamen, deine E-Mail-Adresse und den Link zu deinem Profilbild. Wir verwenden davon nur die Nutzer-ID zur Zuordnung deines Kontos.</p>
           <Ul>
             <li>Gespeichert werden die Kontodaten bei Supabase (Supabase Inc., Rechenzentrum in Frankfurt am Main, EU) als Auftragsverarbeiter.</li>
             <li>Rechtsgrundlage: Bereitstellung der von dir gewünschten Funktion (Art. 6 Abs. 1 lit. b DSGVO).</li>
             <li>Für die Anmeldung selbst ist GitHub, Inc. (USA) eigenständig verantwortlich; es gilt die Datenschutzerklärung von GitHub.</li>
             <li>Dein Anmelde-Token liegt im lokalen Speicher deines Browsers (technisch notwendig).</li>
-            <li>Die verschlüsselte Sicherung löschst du jederzeit selbst in den Einstellungen („Cloud-Kopie löschen“). Die Löschung des Kontos selbst kannst du über die oben genannte Kontaktmöglichkeit verlangen; ein Knopf dafür folgt.</li>
+            <li>Supabase protokolliert bei Anmeldung und Anfragen technisch notwendige Daten (u. a. IP-Adresse, Zeitpunkt) für Betrieb und Sicherheit, nach den Fristen des Anbieters. Wir werten diese Protokolle nicht aus.</li>
+            <li>Den Stand in deinem Konto löschst du jederzeit selbst in den Einstellungen („Kopie im Konto löschen“). Die Löschung des Kontos selbst kannst du über die oben genannte Kontaktmöglichkeit verlangen; ein Knopf dafür folgt.</li>
           </Ul>
         </Sec>
       )}
 
       {f.sync && (
-        <Sec t="Verschlüsselte Sicherung und Geräte-Sync (freiwillig)">
-          <p>Dein Lernstand wird in deinem Browser mit einem nur dir bekannten Schlüssel verschlüsselt (AES-GCM, 256 Bit) und erst dann in deinem Konto gespeichert. Gespeichert werden: der verschlüsselte Inhalt, eine Versionsnummer und der Zeitpunkt der letzten Änderung. Der Betreiber kann den Inhalt nicht lesen.</p>
+        <Sec t="Synchronisieren (freiwillig)">
+          <p><b>Mit Konto:</b> Lernstand und Belohnungen (beim KI-Tutor auch dessen Stand) werden in deinem Konto bei Supabase (Rechenzentrum Frankfurt am Main) gespeichert – Inhalt, Versionsnummer und Zeitpunkt der letzten Änderung. So hast du auf jedem angemeldeten Gerät denselben Stand. Zugriff über die App hast nur du (Anmeldung und Zugriffsregeln in der Datenbank). Der Stand ist nicht Ende-zu-Ende-verschlüsselt: Der Betreiber kann technisch auf ihn zugreifen und tut das nur, wenn es für Betrieb oder Fehlerbehebung nötig ist.</p>
+          <p><b>Ohne Konto (Geräte-Sync):</b> Dein Lernstand wird in deinem Browser mit einem nur dir bekannten Schlüssel verschlüsselt (AES-GCM, 256 Bit) und erst dann gespeichert, unter einer Prüfsumme statt eines Namens. Den Schlüssel überträgst du per Kurzcode oder QR-Code auf deine weiteren Geräte. Der Betreiber kann den Inhalt nicht lesen.</p>
           <Ul>
-            <li>Den Schlüssel überträgst du per Kurzcode oder QR-Code auf deine weiteren Geräte. Bewahre ihn auf – ohne ihn ist die Sicherung in der Cloud nicht lesbar. Der Stand auf deinen Geräten bleibt davon unberührt.</li>
-            <li>Zur Wiederherstellung bei Fehlern bleibt je Tag ein älterer verschlüsselter Stand 10 Tage erhalten.</li>
+            <li>Zur Wiederherstellung bei Fehlern bleibt beim Konto je Tag ein älterer Stand 10 Tage erhalten.</li>
             <li>Rechtsgrundlage: Art. 6 Abs. 1 lit. b DSGVO. Löschen: jederzeit in den Einstellungen.</li>
           </Ul>
         </Sec>
@@ -78,9 +79,11 @@ function Datenschutz() {
 
       {f.leaderboard && (
         <Sec t="Rangliste (freiwillig, mit Einwilligung)">
-          <p>Wenn du an der Rangliste teilnimmst, sehen alle Nutzerinnen und Nutzer deinen selbst gewählten Benutzernamen, dein Level, deine XP und deine Figur. Dein GitHub-Name und deine E-Mail-Adresse erscheinen dort nie.</p>
+          <p>Wenn du an der Rangliste teilnimmst, sehen alle Nutzerinnen und Nutzer deinen selbst gewählten Benutzernamen, dein Level, deine XP, deine Figur und deinen Titel – in dieser App und in der bisherigen Version des Prüfungscoachs (dieselbe öffentliche Bestenliste). Dein GitHub-Name und deine E-Mail-Adresse erscheinen dort nie.</p>
           <Ul>
-            <li>Rechtsgrundlage: deine Einwilligung (Art. 6 Abs. 1 lit. a DSGVO). Du kannst sie jederzeit widerrufen („Austragen“); der Eintrag wird sofort gelöscht.</li>
+            <li>Gespeichert werden nur diese Angaben unter einer zufällig wirkenden Kennung bei Supabase (Frankfurt am Main). Mit Konto ist die Kennung aus deinem Konto abgeleitet: Andere können sie nicht deinem Konto zuordnen, der Betreiber technisch schon.</li>
+            <li>Rechtsgrundlage: deine Einwilligung (Art. 6 Abs. 1 lit. a DSGVO), die du mit „Mitmachen“ gibst. Du kannst sie jederzeit widerrufen („Austragen“); der Eintrag wird sofort gelöscht.</li>
+            <li>In der Testphase dieser Version kannst du dich nicht neu eintragen; bestehende Einträge werden weiter aktualisiert.</li>
             <li>Wähle bitte nicht deinen echten Namen.</li>
           </Ul>
         </Sec>
@@ -93,16 +96,33 @@ function Datenschutz() {
         </Ul>
       </Sec>
 
+      {f.account && (
+        <Sec t="Kostenloser KI-Tutor in der App (mit Anmeldung, Einwilligung)">
+          <p>Wenn du den kostenlosen KI-Tutor in der App nutzt, gehen deine Nachrichten im Tutor und dein Stand zum gewählten Thema (Beherrschung je Konzept, offene Fehlvorstellungen, Lerninhalte – ohne Namen, E-Mail oder Konto-Daten) über unseren Server an den KI-Anbieter {FREE_AI.provider}. Dort werden sie zur Beantwortung verarbeitet, nach den Bedingungen des Anbieters (Gratis-Stufe).</p>
+          <Ul>
+            <li>Rechtsgrundlage: deine Einwilligung (Art. 6 Abs. 1 lit. a DSGVO), die du vor der ersten Nachricht gibst. Ohne Einwilligung kannst du den Tutor mit deiner eigenen KI (Brücke) nutzen.</li>
+            <li>Eine Übermittlung in die USA findet statt. Die Nachrichten laufen über eine Server-Funktion bei Supabase („Edge Function“), die sie nur weiterleitet. Unser Server speichert dabei keine Inhalte, nur Zähler je Konto und Tag (für die Tageslimits), höchstens 30 Tage.</li>
+          </Ul>
+        </Sec>
+      )}
+
+      <Sec t="KI-Tutor über deine eigene KI">
+        <p>Der Tutor erzeugt einen Text mit Anweisungen, deinem Lernstand zum gewählten Thema (Beherrschung je Konzept, offene Fehlvorstellungen, häufige Fehler – ohne Namen oder Konto-Daten) und den Lerninhalten. Du kopierst ihn selbst in eine KI deiner Wahl. Die App überträgt dabei nichts; für die KI gelten deren Bedingungen und deren Datenschutz.</p>
+        <Ul>
+          <li>Den Ergebnis-Block der KI fügst du selbst wieder ein. Die App prüft ihn und übernimmt nur bekannte Themen und Konzepte in deinen Tutor-Stand (im Browser, mit Konto auch in deinem Konto).</li>
+        </Ul>
+      </Sec>
+
       {f.tutor && (
-        <Sec t="KI-Tutor">
-          <p>Der KI-Tutor ist derzeit nur für den Betreiber freigeschaltet und für andere Konten nicht verfügbar. Eingaben im Tutor werden zur Beantwortung an Anthropic, PBC (USA) übermittelt.</p>
+        <Sec t="Tutor Pro (eingebaute KI)">
+          <p>Tutor Pro ist derzeit nur für den Betreiber freigeschaltet und für andere Konten nicht verfügbar. Eingaben im Tutor werden zur Beantwortung an Anthropic, PBC (USA) übermittelt.</p>
         </Sec>
       )}
 
       <Sec t="Speicherdauer">
         <Ul>
           <li>Lernstand im Browser: bis du ihn löschst.</li>
-          {f.account && <li>Konto, verschlüsselte Sicherung, Ranglisten-Eintrag: bis du sie löschst; Tagessicherungen höchstens 10 Tage.</li>}
+          {f.account && <li>Konto, Stand im Konto, Ranglisten-Eintrag: bis du sie löschst; Tagessicherungen höchstens 10 Tage.</li>}
           <li>Technische Zugriffsdaten beim Hosting: nach den Fristen des Anbieters, nur für Betrieb und Sicherheit.</li>
         </Ul>
       </Sec>

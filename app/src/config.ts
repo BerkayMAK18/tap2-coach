@@ -10,7 +10,6 @@ export const KEYS = {
   state: "tap2coach",
   session: "tap2coach-sess",
   beforeImport: "tap2coach-vor-import",
-  appSync: "tap2coach-app-sync", // { key, rev } – Sync-Schlüssel nur auf diesem Gerät
 } as const;
 
 /**
@@ -22,10 +21,21 @@ const SUPABASE_ON = Boolean(import.meta.env.VITE_SUPABASE_URL && import.meta.env
 export const FEATURES = {
   account: SUPABASE_ON, // Anmeldung mit GitHub (Supabase Auth) – an, sobald die Build-Variablen gesetzt sind
   sync: SUPABASE_ON, // Ende-zu-Ende-verschlüsselte Sicherung/Sync im Konto
-  leaderboard: false, // Rangliste mit selbst gewähltem Benutzernamen (Einwilligung)
+  leaderboard: SUPABASE_ON, // Rangliste mit selbst gewähltem Benutzernamen (freiwillig) – dieselbe Bestenliste wie die Live-App
   patchNotes: true, // Release-Liste von der GitHub-API (Seite Patch Notes, portiert 14.11.2026)
-  tutor: false, // KI-Tutor – nur für freigeschaltete Konten (Admin), für andere unsichtbar
+  tutor: false, // Tutor Pro (eingebaute KI, Anthropic) – nur für freigeschaltete Konten (Admin); Tutor (Brücke) ist immer an
 } as const;
+
+/**
+ * Rangliste in der Testphase der neuen App (Dev-Seite, Demo-Tester): Die Bestenliste ist dieselbe wie in der Live-App.
+ * Wer schon eingetragen ist (über die Live-App oder ein verbundenes Gerät), wird weiter aktualisiert und kann den
+ * Namen ändern oder sich austragen – neue Einträge sind aber erst möglich, wenn die neue App die Live-App ersetzt.
+ * So landen keine Testnamen bei den echten Nutzern. Beim Umstieg auf true setzen.
+ */
+export const LB_NEW_JOINS = false;
+
+/** Tutor über die eigene KI (Brücke): Ergebnis-Blöcke schreibt man selbst ein – XP daher höchstens für so viele Aufgaben pro Tag. */
+export const BRIDGE_XP_TASKS_PER_DAY = 8;
 
 /**
  * Verantwortlicher nach Art. 4 Nr. 7 DSGVO – Pflichtangabe im Datenschutzhinweis.
@@ -37,4 +47,10 @@ export const CONTROLLER = {
 } as const;
 
 /** Stand des Datenschutzhinweises – bei jeder inhaltlichen Änderung anpassen. */
-export const PRIVACY_VERSION = "2026-11-14";
+export const PRIVACY_VERSION = "2026-11-15";
+
+/**
+ * Kostenloser Tutor: Anbieter der Gratis-Stufe (Server-Secrets FREE_AI_URL/FREE_AI_KEY/FREE_AI_MODEL in der Edge Function).
+ * Wird in der Einwilligung und im Datenschutzhinweis genannt – bei einem Wechsel des Anbieters hier mit anpassen.
+ */
+export const FREE_AI = { provider: "Groq, Inc. (USA)", consentVersion: "2026-11-15" } as const;

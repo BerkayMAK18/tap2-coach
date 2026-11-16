@@ -1,0 +1,597 @@
+{
+ "10fod6e": {
+  "python": "n = len(a)  # n = Anzahl der Elemente (im Pseudocode vorausgesetzt)\nfor i in range(1, n):\n    aktuell = a[i]\n    j = i - 1\n    while j >= 0 and a[j] > aktuell:\n        a[j + 1] = a[j]\n        j = j - 1\n    a[j + 1] = aktuell",
+  "javascript": "const n = a.length; // n = Anzahl der Elemente (im Pseudocode vorausgesetzt)\nfor (let i = 1; i <= n - 1; i++) {\n  let aktuell = a[i];\n  let j = i - 1;\n  while (j >= 0 && a[j] > aktuell) {\n    a[j + 1] = a[j];\n    j = j - 1;\n  }\n  a[j + 1] = aktuell;\n}",
+  "erklaerung": [
+   "n = Anzahl der Elemente (im Pseudocode vorausgesetzt). Insertion Sort: ab Index 1, denn ein einzelnes Element (Index 0) gilt schon als sortiert.",
+   "Einzufügendes Element sichern, weil sein Platz gleich überschrieben wird.",
+   "j startet beim letzten Element des bereits sortierten Bereichs.",
+   "Solange links noch Elemente sind und diese größer sind, muss weiter nach links gesucht werden.",
+   "Größeres Element eine Position nach rechts schieben, um Platz zu machen.",
+   "Einen Schritt weiter nach links gehen.",
+   "Ende der solange-Schleife – die Einfügeposition ist gefunden.",
+   "Gesichertes Element in die Lücke bei j + 1 einsetzen.",
+   "Ende der Schleife über i – das Array ist sortiert."
+  ]
+ },
+ "13bh9n5": {
+  "python": "def auswerten(werte: list[float], grenze: float) -> \"Auswertung\":\n    if len(werte) == 0:\n        return None\n    summe = 0.0\n    anzahlUeber = 0\n    maxWert = werte[0]\n    maxIndex = 0\n    for i in range(0, len(werte)):\n        summe = summe + werte[i]\n        if werte[i] > grenze:\n            anzahlUeber = anzahlUeber + 1\n        if werte[i] > maxWert:\n            maxWert = werte[i]\n            maxIndex = i\n    return Auswertung(summe / len(werte), anzahlUeber, maxWert, maxIndex)",
+  "javascript": "/** @param {number[]} werte @param {number} grenze @returns {Auswertung|null} */\nfunction auswerten(werte, grenze) {\n  if (werte.length === 0) {\n    return null;\n  }\n  let summe = 0.0;\n  let anzahlUeber = 0;\n  let maxWert = werte[0];\n  let maxIndex = 0;\n  for (let i = 0; i <= werte.length - 1; i++) {\n    summe = summe + werte[i];\n    if (werte[i] > grenze) {\n      anzahlUeber = anzahlUeber + 1;\n    }\n    if (werte[i] > maxWert) {\n      maxWert = werte[i];\n      maxIndex = i;\n    }\n  }\n  return new Auswertung(summe / werte.length, anzahlUeber, maxWert, maxIndex);\n}",
+  "erklaerung": [
+   "Methodenkopf: erhält ein Double-Array und eine Grenze, liefert ein Auswertung-Objekt zurück.",
+   "Sonderfall zuerst: Ein leeres Array hat keinen Durchschnitt und kein Maximum.",
+   "Rückgabe beendet die Methode sofort und liefert null statt eines Ergebnisses.",
+   "Ende der Bedingung.",
+   "Startwert für die Summe; 0.0, weil Double-Werte addiert werden.",
+   "Zähler für die Werte über der Grenze beginnt bei 0.",
+   "Das Maximum startet mit dem ersten Element (Index 0), nicht mit 0, sonst scheitert es bei negativen Werten.",
+   "Passend dazu merkst du dir den Index des bisherigen Maximums.",
+   "Läuft über alle Indizes; für … bis zählt die Grenze mit, daher length - 1 als letzter Index.",
+   "Jeden Wert auf die Summe addieren, für den Durchschnitt am Ende.",
+   "Prüft, ob der aktuelle Wert die Grenze überschreitet.",
+   "Wenn ja, wird der Zähler um 1 erhöht.",
+   "Ende der Bedingung.",
+   "Ist der aktuelle Wert größer als das bisherige Maximum?",
+   "Dann ist er das neue Maximum.",
+   "Und sein Index wird mitgespeichert, weil die Aufgabe auch die Position verlangt.",
+   "Ende der Bedingung.",
+   "Ende der Schleife über i.",
+   "Erzeugt das Ergebnisobjekt: Durchschnitt = Summe / Anzahl, dazu Zähler, Maximum und Index.",
+   "Ende der Methode auswerten.",
+   "",
+   "Punkteverteilung des Prüfers: Auch der Sonderfall leeres Array und die Initialisierung bringen Punkte."
+  ]
+ },
+ "13ekumi": {
+  "python": "def binaereSuche(werte: list, n: int, gesucht) -> int:\n    links = 0\n    rechts = n - 1\n    while links <= rechts:\n        mitte = (links + rechts) // 2   # ganzzahlig\n        if werte[mitte] == gesucht:\n            return mitte\n        elif werte[mitte] < gesucht:\n            links = mitte + 1\n        else:\n            rechts = mitte - 1\n    return -1",
+  "javascript": "function binaereSuche(werte, n, gesucht) {\n  let links = 0;\n  let rechts = n - 1;\n  while (links <= rechts) {\n    let mitte = Math.floor((links + rechts) / 2);   // ganzzahlig\n    if (werte[mitte] === gesucht) {\n      return mitte;\n    } else if (werte[mitte] < gesucht) {\n      links = mitte + 1;\n    } else {\n      rechts = mitte - 1;\n    }\n  }\n  return -1;\n}",
+  "erklaerung": [
+   "Binäre Suche (nur in sortierten Daten): linke Grenze ist der erste Index 0.",
+   "Rechte Grenze ist der letzte Index n - 1.",
+   "Suchen, solange der Bereich noch mindestens ein Element enthält.",
+   "Mitte des Bereichs berechnen; ganzzahlige Division schneidet die Nachkommastelle ab.",
+   "= ist hier ein Vergleich: Steht der gesuchte Wert genau in der Mitte?",
+   "Treffer: Index zurückgeben, rückgabe beendet die Methode sofort.",
+   "Mitte zu klein – der gesuchte Wert kann nur rechts davon liegen.",
+   "Linke Hälfte samt Mitte verwerfen, der Suchbereich halbiert sich.",
+   "Sonst ist die Mitte zu groß.",
+   "Rechte Hälfte samt Mitte verwerfen.",
+   "Ende der Bedingung.",
+   "Ende der solange-Schleife – der Bereich ist leer, nichts gefunden.",
+   "-1 signalisiert: Wert nicht vorhanden (kein gültiger Index)."
+  ]
+ },
+ "15b322q": {
+  "python": "n = len(a)  # n = Anzahl der Elemente (im Pseudocode vorausgesetzt)\nfor i in range(0, n - 1):\n    for j in range(0, n - 1 - i):\n        if a[j].getWert() > a[j + 1].getWert():\n            tmp = a[j]\n            a[j] = a[j + 1]\n            a[j + 1] = tmp",
+  "javascript": "const n = a.length; // n = Anzahl der Elemente (im Pseudocode vorausgesetzt)\nfor (let i = 0; i <= n - 2; i++) {\n  for (let j = 0; j <= n - 2 - i; j++) {\n    if (a[j].getWert() > a[j + 1].getWert()) {\n      let tmp = a[j];\n      a[j] = a[j + 1];\n      a[j + 1] = tmp;\n    }\n  }\n}",
+  "erklaerung": [
+   "n = Anzahl der Elemente (im Pseudocode vorausgesetzt). Bubble Sort: n - 1 Durchläufe reichen, denn danach steht auch das letzte Element richtig.",
+   "Nach jedem Durchlauf steht das größte Element hinten – deshalb läuft j nur bis n - 2 - i.",
+   "Benachbarte Elemente vergleichen: Steht das größere vorne, sind sie falsch herum.",
+   "a[j] in tmp sichern, sonst ginge es beim Überschreiben verloren.",
+   "Rechten Nachbarn nach links kopieren.",
+   "Gesicherten Wert nach rechts – der Tausch ist fertig.",
+   "Ende der Bedingung.",
+   "Ende der inneren Schleife über j.",
+   "Ende der äußeren Schleife – das Array ist aufsteigend sortiert."
+  ]
+ },
+ "15bcfcs": {
+  "python": "for f in range(0, anzahlFilialen):\n    summe = 0\n    for m in range(0, 12):\n        summe = summe + verkauf[f][m]\n    print(\"Filiale \" + str(f) + \": \" + str(summe))",
+  "javascript": "for (let f = 0; f <= anzahlFilialen - 1; f++) {\n  let summe = 0;\n  for (let m = 0; m <= 11; m++) {\n    summe = summe + verkauf[f][m];\n  }\n  console.log(\"Filiale \" + f + \": \" + summe);\n}",
+  "erklaerung": [
+   "Äußere Schleife über alle Filialen (Zeilen des 2D-Arrays), Index beginnt bei 0, daher bis anzahlFilialen - 1.",
+   "Summe für jede Filiale neu auf 0 setzen, sonst würden die Werte der vorigen Filiale mitgezählt.",
+   "Innere Schleife über die 12 Monate: 0 bis 11 inklusiv.",
+   "Verkauf der Filiale f im Monat m zur Summe addieren.",
+   "Ende der Schleife über m – die Jahressumme dieser Filiale ist fertig.",
+   "Gibt Filialnummer und Jahressumme aus; + verkettet hier Texte und Zahlen.",
+   "Ende der Schleife über f."
+  ]
+ },
+ "171y0xn": {
+  "python": "# a)\ndef besterMonat(umsatz: list[list[float]]) -> int:\n    besterIndex = 0\n    besteSumme = -1\n    for m in range(0, 12):\n        summe = 0\n        for f in range(0, len(umsatz)):\n            summe = summe + umsatz[f][m]\n        if summe > besteSumme:\n            besteSumme = summe\n            besterIndex = m\n    return besterIndex + 1\n\n\n# b)\ndef zielErreicht(umsatz: list[list[float]], ziel: float) -> int:\n    anzahl = 0\n    for f in range(0, len(umsatz)):\n        immer = True\n        for m in range(0, 12):\n            if umsatz[f][m] < ziel:\n                immer = False\n        if immer:\n            anzahl = anzahl + 1\n    return anzahl",
+  "javascript": "// a)\n/** @param {number[][]} umsatz @returns {number} */\nfunction besterMonat(umsatz) {\n  let besterIndex = 0;\n  let besteSumme = -1;\n  for (let m = 0; m <= 11; m++) {\n    let summe = 0;\n    for (let f = 0; f <= umsatz.length - 1; f++) {\n      summe = summe + umsatz[f][m];\n    }\n    if (summe > besteSumme) {\n      besteSumme = summe;\n      besterIndex = m;\n    }\n  }\n  return besterIndex + 1;\n}\n\n// b)\n/** @param {number[][]} umsatz @param {number} ziel @returns {number} */\nfunction zielErreicht(umsatz, ziel) {\n  let anzahl = 0;\n  for (let f = 0; f <= umsatz.length - 1; f++) {\n    let immer = true;\n    for (let m = 0; m <= 11; m++) {\n      if (umsatz[f][m] < ziel) {\n        immer = false;\n      }\n    }\n    if (immer) {\n      anzahl = anzahl + 1;\n    }\n  }\n  return anzahl;\n}",
+  "erklaerung": [
+   "Teilaufgabe a)",
+   "Methodenkopf: erhält ein 2D-Array (Filialen x Monate) und liefert die Monatsnummer als Integer.",
+   "Index des besten Monats, startet beim ersten Monat (Index 0).",
+   "Startwert -1, damit schon der erste Monat (Summe mindestens 0) größer ist.",
+   "Äußere Schleife über die 12 Monate; 0 bis 11 inklusiv, weil Indizes bei 0 beginnen.",
+   "Summe für jeden Monat neu auf 0 setzen, sonst addierst du die Vormonate mit.",
+   "Innere Schleife über alle Filialen (Zeilen des Arrays).",
+   "Umsatz der Filiale f im Monat m zur Monatssumme addieren.",
+   "Ende der Schleife über f.",
+   "Ist diese Monatssumme größer als die bisher beste?",
+   "Dann wird sie die neue beste Summe.",
+   "Und der Monatsindex wird gemerkt.",
+   "Ende der Bedingung.",
+   "Ende der Schleife über m.",
+   "Plus 1, weil der Index 0 bis 11 läuft, gefragt aber die Monatsnummer 1 bis 12 ist.",
+   "Ende der Methode besterMonat.",
+   "",
+   "Teilaufgabe b)",
+   "Methodenkopf: erhält Umsätze und Zielwert, liefert die Anzahl der Filialen als Integer.",
+   "Zähler für Filialen, die das Ziel in jedem Monat erreicht haben.",
+   "Äußere Schleife über alle Filialen.",
+   "Flag pro Filiale auf true setzen: Annahme, das Ziel wurde immer erreicht.",
+   "Innere Schleife über die 12 Monate dieser Filiale.",
+   "Liegt der Umsatz in einem Monat unter dem Ziel?",
+   "Dann ist die Annahme widerlegt und das Flag wird false.",
+   "Ende der Bedingung.",
+   "Ende der Schleife über m.",
+   "Ist das Flag nach allen Monaten noch true, hat die Filiale das Ziel immer erreicht.",
+   "Dann wird der Zähler erhöht.",
+   "Ende der Bedingung.",
+   "Ende der Schleife über f.",
+   "Rückgabe beendet die Methode und liefert die Anzahl.",
+   "Ende der Methode zielErreicht.",
+   "",
+   "Häufige Fehler, die Punkte kosten: Zurücksetzen von Summe und Flag an der richtigen Stelle beachten."
+  ]
+ },
+ "17xzn5": {
+  "python": "def durchschnitt(minuten: list[int]) -> float:\n    n = len(minuten)  # n = Anzahl der Elemente (im Pseudocode vorausgesetzt)\n    summe = 0\n    for i in range(0, n):\n        summe = summe + minuten[i]\n    return summe / float(n)",
+  "javascript": "/** @param {number[]} minuten @returns {number} */\nfunction durchschnitt(minuten) {\n  const n = minuten.length; // n = Anzahl der Elemente (im Pseudocode vorausgesetzt)\n  let summe = 0;\n  for (let i = 0; i <= n - 1; i++) {\n    summe = summe + minuten[i];\n  }\n  return summe / n;\n}",
+  "erklaerung": [
+   "Methodenkopf: nimmt Minuten-Werte als Integer-Array und liefert den Durchschnitt als Double.",
+   "Summe startet bei 0, damit beim Aufaddieren nichts Fremdes mitgezählt wird.",
+   "n = Anzahl der Elemente (im Pseudocode vorausgesetzt). Läuft über alle Elemente, Index 0 bis n - 1 inklusiv.",
+   "Aktuellen Wert zur Summe addieren.",
+   "Ende der Schleife über i – summe enthält jetzt alle Minuten.",
+   "Teilt durch n; der Cast auf Double verhindert eine ganzzahlige Division mit abgeschnittenen Nachkommastellen.",
+   "Schließt die Methode durchschnitt."
+  ]
+ },
+ "18jbbsi": {
+  "python": "maxWert = werte[0]\nmaxPos = 0\nfor i in range(1, len(werte)):\n    if werte[i] > maxWert:\n        maxWert = werte[i]\n        maxPos = i",
+  "javascript": "let maxWert = werte[0];\nlet maxPos = 0;\nfor (let i = 1; i <= werte.length - 1; i++) {\n  if (werte[i] > maxWert) {\n    maxWert = werte[i];\n    maxPos = i;\n  }\n}",
+  "erklaerung": [
+   "Erstes Element als vorläufiges Maximum – so ist immer ein echter Vergleichswert vorhanden.",
+   "Position des vorläufigen Maximums merken (Index 0).",
+   "Start bei 1, weil Element 0 schon als Maximum gesetzt ist; bis length - 1 inklusiv.",
+   "Ist der aktuelle Wert größer als das bisherige Maximum?",
+   "Dann wird er zum neuen Maximum.",
+   "Und seine Position wird gemerkt.",
+   "Ende der Bedingung.",
+   "Ende der Schleife – maxWert und maxPos enthalten jetzt das größte Element und seinen Index."
+  ]
+ },
+ "1aokbl7": {
+  "python": "for z in range(0, len(feld)):\n    summe = 0\n    for s in range(0, len(feld[z])):\n        summe = summe + feld[z][s]\n    # summe der Zeile z verwenden",
+  "javascript": "for (let z = 0; z <= feld.length - 1; z++) {\n  let summe = 0;\n  for (let s = 0; s <= feld[z].length - 1; s++) {\n    summe = summe + feld[z][s];\n  }\n  // summe der Zeile z verwenden\n}",
+  "erklaerung": [
+   "Äußere Schleife über die Zeilen z des 2D-Felds (0 bis Zeilenanzahl - 1).",
+   "Summe für jede Zeile neu auf 0 setzen, sonst würden sich die Zeilen aufaddieren.",
+   "Innere Schleife über die Spalten s der aktuellen Zeile; feld[z].length ist die Spaltenanzahl.",
+   "Element in Zeile z, Spalte s zur Zeilensumme addieren.",
+   "Ende der Schleife über s – die Zeile ist komplett summiert.",
+   "Kommentar: Hier wird die fertige Zeilensumme weiterverwendet, z. B. ausgegeben.",
+   "Ende der Schleife über z."
+  ]
+ },
+ "1d3nqlj": {
+  "python": "def fakultaet(n: int) -> int:\n    if n <= 1:\n        return 1                    # Anker\n    return n * fakultaet(n - 1)     # Schritt",
+  "javascript": "/** @param {number} n @returns {number} */\nfunction fakultaet(n) {\n  if (n <= 1) {\n    return 1;                     // Anker\n  }\n  return n * fakultaet(n - 1);    // Schritt\n}",
+  "erklaerung": [
+   "Methodenkopf: fakultaet bekommt eine Ganzzahl n und liefert eine Ganzzahl.",
+   "Prüft, ob der einfachste Fall erreicht ist.",
+   "Anker: 1 zurückgeben, damit die Rekursion stoppt und nicht endlos läuft.",
+   "Ende der Bedingung.",
+   "Schritt: n mal die Fakultät von n - 1, das Problem wird bei jedem Aufruf kleiner.",
+   "Ende der Methode."
+  ]
+ },
+ "1ebfb30": {
+  "python": "n = len(a)  # n = Anzahl der Elemente (im Pseudocode vorausgesetzt)\nfor i in range(0, n - 1):\n    for j in range(0, n - 1 - i):\n        if a[j] > a[j + 1]:\n            tmp = a[j]\n            a[j] = a[j + 1]\n            a[j + 1] = tmp",
+  "javascript": "const n = a.length; // n = Anzahl der Elemente (im Pseudocode vorausgesetzt)\nfor (let i = 0; i <= n - 2; i++) {\n  for (let j = 0; j <= n - 2 - i; j++) {\n    if (a[j] > a[j + 1]) {\n      let tmp = a[j];\n      a[j] = a[j + 1];\n      a[j + 1] = tmp;\n    }\n  }\n}",
+  "erklaerung": [
+   "n = Anzahl der Elemente (im Pseudocode vorausgesetzt). Bubblesort, äußere Schleife: n - 1 Durchläufe (0 bis n - 2 inklusiv) reichen, um alles zu sortieren.",
+   "Innere Schleife vergleicht Nachbarn; hinten stehen schon i fertige Elemente, deshalb nur bis n - 2 - i.",
+   "Steht das linke Element größer als sein rechter Nachbar, sind die beiden falsch herum.",
+   "Linken Wert in tmp sichern, sonst ginge er beim Überschreiben verloren.",
+   "Rechten Wert nach links kopieren.",
+   "Gesicherten Wert nach rechts schreiben – Tausch fertig, das größere Element wandert nach hinten.",
+   "Ende der Bedingung.",
+   "Ende der Schleife über j – das größte verbleibende Element steht jetzt ganz hinten.",
+   "Ende der Schleife über i."
+  ]
+ },
+ "1f2ydvp": {
+  "python": "def binaereSuche(werte: list[int], n: int, x: int) -> int:\n    links = 0\n    rechts = n - 1\n    while links <= rechts:\n        mitte = (links + rechts) // 2\n        if werte[mitte] == x:\n            return mitte\n        elif werte[mitte] < x:\n            links = mitte + 1\n        else:\n            rechts = mitte - 1\n    return -1",
+  "javascript": "function binaereSuche(werte, n, x) {\n  let links = 0;\n  let rechts = n - 1;\n  while (links <= rechts) {\n    let mitte = Math.floor((links + rechts) / 2);\n    if (werte[mitte] === x) {\n      return mitte;\n    } else if (werte[mitte] < x) {\n      links = mitte + 1;\n    } else {\n      rechts = mitte - 1;\n    }\n  }\n  return -1;\n}",
+  "erklaerung": [
+   "Binäre Suche (Array muss sortiert sein): linke Grenze des Suchbereichs ist Index 0.",
+   "Rechte Grenze ist der letzte Index n - 1.",
+   "Suchen, solange der Bereich nicht leer ist; bei links > rechts gibt es keinen Kandidaten mehr.",
+   "Mitte des Bereichs; div ist ganzzahlige Division, damit ein gültiger Index entsteht.",
+   "= ist hier ein Vergleich: Liegt der gesuchte Wert genau in der Mitte?",
+   "Gefunden: Index zurückgeben, die Methode endet sofort.",
+   "Mittlerer Wert zu klein, also kann x nur rechts davon liegen.",
+   "Linke Hälfte samt Mitte verwerfen – der Suchbereich halbiert sich.",
+   "Sonst ist der mittlere Wert zu groß, x kann nur links liegen.",
+   "Rechte Hälfte samt Mitte verwerfen.",
+   "Ende der Bedingung.",
+   "Ende der Schleife.",
+   "Bereich leer, x nicht gefunden: -1 als Kennzeichen, weil -1 kein gültiger Index ist."
+  ]
+ },
+ "1kg0vkq": {
+  "python": "def besterTag(umsatz: list[float]) -> int:\n    n = len(umsatz)  # n = Anzahl der Elemente (im Pseudocode vorausgesetzt)\n    maxIndex = 0\n    for i in range(1, n):\n        if umsatz[i] > umsatz[maxIndex]:\n            maxIndex = i\n    return maxIndex",
+  "javascript": "/** @param {number[]} umsatz @returns {number} */\nfunction besterTag(umsatz) {\n  const n = umsatz.length; // n = Anzahl der Elemente (im Pseudocode vorausgesetzt)\n  let maxIndex = 0;\n  for (let i = 1; i <= n - 1; i++) {\n    if (umsatz[i] > umsatz[maxIndex]) {\n      maxIndex = i;\n    }\n  }\n  return maxIndex;\n}",
+  "erklaerung": [
+   "Methodenkopf: nimmt Tagesumsätze und gibt den Index (Tag) des höchsten Umsatzes zurück.",
+   "Annahme: Tag 0 ist zunächst der beste – so gibt es einen echten Startwert zum Vergleichen.",
+   "n = Anzahl der Elemente (im Pseudocode vorausgesetzt). Start bei 1, weil Tag 0 schon als Startwert dient; läuft bis zum letzten Index n - 1.",
+   "Ist der Umsatz an Tag i höher als der bisher beste?",
+   "Dann Tag i als neuen besten Tag merken.",
+   "Ende der Bedingung.",
+   "Ende der Schleife über i.",
+   "Gibt den Index des umsatzstärksten Tages zurück und beendet die Methode.",
+   "Schließt die Methode besterTag."
+  ]
+ },
+ "1lihgq2": {
+  "python": "def sucheLinear(nummern: list[int], gesucht: int) -> int:\n    n = len(nummern)  # n = Anzahl der Elemente (im Pseudocode vorausgesetzt)\n    for i in range(0, n):\n        if nummern[i] == gesucht:\n            return i\n    return -1",
+  "javascript": "/** @param {number[]} nummern @param {number} gesucht @returns {number} */\nfunction sucheLinear(nummern, gesucht) {\n  const n = nummern.length; // n = Anzahl der Elemente (im Pseudocode vorausgesetzt)\n  for (let i = 0; i <= n - 1; i++) {\n    if (nummern[i] === gesucht) {\n      return i;\n    }\n  }\n  return -1;\n}",
+  "erklaerung": [
+   "Methodenkopf: sucht gesucht im Array und gibt einen Index (Integer) zurück.",
+   "n = Anzahl der Elemente (im Pseudocode vorausgesetzt). Lineare Suche: jedes Element von vorn bis zum letzten Index n - 1 der Reihe nach prüfen.",
+   "= ist ein Vergleich: Steht an Position i der gesuchte Wert?",
+   "Treffer: Index zurückgeben, die Methode endet sofort.",
+   "Ende der Bedingung.",
+   "Ende der Schleife über i.",
+   "Nicht gefunden: -1 zurückgeben, weil das kein gültiger Index ist.",
+   "Schließt die Methode sucheLinear."
+  ]
+ },
+ "1ogs7u9": {
+  "python": "summe = 0\nfor i in range(1, 5):\n    summe = summe + i * 2",
+  "javascript": "let summe = 0;\nfor (let i = 1; i <= 4; i++) {\n  summe = summe + i * 2;\n}",
+  "erklaerung": [
+   "Startwert 0, damit die Summe bei null beginnt.",
+   "i läuft 1, 2, 3, 4 – bis zählt die Grenze 4 mit (inklusiv).",
+   "Addiert das Doppelte von i: 2 + 4 + 6 + 8, am Ende ist summe = 20.",
+   "Ende der Schleife über i."
+  ]
+ },
+ "1ppr5h": {
+  "python": "summe = 0\nanzahl = 0\nfor i in range(0, len(werte)):\n    if werte[i] > grenze:\n        summe = summe + werte[i]\n        anzahl = anzahl + 1\nif anzahl > 0:\n    schnitt = summe / anzahl",
+  "javascript": "let summe = 0;\nlet anzahl = 0;\nfor (let i = 0; i <= werte.length - 1; i++) {\n  if (werte[i] > grenze) {\n    summe = summe + werte[i];\n    anzahl = anzahl + 1;\n  }\n}\nif (anzahl > 0) {\n  schnitt = summe / anzahl;\n}",
+  "erklaerung": [
+   "Startwert 0, damit die Summe bei null beginnt.",
+   "Zähler auf 0, er zählt, wie viele Werte die Bedingung erfüllen.",
+   "Durchläuft alle Indizes von 0 bis length - 1 (bis ist inklusiv, letzter Index ist length - 1).",
+   "Nur Werte über der Grenze sollen berücksichtigt werden – das ist der Filter.",
+   "Passenden Wert zur laufenden Summe addieren.",
+   "Zähler erhöhen, damit später der Durchschnitt nur über die passenden Werte gebildet wird.",
+   "Ende der Bedingung.",
+   "Ende der Schleife über i.",
+   "Schutz vor Division durch 0, falls kein Wert über der Grenze lag.",
+   "Durchschnitt = Summe geteilt durch Anzahl der gefilterten Werte.",
+   "Ende der Bedingung."
+  ]
+ },
+ "1rolnoz": {
+  "python": "def offene(bestellungen: list[Bestellung]) -> list[Bestellung]:\n    ergebnis = []\n    for i in range(0, len(bestellungen)):\n        b = bestellungen[i]\n        if b.getStatus() == \"offen\":\n            ergebnis.append(b)\n    return ergebnis",
+  "javascript": "/** @param {Bestellung[]} bestellungen @returns {Bestellung[]} */\nfunction offene(bestellungen) {\n  let ergebnis = [];\n  for (let i = 0; i <= bestellungen.length - 1; i++) {\n    let b = bestellungen[i];\n    if (b.getStatus() === \"offen\") {\n      ergebnis.push(b);\n    }\n  }\n  return ergebnis;\n}",
+  "erklaerung": [
+   "Methodenkopf: nimmt eine Liste von Bestellungen und gibt eine neue Liste von Bestellungen zurück.",
+   "Leere Ergebnisliste anlegen, in die die passenden Bestellungen gesammelt werden.",
+   "Läuft über alle Bestellungen; Indizes beginnen bei 0, deshalb bis size() - 1.",
+   "Bestellung an Position i holen und in b merken, damit der Zugriff kürzer wird.",
+   "= ist ein Vergleich: Hat die Bestellung den Status offen?",
+   "Dann wird sie zur Ergebnisliste hinzugefügt.",
+   "Ende der Bedingung.",
+   "Ende der Schleife über i.",
+   "Gibt die Liste aller offenen Bestellungen zurück und beendet die Methode.",
+   "Schließt die Methode offene."
+  ]
+ },
+ "1sb26vp": {
+  "python": "n = len(a)  # n = Anzahl der Elemente (im Pseudocode vorausgesetzt)\nfor i in range(0, n - 1):\n    minIndex = i\n    for j in range(i + 1, n):\n        if a[j] < a[minIndex]:\n            minIndex = j\n    tmp = a[i]\n    a[i] = a[minIndex]\n    a[minIndex] = tmp",
+  "javascript": "const n = a.length; // n = Anzahl der Elemente (im Pseudocode vorausgesetzt)\nfor (let i = 0; i <= n - 2; i++) {\n  let minIndex = i;\n  for (let j = i + 1; j <= n - 1; j++) {\n    if (a[j] < a[minIndex]) {\n      minIndex = j;\n    }\n  }\n  let tmp = a[i];\n  a[i] = a[minIndex];\n  a[minIndex] = tmp;\n}",
+  "erklaerung": [
+   "n = Anzahl der Elemente (im Pseudocode vorausgesetzt). Selectionsort: Position i wird der Reihe nach mit dem kleinsten Rest-Element belegt; das letzte bleibt automatisch.",
+   "Annahme: Das kleinste Element des unsortierten Rests steht zunächst an Position i.",
+   "Durchsucht den Rest rechts von i bis zum letzten Index n - 1.",
+   "Ist a[j] kleiner als das bisher kleinste Element?",
+   "Dann dessen Position als neues Minimum merken.",
+   "Ende der Bedingung.",
+   "Ende der Schleife über j – minIndex zeigt jetzt auf das kleinste Rest-Element.",
+   "Wert an Position i in tmp sichern.",
+   "Kleinstes Element an Position i schreiben.",
+   "Gesicherten Wert an die frühere Minimum-Position – Tausch fertig, Bereich 0 bis i ist sortiert.",
+   "Ende der Schleife über i."
+  ]
+ },
+ "1slmscw": {
+  "python": "def quersumme(n: int) -> int:\n    if n < 10:\n        return n\n    return (n % 10) + quersumme(n // 10)\n\n# Vorteil: kurz und elegant bei rekursiven Problemen.\n# Nachteil: Speicherbedarf auf dem Stack, Gefahr Stack Overflow.",
+  "javascript": "/** @param {number} n @returns {number} */\nfunction quersumme(n) {\n  if (n < 10) {\n    return n;\n  }\n  return (n % 10) + quersumme(Math.floor(n / 10));\n}\n\n// Vorteil: kurz und elegant bei rekursiven Problemen.\n// Nachteil: Speicherbedarf auf dem Stack, Gefahr Stack Overflow.",
+  "erklaerung": [
+   "Methodenkopf: erhält eine Zahl und liefert ihre Quersumme; die Methode ist rekursiv.",
+   "Abbruchbedingung: Eine einstellige Zahl ist schon ihre eigene Quersumme.",
+   "Rückgabe beendet hier die Rekursion und liefert n.",
+   "Ende der Bedingung.",
+   "n mod 10 liefert die letzte Ziffer, n div 10 schneidet sie ab; der Rest wird rekursiv weiterberechnet.",
+   "Ende der Methode quersumme.",
+   "Vor- und Nachteil der Rekursion sowie Punkteverteilung des Prüfers."
+  ]
+ },
+ "1vy8rj6": {
+  "python": "def pruefePasswort(pw: str) -> bool:\n    if len(pw) < 10:\n        return False\n    ziffer = False\n    gross = False\n    for i in range(0, len(pw)):\n        c = pw[i]\n        if c.isdigit(): ziffer = True\n        if c.isupper(): gross = True\n    return ziffer and gross",
+  "javascript": "/** @param {string} pw @returns {boolean} */\nfunction pruefePasswort(pw) {\n  if (pw.length < 10) {\n    return false;\n  }\n  let ziffer = false;\n  let gross = false;\n  for (let i = 0; i <= pw.length - 1; i++) {\n    let c = pw.charAt(i);\n    if (c >= \"0\" && c <= \"9\") { ziffer = true; }\n    if (c >= \"A\" && c <= \"Z\") { gross = true; }\n  }\n  return ziffer && gross;\n}",
+  "erklaerung": [
+   "Methodenkopf: erhält ein Passwort als String und liefert true oder false.",
+   "Zuerst die Länge prüfen: Weniger als 10 Zeichen ist sofort ungültig.",
+   "Rückgabe beendet die Methode sofort mit false, der Rest wird übersprungen.",
+   "Ende der Bedingung.",
+   "Flag: Wurde schon eine Ziffer gefunden? Am Anfang nein.",
+   "Flag: Wurde schon ein Großbuchstabe gefunden? Am Anfang nein.",
+   "Schleife über alle Zeichen; laenge - 1 ist der letzte Index, weil Indizes bei 0 beginnen.",
+   "Das Zeichen an Position i holen.",
+   "Ist es eine Ziffer, wird das Flag gesetzt; Kurzform von wenn … ende wenn in einer Zeile.",
+   "Ist es ein Großbuchstabe, wird das zweite Flag gesetzt.",
+   "Ende der Schleife über i.",
+   "Gültig nur, wenn beide Flags true sind; und verknüpft die Bedingungen.",
+   "Ende der Methode pruefePasswort.",
+   "Punkteverteilung des Prüfers: Achte auf die genaue Grenze (mindestens 10) und laenge - 1."
+  ]
+ },
+ "1yshxu6": {
+  "python": "def nachbestellen(lager: list[\"Artikel\"], lieferant: str) -> list[int]:\n    ergebnis = []\n    for i in range(0, len(lager)):\n        a = lager[i]\n        if a.getLieferant() == lieferant and a.getBestand() < a.getMindestbestand():\n            ergebnis.append(a.getNr())\n    return ergebnis",
+  "javascript": "/** @param {Artikel[]} lager @param {string} lieferant @returns {number[]} */\nfunction nachbestellen(lager, lieferant) {\n  let ergebnis = [];\n  for (let i = 0; i <= lager.length - 1; i++) {\n    let a = lager[i];\n    if (a.getLieferant() === lieferant && a.getBestand() < a.getMindestbestand()) {\n      ergebnis.push(a.getNr());\n    }\n  }\n  return ergebnis;\n}",
+  "erklaerung": [
+   "Methodenkopf: erhält Lagerliste und Lieferantennamen, liefert eine Liste von Artikelnummern.",
+   "Leere Ergebnisliste für die Nummern der nachzubestellenden Artikel anlegen.",
+   "Schleife über alle Artikel; size() - 1 ist der letzte Index, weil bis inklusiv zählt.",
+   "Den aktuellen Artikel aus der Liste holen.",
+   "Beide Bedingungen mit und: richtiger Lieferant (= ist hier Vergleich) und Bestand unter Mindestbestand.",
+   "Nur dann die Artikelnummer zur Ergebnisliste hinzufügen.",
+   "Ende der Bedingung.",
+   "Ende der Schleife über i.",
+   "Rückgabe beendet die Methode und liefert die Liste.",
+   "Ende der Methode nachbestellen.",
+   "Punkteverteilung des Prüfers: Die kombinierte Bedingung bringt die meisten Punkte."
+  ]
+ },
+ "2f6wrz": {
+  "python": "def unterMindestbestand(lager: list) -> list:\n    ergebnis = []\n    for i in range(0, len(lager)):\n        a = lager[i]\n        if a.getBestand() < a.getMindestbestand():\n            ergebnis.append(a)\n    return ergebnis",
+  "javascript": "function unterMindestbestand(lager) {\n  let ergebnis = [];\n  for (let i = 0; i <= lager.length - 1; i++) {\n    let a = lager[i];\n    if (a.getBestand() < a.getMindestbestand()) {\n      ergebnis.push(a);\n    }\n  }\n  return ergebnis;\n}",
+  "erklaerung": [
+   "Neue leere Liste für die Treffer anlegen, damit am Ende etwas zurückgegeben werden kann.",
+   "Durchläuft alle Artikel im Lager, Index 0 bis size() - 1.",
+   "Aktuellen Artikel aus der Liste holen und in a zwischenspeichern.",
+   "Liegt der Bestand unter dem Mindestbestand, muss nachbestellt werden.",
+   "Dann den Artikel zur Ergebnisliste hinzufügen.",
+   "Ende der Bedingung.",
+   "Ende der Schleife über i.",
+   "Gefilterte Liste zurückgeben; Rückgabe beendet die Methode."
+  ]
+ },
+ "breabz": {
+  "python": "# a) Selection Sort\nfor i in range(0, len(artikel) - 1):\n    maxPos = i\n    for j in range(i + 1, len(artikel)):\n        if artikel[j].getPreis() > artikel[maxPos].getPreis():\n            maxPos = j\n    tmp = artikel[i]\n    artikel[i] = artikel[maxPos]\n    artikel[maxPos] = tmp\n\n# b) Insertion Sort\nfor i in range(1, len(artikel)):\n    aktuell = artikel[i]\n    j = i - 1\n    while j >= 0 and artikel[j].getPreis() < aktuell.getPreis():\n        artikel[j + 1] = artikel[j]\n        j = j - 1\n    artikel[j + 1] = aktuell\n\n# c) Insertion Sort: Bei fast sortierten Daten kaum innere Durchläufe, nahe O(n).\n#    Selection Sort sucht immer den ganzen Rest ab und bleibt bei O(n²).",
+  "javascript": "// a) Selection Sort\nfor (let i = 0; i <= artikel.length - 2; i++) {\n  let maxPos = i;\n  for (let j = i + 1; j <= artikel.length - 1; j++) {\n    if (artikel[j].getPreis() > artikel[maxPos].getPreis()) {\n      maxPos = j;\n    }\n  }\n  let tmp = artikel[i];\n  artikel[i] = artikel[maxPos];\n  artikel[maxPos] = tmp;\n}\n\n// b) Insertion Sort\nfor (let i = 1; i <= artikel.length - 1; i++) {\n  let aktuell = artikel[i];\n  let j = i - 1;\n  while (j >= 0 && artikel[j].getPreis() < aktuell.getPreis()) {\n    artikel[j + 1] = artikel[j];\n    j = j - 1;\n  }\n  artikel[j + 1] = aktuell;\n}\n\n// c) Insertion Sort: Bei fast sortierten Daten kaum innere Durchläufe, nahe O(n).\n//    Selection Sort sucht immer den ganzen Rest ab und bleibt bei O(n²).",
+  "erklaerung": [
+   "Teilaufgabe a): Selection Sort sucht im unsortierten Rest das größte Element und tauscht es nach vorn.",
+   "Äußere Schleife bis length - 2: Das letzte Element ist am Ende automatisch richtig.",
+   "Annahme: Das Element an Position i ist das teuerste im Rest.",
+   "Innere Schleife durchsucht den restlichen unsortierten Bereich ab i + 1.",
+   "Ist der Preis an j größer als am bisherigen Maximum? Größer sortiert absteigend.",
+   "Dann merkst du dir j als neue Position des Maximums.",
+   "Ende der Bedingung.",
+   "Ende der Schleife über j.",
+   "Dreieckstausch Schritt 1: Element an i in einer Hilfsvariablen sichern.",
+   "Schritt 2: Das Maximum an Position i schreiben.",
+   "Schritt 3: Das gesicherte Element an die alte Maximum-Position setzen.",
+   "Ende der Schleife über i.",
+   "",
+   "Teilaufgabe b): Insertion Sort fügt jedes Element in den schon sortierten linken Teil ein.",
+   "Start bei Index 1, weil ein einzelnes Element (Index 0) schon sortiert ist.",
+   "Das einzufügende Element zwischenspeichern, da es gleich überschrieben werden kann.",
+   "j zeigt auf das letzte Element des sortierten Bereichs.",
+   "Solange links ein billigeres Element steht und j nicht unter 0 fällt, wird weiter verschoben (absteigend).",
+   "Element eine Position nach rechts schieben, um Platz zu machen.",
+   "Eine Position weiter nach links gehen.",
+   "Ende der solange-Schleife.",
+   "Das gemerkte Element in die entstandene Lücke einsetzen.",
+   "Ende der Schleife über i.",
+   "",
+   "Teilaufgabe c): Vergleich der Laufzeit; Insertion Sort profitiert von fast sortierten Daten."
+  ]
+ },
+ "fttq8q": {
+  "python": "def fakultaet(n: int) -> int:\n    if n <= 1: return 1\n    return n * fakultaet(n - 1)",
+  "javascript": "/** @param {number} n @returns {number} */\nfunction fakultaet(n) {\n  if (n <= 1) { return 1; }\n  return n * fakultaet(n - 1);\n}",
+  "erklaerung": [
+   "Methodenkopf: nimmt eine Ganzzahl n und gibt eine Ganzzahl zurück.",
+   "Rekursionsanker: 0! und 1! sind 1, Rückgabe beendet hier die Rekursion.",
+   "Rekursionsschritt: n! = n * (n - 1)!, die Methode ruft sich mit kleinerem n selbst auf.",
+   "Ende der Methode."
+  ]
+ },
+ "glm0ga": {
+  "python": "for i in range(0, len(mitarbeiter) - 1):\n    for j in range(0, len(mitarbeiter) - 1 - i):\n        if mitarbeiter[j].getEintritt() > mitarbeiter[j + 1].getEintritt():\n            tmp = mitarbeiter[j]\n            mitarbeiter[j] = mitarbeiter[j + 1]\n            mitarbeiter[j + 1] = tmp",
+  "javascript": "for (let i = 0; i <= mitarbeiter.length - 2; i++) {\n  for (let j = 0; j <= mitarbeiter.length - 2 - i; j++) {\n    if (mitarbeiter[j].getEintritt() > mitarbeiter[j + 1].getEintritt()) {\n      let tmp = mitarbeiter[j];\n      mitarbeiter[j] = mitarbeiter[j + 1];\n      mitarbeiter[j + 1] = tmp;\n    }\n  }\n}",
+  "erklaerung": [
+   "Bubble Sort: Äußere Schleife für die Durchläufe; nach jedem steht das größte Element hinten richtig.",
+   "Innere Schleife vergleicht Nachbarn; - i, weil die letzten i Elemente schon sortiert sind.",
+   "Steht ein späteres Eintrittsdatum vor einem früheren, sind die Nachbarn falsch herum (aufsteigend).",
+   "Dreieckstausch Schritt 1: Element an j in einer Hilfsvariablen sichern.",
+   "Schritt 2: Den rechten Nachbarn nach links holen.",
+   "Schritt 3: Das gesicherte Element rechts einsetzen.",
+   "Ende der Bedingung.",
+   "Ende der Schleife über j.",
+   "Ende der Schleife über i."
+  ]
+ },
+ "lhrm61": {
+  "python": "n = len(zeit)  # n = Anzahl der Elemente (im Pseudocode vorausgesetzt)\nfor i in range(1, n):\n    wert = zeit[i]\n    j = i - 1\n    while j >= 0 and zeit[j] > wert:\n        zeit[j + 1] = zeit[j]\n        j = j - 1\n    zeit[j + 1] = wert",
+  "javascript": "const n = zeit.length; // n = Anzahl der Elemente (im Pseudocode vorausgesetzt)\nfor (let i = 1; i <= n - 1; i++) {\n  let wert = zeit[i];\n  let j = i - 1;\n  while (j >= 0 && zeit[j] > wert) {\n    zeit[j + 1] = zeit[j];\n    j = j - 1;\n  }\n  zeit[j + 1] = wert;\n}",
+  "erklaerung": [
+   "n = Anzahl der Elemente (im Pseudocode vorausgesetzt). Insertionsort: Element i wird in den schon sortierten Teil links davon einsortiert; Index 0 gilt als sortiert.",
+   "Einzufügenden Wert sichern, weil seine Position gleich überschrieben werden kann.",
+   "j zeigt auf das letzte Element des sortierten Teils.",
+   "Solange links noch Elemente sind und diese größer als wert sind, muss weiter nach links gesucht werden.",
+   "Größeres Element eine Position nach rechts schieben, um Platz zu schaffen.",
+   "Eine Position weiter nach links gehen.",
+   "Ende der Schleife – bei j + 1 ist jetzt die richtige Lücke.",
+   "Gesicherten Wert in die Lücke schreiben; der Bereich 0 bis i ist nun sortiert.",
+   "Ende der Schleife über i."
+  ]
+ },
+ "nvbty6": {
+  "python": "def statistik(ma: list[\"Mitarbeiter\"]) -> list[\"AbtStat\"]:\n    ergebnis = []\n    for i in range(0, len(ma)):\n        m = ma[i]\n        stat = None\n        for j in range(0, len(ergebnis)):\n            if ergebnis[j].getAbteilung() == m.getAbteilung():\n                stat = ergebnis[j]\n        if stat is None:\n            stat = AbtStat(m.getAbteilung())\n            ergebnis.append(stat)\n        stat.setSumme(stat.getSumme() + m.getGehalt())\n        stat.setAnzahl(stat.getAnzahl() + 1)\n    return ergebnis",
+  "javascript": "/** @param {Mitarbeiter[]} ma @returns {AbtStat[]} */\nfunction statistik(ma) {\n  let ergebnis = [];\n  for (let i = 0; i <= ma.length - 1; i++) {\n    let m = ma[i];\n    let stat = null;\n    for (let j = 0; j <= ergebnis.length - 1; j++) {\n      if (ergebnis[j].getAbteilung() === m.getAbteilung()) {\n        stat = ergebnis[j];\n      }\n    }\n    if (stat === null) {\n      stat = new AbtStat(m.getAbteilung());\n      ergebnis.push(stat);\n    }\n    stat.setSumme(stat.getSumme() + m.getGehalt());\n    stat.setAnzahl(stat.getAnzahl() + 1);\n  }\n  return ergebnis;\n}",
+  "erklaerung": [
+   "Methodenkopf: erhält eine Mitarbeiterliste und liefert eine Liste von Abteilungsstatistiken.",
+   "Leere Ergebnisliste anlegen, in die pro Abteilung ein AbtStat-Objekt kommt.",
+   "Äußere Schleife über alle Mitarbeiter; size() - 1 ist der letzte Index, weil bis inklusiv ist.",
+   "Den aktuellen Mitarbeiter aus der Liste holen.",
+   "stat = null bedeutet: Für diese Abteilung wurde noch nichts gefunden.",
+   "Innere Schleife: Durchsucht die bisherige Ergebnisliste nach der Abteilung (lineare Suche).",
+   "Vergleicht die Abteilung des Eintrags mit der Abteilung des Mitarbeiters.",
+   "Treffer: Diesen vorhandenen Statistik-Eintrag merkst du dir.",
+   "Ende der Bedingung.",
+   "Ende der Suchschleife über j.",
+   "Ist stat noch null, gibt es die Abteilung noch nicht in der Ergebnisliste.",
+   "Dann wird ein neues AbtStat-Objekt für diese Abteilung erzeugt.",
+   "Und der Ergebnisliste hinzugefügt, damit spätere Mitarbeiter es finden.",
+   "Ende der Bedingung.",
+   "Gehalt des Mitarbeiters zur Summe der Abteilung addieren (über Getter und Setter).",
+   "Anzahl der Mitarbeiter in dieser Abteilung um 1 erhöhen.",
+   "Ende der Schleife über i.",
+   "Rückgabe beendet die Methode und liefert die fertige Liste.",
+   "Ende der Methode statistik.",
+   "",
+   "Punkteverteilung des Prüfers: Die Suche in der Ergebnisliste bringt die meisten Punkte.",
+   "Hinweis: Gruppieren ohne Map ist ein wiederkehrendes Prüfungsmuster."
+  ]
+ },
+ "q135p7": {
+  "python": "n = len(a)  # n = Anzahl der Elemente (im Pseudocode vorausgesetzt)\nfor i in range(0, n - 1):\n    minPos = i\n    for j in range(i + 1, n):\n        if a[j] < a[minPos]: minPos = j\n    tmp = a[i]; a[i] = a[minPos]; a[minPos] = tmp",
+  "javascript": "const n = a.length; // n = Anzahl der Elemente (im Pseudocode vorausgesetzt)\nfor (let i = 0; i <= n - 2; i++) {\n  let minPos = i;\n  for (let j = i + 1; j <= n - 1; j++) {\n    if (a[j] < a[minPos]) { minPos = j; }\n  }\n  let tmp = a[i]; a[i] = a[minPos]; a[minPos] = tmp;\n}",
+  "erklaerung": [
+   "n = Anzahl der Elemente (im Pseudocode vorausgesetzt). Selection Sort: für jede Position i von vorne das passende Minimum suchen; die letzte ergibt sich von selbst.",
+   "Annahme: das kleinste Element des Restbereichs steht an Position i.",
+   "Den unsortierten Rest ab i + 1 bis zum letzten Index n - 1 durchsuchen.",
+   "Kleineres Element gefunden? Dann dessen Position merken; ende wenn steht hier in derselben Zeile.",
+   "Ende der Suche über j – minPos zeigt auf das Minimum des Rests.",
+   "Dreieckstausch: Minimum an Position i bringen, der vordere Teil wächst um ein sortiertes Element.",
+   "Ende der Schleife über i – das Array ist sortiert."
+  ]
+ },
+ "qi829z": {
+  "python": "def zaehleUeber(liste: list, grenze: float) -> int:\n    zaehler = 0\n    for i in range(0, len(liste)):\n        if liste[i].getWert() > grenze:\n            zaehler = zaehler + 1\n    return zaehler",
+  "javascript": "/** @param {Messung[]} liste @param {number} grenze @returns {number} */\nfunction zaehleUeber(liste, grenze) {\n  let zaehler = 0;\n  for (let i = 0; i <= liste.length - 1; i++) {\n    if (liste[i].getWert() > grenze) {\n      zaehler = zaehler + 1;\n    }\n  }\n  return zaehler;\n}",
+  "erklaerung": [
+   "Methodenkopf: Parameter liste und grenze mit Typ, nach dem Doppelpunkt der Rückgabetyp Integer.",
+   "Zähler startet bei 0, damit noch kein Messwert mitgezählt ist.",
+   "Läuft über alle Indizes von 0 bis size() - 1; die Grenze zählt mit, deshalb das - 1.",
+   "Holt die Messung an Position i und prüft, ob ihr Wert echt größer als die Grenze ist.",
+   "Treffer: Zähler um 1 erhöhen.",
+   "Ende der Bedingung.",
+   "Ende der Schleife über i.",
+   "Gibt die Anzahl der Werte über der Grenze zurück und beendet die Methode.",
+   "Schließt die Methode zaehleUeber."
+  ]
+ },
+ "qlflpc": {
+  "python": "def methode(param: Typ) -> Rückgabetyp:\n    for i in range(0, len(liste)):\n        if bedingung:\n            ...\n        else:\n            ...\n    return ergebnis",
+  "javascript": "/** @param {Typ} param @returns {Rückgabetyp} */\nfunction methode(param) {\n  for (let i = 0; i <= liste.length - 1; i++) {\n    if (bedingung) {\n      /* ... */\n    } else {\n      /* ... */\n    }\n  }\n  return ergebnis;\n}",
+  "erklaerung": [
+   "Methodenkopf nach IHK-Schema: name(param: Typ) : Rückgabetyp – Eingabe und Ergebnistyp stehen fest.",
+   "Zählschleife über alle Elemente: Indizes beginnen bei 0, bis zählt inklusiv, daher size() - 1.",
+   "Für jedes Element wird eine Bedingung geprüft, die entscheidet, welcher Zweig läuft.",
+   "Platzhalter: Anweisungen, wenn die Bedingung wahr ist.",
+   "Alternativzweig: läuft nur, wenn die Bedingung falsch ist.",
+   "Platzhalter: Anweisungen für den Fall falsch.",
+   "ende wenn schließt den Bedingungsblock.",
+   "ende für schließt die Schleife – danach sind alle Elemente bearbeitet.",
+   "Rückgabe liefert das Ergebnis an den Aufrufer und beendet die Methode sofort.",
+   "Ende der Methode."
+  ]
+ },
+ "rurfrq": {
+  "python": "# Werden min und max nicht mit demselben Startwert (werte[0]) initialisiert, etwa min mit einem großen und max mit einem kleinen Wert, setzt der erste Wert nur min. Er wird wegen „sonst“ nie auf max geprüft – bei streng fallenden Daten bleibt max falsch.\n# Korrektur: zwei getrennte wenn-Abfragen:\nif werte[i] < min:\n    min = werte[i]\nif werte[i] > max:\n    max = werte[i]",
+  "javascript": "// Werden min und max nicht mit demselben Startwert (werte[0]) initialisiert, etwa min mit einem großen und max mit einem kleinen Wert, setzt der erste Wert nur min. Er wird wegen „sonst“ nie auf max geprüft – bei streng fallenden Daten bleibt max falsch.\n// Korrektur: zwei getrennte wenn-Abfragen:\nif (werte[i] < min) {\n  min = werte[i];\n}\nif (werte[i] > max) {\n  max = werte[i];\n}",
+  "erklaerung": [
+   "Erklärt den Fehler: Wegen sonst wird ein Wert, der min setzt, nicht mehr auf max geprüft.",
+   "Einleitung der Korrektur: Beide Prüfungen müssen unabhängig voneinander laufen.",
+   "Erste eigene Abfrage: neues Minimum merken, Block wird mit ende wenn geschlossen.",
+   "Zweite eigene Abfrage: läuft immer, also wird jeder Wert auch auf ein neues Maximum geprüft."
+  ]
+ },
+ "rwe8s": {
+  "python": "if werte[i] < min: min = werte[i]\nelif werte[i] > max: max = werte[i]",
+  "javascript": "if (werte[i] < min) { min = werte[i]; }\nelse if (werte[i] > max) { max = werte[i]; }",
+  "erklaerung": [
+   "Ist der aktuelle Wert kleiner als das bisherige Minimum, wird er das neue Minimum.",
+   "Nur wenn die erste Bedingung falsch war, wird auf ein neues Maximum geprüft – genau das ist hier die Fehlerquelle."
+  ]
+ },
+ "sq4rqb": {
+  "python": "def hatDuplikat(nummern: list[int]) -> bool:\n    n = len(nummern)  # n = Anzahl der Elemente (im Pseudocode vorausgesetzt)\n    for i in range(0, n - 1):\n        for j in range(i + 1, n):\n            if nummern[i] == nummern[j]:\n                return True\n    return False",
+  "javascript": "/** @param {number[]} nummern @returns {boolean} */\nfunction hatDuplikat(nummern) {\n  const n = nummern.length; // n = Anzahl der Elemente (im Pseudocode vorausgesetzt)\n  for (let i = 0; i <= n - 2; i++) {\n    for (let j = i + 1; j <= n - 1; j++) {\n      if (nummern[i] === nummern[j]) {\n        return true;\n      }\n    }\n  }\n  return false;\n}",
+  "erklaerung": [
+   "Methodenkopf: nimmt ein Integer-Array und liefert Boolean (wahr/falsch) zurück.",
+   "n = Anzahl der Elemente (im Pseudocode vorausgesetzt). Jedes Element außer dem letzten wird als Vergleichsbasis genommen.",
+   "j startet bei i + 1, damit jedes Paar nur einmal und nie ein Element mit sich selbst verglichen wird.",
+   "= ist ein Vergleich: Haben zwei verschiedene Positionen denselben Wert?",
+   "Duplikat gefunden: sofort wahr zurückgeben, Rückgabe beendet die Methode.",
+   "Ende der Bedingung.",
+   "Ende der Schleife über j.",
+   "Ende der Schleife über i.",
+   "Alle Paare geprüft, kein Treffer: also gibt es kein Duplikat.",
+   "Schließt die Methode hatDuplikat."
+  ]
+ },
+ "vvi0xu": {
+  "python": "def istFrei(buchungen: list[\"Buchung\"], raum: int, start: int, ende: int) -> bool:\n    for i in range(0, len(buchungen)):\n        b = buchungen[i]\n        if b.getRaum() == raum and start < b.getEnde() and b.getStart() < ende:\n            return False\n    return True",
+  "javascript": "/** @param {Buchung[]} buchungen @param {number} raum @param {number} start @param {number} ende @returns {boolean} */\nfunction istFrei(buchungen, raum, start, ende) {\n  for (let i = 0; i <= buchungen.length - 1; i++) {\n    let b = buchungen[i];\n    if (b.getRaum() === raum && start < b.getEnde() && b.getStart() < ende) {\n      return false;\n    }\n  }\n  return true;\n}",
+  "erklaerung": [
+   "Methodenkopf: prüft für Raum und Zeitraum, ob keine Buchung kollidiert; liefert true oder false.",
+   "Schleife über alle Buchungen im Array; length - 1 ist der letzte Index.",
+   "Die aktuelle Buchung holen.",
+   "Gleicher Raum und Zeiten überschneiden sich: neuer Start vor altem Ende und alter Start vor neuem Ende.",
+   "Eine Kollision reicht: Rückgabe false beendet die Methode sofort.",
+   "Ende der Bedingung.",
+   "Ende der Schleife über i.",
+   "Erst nach der Schleife true zurückgeben, weil dann keine Buchung kollidiert hat.",
+   "Ende der Methode istFrei.",
+   "Punkteverteilung des Prüfers: Die korrekte Überschneidungsprüfung bringt die meisten Punkte."
+  ]
+ },
+ "ys522d": {
+  "python": "def istRaumFrei(buchungen: list, raum, start, ende) -> bool:\n    for i in range(0, len(buchungen)):\n        if buchungen[i].getRaum() == raum and start < buchungen[i].getEnde() and buchungen[i].getStart() < ende:\n            return False\n    return True",
+  "javascript": "function istRaumFrei(buchungen, raum, start, ende) {\n  for (let i = 0; i <= buchungen.length - 1; i++) {\n    if (buchungen[i].getRaum() === raum && start < buchungen[i].getEnde() && buchungen[i].getStart() < ende) {\n      return false;\n    }\n  }\n  return true;\n}",
+  "erklaerung": [
+   "Prüft jede vorhandene Buchung einzeln (Index 0 bis length - 1).",
+   "Konflikt, wenn derselbe Raum und sich die Zeiträume überlappen (neuer Start vor altem Ende und alter Start vor neuem Ende).",
+   "Ein Konflikt reicht: Rückgabe false beendet die Methode sofort, der Raum ist nicht frei.",
+   "Ende der Bedingung.",
+   "Ende der Schleife über i.",
+   "Keine Überschneidung gefunden – erst nach der ganzen Schleife darf true zurückgegeben werden."
+  ]
+ },
+ "zy1u0n": {
+  "python": "for i in range(0, len(daten)):\n    d = daten[i]\n    gruppe = None\n    for j in range(0, len(ergebnis)):\n        if ergebnis[j].getName() == d.getName():\n            gruppe = ergebnis[j]\n    if gruppe == None:\n        gruppe = Gruppe(d.getName())\n        ergebnis.append(gruppe)\n    gruppe.setSumme(gruppe.getSumme() + d.getWert())",
+  "javascript": "for (let i = 0; i <= daten.length - 1; i++) {\n  let d = daten[i];\n  let gruppe = null;\n  for (let j = 0; j <= ergebnis.length - 1; j++) {\n    if (ergebnis[j].getName() === d.getName()) {\n      gruppe = ergebnis[j];\n    }\n  }\n  if (gruppe === null) {\n    gruppe = new Gruppe(d.getName());\n    ergebnis.push(gruppe);\n  }\n  gruppe.setSumme(gruppe.getSumme() + d.getWert());\n}",
+  "erklaerung": [
+   "Äußere Schleife: jeden Datensatz einmal verarbeiten.",
+   "Aktuellen Datensatz in d zwischenspeichern.",
+   "null bedeutet: noch keine passende Gruppe gefunden.",
+   "Innere Schleife sucht in den bereits angelegten Gruppen.",
+   "Gibt es schon eine Gruppe mit gleichem Namen? (== ist ein Vergleich)",
+   "Gefundene Gruppe merken.",
+   "Ende der Bedingung.",
+   "Ende der Suche über j.",
+   "Keine Gruppe gefunden – also ist der Name neu.",
+   "Neue Gruppe mit diesem Namen erzeugen.",
+   "Neue Gruppe in die Ergebnisliste aufnehmen, damit spätere Datensätze sie finden.",
+   "Ende der Bedingung.",
+   "Wert des Datensatzes zur Summe der Gruppe addieren – egal ob die Gruppe neu oder alt ist.",
+   "Ende der äußeren Schleife – jede Gruppe enthält jetzt ihre Gesamtsumme."
+  ]
+ }
+}

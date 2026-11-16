@@ -123,10 +123,81 @@ Jeder Bereich ist ein eigenes Modul (Route + Logik in `lib/` + Tests) und kann u
   den Tokens). Der frühere eigene UI-Baukasten (`src/ui`, Tailwind) ist seit 14.11.2026 vollständig ersetzt.
 - **Gamification/Gacha vollständig** als eigenes Modul (`tap2coach-gami`, gleiches Format).
 - **Optionales Konto mit GitHub** (Supabase, Frankfurt) für Sicherung, Sync und Rangliste – Lernen ohne Konto bleibt.
-- **Datenschutz:** Der Lernstand im Konto ist Ende-zu-Ende-verschlüsselt, der Betreiber kann ihn nicht lesen;
-  Rangliste nur mit selbst gewähltem Benutzernamen und Einwilligung. Details: `docs/DATENSCHUTZ.md`.
+- **Datenschutz:** Rangliste nur mit selbst gewähltem Benutzernamen und Einwilligung. Details: `docs/DATENSCHUTZ.md`.
+
+## Synchronisieren: zwei Wege (14.11.2026)
+
+- **Mit Konto** (`store/account.ts`, `supabase/001_app_sync.sql`): „ein Konto, ein Stand“.
+  - Der GitHub-Login reicht. Lernstand und Belohnungen liegen als JSON im Konto (RLS, nur eigene Zeile), **nicht** E2E.
+  - Abgleich über `lib/konto-sync.ts` (holen → zusammenführen → schreiben mit Versionsprüfung).
+  - Stände ohne Konto lassen sich per Kurzcode oder Schlüssel übernehmen.
+- **Ohne Konto** (`store/livesync.ts`, `tap2_sync` der Live-App): Geräte per Kurzcode/QR koppeln, E2E-verschlüsselt.
+  Das ist auch die Brücke zur Live-App.
+- „Auf anderes Gerät übertragen“ (Link/QR ohne Server) ist in der Dev-App entfallen; empfangene Links funktionieren
+  weiter.
+- **Rangliste:** Mit Konto gehört der Eintrag zum Konto (ID = sha256 der Nutzer-ID, `lib/gami/lb.ts`) und ist auf allen
+  angemeldeten Geräten derselbe. Beim Anmelden zieht ein bestehender Eintrag mit seinem Namen auf die Konto-ID um;
+  beim Abmelden bleibt er beim Konto. Ohne Konto gilt die Regel der Live-App (Sync-Schlüssel bzw. Gerät).
+- **Logo:** Vortex-Wirbel (`public/icons/vortex.svg`; daraus `favicon.png`, `icon-192/512.png`, `apple-touch-icon.png`)
+  ersetzt in der Dev-App den Raben (Markenzeichen, Tutorial, Menü-Icon und Avatar des Tutors).
+- **Pseudocode mit Python/JavaScript** (15.11.2026, nur Dev-App): Zu den Pseudocode-Beispielen (Lernpakete, Code-Karten,
+  Fragetexte, Musterlösungen der Aufgaben, Erwartungshorizonte) gibt es Python- und JavaScript-Fassungen in
+  `src/content/code-variants.json`. Zugeordnet wird über eine Prüfsumme des Pseudocode-Texts (`lib/code-variants.ts`).
+  `components/CodeVariants.tsx` zeigt oben die Sprache (Umschalter, gemerkt in `tap2coach-codesprache`) und darunter den
+  Pseudocode. Ändert die Live-App einen Block, erscheint nur noch der Pseudocode; `code-variants.test.ts` meldet die
+  veraltete Fassung. Die Inhalte selbst bleiben in der Live-App (Pseudocode wie in der IHK-Prüfung).
+  - Reiter „Zeile für Zeile“: je Pseudocode-Zeile eine kurze Erklärung (`erklaerung` in derselben Datei, Zeilenzahl
+    per Test geprüft).
+  - Reiter „Ablauf“ für Sortier- und Suchverfahren (Bubble, Selection, Insertion, binäre und lineare Suche, Maximum):
+    `lib/code-visual.ts` simuliert die Schritte rein und deterministisch. Die aktiven Pseudocode-Zeilen werden über
+    Muster gefunden. Die Anzeige hat Balken, Variablen, Vor/Zurück/Abspielen und „Neue Zahlen“.
+- **Normalisierung visuell** (15.11.2026, nur Dev-App): Beispiele in `src/content/normalisierung.json` (Zod-Schema
+  `NormBeispiel` in `content/schema.ts`), zugeordnet über Katalog-IDs: Aufgabe `D2`, offene Frage `o83`, Karten
+  `k:db0`–`k:db2`, MC `m84`/`m85`, Lernpaket-Abschnitt `P04:Normalformen`. `components/NormVisual.tsx` legt Reiter über die
+  bisherige Musterlösung: „Schritt für Schritt“ (Ausgang → 1./2./3. NF, PK/FK markiert, verschobene, umbenannte und neue
+  Spalten hervorgehoben), „Abhängigkeiten“ (Pfeil-Diagramm), „Ergebnis“ (Tabellen mit Beziehungen) und „Musterlösung“.
+  `TextMitTabellen` zeigt „a | b“-Zeilen in Aufgabentexten als Tabelle. `lib/normalisierung.ts` prüft jedes Beispiel
+  (Schlüssel, Fremdschlüssel, kein Attribut verloren, Beispieldaten); `normalisierung.test.ts` gleicht die letzte Stufe
+  mit den Relationen der Text-Musterlösung ab. Ändert die Live-App den Text, meldet der Test die Abweichung.
+- **Beziehungen visuell** (15.11.2026, nur Dev-App): Beispiele in `src/content/beziehungen.json` (Zod-Schema
+  `BezBeispiel` in `content/schema.ts`), zugeordnet über Katalog-IDs: MC `m87`, `m88`, `m94`, `m213`, `m214`, Karten
+  `k:db7`–`k:db10`, `k:db17`, `k:sql19`, Lernpaket-Abschnitte `P04:m:n-Beziehungen auflösen`, `G03:Kardinalitäten lesen`,
+  `G03:Krähenfuß-Notation`. `components/BezVisual.tsx`: `BezVorher` zeigt in der Lernrunde unter der Frage ein neutrales
+  Beziehungsbild (zwei Entitäten, Kardinalitäten bzw. Krähenfuß, noch ohne Fremdschlüssel; „?“, wenn die Kardinalität
+  gefragt ist) und deckt es nach der Antwort auf. `BezLoesung` zeigt in der Erklärung das Relationenmodell als
+  Mini-Tabellen mit PK/FK/UNIQUE und Pfeil FK → PK, bei referentieller Integrität mit Beispieldaten und abgelehntem
+  INSERT/DELETE. SVG aus Daten, Geometrie rein in `lib/beziehungen.ts` (Monoschrift, keine DOM-Messung); ist der Platz zu
+  schmal (z. B. 375 px), stehen die Kästen untereinander. `pruefeBez` prüft jedes Beispiel (Schlüssel, FK-Seite passt zum
+  Bild, Zwischentabelle bei m:n, UNIQUE bei 1:1, Beispieldaten, Verstoß wirklich gegeben); die Tests gleichen Tabellen,
+  Schlüssel und „Tabelle.Spalte“ mit Erklärung bzw. Musterlösung ab.
+- **Name:** Die Dev-App heißt „Vortex“ (Seitenleiste, Fenstertitel, PWA-Manifest, Fußzeile). Der KI-Tutor darin heißt
+  „Tutor“ bzw. „Tutor Pro“. Texte, die 1:1 aus der Live-App stammen („Coach“), sind unverändert.
 - **KI-Tutor als Premium-Funktion**, vorerst nur für den Admin (`app_metadata.role = 'admin'`), für andere unsichtbar,
   umgesetzt als Supabase Edge Function. Bezahl-Option später.
+
+## KI-Prüfungstutor (14.11.2026)
+
+Server und Browser teilen sich die Arbeit so (Details: `docs/TUTOR.md`):
+
+- **Edge Function `tutor`** (einziger Server-Code): Login + Admin-Rolle, Tageslimit, Anweisungen und das einzige
+  Werkzeug `pruefer_runde` (festes Schema, strict). Der Browser kann weder Anweisungen noch Werkzeuge mitschicken.
+- **Browser, reine Logik in `lib/`:**
+  - `tutor-schema.ts` prüft jede Runde (Zod, Fremdtext),
+  - `tutor-session.ts` macht daraus Aufgaben, Bewertungen und Belege,
+  - `graph.ts` (`buildConceptGraph`) berechnet den Stand je Konzept,
+  - `lehrplan.ts` berechnet den Lehrplan deterministisch,
+  - `tutor-state.ts` hält den Tutor-Stand mit Merge-Regel,
+  - `tutor-sync.ts` gleicht über das Konto ab (`app_tutor_state`, Login reicht; `konto-sync.ts`).
+- **XP:** Eine bewertete Aufgabe zählt wie eine normale Antwort (`gm.answer`, Combo, Serie, Quests, keine Obergrenze). Damit ist sie kompatibel mit Sync und Rangliste der Live-App
+  (`gami/tutor-xp.test.ts` gegen das Original).
+- **Speicher:**
+
+  | Was | Wo |
+  | --- | --- |
+  | Tutor-Stand | `tap2coach-tutor-stand`, im Konto über `app_tutor_state`, **nicht** in `tap2_sync` |
+  | Sitzung | `tap2coach-tutor-sitzung`, nur dieses Gerät |
+  | Modell | `tap2coach-tutor-modell` |
+  | Geräte-ID für XP je Gerät | `tap2coach-tutor-geraet` |
 
 ## Phasenplan
 
@@ -135,9 +206,9 @@ Jeder Bereich ist ein eigenes Modul (Route + Logik in `lib/` + Tests) und kann u
 | 0 | Gerüst aus learnlab, eigenes Design, Katalogformat | erledigt, Stack am 13.11. auf statische PWA umgestellt |
 | 1a | Design der Live-App übernehmen, Datenschutzhinweis | erledigt (14.11.: Grundgerüst ohne Tailwind, PORTIERUNG.md) |
 | 1b | Funktionsgleichheit inkl. Gamification/Gacha (Tabelle oben) | erledigt (alle Module 1:1, PORTIERUNG.md) |
-| 1c | Konto (GitHub), E2E-Sync, Rangliste mit Benutzername, Konto löschen | offen (braucht Supabase-Dev-Projekt + GitHub-OAuth-App) |
+| 1c | Konto (GitHub, ein Stand pro Konto), Geräte-Sync ohne Konto, Rangliste mit Benutzername, Konto löschen | Konto-Sync fertig (14.11., SQL 001 einspielen); Rangliste und Konto löschen offen |
 | 2 | Katalog-Bibliothek (Suche/Filter, mehrere Kataloge), TAP1, Lehrjahr → Lernfeld, Klausurkalender | offen |
-| 3 | KI-Tutor (Premium, nur Admin): Stufe 1 Wissensgraph fertig (`/tutor`), Stufe 2 KI siehe `docs/TUTOR.md` | Stufe 2 offen (braucht Login + Claude-API-Key) |
+| 3 | KI-Prüfungstutor (Premium, nur Admin): Sitzung je Thema im IHK-Stil, Konzept-Graph, deterministischer Lehrplan, Tutor-Stand im Konto, XP – `docs/TUTOR.md` | fertig (14.11., Function deployt; SQL 004 einspielen) |
 | 4 | Neue App ersetzt die Live-App (gleiche Origin, Lernstände bleiben) | offen |
 
 ## Sicherheit

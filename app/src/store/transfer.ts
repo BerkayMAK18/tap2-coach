@@ -7,6 +7,13 @@ import qrcode from "qrcode-generator";
 import { gm } from "./gami";
 import { txApply, txDecode, txEncode, type TxIn } from "@/lib/transfer";
 import { useProgress } from "./progress";
+import { KEYS } from "@/config";
+
+/** Belohnungen aus einem Übertragungs-Link nur mit möglichen Werten übernehmen (Schutz vor präparierten Links). */
+export function plausibleG(g: Record<string, unknown>): boolean {
+  const xp = Number(g.x ?? g.earned ?? 0), lvl = Number(g.l ?? g.level ?? 1);
+  return Number.isFinite(xp) && Number.isFinite(lvl) && xp >= 0 && xp <= 2_000_000 && lvl >= 1 && lvl <= 1000;
+}
 
 export type Tx = { busy?: boolean; err?: string; link?: string; qr?: { n: number; d: string; k: number } | null; partial?: boolean; at?: string } | null;
 export type Imp = { inc?: TxIn; err?: string; done?: string } | null;
@@ -40,9 +47,10 @@ export const useTransfer = create<{ tx: Tx; imp: Imp; build: () => Promise<void>
   apply: (mode) => {
     const inc = get().imp?.inc; if (!inc) return;
     const P = useProgress.getState();
+    if (mode === "replace") { try { localStorage.setItem(KEYS.beforeImport, JSON.stringify({ at: Date.now(), data: P.S })); } catch { /* privat */ } } // Rettung per Hand möglich
     P.applySynced(txApply(P.S, inc, mode));
     if (mode === "replace") P.setSession(null);
-    if (inc.g) gm.merge(inc.g); // Belohnungen werden immer zusammengeführt, nie ersetzt
+    if (inc.g && plausibleG(inc.g)) gm.merge(inc.g); // Belohnungen werden immer zusammengeführt, nie ersetzt – fremde Links mit unmöglichen Werten nie
     set({ imp: { done: mode === "merge" ? "Mit deinem Stand zusammengeführt." : "Dein Stand wurde ersetzt." }, tx: null });
   },
   cancel: () => set({ imp: null }),

@@ -68,8 +68,8 @@ export const EXTRAS: Item[] = [
   { id: "shield", slot: "boost", rar: "SR", name: "Serien-Schild", icon: "🛡️", desc: "Rettet die Serie bei einem Fehler" }
 ];
 export const ITEMS = SKINS.concat(EXTRAS);
-/** Wie in der Live-App ein einfaches Objekt (Object.fromEntries) – gleiche Nachschlage-Regeln */
-export const IT: Record<string, Item | undefined> = Object.fromEntries(ITEMS.map((i) => [i.id, i]));
+/** Nachschlagen wie in der Live-App, aber ohne Prototyp: Fremdwerte wie „constructor“ aus Sync/Import sind nie ein Gegenstand. */
+export const IT: Record<string, Item | undefined> = Object.assign(Object.create(null) as Record<string, Item | undefined>, Object.fromEntries(ITEMS.map((i) => [i.id, i])));
 export type Equip = Record<string, string>;
 export const baseEquip = (c: string): Equip => ({ hat: `${c}-ohne-hat`, eye: `${c}-ohne-eye`, neck: `${c}-ohne-neck`, bg: `${c}-basis-bg`, shirt: `${c}-ohne-shirt` });
 

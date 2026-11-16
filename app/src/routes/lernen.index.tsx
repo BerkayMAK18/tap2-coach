@@ -14,6 +14,9 @@ import { ST_LBL, dec, dueCount, learnList, learnSel, learnSelOnly, qTask, selQ, 
 import { counts, isDue, st } from "@/lib/srs";
 import { useProgress } from "@/store/progress";
 import { Ic, Ring, pctS } from "@/ui-main";
+import { CodeVariants } from "@/components/CodeVariants";
+import { NormVisual } from "@/components/NormVisual";
+import { BezLoesung } from "@/components/BezVisual";
 import { AmpBar, Amp, Legend, TimerBox, TopicRow } from "@/components/lernen/bits";
 import { UebItem } from "@/components/aufgaben/UebItem";
 import { uebOf } from "@/lib/aufgaben";
@@ -100,7 +103,7 @@ function Theory({ p, idx, many }: { p: Paket; idx: number; many: boolean }) {
         {p.kern.map(([h, t, c], i) => (
           <details key={i} className="kern" open={i === 0}>
             <summary><span className="kn">{i + 1}</span><span>{h}</span><Ic name="down" cls="ic chev" /></summary>
-            <div className="kb"><p>{t}</p>{c && <pre>{c}</pre>}</div>
+            <div className="kb"><p>{t}</p>{c && <CodeVariants pseudo={c} />}<NormVisual id={`${p.id}:${h}`} /><BezLoesung id={`${p.id}:${h}`} theorie /></div>
           </details>
         ))}
       </div>

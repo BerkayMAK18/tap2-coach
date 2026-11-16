@@ -5,6 +5,7 @@
  * Funktionen arbeiten direkt auf dem übergebenen Stand G (wie das Original), ohne Speicher oder Oberfläche.
  */
 import { dayStr, isObj, mapObj, num, plain, type State } from "@/lib/state";
+import { today } from "@/lib/dates";
 import { ANIMALS, CHARS } from "./art";
 import { IT, ITEMS, QPOOL, SKINS, SLOTS, baseEquip, need, type Equip, type Today } from "./items";
 import { TI, TITLES } from "./titles";
@@ -53,6 +54,17 @@ const cleanQuests = (q: unknown): Quests | null => {
 export const fresh = (): GState => ({ v: 1, earned: 0, xp: 0, level: 1, federn: 300, tickets: 1, combo: 0, best: 0, lastLogin: null, loginClaimed: null, loginStreak: 0, calIdx: 0, calRound: 1, today: null, quests: null, owned: {}, equip: {}, char: "rabe", banner: "rabe", boosts: { xp2: 0, shield: 0 }, xp2Left: 0, shieldOn: false, pity: {}, hist: [], pulls: 0, tab: "quests" }) as unknown as GState;
 
 /** Stand nach dem Laden (Speicher, Link, Sicherung, Sync) auf gültige Werte bringen – nichts Gültiges wird verworfen */
+/**
+ * Tage liegen nie in der Zukunft (falsche Geräteuhr, Test mit verstelltem Datum). Sonst gewänne so ein Stand jeden
+ * Abgleich für immer: der Login-Kalender spränge nach jedem Abholen zurück und der Bonus wäre sofort wieder offen
+ * (wie pastDay() beim Lernstand der Live-App). Gilt für fremde Stände beim Einmischen: Login-Tage werden auf heute
+ * begrenzt, Tageszähler aus der Zukunft verworfen. Ein eigener Stand heilt sich damit beim nächsten Abholen.
+ */
+export function noFuture(G: GState, t0 = today()) {
+  const g = G as Loose;
+  ["lastLogin", "loginClaimed"].forEach((k) => { if (typeof g[k] === "string" && (g[k] as string) > t0) g[k] = t0; });
+  if (G.today && isObj(G.today) && typeof G.today.day === "string" && G.today.day > t0) { G.today = null; G.quests = null; }
+}
 export function fix(G: GState) {
   const g = G as Loose;
   if (!G.owned || typeof G.owned !== "object") G.owned = {};
@@ -123,8 +135,9 @@ export function unpack(p: unknown): GState | null {
   return g;
 }
 /** Fremden Stand einmischen: Besitz/Titel/Events vereinigen, Fortschritt vom weiter fortgeschrittenen Stand, Aussehen von der jüngsten Wahl */
-export function merge(G: GState, p: unknown) {
+export function merge(G: GState, p: unknown, day = today()) {
   const inc = unpack(p); if (!inc) return false;
+  noFuture(inc, day); // ein Stand aus der Zukunft darf den Abgleich nicht gewinnen
   const I = inc as GState & Loose, M = G as GState & Loose;
   // Stand mit Konto (v2.8+): Spiegelung. Ohne Konto (ältere Version): bisherige Regel, das Konto gleicht fix() danach an.
   const neu = isObj(inc.kb) && !Array.isArray(inc.kb);

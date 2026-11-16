@@ -63,7 +63,24 @@ function load(): GState {
   return G;
 }
 /** Stand (beim ersten Zugriff geladen) */
-export const gami = (): GState => (G ??= load());
+export const gami = (): GState => { if (!G) { G = load(); keepServerLogin(G); } return G; };
+
+// ---- Login-Bonus: zuletzt bestätigter Stand des Servers (auf dem Gerät gemerkt)
+// Ein eingemischter Stand (Sync, zweiter Tab, Neustart) kann den Kalender kurz auf „noch nicht abgeholt“ setzen,
+// bis der Server wieder gefragt ist – dann sprang das Fenster kurz auf. Was der Server heute bestätigt hat, gilt
+// deshalb sofort wieder: Kalender auf seinen Stand, ohne Belohnung (ok: false).
+const KEY_LOGIN_SRV = "tap2coach-login-server";
+let srvLogin: ServerLogin | null = (() => { try { return JSON.parse(localStorage.getItem(KEY_LOGIN_SRV) || "null"); } catch { return null; } })();
+function rememberServerLogin(s: ServerLogin) {
+  if (!s || typeof s.day !== "string") return;
+  srvLogin = { day: s.day, idx: s.idx, round: s.round, streak: s.streak };
+  try { localStorage.setItem(KEY_LOGIN_SRV, JSON.stringify(srvLogin)); } catch { /* privat */ }
+}
+/** Heute vom Server bestätigt, aber der Stand sagt etwas anderes → zurück auf den Server-Stand. true = korrigiert */
+function keepServerLogin(g: GState): boolean {
+  if (!srvLogin || srvLogin.day !== today() || g.loginClaimed === srvLogin.day) return false;
+  return applyServerLogin(g, { ...ctx, fx: { ...ctx.fx, save: () => {}, toast: () => {}, confetti: () => {} } }, { ...srvLogin, ok: false, already: true }) || true;
+}
 
 // ---- Effekte (Zeiten wie in der Live-App)
 let tid = 0;
@@ -100,7 +117,7 @@ export const gm = {
   guess: (q: Pick<Question, "id" | "topic">) => safe(() => { onGuess(gami(), ctx, q); bump(); }),
   chip: () => safe(() => chipText(gami())) ?? "",
   pack: () => safe(() => packCore(gami())) ?? null,
-  merge: (p: unknown) => safe(() => { if (mergeCore(gami(), p)) { save(); bump(); } }),
+  merge: (p: unknown) => safe(() => { if (mergeCore(gami(), p)) { keepServerLogin(gami()); save(); bump(); } }),
   data: () => safe(() => JSON.parse(JSON.stringify(gami())) as GState),
   evInfo: (e: EventCatalog) => safe(() => evInfoCore(gami(), e)) ?? {},
   evFinal: (e: EventCatalog, sure: number, n: number) => safe(() => { const r = evFinalCore(gami(), ctx, e, sure, n); bump(); return r; }),
@@ -151,6 +168,7 @@ async function claimOnServer() {
   if (LOGIN.busy) return; LOGIN.busy = true;
   try {
     const s = (await rpc("app_login_claim", {})) as ServerLogin | null;
+    if (s && (s.ok || s.already)) rememberServerLogin(s);
     if (s && s.ok && applyServerLogin(gami(), ctx, s)) toast(loginToast(CAL[s.idx!]));
     else if (s && s.already) { applyServerLogin(gami(), ctx, s); toast("Heute schon abgeholt – morgen gibt es den nächsten Bonus."); }
     else toast("Den Bonus gerade nicht abholbar. Versuch es gleich noch einmal.");
@@ -165,7 +183,7 @@ export async function loginCheck() {
   if (!serverLogin()) return;
   try {
     const s = (await rpc("app_login_state", {})) as (ServerLogin & { last?: string }) | null;
-    if (s && s.claimed) { applyServerLogin(gami(), ctx, { ...s, ok: false, already: true }); if (useGami.getState().modal?.k === "login") closeModal(); bump(); }
+    if (s && s.claimed) { rememberServerLogin(s); applyServerLogin(gami(), ctx, { ...s, ok: false, already: true }); if (useGami.getState().modal?.k === "login") closeModal(); bump(); }
   } catch (e) { if (fnMissing(e)) LOGIN.missing = true; }
 }
 function doPull(n: number) {
@@ -257,7 +275,7 @@ export const lbOnRender = () => { const fresh = LBX.away; LBX.away = false; setT
 
 if (typeof window !== "undefined") {
   // Anderer Tab hat Belohnungen gespeichert: übernehmen
-  window.addEventListener("storage", (e) => { if (e.key === KEY_GAMI && e.newValue) { try { G = parseStored(e.newValue); bump(); } catch { /* kaputt: eigenen Stand behalten */ } } });
+  window.addEventListener("storage", (e) => { if (e.key === KEY_GAMI && e.newValue) { try { G = parseStored(e.newValue); if (keepServerLogin(G)) save(); bump(); } catch { /* kaputt: eigenen Stand behalten */ } } });
   document.addEventListener("visibilitychange", () => { if (document.visibilityState === "hidden" && LBX.timer) { clearTimeout(LBX.timer); void lbPush(); } });
 }
 

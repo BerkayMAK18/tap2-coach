@@ -15,7 +15,7 @@ import { newCtx, oldGami, seeded, stateWith, type World } from "./golden/harness
 const DAY = "2026-11-14";
 type Dev = { G: GState; ctx: Ctx; w: World };
 const dev = (raw: object, day = DAY): Dev => { const w: World = { S: stateWith([]), day, synced: true }; const G = parseStored(JSON.stringify(raw)); return { G, ctx: newCtx(w, () => G), w }; };
-const sync = (a: Dev, b: Dev) => { merge(a.G, pack(b.G)); }; // a übernimmt den Stand von b
+const sync = (a: Dev, b: Dev) => { merge(a.G, pack(b.G), a.w.day); }; // a übernimmt den Stand von b
 const same = (a: Dev, b: Dev) => expect(stab(pack(a.G))).toBe(stab(pack(b.G)));
 const answer = (d: Dev, ok = true, i = 0) => onAnswer(d.G, d.ctx, BASE_Q[i], ok, false, -1, 1);
 const START = { earned: 4000, level: 12, xp: 0, federn: 370, tickets: 0, loginClaimed: DAY, lastLogin: DAY, loginStreak: 3, calIdx: 2, banner: "rabe" };
@@ -75,7 +75,7 @@ describe("Mehrere Geräte über die Cloud: am Ende überall derselbe Stand", () 
   for (const seed of [1, 2, 3, 4, 5]) it(`Startwert ${seed}`, () => {
     const rnd = seeded(seed * 77), devs = [dev(START), dev(START), dev(START)];
     let cloud: unknown = null;
-    const up = (d: Dev) => { if (cloud) merge(d.G, cloud); cloud = pack(d.G); };
+    const up = (d: Dev) => { if (cloud) merge(d.G, cloud, d.w.day); cloud = pack(d.G); };
     for (let step = 0; step < 300; step++) {
       const d = devs[Math.floor(rnd() * devs.length)], x = rnd();
       vi.advanceTimersByTime(Math.floor(rnd() * 5000));

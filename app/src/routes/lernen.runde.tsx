@@ -14,6 +14,7 @@ import type { Question } from "@/content/schema";
 import { shuffle } from "@/lib/dates";
 import { evById, evPassFallback, kapMastered, learnEv, learnEvFinal, type EvRes } from "@/lib/events";
 import { ST_LBL, looksCode, nextRound, qTask, reportUrl, tcolOf } from "@/lib/lernen";
+import { asLernQ } from "@/lib/sowi-mc";
 import { counts, nextTxt, st } from "@/lib/srs";
 import { gm } from "@/store/gami";
 import { ComboChip } from "@/components/gami/Hud";
@@ -43,9 +44,12 @@ function sessNext() {
   patch({ i: s.i + 1, pick: null, rev: false, optOpen: false, own: "" });
   window.scrollTo({ top: 0 }); focusMain();
 }
+/** Frage für die Lernrunde: SoWi-Karten als Auswahlfrage (in der Prüfung ist SoWi nur Multiple Choice) */
+const isSowi = (t: string) => TP[t]?.teil === "SoWi";
+const lernQ = (S: Parameters<typeof getQ>[0], id: string) => { const q = getQ(S, id); return q && asLernQ(q, isSowi); };
 function pick(i: number) {
   const s = S0().sess; if (!s || s.pick !== null) return;
-  const q = getQ(S0().S, s.ids[s.i]); if (!q || q.type !== "mc") return;
+  const q = lernQ(S0().S, s.ids[s.i]); if (!q || q.type !== "mc") return;
   const ok = i === q.right, [f, t] = S0().answer(q.id, ok);
   patch({ pick: i, res: { ...s.res, [q.id]: { ok, f, t } }, last: null });
   gm.answer(q, ok, false, f, t);
@@ -54,14 +58,14 @@ function pick(i: number) {
 function reveal() { patch({ rev: true }); focusSel("#s-yes"); }
 function markGuess() {
   const s = S0().sess; if (!s) return;
-  const q = getQ(S0().S, s.ids[s.i]); if (!q) return;
+  const q = lernQ(S0().S, s.ids[s.i]); if (!q) return;
   const r = s.res[q.id];
   if (S0().S.q[q.id] && r && r.ok) { S0().markGuess(q.id); patch({ res: { ...s.res, [q.id]: { ...r, t: 1, guess: true } } }); gm.guess(q); }
   sessNext();
 }
 function rateCard(ok: boolean, unsure = false) {
   const s = S0().sess; if (!s || !s.rev) return;
-  const q = getQ(S0().S, s.ids[s.i]); if (!q) return;
+  const q = lernQ(S0().S, s.ids[s.i]); if (!q) return;
   const [f, t] = S0().answer(q.id, ok, unsure);
   patch({ res: { ...s.res, [q.id]: { ok, f, t } }, last: { ok, f, t, id: q.id } });
   gm.answer(q, ok, !!unsure, f, t);
@@ -93,7 +97,7 @@ function Runde() {
   useEffect(() => { if (sess && i !== sess.i) patch({ i }); });
   if (!sess) return null;
   if (i >= sess.ids.length) return <SessEnd sess={sess} close={closeSess} />;
-  return <QuestionView key={sess.ids[i] + ":" + i} sess={sess} q={getQ(S, sess.ids[i])!} at={i} close={closeSess} />;
+  return <QuestionView key={sess.ids[i] + ":" + i} sess={sess} q={lernQ(S, sess.ids[i])!} at={i} close={closeSess} />;
 }
 
 function QuestionView({ sess: s, q, at, close }: { sess: Session; q: Question; at: number; close: () => void }) {
@@ -249,7 +253,7 @@ function QuestionView({ sess: s, q, at, close }: { sess: Session; q: Question; a
 
 function SessEnd({ sess: s, close }: { sess: Session; close: () => void }) {
   const S = useProgress((x) => x.S), startRound = useStartRound(), navigate = useNavigate();
-  const done = s.ids.filter((id, i, a) => s.res[id] && a.indexOf(id) === i).map((id) => ({ q: getQ(S, id), r: s.res[id] })).filter((x): x is { q: Question; r: Session["res"][string] } => !!x.q);
+  const done = s.ids.filter((id, i, a) => s.res[id] && a.indexOf(id) === i).map((id) => ({ q: lernQ(S, id), r: s.res[id] })).filter((x): x is { q: Question; r: Session["res"][string] } => !!x.q);
   const ok = done.filter((x) => x.r.ok).length, wrong = done.filter((x) => !x.r.ok);
   const c = counts(S, done.map((x) => x.q)), green = done.filter((x) => x.r.t === 2 && x.r.f !== 2).length;
   const again = () => startRound({ list: wrong.map((x) => x.q), title: "Fehler wiederholen", src: s.src.final ? { ...s.src, final: false } : s.src });

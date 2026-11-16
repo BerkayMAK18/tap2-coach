@@ -4,6 +4,11 @@ Stand: 14.11.2026. Die App heißt seit 14.11.2026 „Vortex“; der KI-Tutor hei
 
 **Einrichtung:** Edge Function deployt (14.11.2026). Für den Tutor-Stand im Konto `004_app_tutor_state_konto.sql` einspielen (ersetzt 003).
 
+## Zugang (16.11.2026)
+
+Der Tutor ist vorerst **nur für das freigeschaltete Konto** (`app_metadata.role = 'admin'`, Tutor Pro mit Claude)
+sichtbar: Menüpunkt und Seite `/tutor` sind für alle anderen ausgeblendet – auch der kostenlose Weg und die Brücke.
+
 ## Zwei Varianten (14.11.2026)
 
 | | **Tutor** (kostenlos) | **Tutor Pro** (Premium) |

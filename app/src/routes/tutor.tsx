@@ -10,11 +10,12 @@
  *   Auf dem Handy wechseln Chat, Aufgabe und Stand über Reiter.
  * - „Lehrplan“: deterministisch berechneter Plan bis zur Prüfung.
  *
- * Premium: nur das freigeschaltete GitHub-Konto (app_metadata.role = "admin"), auf jedem Gerät, auf dem es angemeldet ist.
- * Maßgeblich ist die Prüfung im Server (Edge Function), die Ansicht folgt ihr nur.
+ * Zugang vorerst nur für das freigeschaltete GitHub-Konto (app_metadata.role = "admin", „Tutor Pro“ mit Claude) –
+ * Menüpunkt und Seite sind für alle anderen unsichtbar (16.11.2026), auch der kostenlose Weg und die Brücke.
+ * Maßgeblich für die KI ist die Prüfung im Server (Edge Function), die Ansicht folgt ihr nur.
  */
 import { useEffect, useState } from "react";
-import { createFileRoute } from "@tanstack/react-router";
+import { Link, createFileRoute } from "@tanstack/react-router";
 import { TOPICS, TP } from "@/content/catalog";
 import { EXAM_DE } from "@/config";
 import { xpToday } from "@/lib/tutor-state";
@@ -47,6 +48,7 @@ function Tutor() {
   const syncNow = useTutor((s) => s.syncNow);
   useEffect(() => { void syncNow(); }, [syncNow]);
   if (supabase && !ready) return <section className="card"><p className="small muted">Anmeldung wird geprüft …</p></section>;
+  if (!pro) return <section className="card"><h3>Diese Seite ist nicht verfügbar.</h3><p className="small muted"><Link to="/">Zur Übersicht</Link></p></section>;
   const inApp = signedIn && stored === "app"; // ohne Anmeldung nur die Brücke
   const setWay = (w: Way) => { setStored(w); try { localStorage.setItem(KEY_WAY, w); } catch { /* privat */ } };
   const way = { pro, inApp, signedIn, setWay };

@@ -26,7 +26,7 @@ import { ConfirmHost } from "@/ui-main/confirm";
 const TUTOR_NAV = { view: "tutor", label: "Tutor", svg: '<path d="M12 12.2c.9-.5 1.9.2 1.8 1.2-.2 1.5-2 2.2-3.3 1.6-1.8-.8-2.3-3.1-1.4-4.7 1.2-2.1 4.1-2.6 6-1.3 2.4 1.6 2.8 5 1.2 7.3-2 2.8-6 3.2-8.7 1.2C4.6 15.2 4.2 10.4 6.6 7.3 9.4 3.7 15 3.3 18.4 6.2"/>' }; // Wirbel (wie das Vortex-Logo)
 import { useProgress } from "@/store/progress";
 import { useLiveSync } from "@/store/livesync";
-import { useAccount } from "@/store/account";
+import { isAdmin, useAccount } from "@/store/account";
 import { usePruefung } from "@/store/pruefung";
 import { KEY_TUT } from "@/lib/tipps";
 import { Suche } from "@/components/lernen/Suche";
@@ -68,6 +68,7 @@ function Shell() {
   useEffect(() => { document.title = `${VTITLE[view] ?? (view === "tutor" ? "Tutor" : "Vortex")} · Vortex`; }, [view]);
 
   const c = counts(S, allQ(S)), left = daysBetween(today(), EXAM_DAY);
+  const tutorOn = useAccount((s) => isAdmin(s.user)); // Menüpunkt Tutor nur fürs Admin-Konto
   const navView = view === "operatoren" || view === "plan" ? "tipps" : view === "lernen" && sess?.src?.ev ? "events" : view; // Event-Runde: Menüpunkt Events
   const focus = loc.pathname.startsWith("/lernen/runde") || (view === "pruefung" && !!run && run.phase === "write"); // Fokus wie die Live-App: Lernrunde, Prüfung beim Schreiben
   // Fokus-Ansicht wie die Live-App an <body> (das Stylesheet blendet mit body.focus die Navigation auf dem Handy aus)
@@ -83,8 +84,8 @@ function Shell() {
       <nav className="side" aria-label="Hauptnavigation">
         <div className="brand"><img className="brand-mark" src="/icons/vortex.svg" alt="" /><div className="brand-t">Vortex</div></div>
         {NAV_MAIN.map((n) => <NavBtn key={n.view} n={n} current={navView === n.view} />)}
-        {/* Tutor für alle: kostenlos über die eigene KI, Tutor Pro (eingebaute KI) nur fürs freigeschaltete Konto */}
-        <NavBtn n={TUTOR_NAV} current={navView === "tutor"} />
+        {/* Tutor vorerst nur für das freigeschaltete Konto (Claude) – für alle anderen unsichtbar */}
+        {tutorOn && <NavBtn n={TUTOR_NAV} current={navView === "tutor"} />}
         <div className="side-foot">{NAV_FOOT.map((n) => <NavBtn key={n.view} n={n} current={navView === n.view} />)}</div>
       </nav>
       <div className="col">

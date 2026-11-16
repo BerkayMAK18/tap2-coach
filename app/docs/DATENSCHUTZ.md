@@ -30,6 +30,7 @@ diesen Hinweis und dieses Dokument mitpflegen.**
 | Lernstand lokal | Antworten, Markierungen, Ergebnisse, Belohnungen | Browser (localStorage) | § 25 (2) Nr. 2 TDDDG, Art. 6 (1) b | nur Nutzer | Einstellungen → zurücksetzen |
 | Konto (optional) | GitHub-ID, -Name, E-Mail, Avatar-URL | Supabase Auth, Frankfurt (AV) | Art. 6 (1) b | Betreiber im Dashboard (unvermeidbar) | Konto löschen |
 | Stand im Konto (optional) | Lernstand + Belohnungen (JSON), Version, Zeitstempel (`app_sync`) | Supabase DB, Frankfurt | Art. 6 (1) b | Nutzer über die App; Betreiber technisch (nicht E2E) | „Kopie im Konto löschen“ / Konto löschen; Tagesstände max. 10 Tage |
+| Login-Bonus mit Konto (optional) | Tage, an denen der Tagesbonus abgeholt wurde, mit Kalendertag/Runde/Serie (`app_login_bonus`) | Supabase DB, Frankfurt | Art. 6 (1) b | Nutzer über die App; Betreiber technisch | Konto löschen; automatisch nach 60 Tagen |
 | Geräte-Sync ohne Konto (optional) | **verschlüsselter** Lernstand + Belohnungen unter Prüfsumme (`tap2_sync`) | Supabase DB, Frankfurt | Art. 6 (1) b | niemand außer Nutzer (Schlüssel nur im Browser) | „Kopie in der Cloud löschen“ |
 | Rangliste (optional) | Benutzername, Level, XP, Figur/Titel unter pseudonymer ID (`tap2_lb`, gemeinsam mit der Live-App) | Supabase DB, Frankfurt | Art. 6 (1) a (Mitmachen) | alle Nutzer (nur diese Felder); Betreiber kann Konto-Einträge zuordnen | Austragen |
 | Server-Protokolle | IP, Zeit, Anfrage (Auth, Datenbank, Edge Function) | Supabase (AV) | Art. 6 (1) f | Betreiber im Dashboard | Fristen des Anbieters |

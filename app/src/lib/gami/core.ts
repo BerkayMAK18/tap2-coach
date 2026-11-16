@@ -132,6 +132,22 @@ export function claimLogin(G: GState, ctx: Ctx, o: LoginOffer) {
   ctx.fx.save();
   return true;
 }
+/**
+ * Login-Bonus mit Konto: der Server entscheidet (supabase/007_app_login_bonus.sql). ok = heute neu abgeholt →
+ * Belohnung für seinen Kalendertag gutschreiben; sonst nur den Kalender auf seinen Stand setzen (keine Belohnung).
+ * So lässt sich der Bonus weder über mehrere Geräte/Tabs noch über einen zurückgesetzten Abgleich doppelt holen.
+ */
+export type ServerLogin = { ok?: boolean; already?: boolean; claimed?: boolean; day?: string; idx?: number; round?: number; streak?: number };
+export function applyServerLogin(G: GState, ctx: Ctx, s: ServerLogin | null): boolean {
+  if (!s || typeof s.day !== "string" || !/^\d{4}-\d{2}-\d{2}$/.test(s.day) || !Number.isInteger(s.idx) || s.idx! < 0 || s.idx! >= CAL.length) return false;
+  const idx = s.idx!, round = Math.max(1, Math.floor(Number(s.round) || 1)), streak = Math.max(1, Math.floor(Number(s.streak) || 1));
+  if (s.ok) { const r = CAL[idx]; if (r.f) G.federn += r.f; if (r.t) G.tickets += r.t; if (r.b) G.boosts[r.b as "xp2"]++; }
+  G.loginStreak = streak; G.lastLogin = s.day; G.loginClaimed = s.day;
+  G.calIdx = idx + 1; G.calRound = round;
+  if (G.calIdx >= CAL.length) { G.calIdx = 0; G.calRound = round + 1; if (s.ok) { ctx.fx.confetti(40); ctx.fx.toast(`Woche geschafft! Runde ${G.calRound} beginnt – alle Belohnungen wieder verfügbar`, 300); } }
+  ctx.fx.save();
+  return !!s.ok;
+}
 export const loginToast = (r: CalDay) => `Login-Bonus: ${r.f ? "+" + r.f + " 🪶" : r.t ? "+" + r.t + " 🎟️" : "+1 " + IT[r.b!]!.name}`;
 
 // ---- Schatzkammer

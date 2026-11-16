@@ -10,8 +10,8 @@ import { create } from "zustand";
 import type { EventCatalog, Question } from "@/content/schema";
 import { today } from "@/lib/dates";
 import { supabase } from "@/lib/supabase";
-import { claimable, claimLogin, claimQuest, chipText, equip, evFinal as evFinalCore, evInfo as evInfoCore, evKap as evKapCore, evWear, loginOffer, loginToast, onAnswer, onGuess, openChest, pull, rollDay, setTitle, titleCheck, applyBoost, type Ctx, type LoginOffer, type PullResult } from "@/lib/gami/core";
-import { KEY_GAMI } from "@/lib/gami/items";
+import { applyServerLogin, claimable, claimLogin, claimQuest, chipText, equip, evFinal as evFinalCore, evInfo as evInfoCore, evKap as evKapCore, evWear, loginOffer, loginToast, onAnswer, onGuess, openChest, pull, rollDay, setTitle, titleCheck, applyBoost, type Ctx, type LoginOffer, type PullResult, type ServerLogin } from "@/lib/gami/core";
+import { CAL, KEY_GAMI } from "@/lib/gami/items";
 import { NAME_RE, lbGet, lbId, lbSet, lookOf, type LbData } from "@/lib/gami/lb";
 import { LB_NEW_JOINS } from "@/config";
 import { firstStart, merge as mergeCore, pack as packCore, parseStored, type GState } from "@/lib/gami/state";
@@ -125,7 +125,10 @@ export const act = {
   claim: (id: string) => safe(() => { if (claimQuest(gami(), ctx, id)) { bump(); after(30000); } }),
   chest: () => safe(() => { if (openChest(gami(), ctx)) { openModal({ k: "chest" }); after(30000); } }),
   showLogin: () => safe(showLogin),
-  claimLogin: (o: LoginOffer) => safe(() => { if (!claimLogin(gami(), ctx, o)) return closeModal(); closeModal(); toast(loginToast(o.r)); }),
+  claimLogin: (o: LoginOffer) => safe(() => {
+    if (serverLogin()) { closeModal(); void claimOnServer(); return; } // mit Konto entscheidet der Server
+    if (!claimLogin(gami(), ctx, o)) return closeModal(); closeModal(); toast(loginToast(o.r));
+  }),
   pull: (n: number) => safe(() => { doPull(n); after(30000); }),
   again: (n: number) => safe(() => doPull(n)),
   info: (c: string) => safe(() => openModal({ k: "info", c })),
@@ -137,6 +140,34 @@ export const act = {
   evWear: (e: EventCatalog) => safe(() => { evWear(gami(), e); save(); lbSoon(3000); ctx.fx.syncSoon(3000); closeModal(); }),
 };
 function showLogin() { const o = loginOffer(gami(), today()); if (o) openModal({ k: "login", o }); }
+
+// ---- Login-Bonus mit Konto: serverseitig (supabase/007_app_login_bonus.sql)
+// Ohne Konto bleibt er wie in der Live-App auf dem Gerät. Fehlt die Funktion auf dem Server noch (SQL nicht
+// eingespielt), gilt ebenfalls die bisherige Regel – sonst ginge der Bonus gar nicht.
+const LOGIN = { missing: false, busy: false };
+const serverLogin = () => !!supabase && !!ACC() && !LOGIN.missing;
+const fnMissing = (e: unknown) => /app_login_(claim|state)/.test(String(e instanceof Error ? e.message : e)) && /function|exist|schema|find/i.test(String(e instanceof Error ? e.message : e));
+async function claimOnServer() {
+  if (LOGIN.busy) return; LOGIN.busy = true;
+  try {
+    const s = (await rpc("app_login_claim", {})) as ServerLogin | null;
+    if (s && s.ok && applyServerLogin(gami(), ctx, s)) toast(loginToast(CAL[s.idx!]));
+    else if (s && s.already) { applyServerLogin(gami(), ctx, s); toast("Heute schon abgeholt – morgen gibt es den nächsten Bonus."); }
+    else toast("Den Bonus gerade nicht abholbar. Versuch es gleich noch einmal.");
+    after(3000);
+  } catch (e) {
+    if (fnMissing(e)) { LOGIN.missing = true; const o = loginOffer(gami(), today()); if (o && claimLogin(gami(), ctx, o)) toast(loginToast(o.r)); }
+    else toast("Keine Verbindung – den Bonus holst du ab, sobald du wieder online bist.");
+  } finally { LOGIN.busy = false; bump(); }
+}
+/** Nach der Anmeldung: Kalender auf den Stand des Servers bringen (heute schon abgeholt → Fenster schließen, kein Bonus) */
+export async function loginCheck() {
+  if (!serverLogin()) return;
+  try {
+    const s = (await rpc("app_login_state", {})) as (ServerLogin & { last?: string }) | null;
+    if (s && s.claimed) { applyServerLogin(gami(), ctx, { ...s, ok: false, already: true }); if (useGami.getState().modal?.k === "login") closeModal(); bump(); }
+  } catch (e) { if (fnMissing(e)) LOGIN.missing = true; }
+}
 function doPull(n: number) {
   const g = gami(), r = pull(g, ctx, n); if (!r) return;
   openModal({ k: "pullOpen", n, top: r.top }); bump();

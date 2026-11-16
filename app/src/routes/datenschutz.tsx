@@ -122,7 +122,7 @@ function Datenschutz() {
       <Sec t="Speicherdauer">
         <Ul>
           <li>Lernstand im Browser: bis du ihn löschst.</li>
-          {f.account && <li>Konto, Stand im Konto, Ranglisten-Eintrag: bis du sie löschst; Tagessicherungen höchstens 10 Tage.</li>}
+          {f.account && <li>Konto, Stand im Konto, Ranglisten-Eintrag: bis du sie löschst; Tagessicherungen höchstens 10 Tage; Tage des abgeholten Login-Bonus höchstens 60 Tage.</li>}
           <li>Technische Zugriffsdaten beim Hosting: nach den Fristen des Anbieters, nur für Betrieb und Sicherheit.</li>
         </Ul>
       </Sec>

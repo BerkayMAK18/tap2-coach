@@ -9,7 +9,7 @@
  */
 import { useEffect, useMemo, useRef } from "react";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { TAP2, TP, getQ } from "@/content/catalog";
+import { catalogFor, getQ, topicMapFor } from "@/content/catalog";
 import type { Question } from "@/content/schema";
 import { shuffle } from "@/lib/dates";
 import { evById, evPassFallback, kapMastered, learnEv, learnEvFinal, type EvRes } from "@/lib/events";
@@ -31,7 +31,7 @@ import { useLernenUI, useStartRound } from "@/components/lernen/ui";
 export const Route = createFileRoute("/lernen/runde")({ component: Runde });
 
 const LANG_N: Record<string, string> = { pseudo: "Pseudocode", sql: "SQL" };
-const codeLang = (q: Question) => (!q.own ? TAP2.codeLang[q.id] : undefined);
+const codeLang = (q: Question, area: "fiae" | "fisi") => (!q.own ? catalogFor(area).codeLang[q.id] : undefined);
 const S0 = () => useProgress.getState();
 /** Laufende Runde ändern und speichern (keepSess() der Live-App) */
 const patch = (p: Partial<Session>) => { const s = S0().sess; if (s) S0().setSession({ ...s, ...p }); };
@@ -45,11 +45,11 @@ function sessNext() {
   window.scrollTo({ top: 0 }); focusMain();
 }
 /** Frage für die Lernrunde: SoWi-Karten als Auswahlfrage (in der Prüfung ist SoWi nur Multiple Choice) */
-const isSowi = (t: string) => TP[t]?.teil === "SoWi";
-const lernQ = (S: Parameters<typeof getQ>[0], id: string) => { const q = getQ(S, id); return q && asLernQ(q, isSowi); };
+const isSowi = (t: string, area: "fiae" | "fisi") => topicMapFor(area)[t]?.teil === "SoWi";
+const lernQ = (S: Parameters<typeof getQ>[0], id: string, area: "fiae" | "fisi") => { const q = getQ(S, id, area); return q && asLernQ(q, (tid) => isSowi(tid, area)); };
 function pick(i: number) {
   const s = S0().sess; if (!s || s.pick !== null) return;
-  const q = lernQ(S0().S, s.ids[s.i]); if (!q || q.type !== "mc") return;
+  const q = lernQ(S0().S, s.ids[s.i], s.src.area ?? "fiae"); if (!q || q.type !== "mc") return;
   const ok = i === q.right, [f, t] = S0().answer(q.id, ok);
   patch({ pick: i, res: { ...s.res, [q.id]: { ok, f, t } }, last: null });
   gm.answer(q, ok, false, f, t);
@@ -58,14 +58,14 @@ function pick(i: number) {
 function reveal() { patch({ rev: true }); focusSel("#s-yes"); }
 function markGuess() {
   const s = S0().sess; if (!s) return;
-  const q = lernQ(S0().S, s.ids[s.i]); if (!q) return;
+  const q = lernQ(S0().S, s.ids[s.i], s.src.area ?? "fiae"); if (!q) return;
   const r = s.res[q.id];
   if (S0().S.q[q.id] && r && r.ok) { S0().markGuess(q.id); patch({ res: { ...s.res, [q.id]: { ...r, t: 1, guess: true } } }); gm.guess(q); }
   sessNext();
 }
 function rateCard(ok: boolean, unsure = false) {
   const s = S0().sess; if (!s || !s.rev) return;
-  const q = lernQ(S0().S, s.ids[s.i]); if (!q) return;
+  const q = lernQ(S0().S, s.ids[s.i], s.src.area ?? "fiae"); if (!q) return;
   const [f, t] = S0().answer(q.id, ok, unsure);
   patch({ res: { ...s.res, [q.id]: { ok, f, t } }, last: { ok, f, t, id: q.id } });
   gm.answer(q, ok, !!unsure, f, t);
@@ -79,6 +79,7 @@ function ensureOrd(q: Question & { type: "mc" }) {
 
 function Runde() {
   const sess = useProgress((s) => s.sess), S = useProgress((s) => s.S), navigate = useNavigate();
+  const area = sess?.src.area ?? "fiae", catalog = catalogFor(area), TP = topicMapFor(area);
   // Lernrunde = Fokusmodus (auf dem Handy ohne Navigationsleiste), wie body.focus in der Live-App
   useEffect(() => { document.body.classList.add("focus"); return () => document.body.classList.remove("focus"); }, []);
   // Ohne laufende Runde (z. B. direkt aufgerufen) zur Themenliste; Beenden navigiert selbst
@@ -93,20 +94,20 @@ function Runde() {
   };
   // Fragen, die es nicht mehr gibt (z. B. gelöschte eigene Karte), überspringen
   let i = sess ? sess.i : 0;
-  while (sess && i < sess.ids.length && !getQ(S, sess.ids[i])) i++;
+  while (sess && i < sess.ids.length && !getQ(S, sess.ids[i], area)) i++;
   useEffect(() => { if (sess && i !== sess.i) patch({ i }); });
   if (!sess) return null;
   if (i >= sess.ids.length) return <SessEnd sess={sess} close={closeSess} />;
-  return <QuestionView key={sess.ids[i] + ":" + i} sess={sess} q={lernQ(S, sess.ids[i])!} at={i} close={closeSess} />;
+  return <QuestionView key={sess.ids[i] + ":" + i} sess={sess} q={lernQ(S, sess.ids[i], area)!} at={i} close={closeSess} area={area} catalog={catalog} TP={TP} />;
 }
 
-function QuestionView({ sess: s, q, at, close }: { sess: Session; q: Question; at: number; close: () => void }) {
+function QuestionView({ sess: s, q, at, close, area, catalog, TP }: { sess: Session; q: Question; at: number; close: () => void; area: "fiae" | "fisi"; catalog: ReturnType<typeof catalogFor>; TP: ReturnType<typeof topicMapFor> }) {
   const S = useProgress((x) => x.S), toggleMark = useProgress((x) => x.toggleMark);
   const ref = useRef<HTMLDivElement>(null), sqlRun = useRef<(() => void) | null>(null);
   const t = TP[q.topic] ?? { n: q.topic, teil: "Event" }, sv = st(S, q.id), marked = !!S.mark[q.id];
   const mixed = (s.src.tid && q.topic !== s.src.tid) || (s.src.tids && !s.src.tids.includes(q.topic));
   const multi = !s.src.tid || mixed;
-  const lang = codeLang(q);
+  const lang = codeLang(q, area);
   const fallbackOrd = useMemo(() => (q.type === "mc" ? shuffle(q.opts.map((_, i) => i)) : []), [q.id]); // eslint-disable-line react-hooks/exhaustive-deps
   const ord = s.ord?.[q.id] ?? fallbackOrd;
   useEffect(() => { if (q.type === "mc" && (s.optOpen || s.pick !== null) && !s.ord?.[q.id]) patch({ ord: { ...(s.ord ?? {}), [q.id]: fallbackOrd } }); });
@@ -183,7 +184,7 @@ function QuestionView({ sess: s, q, at, close }: { sess: Session; q: Question; a
       </div>
     ) : <p className="kbdhelp">Tasten <span className="kbd">1</span>–<span className="kbd">4</span> zum Antworten · <span className="kbd">Enter</span> weiter</p>;
   } else if (lang) {
-    const mine = s.code?.[q.id] ?? "", has = !!mine.trim(), cfg = TAP2.sqlDb.cards[q.id] ?? {};
+    const mine = s.code?.[q.id] ?? "", has = !!mine.trim(), cfg = catalog.sqlDb.cards[q.id] ?? {};
     const setCode = (v: string) => { const s1 = S0().sess; if (s1) S0().setSession({ ...s1, code: { ...(s1.code ?? {}), [q.id]: v } }); };
     body = !s.rev ? (
       <>
@@ -236,7 +237,7 @@ function QuestionView({ sess: s, q, at, close }: { sess: Session; q: Question; a
         <div className="prog"><span>{s.title}</span><div className="bar"><i style={{ width: `${(at / s.ids.length) * 100}%` }} /></div></div>
         <ComboChip />
         <span className="qcount num">{at + 1} / {s.ids.length}</span>
-        <a className="iconbtn report" href={reportUrl(q)} target="_blank" rel="noopener" aria-label="Fehler in dieser Frage melden" title="Fehler melden"><Ic name="flag" /></a>
+        <a className="iconbtn report" href={reportUrl(q, area)} target="_blank" rel="noopener" aria-label="Fehler in dieser Frage melden" title="Fehler melden"><Ic name="flag" /></a>
         <button type="button" className={`iconbtn star ${marked ? "marked" : ""}`} aria-pressed={marked} aria-label={marked ? "Markierung entfernen" : "Frage markieren"} title="Markieren" onClick={() => toggleMark(q.id)}><Ic name="star" /></button>
       </div>
       {last && <div className={`lastnote ${last.ok ? "ok" : "bad"}`}><Ic name={last.ok ? "check" : "x"} cls="ic xs" /> Vorherige Frage {last.ok ? "gewusst" : "nicht gewusst"} <Trans f={last.f} t={last.t} />{last.id && <span className="nexttxt">{nextTxt(S, last.id)}</span>}</div>}
@@ -253,14 +254,15 @@ function QuestionView({ sess: s, q, at, close }: { sess: Session; q: Question; a
 
 function SessEnd({ sess: s, close }: { sess: Session; close: () => void }) {
   const S = useProgress((x) => x.S), startRound = useStartRound(), navigate = useNavigate();
-  const done = s.ids.filter((id, i, a) => s.res[id] && a.indexOf(id) === i).map((id) => ({ q: lernQ(S, id), r: s.res[id] })).filter((x): x is { q: Question; r: Session["res"][string] } => !!x.q);
+  const area = s.src.area ?? "fiae";
+  const done = s.ids.filter((id, i, a) => s.res[id] && a.indexOf(id) === i).map((id) => ({ q: lernQ(S, id, area), r: s.res[id] })).filter((x): x is { q: Question; r: Session["res"][string] } => !!x.q);
   const ok = done.filter((x) => x.r.ok).length, wrong = done.filter((x) => !x.r.ok);
   const c = counts(S, done.map((x) => x.q)), green = done.filter((x) => x.r.t === 2 && x.r.f !== 2).length;
   const again = () => startRound({ list: wrong.map((x) => x.q), title: "Fehler wiederholen", src: s.src.final ? { ...s.src, final: false } : s.src });
   const evE = evById(s.src.ev);
   const next = () => {
     if (evE) { startRound(s.src.final ? learnEvFinal(S, evE) : learnEv(S, evE, s.src.kap)); return; }
-    startRound(nextRound(S, s.src));
+    startRound(nextRound(S, s.src, area));
   };
   // Event: Abschlusstest auswerten (Belohnung vergibt das Belohnungs-Modul) und gemeistertes Kapitel melden – je Runde einmal
   useEffect(() => {

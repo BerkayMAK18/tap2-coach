@@ -7,10 +7,11 @@ import { useEffect, type RefObject } from "react";
 import { create } from "zustand";
 import { useNavigate } from "@tanstack/react-router";
 import { startTab, type Plan } from "@/lib/lernen";
+import { useLearningArea } from "@/store/learning-area";
 import { useProgress } from "@/store/progress";
 import { examWriting } from "@/store/pruefung";
 
-export type Tf = "alle" | "Teil 1" | "Teil 2" | "SoWi";
+export type Tf = "alle" | "Teil 1" | "Teil 2" | "Teil 1 + 2" | "SoWi";
 export type TTab = "theorie" | "fragen" | "aufgaben";
 type UI = { tf: Tf; sel: string[]; ttab: TTab; srchOpen: boolean; srchQ: string };
 export const useLernenUI = create<UI>(() => ({ tf: "alle", sel: [], ttab: "theorie", srchOpen: false, srchQ: "" }));
@@ -24,7 +25,8 @@ export function useStartRound() {
   const navigate = useNavigate();
   return (p: Plan | null) => {
     if (!p || !p.list.length) return;
-    useProgress.getState().startSession(p.title, p.list.map((q) => q.id), p.src, p.startAt);
+    const area = p.src.ev ? "fiae" : p.src.area ?? useLearningArea.getState().area;
+    useProgress.getState().startSession(p.title, p.list.map((q) => q.id), { ...p.src, area }, p.startAt);
     void navigate({ to: "/lernen/runde" });
     window.scrollTo({ top: 0 });
   };
@@ -34,8 +36,9 @@ export function useOpenTopic() {
   const navigate = useNavigate();
   return (tid: string, tab?: TTab) => {
     const st = useProgress.getState();
+    const area = useLearningArea.getState().area;
     if (st.sess) st.setSession(null);
-    useLernenUI.setState({ ttab: tab ?? (startTab(st.S, tid) as TTab) });
+    useLernenUI.setState({ ttab: tab ?? (startTab(st.S, tid, area) as TTab) });
     void navigate({ to: "/lernen", search: { thema: tid } });
     window.scrollTo({ top: 0 });
   };

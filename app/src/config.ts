@@ -1,9 +1,12 @@
-/**
- * Zentrale Einstellungen. Für einen neuen Jahrgang hier das Prüfungsdatum anpassen
- * (später: pro Katalog in der Katalog-Bibliothek).
- */
+/** Zentrale Prüfungstermine; der Standard bleibt mit der Live-App kompatibel. */
 export const EXAM_DAY = "2026-11-25"; // TAP2 Winter 2026/27 – gleich wie in der Live-App
 export const EXAM_DE = EXAM_DAY.split("-").reverse().join(".");
+export const EXAM_TERMS = [
+  { id: "winter-2026-27", label: "Winter 2026/27 · schriftlich 25.11.2026", date: "2026-11-25" },
+  { id: "summer-2027", label: "Sommer 2027 · schriftlich 28.04.2027", date: "2027-04-28" },
+] as const;
+export type ExamTermId = (typeof EXAM_TERMS)[number]["id"] | "custom";
+export const DEFAULT_EXAM_TERM: ExamTermId = "winter-2026-27";
 
 /** localStorage-Schlüssel – identisch mit der Live-App, damit Sicherungen und später Sync kompatibel sind. */
 export const KEYS = {

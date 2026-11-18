@@ -15,6 +15,7 @@ import { counts } from "@/lib/srs";
 import { gm, useGami } from "@/store/gami";
 import { EvPreview } from "@/components/gami/Hud";
 import { useProgress } from "@/store/progress";
+import { useLearningArea } from "@/store/learning-area";
 import { Ic } from "@/ui-main";
 import { AmpBar, Legend } from "@/components/lernen/bits";
 import { useStartRound } from "@/components/lernen/ui";
@@ -28,7 +29,9 @@ const info = (e: EventCatalog): EvInfo => gm.evInfo(e);
 
 function Events() {
   const { ev } = Route.useSearch(), e = evById(ev);
+  const area = useLearningArea((s) => s.area);
   useGami((t) => t.n);
+  if (area === "fisi") return <section className="card"><h2>Events</h2><p className="muted">Die vorhandenen Events gehören zum Bereich Anwendungsentwicklung. Für Systemintegration sind noch keine eigenen Events hinterlegt.</p></section>;
   return e ? <EventPage key={e.id} e={e} /> : <EventList />;
 }
 

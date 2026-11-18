@@ -19,6 +19,7 @@ import { LETTERS, MODE_LBL, SIM_MIN, STEP_LBL, TEIL, fmtT, left, n1ok, opHint, p
 import { counts } from "@/lib/srs";
 import { note } from "@/lib/state";
 import { useProgress } from "@/store/progress";
+import { useLearningArea } from "@/store/learning-area";
 import { usePruefung } from "@/store/pruefung";
 import { fmtClock } from "@/store/timer";
 import { Ic, Ring, pctS } from "@/ui-main";
@@ -31,7 +32,9 @@ const top = () => window.scrollTo({ top: 0 });
 
 function Pruefung() {
   const run = usePruefung((s) => s.run);
+  const area = useLearningArea((s) => s.area);
   useEffect(() => { const P = usePruefung.getState(); if (P.run && P.run.phase === "done") P.close(); P.setConfirm(null); }, []);
+  if (area === "fisi" && !run) return <section className="card"><h2>FISI-Prüfungssimulation</h2><p className="muted">Für Systemintegration sind noch keine eigenständigen Prüfungssimulationen hinterlegt. Die verfügbaren FISI-Fragen kannst du unter „Lernen“ üben.</p></section>;
   if (run && run.mode === "sim") return run.phase === "done" ? <SimDone r={run} /> : <SimWrite r={run} />;
   if (run) return run.phase === "write" ? <RealWrite r={run} /> : run.phase === "grade" ? <RealGrade r={run} /> : <RealDone r={run} />;
   return <Start />;

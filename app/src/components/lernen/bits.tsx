@@ -2,10 +2,12 @@
  * Kleine Bausteine des Lernen-Bereichs – gleiches Markup und gleiche Klassen wie die Template-Strings der Live-App
  * (ampBar, legend, trans, topicRow, frontHTML, figHTML, ewhHTML, tmHTML, todayPlanHTML).
  */
-import { TP, allQ, figFor, topicQ } from "@/content/catalog";
+import { allQ, figFor, topicMapFor, topicQ, type LearningArea } from "@/content/catalog";
 import type { Question, Topic } from "@/content/schema";
 import { ST_LBL, ST_SHORT, qParts, situBlocks, tcolOf } from "@/lib/lernen";
 import { buildPlan, type PlanItem } from "@/lib/plan";
+import { today } from "@/lib/dates";
+import { useExamDay } from "@/store/exam-date";
 import type { Seg } from "@/lib/search";
 import { counts, isDue, type Counts } from "@/lib/srs";
 import { useProgress } from "@/store/progress";
@@ -33,8 +35,8 @@ export const Trans = ({ f, t }: { f: number; t: number }) => <span className="tr
 /** Suchtreffer mit Markierung (escaped, kein HTML) */
 export const Segs = ({ segs }: { segs: Seg[] }) => <>{segs.map(([t, m], i) => (m ? <mark key={i}>{t}</mark> : t))}</>;
 
-export function TopicRow({ t, onOpen }: { t: Topic; onOpen: (tid: string) => void }) {
-  const S = useProgress((s) => s.S), c = counts(S, topicQ(S, t.id));
+export function TopicRow({ t, onOpen, area = "fiae" }: { t: Topic; onOpen: (tid: string) => void; area?: LearningArea }) {
+  const S = useProgress((s) => s.S), c = counts(S, topicQ(S, t.id, area));
   return (
     <button type="button" className={`trow t-${tcolOf(t.teil)}`} data-topic={t.id} onClick={() => onOpen(t.id)}>
       <span className="tr-ic"><Ic name={t.ic ?? ""} /></span>
@@ -77,19 +79,19 @@ export function TimerBox({ k, min, label = "Start", hint, compact = true }: { k:
 const TEIL_K: Record<string, string> = { t1: "Planen", t2: "Algorithmen", wiso: "SoWi" };
 export type PlanActions = { topic: (tid: string) => void; sim: (teil: string) => void; go: (view: string) => void; due: () => void };
 /** Eintrag im Lernplan (planItemHTML): Knöpfe nur für heute (mit act) */
-export function PlanLi({ it, act }: { it: PlanItem; act?: PlanActions }) {
-  if (it.kind === "topic") { const t = TP[it.tid]; return <li><span className="pi-ic"><Ic name={t.ic ?? ""} cls="ic sm" /></span><span className="pi-t"><b>{t.n}</b><span className="small muted">{it.n} Fragen · {t.teil}</span></span>{act && <button type="button" className="btn small" onClick={() => act.topic(it.tid)}><Ic name="play" cls="ic xs" /> Lernen</button>}</li>; }
+export function PlanLi({ it, act, area = "fiae" }: { it: PlanItem; act?: PlanActions; area?: LearningArea }) {
+  if (it.kind === "topic") { const t = topicMapFor(area)[it.tid]; return <li><span className="pi-ic"><Ic name={t.ic ?? ""} cls="ic sm" /></span><span className="pi-t"><b>{t.n}</b><span className="small muted">{it.n} Fragen · {t.teil}</span></span>{act && <button type="button" className="btn small" onClick={() => act.topic(it.tid)}><Ic name="play" cls="ic xs" /> Lernen</button>}</li>; }
   if (it.kind === "sim") return <li><span className="pi-ic"><Ic name="timer" cls="ic sm" /></span><span className="pi-t"><b>Prüfung simulieren: {TEIL_K[it.teil]}</b><span className="small muted">{it.teil === "wiso" ? "Simulation, 60 Min." : "Real-Klausur, 90 Min."} · danach Fehlerursachen eintragen</span></span>{act && <button type="button" className="btn small" onClick={() => act.sim(it.teil)}>Starten</button>}</li>;
   if (it.kind === "op") return <li><span className="pi-ic"><Ic name="bulb" cls="ic sm" /></span><span className="pi-t"><b>Operator-Trainer</b><span className="small muted">10 Min. · Antworttiefe üben</span></span>{act && <button type="button" className="btn small" onClick={() => act.go("operatoren")}>Öffnen</button>}</li>;
   return <li><span className="pi-ic"><Ic name="star" cls="ic sm" /></span><span className="pi-t"><b>Nur wiederholen</b><span className="small muted">Fällige Fragen und Fehler, Tipps lesen, nichts Neues. Früh schlafen.</span></span>{act && <button type="button" className="btn small" onClick={() => act.go("tipps")}>Tipps</button>}</li>;
 }
 /** „Heute laut Lernplan“ (todayPlanHTML() der Live-App) */
-export function TodayPlan({ act }: { act: PlanActions }) {
-  const S = useProgress((s) => s.S), P = buildPlan(S), items = P.plan[P.days[0]] ?? [], dueN = allQ(S).filter((q) => isDue(S, q.id)).length;
+export function TodayPlan({ act, area = "fiae" }: { act: PlanActions; area?: LearningArea }) {
+  const S = useProgress((s) => s.S), examDay = useExamDay(), P = buildPlan(S, today(), examDay, area), items = P.plan[P.days[0]] ?? [], dueN = allQ(S, area).filter((q) => isDue(S, q.id)).length;
   return (
     <ul className="plan-items">
       {dueN > 0 && <li><span className="pi-ic"><Ic name="again" cls="ic sm" /></span><span className="pi-t"><b>Fällige Wiederholungen</b><span className="small muted">{dueN} Fragen · zuerst erledigen</span></span><button type="button" className="btn small primary" onClick={act.due}>Starten</button></li>}
-      {items.map((it, i) => <PlanLi key={i} it={it} act={act} />)}
+      {items.map((it, i) => <PlanLi key={i} it={it} act={act} area={area} />)}
       {!items.length && !dueN && <li><span className="pi-t small muted">Heute steht nichts Neues an.</span></li>}
     </ul>
   );

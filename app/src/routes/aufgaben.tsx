@@ -14,6 +14,7 @@ import { UE, UEB, UEB_TOPIC, reportUrlUeb, uebGroups } from "@/lib/aufgaben";
 import { fmtDay } from "@/lib/dates";
 import { dec, tcolOf } from "@/lib/lernen";
 import { useProgress } from "@/store/progress";
+import { useLearningArea } from "@/store/learning-area";
 import { tmState, useTimer } from "@/store/timer";
 import { Ic } from "@/ui-main";
 import { CodeVariants } from "@/components/CodeVariants";
@@ -27,7 +28,8 @@ const search = z.object({ u: z.string().optional().catch(undefined) }); // fehle
 export const Route = createFileRoute("/aufgaben")({ validateSearch: search, component: Aufgaben });
 
 function Aufgaben() {
-  const { u } = Route.useSearch();
+  const { u } = Route.useSearch(), area = useLearningArea((s) => s.area);
+  if (area === "fisi") return <section className="card"><h2>FISI-Übungsaufgaben</h2><p className="muted">Für Systemintegration sind noch keine eigenständigen größeren Übungsaufgaben hinterlegt. Die verfügbaren FISI-Fragen findest du unter „Lernen“.</p></section>;
   if (u && UE[u]) return <UebPage key={u} u={UE[u]} />;
   return <UebList />;
 }

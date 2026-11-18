@@ -2,6 +2,7 @@
 import { useNavigate } from "@tanstack/react-router";
 import { learnList, learnTopic } from "@/lib/lernen";
 import { useProgress } from "@/store/progress";
+import { useLearningArea } from "@/store/learning-area";
 import { usePruefung } from "@/store/pruefung";
 import { useStartRound } from "@/components/lernen/ui";
 import type { PlanActions } from "@/components/lernen/bits";
@@ -13,9 +14,9 @@ export function usePlanActions(): PlanActions {
   const navigate = useNavigate(), startRound = useStartRound();
   const go = (v: string) => { void navigate({ to: VIEW_PATH[v] ?? "/" }); window.scrollTo({ top: 0 }); };
   return {
-    topic: (tid) => startRound(learnTopic(useProgress.getState().S, tid)),
+    topic: (tid) => startRound(learnTopic(useProgress.getState().S, tid, useLearningArea.getState().area)),
     sim: (t) => { usePruefung.getState().setPk({ mode: t === "wiso" ? "sim" : "real", teil: t }); go("pruefung"); },
     go,
-    due: () => startRound(learnList(useProgress.getState().S, "due")),
+    due: () => startRound(learnList(useProgress.getState().S, "due", undefined, useLearningArea.getState().area)),
   };
 }

@@ -90,6 +90,16 @@ app/
   die auf gleiche Länge gekürzte richtige Option stehen in `src/content/sowi-mc/` – eigene Inhalte, nicht aus dem
   Export. Umwandlung in `src/lib/sowi-mc.ts`; Frage-IDs und Lernstand bleiben gleich. Tests prüfen Abdeckung aller
   SoWi-Karten und dass die Länge die Lösung nicht verrät.
+- **FIAE/FISI-Bereichswahl (18.11.2026):** FIAE bleibt der Standardkatalog aus dem Live-Export. FISI liegt als
+  eigenständig formulierter Katalog mit über 400 Fragen in `src/content/fisi.json` und `src/content/fisi-bank.ts`.
+  Die Netzberechnungen werden aus festen Datensätzen abgeleitet; Originalprüfungen und Lösungshinweise aus den
+  bereitgestellten PDFs werden nicht veröffentlicht. `src/store/learning-area.ts` speichert die Auswahl lokal unter
+  `tap2coach-bereich`. Der Fortschritt bleibt im kompatiblen Lernstand `tap2coach`; FISI-Fragen verwenden den eigenen
+  ID-Namensraum `fisi:`. Übersicht, Lernen, Suche und Lernplan folgen der Auswahl. FISI-Aufgaben, Prüfungssimulationen,
+  Events und Tutor sind noch nicht portiert und werden nicht mit FIAE-Inhalten aufgefüllt.
+- **Prüfungstermin:** Auswahl Winter 2026/27 (25.11.2026), Sommer 2027 (28.04.2027) oder individuelles Einladungsdatum.
+  Lokal gespeichert unter `tap2coach-pruefungstermin`; Countdown, Lernplan und Tutor-Lehrplan verwenden denselben Wert.
+  Schriftliche Termine folgen AkA/IHK-IT-Terminen; Projekt- und Fachgesprächsdaten bleiben individuell.
 
 ## Portierung aus der Live-App
 

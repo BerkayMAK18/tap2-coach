@@ -25,8 +25,10 @@ import { ask } from "@/ui-main/ask";
 import { AccountCard } from "@/components/AccountCard";
 import { SyncCard } from "@/components/SyncCard";
 import { supabase } from "@/lib/supabase";
-import { FEATURES } from "@/config";
+import { EXAM_TERMS, FEATURES, type ExamTermId } from "@/config";
 import { useAccount } from "@/store/account";
+import { useExamSettings } from "@/store/exam-date";
+import { formatExamDate, resolveExamDate } from "@/lib/exam-date";
 
 export const Route = createFileRoute("/einstellungen")({ component: Einstellungen });
 
@@ -41,6 +43,7 @@ function Einstellungen() {
         <h3>Darstellung</h3>
         <div className="segs" role="group" aria-label="Darstellung" style={{ marginTop: 10 }}>{([["auto", "wie System", "auto"], ["light", "Hell", "sun"], ["dark", "Dunkel", "moon"]] as const).map(([m, l, i]) => <button key={m} type="button" className={`seg ${tm === m ? "on" : ""}`} aria-pressed={tm === m} onClick={() => { setTheme(m); setTm(m); }}><Ic name={i} cls="ic xs" /> {l}</button>)}</div>
       </section>
+      <ExamDateCard />
       <section className="card app-card">
         <h3>App &amp; Offline</h3>
         <p className="small muted">{pwa.standalone ? "Du nutzt den Coach als installierte App." : "Du kannst den Coach wie eine App auf dem Startbildschirm ablegen. Er funktioniert dann auch ohne Internet, z. B. in der Bahn."}</p>
@@ -58,6 +61,24 @@ function Einstellungen() {
       <section className="card"><h3>Hilfe</h3><p className="tiny muted">App-Version {BUILD}</p><div className="row" style={{ marginTop: 8 }}><button type="button" className="btn small" data-go2="tutorial"><Ic name="map" cls="ic xs" /> Tutorial öffnen</button><button type="button" className="btn small" data-go2="patchnotes">Patch Notes</button><a className="btn small ghost" href={`https://github.com/${REPO}/issues`} target="_blank" rel="noopener">Gemeldete Fehler ansehen</a></div></section>
       <p className="tiny muted" style={{ textAlign: "center", marginTop: 8 }}><button type="button" className="linkbtn" data-go2="datenschutz">Datenschutz</button></p>
     </>
+  );
+}
+
+function ExamDateCard() {
+  const term = useExamSettings((s) => s.term), customDate = useExamSettings((s) => s.customDate);
+  const setTerm = useExamSettings((s) => s.setTerm), setCustomDate = useExamSettings((s) => s.setCustomDate);
+  const date = resolveExamDate(term, customDate);
+  return (
+    <section className="card exam-date-card">
+      <h3>Prüfungstermin</h3>
+      <label className="f" htmlFor="exam-term">Dein Prüfungstermin<select id="exam-term" value={term} onChange={(e) => setTerm(e.target.value as ExamTermId)}>
+        {EXAM_TERMS.map((option) => <option key={option.id} value={option.id}>{option.label}</option>)}
+        <option value="custom">Individuelles Datum</option>
+      </select></label>
+      {term === "custom" && <label className="f" htmlFor="exam-custom-date">Datum aus deiner Einladung<input id="exam-custom-date" type="date" value={customDate} onChange={(e) => setCustomDate(e.target.value)} /></label>}
+      <p className="small muted">Ausgewählt: {formatExamDate(date)}. Countdown, Übersicht und Lernpläne richten sich danach. Projekt- und Fachgesprächstermine weichen ab; maßgeblich ist deine persönliche IHK-Einladung.</p>
+      <p className="tiny muted">Schriftliche IT-Prüfungstermine: <a href="https://www.ihk-aka.de/aktuelles/pruefungsnews/detail/202508" target="_blank" rel="noopener">AkA-Terminplan</a>. Projektfristen: <a href="https://www.ihk.de/rheinhessen/aus-und-weiterbildung/berufe-a-z/terminplan-winter2-6187910" target="_blank" rel="noopener">IHK Rheinhessen</a>.</p>
+    </section>
   );
 }
 

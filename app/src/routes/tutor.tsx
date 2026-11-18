@@ -17,11 +17,13 @@
 import { useEffect, useState } from "react";
 import { Link, createFileRoute } from "@tanstack/react-router";
 import { TOPICS, TP } from "@/content/catalog";
-import { EXAM_DE } from "@/config";
+import { formatExamDate } from "@/lib/exam-date";
 import { xpToday } from "@/lib/tutor-state";
 import { today } from "@/lib/dates";
 import { useTutor } from "@/store/tutor";
 import { isAdmin, useAccount } from "@/store/account";
+import { useLearningArea } from "@/store/learning-area";
+import { useExamDay } from "@/store/exam-date";
 import { supabase } from "@/lib/supabase";
 import { Ic } from "@/ui-main";
 import { ask } from "@/ui-main/ask";
@@ -44,9 +46,11 @@ type Mob = "chat" | Side;
 
 function Tutor() {
   const pro = useAccount((s) => isAdmin(s.user)), ready = useAccount((s) => s.ready), signedIn = useAccount((s) => !!s.user);
+  const area = useLearningArea((s) => s.area);
   const [top, setTop] = useState<Top>("sitzung"), [stored, setStored] = useState<Way>(readWay);
   const syncNow = useTutor((s) => s.syncNow);
   useEffect(() => { void syncNow(); }, [syncNow]);
+  if (area === "fisi") return <section className="card"><h2>Tutor</h2><p className="muted">Der Prüfungstutor ist derzeit auf Anwendungsentwicklung ausgerichtet. Für Systemintegration ist er noch nicht freigeschaltet.</p></section>;
   if (supabase && !ready) return <section className="card"><p className="small muted">Anmeldung wird geprüft …</p></section>;
   if (!pro) return <section className="card"><h3>Diese Seite ist nicht verfügbar.</h3><p className="small muted"><Link to="/">Zur Übersicht</Link></p></section>;
   const inApp = signedIn && stored === "app"; // ohne Anmeldung nur die Brücke
@@ -128,6 +132,7 @@ function SessionTab({ way }: { way: WayProps }) {
 /** Themenwahl: alle Katalogthemen nach Prüfungsteil, Empfehlung aus dem Lehrplan */
 function Themenwahl({ way }: { way: WayProps }) {
   const { pro, inApp, signedIn, setWay } = way, signIn = useAccount((s) => s.signIn);
+  const examLabel = formatExamDate(useExamDay());
   const graphs = useGraphs(), plan = useLehrplan(), { busy, err, model, setModel, state, open: openApp, openBridge } = useTutor();
   const open = inApp ? openApp : openBridge;
   const rec = plan.empfehlung?.kind === "sitzung" ? plan.empfehlung : null;
@@ -140,8 +145,8 @@ function Themenwahl({ way }: { way: WayProps }) {
         <div className="row" style={{ gap: 10, flexWrap: "wrap" }}>
           <img className="vx-mark" src="/icons/vortex.svg" alt="" />
           <div style={{ flex: 1, minWidth: 220 }}><h2 style={{ margin: 0 }}>{pro && inApp ? "Tutor Pro" : "Tutor"}</h2><p className="small muted" style={{ margin: "4px 0 0" }}>{inApp
-            ? <>Wähle ein Thema – der Chat öffnet sich. Sobald du deine erste Nachricht schreibst, löchert dich der Tutor eine ganze Sitzung lang mit Aufgaben im IHK-Stil und bewertet wie ein Prüfer mit Teilpunkten.{pro ? "" : " Kostenlos, mit einem einfacheren Modell als Tutor Pro."} Prüfung am {EXAM_DE}.</>
-            : <>Dein Prüfungstutor für die TAP2 – mit deiner eigenen KI, kostenlos. Wähle ein Thema: Der Tutor stellt dir eine ganze Sitzung lang Aufgaben im IHK-Stil, bewertet wie ein Prüfer mit Teilpunkten, und dein Graph lernt mit. Prüfung am {EXAM_DE}.</>}</p></div>
+            ? <>Wähle ein Thema – der Chat öffnet sich. Sobald du deine erste Nachricht schreibst, löchert dich der Tutor eine ganze Sitzung lang mit Aufgaben im IHK-Stil und bewertet wie ein Prüfer mit Teilpunkten.{pro ? "" : " Kostenlos, mit einem einfacheren Modell als Tutor Pro."} Prüfung am {examLabel}.</>
+            : <>Dein Prüfungstutor für die TAP2 – mit deiner eigenen KI, kostenlos. Wähle ein Thema: Der Tutor stellt dir eine ganze Sitzung lang Aufgaben im IHK-Stil, bewertet wie ein Prüfer mit Teilpunkten, und dein Graph lernt mit. Prüfung am {examLabel}.</>}</p></div>
           {pro && inApp && <div className="segs" role="group" aria-label="Modell">{(["sonnet", "haiku"] as const).map((m) => <button key={m} type="button" className={`seg ${model === m ? "on" : ""}`} aria-pressed={model === m} onClick={() => setModel(m)}>{m === "sonnet" ? "Gründlich (Sonnet)" : "Schnell (Haiku)"}</button>)}</div>}
         </div>
         {rec && (

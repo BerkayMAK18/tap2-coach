@@ -1,6 +1,6 @@
 /** Runden zusammenstellen, „Als Nächstes“, Lernplan – Regeln der Live-App. */
 import { describe, expect, it } from "vitest";
-import { TOPICS, TP, allQ, topicQ } from "@/content/catalog";
+import { FISI, TOPICS, TP, allQ, topicQ } from "@/content/catalog";
 import { addDays, today } from "./dates";
 import { learnList, learnSel, learnSelOnly, nextRound, nextTopic, onlyList, perDay, qParts, selNames, situBlocks, startTab, tcolOf } from "./lernen";
 import { buildPlan, wdOf } from "./plan";
@@ -23,6 +23,14 @@ describe("Frage-Text", () => {
 });
 
 describe("Runden", () => {
+  it("stellt FISI-Fragen unter eigenen IDs zusammen", () => {
+    const p = learnList(blank(), "learn", "si-netzwerk", "fisi")!;
+    expect(p.title).toBe("Netzwerke & Adressierung");
+    expect(p.src).toEqual({ kind: "learn", tid: "si-netzwerk", area: "fisi" });
+    expect(p.list.length).toBeGreaterThan(0);
+    p.list.forEach((q) => expect(q.id.startsWith("fisi:")).toBe(true));
+    expect(startTab(blank(), "si-netzwerk", "fisi")).toBe("fragen");
+  });
   it("Thema lernen: höchstens 20, Titel = Themenname", () => {
     const p = learnList(blank(), "learn", "T01")!;
     expect(p.list.length).toBe(Math.min(ROUND, T01.length));
@@ -95,5 +103,11 @@ describe("Lernplan", () => {
   it("Mittwochs Operator-Trainer, nach der Prüfung leer", () => {
     expect(P.plan["2026-11-18"].some((x) => x.kind === "op")).toBe(true);
     expect(buildPlan(blank(), exam, exam).days).toEqual([]);
+  });
+  it("plant FISI-Fragen, ohne FIAE-Simulationen oder Operator-Übungen einzumischen", () => {
+    const P = buildPlan(blank(), from, exam, "fisi");
+    expect(P.total).toBe(FISI.questions.length);
+    expect(Object.values(P.plan).flat().every((item) => item.kind === "topic" || item.kind === "final")).toBe(true);
+    Object.values(P.plan).flat().forEach((item) => { if (item.kind === "topic") expect(item.tid.startsWith("si-")).toBe(true); });
   });
 });

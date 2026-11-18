@@ -4,10 +4,12 @@
  */
 import { useEffect } from "react";
 import { createFileRoute } from "@tanstack/react-router";
-import { EXAM_DAY, EXAM_DE } from "@/config";
 import { daysBetween, today } from "@/lib/dates";
+import { formatExamDate } from "@/lib/exam-date";
 import { KEY_TUT, codeCard, tutStats } from "@/lib/tipps";
 import { useProgress } from "@/store/progress";
+import { useLearningArea } from "@/store/learning-area";
+import { useExamDay } from "@/store/exam-date";
 import { Ic, pctS } from "@/ui-main";
 import { useStartRound } from "@/components/lernen/ui";
 import { usePlanActions } from "@/components/tipps/actions";
@@ -15,30 +17,32 @@ import { usePlanActions } from "@/components/tipps/actions";
 export const Route = createFileRoute("/tutorial")({ component: Tutorial });
 
 function Tutorial() {
-  const S = useProgress((s) => s.S), act = usePlanActions(), startRound = useStartRound();
+  const S = useProgress((s) => s.S), area = useLearningArea((s) => s.area), act = usePlanActions(), startRound = useStartRound();
+  const examDay = useExamDay(), examLabel = formatExamDate(examDay);
   useEffect(() => { try { localStorage.setItem(KEY_TUT, "1"); } catch { /* privat */ } }, []);
-  const left = Math.max(0, daysBetween(today(), EXAM_DAY)), { c, dueN, need, perDay } = tutStats(S, left);
+  const left = Math.max(0, daysBetween(today(), examDay)), { c, dueN, need, perDay } = tutStats(S, left, area);
   const tut = (k: string) => {
     if (k === "due") act.due();
-    else if (k === "code") { const q = codeCard(S); if (q) startRound({ list: [q], title: "Code-Karte", src: { kind: "code" } }); }
+    else if (k === "code") { const q = codeCard(S, area); if (q) startRound({ list: [q], title: "Code-Karte", src: { kind: "code" } }); }
     else act.go(k);
   };
   const B = ({ k, primary, children }: { k: string; primary?: boolean; children: React.ReactNode }) => <button type="button" className={`btn small${primary ? " primary" : ""}`} onClick={() => tut(k)}>{children}</button>;
-  const steps: [string, string, string, React.ReactNode][] = [
-    ["calendar", "Dem Lernplan folgen", "Der Lernplan verteilt alle offenen Fragen bis zum Vortag der Prüfung auf die Tage – Teil 1 zuerst. In der Übersicht steht immer, was heute dran ist.", <B k="plan" primary>Lernplan ansehen</B>],
+  const allSteps: [string, string, string, React.ReactNode][] = [
+    ["calendar", "Dem Lernplan folgen", area === "fiae" ? "Der Lernplan verteilt alle offenen Fragen bis zum Vortag der Prüfung auf die Tage – Teil 1 zuerst. In der Übersicht steht immer, was heute dran ist." : "Der Lernplan verteilt alle offenen FISI-Fragen bis zum Vortag der Prüfung auf die Tage. In der Übersicht steht immer, was heute dran ist.", <B k="plan" primary>Lernplan ansehen</B>],
     ["again", "Jeden Tag zuerst: fällige Wiederholungen", "10–15 Min. Fragen, die du schon kannst, kommen nach 1, 3, 7, 14 und 30 Tagen wieder. So bleibt das Wissen bis zur Prüfung frisch.", dueN ? <B k="due" primary>Fällige wiederholen ({dueN})</B> : <span className="small muted">Heute nichts fällig.</span>],
-    ["book", "Thema für Thema: erst Theorie, dann Fragen", "Unter Lernen ein Thema öffnen, die Theorie lesen (Lernzeit-Timer starten) und dann Lernrunden à 20 Fragen machen, bis die Ampel grün ist. Erst selbst antworten, dann Optionen bzw. Lösung ansehen. Bist du unsicher, sag es ehrlich – die Frage kommt dann morgen wieder. In jeder Runde stecken ein paar Wiederholungen aus anderen Themen.", <B k="lernen">Zu den Themen</B>],
-    ["layers", "Themen mischen", "Unter Lernen mehrere Themen anhaken und gemeinsam üben – zum Beispiel SQL und Datenmodell. Gemischt üben trainiert, Aufgaben zu erkennen, statt sie nur zu wiederholen.", <B k="lernen">Themen auswählen</B>],
+    ["book", "Thema für Thema lernen", area === "fiae" ? "Unter Lernen ein Thema öffnen, die Theorie lesen (Lernzeit-Timer starten) und dann Lernrunden à 20 Fragen machen, bis die Ampel grün ist. Erst selbst antworten, dann Optionen bzw. Lösung ansehen. Bist du unsicher, sag es ehrlich – die Frage kommt dann morgen wieder." : "Unter Lernen ein Thema wählen und die Fragen in kurzen Lernrunden üben. Erst selbst antworten, dann die Lösung ansehen. Bist du unsicher, sag es ehrlich – die Frage kommt dann morgen wieder.", <B k="lernen">Zu den Themen</B>],
+    ["layers", "Themen mischen", area === "fiae" ? "Unter Lernen mehrere Themen anhaken und gemeinsam üben – zum Beispiel SQL und Datenmodell. Gemischt üben trainiert, Aufgaben zu erkennen, statt sie nur zu wiederholen." : "Unter Lernen mehrere Systemintegrationsthemen anhaken und gemeinsam üben. Gemischt üben trainiert, Aufgaben zu erkennen, statt sie nur zu wiederholen.", <B k="lernen">Themen auswählen</B>],
     ["code", "Code schreiben, nicht nur lesen", "Bei Pseudocode- und SQL-Karten deine Lösung im Editor tippen, SQL mit Shift + Enter ausführen und mit der Musterlösung vergleichen.", <B k="code">Code-Karte üben</B>],
     ["pencil", "Große Aufgaben auf Papier, mit Timer", "Unter Aufgaben eine Aufgabe starten – der Timer läuft mit der Prüfungszeit. Auf Papier lösen, Stopp drücken, mit der Musterlösung vergleichen und Punkte eintragen.", <B k="aufgaben">Zu den Aufgaben</B>],
     ["bulb", "Operatoren beherrschen", "Der Operator bestimmt die Antworttiefe: „Nennen“ = Stichwort, „Erläutern“ = mit Begründung oder Beispiel, „Beurteilen“ = mit eigenem Urteil. Im Operator-Trainer übst du genau das.", <B k="operatoren">Operator-Trainer</B>],
     ["timer", "Einmal pro Woche: Prüfung simulieren", "Je Teil eine Real-Klausur (Teil 1, Teil 2) bzw. SoWi-Simulation unter Zeitdruck. Beim Bewerten jedem Punktverlust eine Ursache zuordnen – unter Tipps siehst du, woran es am häufigsten liegt.", <B k="pruefung">Zur Prüfung</B>],
-    ["bulb", "Letzte Woche: festigen statt neu lernen", "Nur noch fällige Wiederholungen, Fehlerfragen und Simulationen. Prüfungstechnik unter Tipps lesen. Am Tag vor der Prüfung nichts Neues mehr.", <B k="tipps">Zu den Tipps</B>],
+    ["bulb", "Letzte Woche: festigen statt neu lernen", area === "fiae" ? "Nur noch fällige Wiederholungen, Fehlerfragen und Simulationen. Prüfungstechnik unter Tipps lesen. Am Tag vor der Prüfung nichts Neues mehr." : "Nur noch fällige Wiederholungen und Fehlerfragen. Prüfungstechnik unter Tipps lesen. Am Tag vor der Prüfung nichts Neues mehr.", <B k="tipps">Zu den Tipps</B>],
   ];
+  const steps = area === "fiae" ? allSteps : allSteps.filter(([icon]) => !["code", "pencil", "timer"].includes(icon));
   return (
     <>
       <section className="card tut-plan">
-        <div className="row" style={{ alignItems: "flex-start" }}><img src="/icons/vortex.svg" alt="" className="tut-raven" /><div style={{ flex: 1, minWidth: 220 }}><h2>Dein Plan bis zum {EXAM_DE}</h2><p className="muted" style={{ marginTop: 6 }}>{left > 0 && <>Noch <b className="ink">{left} {left === 1 ? "Tag" : "Tage"}</b>. </>}{need ? <>Beantworte jeden Tag etwa <b className="ink">{perDay} Fragen</b>{dueN ? " plus die fälligen Wiederholungen" : ""}, dann ist bis zum Vortag alles grün.</> : "Alle Fragen sind grün – jetzt geht es ums Festigen."} Aktuell: {pctS(c.pct)} prüfungsreif.</p></div></div>
+        <div className="row" style={{ alignItems: "flex-start" }}><img src="/icons/vortex.svg" alt="" className="tut-raven" /><div style={{ flex: 1, minWidth: 220 }}><h2>Dein Plan bis zum {examLabel}</h2><p className="muted" style={{ marginTop: 6 }}>{left > 0 && <>Noch <b className="ink">{left} {left === 1 ? "Tag" : "Tage"}</b>. </>}{need ? <>Beantworte jeden Tag etwa <b className="ink">{perDay} Fragen</b>{dueN ? " plus die fälligen Wiederholungen" : ""}, dann ist bis zum Vortag alles grün.</> : "Alle Fragen sind grün – jetzt geht es ums Festigen."} Aktuell: {pctS(c.pct)} prüfungsreif.</p></div></div>
       </section>
       <section className="sec"><div className="sec-head"><h2>Der Lernpfad</h2></div>
         <ol className="tut-steps">{steps.map(([i, h, t, a], n) => <li key={n}><span className="ts-n">{n + 1}</span><div className="ts-b"><b><Ic name={i} cls="ic sm" /> {h}</b><p className="small muted">{t}</p><div className="row">{a}</div></div></li>)}</ol>
@@ -47,8 +51,8 @@ function Tutorial() {
         <div className="cheat">
           <div className="card"><h4><Ic name="home" cls="ic sm" /> Übersicht</h4><p className="small muted">Prüfungsreife, Stand je Teil, Lernempfehlung, „Gezielt üben“ (fällig, Fehler, neu, markiert, Zufall).</p></div>
           <div className="card"><h4><Ic name="book" cls="ic sm" /> Lernen</h4><p className="small muted">Themen mit Theorie und Fragen. Mehrere Themen anhaken = gemeinsame Lernrunde. Eigene Fragen anlegen.</p></div>
-          <div className="card"><h4><Ic name="pencil" cls="ic sm" /> Aufgaben</h4><p className="small muted">Große Aufgaben im Prüfungsstil mit Timer, Musterlösung und Punkteeintrag.</p></div>
-          <div className="card"><h4><Ic name="timer" cls="ic sm" /> Prüfung</h4><p className="small muted">Simulation (30 Auswahlfragen) und Real-Klausur (4 offene Aufgaben, 90 Min.) mit Note.</p></div>
+          <div className="card"><h4><Ic name="pencil" cls="ic sm" /> Aufgaben</h4><p className="small muted">{area === "fiae" ? "Große Aufgaben im Prüfungsstil mit Timer, Musterlösung und Punkteeintrag." : "Eigenständige FISI-Übungsaufgaben werden ergänzt. Die verfügbaren Fragen findest du unter Lernen."}</p></div>
+          <div className="card"><h4><Ic name="timer" cls="ic sm" /> Prüfung</h4><p className="small muted">{area === "fiae" ? "Simulation (30 Auswahlfragen) und Real-Klausur (4 offene Aufgaben, 90 Min.) mit Note." : "Eine FISI-Prüfungssimulation ist noch nicht hinterlegt."}</p></div>
           <div className="card"><h4><Ic name="bulb" cls="ic sm" /> Tipps</h4><p className="small muted">Prüfungstechnik, Operatoren, typische Punktverluste und deine schwächsten Themen.</p></div>
           <div className="card"><h4><Ic name="gear" cls="ic sm" /> Einstellungen</h4><p className="small muted">Hell/Dunkel, App installieren, Sicherung speichern/laden, Fortschritt zurücksetzen.</p></div>
         </div>

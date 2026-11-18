@@ -5,11 +5,12 @@
  */
 import { useEffect, useMemo, useRef } from "react";
 import { useNavigate } from "@tanstack/react-router";
-import { TAP2, TOPICS, TP, allQ } from "@/content/catalog";
+import { allQ, catalogFor, topicMapFor } from "@/content/catalog";
 import { ST_LBL, clip, qTask } from "@/lib/lernen";
 import { buildIndex, hl, qSnippet, search, snippet, tooShort } from "@/lib/search";
 import { st } from "@/lib/srs";
 import { useProgress } from "@/store/progress";
+import { useLearningArea } from "@/store/learning-area";
 import { Ic } from "@/ui-main";
 import { Amp, Segs } from "./bits";
 import { useLernenUI, useOpenTopic, useStartRound } from "./ui";
@@ -22,9 +23,10 @@ export function Suche() {
 
 function SearchDialog() {
   const raw = useLernenUI((s) => s.srchQ), S = useProgress((s) => s.S);
+  const area = useLearningArea((s) => s.area), catalog = catalogFor(area), TP = topicMapFor(area);
   const navigate = useNavigate(), startRound = useStartRound(), openTopic = useOpenTopic();
   const inp = useRef<HTMLInputElement>(null), res = useRef<HTMLDivElement>(null), dlg = useRef<HTMLDivElement>(null);
-  const idx = useMemo(() => buildIndex(allQ(useProgress.getState().S), TAP2.ueb, TOPICS, TAP2.pakete), []); // beim Öffnen gebaut (srchIndex())
+  const idx = useMemo(() => buildIndex(allQ(useProgress.getState().S, area), catalog.ueb, catalog.topics, catalog.pakete), [area, catalog]);
   const short = tooShort(raw), r = short ? null : search(idx, raw);
   const close = () => {
     useLernenUI.setState({ srchOpen: false });

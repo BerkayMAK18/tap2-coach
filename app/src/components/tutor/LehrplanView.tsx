@@ -2,13 +2,15 @@
  * Tab „Lehrplan“ unter Tutor: deterministisch aus Konzept-Graph, Prüfungsdatum, Muss-Themen und Fehlvorstellungen
  * (lib/lehrplan.ts). Passt sich nach jeder Sitzung an. „Öffnen“ öffnet den Chat zu Thema und Fokus des Eintrags (die KI startet mit der ersten Nachricht).
  */
-import { EXAM_DE } from "@/config";
 import { fmtDay, today } from "@/lib/dates";
+import { formatExamDate } from "@/lib/exam-date";
 import type { Lehrplan, PlanItem } from "@/lib/lehrplan";
+import { useExamDay } from "@/store/exam-date";
 import { Ic } from "@/ui-main";
 import { pc, tn } from "./shared";
 
 export function LehrplanView({ plan, onStart, busy }: { plan: Lehrplan; onStart: (tid: string, fokus: string[]) => void; busy: boolean }) {
+  const examLabel = formatExamDate(useExamDay());
   const max = Math.max(1, ...plan.ranking.map((r) => r.bedarf));
   const item = (it: PlanItem, k: number, isToday: boolean) => it.kind === "wiederholung" ? (
     <li key={k} className="tp-pi rep"><Ic name="again" cls="ic xs" /><div><b className="small">Wiederholung</b><p className="tiny muted">{it.grund}</p><p className="tiny">{it.topics.map(tn).join(" · ")}</p></div></li>
@@ -26,7 +28,7 @@ export function LehrplanView({ plan, onStart, busy }: { plan: Lehrplan; onStart:
   return (
     <div className="tp-plan">
       <section className="card">
-        <div className="row"><h3 style={{ margin: 0 }}>Dein Lehrplan bis zur Prüfung</h3><span className="spacer" /><span className="chip blue">{plan.tage > 0 ? `noch ${plan.tage} ${plan.tage === 1 ? "Tag" : "Tage"} · ${EXAM_DE}` : "Prüfung vorbei"}</span></div>
+        <div className="row"><h3 style={{ margin: 0 }}>Dein Lehrplan bis zur Prüfung</h3><span className="spacer" /><span className="chip blue">{plan.tage > 0 ? `noch ${plan.tage} ${plan.tage === 1 ? "Tag" : "Tage"} · ${examLabel}` : "Prüfung vorbei"}</span></div>
         <p className="small muted" style={{ marginBottom: 0 }}>Berechnet aus deinem Stand je Konzept (Tutor-Sitzungen und Lernrunden), Muss-Themen und offenen Fehlvorstellungen – nicht von der KI. Nach jeder Sitzung rechnet er sich neu.</p>
       </section>
       <div className="tp-plan-grid">

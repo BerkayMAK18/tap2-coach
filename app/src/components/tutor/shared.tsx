@@ -4,8 +4,8 @@
  */
 import { useMemo } from "react";
 import { TAP2, TOPICS, TP, allQ } from "@/content/catalog";
-import { EXAM_DAY } from "@/config";
 import { daysBetween, fmtDay, iso, today } from "@/lib/dates";
+import { getExamDay, useExamDay } from "@/store/exam-date";
 import { buildConceptGraph, type ConceptGraph, type Level } from "@/lib/graph";
 import { buildLehrplan, type Lehrplan } from "@/lib/lehrplan";
 import { handoff } from "@/lib/tutor-session";
@@ -39,11 +39,12 @@ export function useGraphs() {
 /** Lehrplan aus Graph, Prüfungsdatum, Muss-Themen und Fehlvorstellungen (passt sich nach jeder Sitzung an) */
 export function useLehrplan(): Lehrplan {
   const graphs = useGraphs(), state = useTutor((s) => s.state);
+  const examDay = useExamDay();
   return useMemo(() => {
     const last = new Map<string, number>();
     Object.values(state.sess).forEach((x) => last.set(x.t, Math.max(last.get(x.t) ?? 0, x.end ?? x.start)));
-    return buildLehrplan(TOPICS.map((t) => ({ id: t.id, name: t.n, muss: t.prio === "Muss", g: graphs.get(t.id)!, ...(last.has(t.id) ? { lastSession: last.get(t.id)! } : {}) })), today(), EXAM_DAY, Date.now());
-  }, [graphs, state]);
+    return buildLehrplan(TOPICS.map((t) => ({ id: t.id, name: t.n, muss: t.prio === "Muss", g: graphs.get(t.id)!, ...(last.has(t.id) ? { lastSession: last.get(t.id)! } : {}) })), today(), examDay, Date.now());
+  }, [graphs, state, examDay]);
 }
 
 /** Übergabe für eine neue Sitzung zu einem Thema */
@@ -52,7 +53,7 @@ export function makeHandoff(tid: string, S: State, state: TutorState, g: Concept
   const errors = allQ(S).filter((q) => q.topic === tid && (S.q[q.id]?.w ?? 0) > 0 && st(S, q.id) !== 2).sort((a, b) => (S.q[b.id]?.w ?? 0) - (S.q[a.id]?.w ?? 0)).slice(0, 5).map((q) => q.q);
   const lastTxt = (c: ConceptGraph["concepts"][number]) => (c.last ? `${c.last.art}${c.last.n ? " – " + c.last.n : ""}`.slice(0, 120) : undefined);
   return handoff({
-    date: fmtDay(today()), examDays: Math.max(0, daysBetween(today(), EXAM_DAY)),
+    date: fmtDay(today()), examDays: Math.max(0, daysBetween(today(), getExamDay())),
     topic: { id: tid, name: t?.n ?? tid, muss: t?.prio === "Muss" },
     concepts: g.concepts.map((c) => ({ id: c.id, label: c.label, m: c.m, n: c.n, ...(lastTxt(c) ? { last: lastTxt(c) } : {}) })),
     miscon: Object.values(state.fv).filter((f) => f.t === tid && fvActive(f)).map((f) => ({ id: f.id, ...(f.k ? { konzept: f.k } : {}), text: f.text, count: Math.max(1, fvCount(state, f.id)) })),

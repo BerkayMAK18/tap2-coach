@@ -8,8 +8,7 @@
 import { useEffect } from "react";
 import { Link, Outlet, createRootRoute, redirect, useLocation, useNavigate } from "@tanstack/react-router";
 import { useRegisterSW } from "virtual:pwa-register/react";
-import { allQ } from "@/content/catalog";
-import { EXAM_DAY } from "@/config";
+import { allQ, type LearningArea } from "@/content/catalog";
 import { daysBetween, today } from "@/lib/dates";
 import { counts } from "@/lib/srs";
 import { EVENTS } from "@/content/catalog";
@@ -25,6 +24,8 @@ import { ConfirmHost } from "@/ui-main/confirm";
 /** Menüpunkt Tutor (KI-Tutor, nicht in der Live-App, daher nicht in der generierten nav.ts) */
 const TUTOR_NAV = { view: "tutor", label: "Tutor", svg: '<path d="M12 12.2c.9-.5 1.9.2 1.8 1.2-.2 1.5-2 2.2-3.3 1.6-1.8-.8-2.3-3.1-1.4-4.7 1.2-2.1 4.1-2.6 6-1.3 2.4 1.6 2.8 5 1.2 7.3-2 2.8-6 3.2-8.7 1.2C4.6 15.2 4.2 10.4 6.6 7.3 9.4 3.7 15 3.3 18.4 6.2"/>' }; // Wirbel (wie das Vortex-Logo)
 import { useProgress } from "@/store/progress";
+import { useLearningArea } from "@/store/learning-area";
+import { useExamDay } from "@/store/exam-date";
 import { useLiveSync } from "@/store/livesync";
 import { isAdmin, useAccount } from "@/store/account";
 import { usePruefung } from "@/store/pruefung";
@@ -59,6 +60,8 @@ let booted = false;
 const BOOT_HASH = typeof window !== "undefined" ? window.location.hash.slice(1) : "";
 function Shell() {
   const S = useProgress((s) => s.S), sess = useProgress((s) => s.sess), run = usePruefung((s) => s.run);
+  const area = useLearningArea((s) => s.area), setArea = useLearningArea((s) => s.setArea);
+  const examDay = useExamDay();
   const loc = useLocation(), navigate = useNavigate();
   useGami((t) => t.n);
   const view = viewOf(loc.pathname);
@@ -67,7 +70,8 @@ function Shell() {
   useSearchHotkey();
   useEffect(() => { document.title = `${VTITLE[view] ?? (view === "tutor" ? "Tutor" : "Vortex")} · Vortex`; }, [view]);
 
-  const c = counts(S, allQ(S)), left = daysBetween(today(), EXAM_DAY);
+  const c = counts(S, allQ(S, area)), left = daysBetween(today(), examDay);
+  const areaLocked = !!sess || !!run;
   const tutorOn = useAccount((s) => isAdmin(s.user)); // Menüpunkt Tutor nur fürs Admin-Konto
   const navView = view === "operatoren" || view === "plan" ? "tipps" : view === "lernen" && sess?.src?.ev ? "events" : view; // Event-Runde: Menüpunkt Events
   const focus = loc.pathname.startsWith("/lernen/runde") || (view === "pruefung" && !!run && run.phase === "write"); // Fokus wie die Live-App: Lernrunde, Prüfung beim Schreiben
@@ -83,14 +87,17 @@ function Shell() {
     <div className="app" onClick={go}>
       <nav className="side" aria-label="Hauptnavigation">
         <div className="brand"><img className="brand-mark" src="/icons/vortex.svg" alt="" /><div className="brand-t">Vortex</div></div>
-        {NAV_MAIN.map((n) => <NavBtn key={n.view} n={n} current={navView === n.view} />)}
+        {NAV_MAIN.filter((n) => area === "fiae" || n.view !== "events").map((n) => <NavBtn key={n.view} n={n} current={navView === n.view} />)}
         {/* Tutor vorerst nur für das freigeschaltete Konto (Claude) – für alle anderen unsichtbar */}
-        {tutorOn && <NavBtn n={TUTOR_NAV} current={navView === "tutor"} />}
+        {tutorOn && area === "fiae" && <NavBtn n={TUTOR_NAV} current={navView === "tutor"} />}
         <div className="side-foot">{NAV_FOOT.map((n) => <NavBtn key={n.view} n={n} current={navView === n.view} />)}</div>
       </nav>
       <div className="col">
         <header className="top" id="topbar">
-          <div className="top-l"><h1 id="page-title">{VTITLE[view] ?? (view === "tutor" ? "Tutor" : "Vortex")}</h1></div>
+          <div className="top-l"><h1 id="page-title">{VTITLE[view] ?? (view === "tutor" ? "Tutor" : "Vortex")}</h1><div className="segs area-switch" role="group" aria-label="Lernbereich">
+            <button type="button" className={`seg ${area === "fiae" ? "on" : ""}`} aria-pressed={area === "fiae"} disabled={areaLocked} title={areaLocked ? "Beende zuerst die laufende Runde oder Prüfung" : "Fachinformatik Anwendungsentwicklung"} onClick={() => setArea("fiae")}>FIAE</button>
+            <button type="button" className={`seg ${area === "fisi" ? "on" : ""}`} aria-pressed={area === "fisi"} disabled={areaLocked} title={areaLocked ? "Beende zuerst die laufende Runde oder Prüfung" : "Fachinformatik Systemintegration"} onClick={() => setArea("fisi")}>FISI</button>
+          </div></div>
           <div className="hud" id="hud">
             <button type="button" className="pill" data-go="start" title="Anteil der Fragen auf Grün, gelbe zählen halb"><Ring frac={c.pct} size={22} sw={4} /><span className="lbl">Prüfungsreife</span><b>{pctS(c.pct)}</b></button>
             <span className="pill days"><Ic name="calendar" /><b>{Math.max(0, left)}</b><span className="lbl">{left === 1 ? "Tag" : "Tage"}</span></span>

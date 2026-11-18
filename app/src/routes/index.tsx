@@ -4,12 +4,14 @@
  */
 import { useRef } from "react";
 import { createFileRoute } from "@tanstack/react-router";
-import { TOPICS, allQ, inTeil, topicQ } from "@/content/catalog";
-import { EXAM_DAY, EXAM_DE } from "@/config";
+import { allQ, inTeil, topicQ, topicsFor } from "@/content/catalog";
 import { daysBetween, today } from "@/lib/dates";
+import { formatExamDate } from "@/lib/exam-date";
 import { learnList, nextTopic, perDay, tcolOf, type Kind } from "@/lib/lernen";
 import { counts, isDue, reifeLabel } from "@/lib/srs";
 import { useProgress } from "@/store/progress";
+import { useLearningArea } from "@/store/learning-area";
+import { useExamDay } from "@/store/exam-date";
 import { Ic, Ring, pctS } from "@/ui-main";
 import { AmpBar, Legend, TodayPlan, type PlanActions } from "@/components/lernen/bits";
 import { useAnimRings, useStartRound } from "@/components/lernen/ui";
@@ -22,21 +24,23 @@ const TEIL_K = { t1: "Planen", t2: "Algorithmen", wiso: "SoWi" };
 
 function Start() {
   const S = useProgress((s) => s.S);
+  const area = useLearningArea((s) => s.area), topics = topicsFor(area);
+  const examDay = useExamDay(), examLabel = formatExamDate(examDay);
   const startRound = useStartRound(), ref = useRef<HTMLElement>(null);
   useAnimRings(ref, []);
-  const all = allQ(S), c = counts(S, all), daysLeft = daysBetween(today(), EXAM_DAY), left = Math.max(0, daysLeft);
-  const pd = perDay(S, left), todayN = S.log[today()] || 0;
-  const nt = nextTopic(S), ntc = counts(S, topicQ(S, nt.id));
-  const parts = PARTS.map((p) => { const tids = TOPICS.filter((t) => inTeil(t, p)).map((t) => t.id); return { p, c: counts(S, all.filter((q) => tids.includes(q.topic))) }; });
+  const all = allQ(S, area), c = counts(S, all), daysLeft = daysBetween(today(), examDay), left = Math.max(0, daysLeft);
+  const pd = perDay(S, left, area), todayN = S.log[today()] || 0;
+  const nt = nextTopic(S, area), ntc = counts(S, topicQ(S, nt.id, area));
+  const parts = PARTS.map((p) => { const tids = topics.filter((t) => inTeil(t, p)).map((t) => t.id); return { p, c: counts(S, all.filter((q) => tids.includes(q.topic))) }; });
   const errN = c.r, markN = all.filter((q) => S.mark[q.id]).length, dueN = all.filter((q) => isDue(S, q.id)).length;
-  const kind = (k: Kind) => startRound(learnList(S, k));
+  const kind = (k: Kind) => startRound(learnList(S, k, undefined, area));
   const act: PlanActions = usePlanActions(), go = act.go; // Lernplan-Knöpfe wie bindPlan() der Live-App
 
   return (
     <>
       <section className="hero grad" ref={ref}>
         <div>
-          <div className="eyebrow"><Ic name="calendar" cls="ic sm" />{daysLeft > 0 ? `Noch ${daysLeft} ${daysLeft === 1 ? "Tag" : "Tage"} bis zur TAP2 am ${EXAM_DE}` : `TAP2 am ${EXAM_DE}`}</div>
+          <div className="eyebrow"><Ic name="calendar" cls="ic sm" />{daysLeft > 0 ? `Noch ${daysLeft} ${daysLeft === 1 ? "Tag" : "Tage"} bis zur ${area === "fisi" ? "FISI-Prüfung" : "TAP2"} am ${examLabel}` : `${area === "fisi" ? "FISI-Prüfung" : "TAP2"} am ${examLabel}`}</div>
           <h2>{reifeLabel(c.pct)}</h2>
           <p className="mot">{c.t - c.g} von {c.t} Fragen sind noch nicht grün. Eine Frage wird grün, wenn du sie zweimal hintereinander richtig beantwortest. Danach kommt sie nach 3, 7, 14 und 30 Tagen zur Wiederholung.</p>
           <AmpBar c={c} cls="lg" /><Legend c={c} />
@@ -46,7 +50,7 @@ function Start() {
         <div className="hero-side"><Ring frac={c.pct} size={150} sw={12} cls="anim" inner={<>{Math.round(c.pct * 100)}<small>% prüfungsreif</small></>} /></div>
       </section>
       <div className="parts">
-        {parts.map(({ p, c: pc }) => (
+        {area === "fiae" ? parts.map(({ p, c: pc }) => (
           <section key={p} className={`card part t-${tcolOf(p)}`}>
             <div className="row">
               <Ring frac={pc.pct} size={58} sw={6} cls="anim" inner={<span className="tiny">{Math.round(pc.pct * 100)}%</span>} />
@@ -55,15 +59,22 @@ function Start() {
             <AmpBar c={pc} />
             <div className="row">
               <span className="tiny muted">{pc.g} von {pc.t} grün</span><span className="spacer" />
-              <button type="button" className="btn small" title={`Gemischte Runde aus allen Themen: ${TOPICS.filter((x) => inTeil(x, p)).map((x) => x.n).join(", ")}`} onClick={() => startRound(learnList(S, "part", p))}><Ic name="play" cls="ic xs" /> {p === "wiso" ? "SoWi" : p === "t1" ? "Teil 1" : "Teil 2"} gemischt</button>
+              <button type="button" className="btn small" title={`Gemischte Runde aus allen Themen: ${topics.filter((x) => inTeil(x, p)).map((x) => x.n).join(", ")}`} onClick={() => startRound(learnList(S, "part", p, area))}><Ic name="play" cls="ic xs" /> {p === "wiso" ? "SoWi" : p === "t1" ? "Teil 1" : "Teil 2"} gemischt</button>
             </div>
           </section>
-        ))}
+        )) : topics.map((topic) => {
+          const tc = counts(S, topicQ(S, topic.id, area));
+          return <section key={topic.id} className={`card part t-${tcolOf(topic.teil)}`}>
+            <div className="row"><Ring frac={tc.pct} size={58} sw={6} cls="anim" inner={<span className="tiny">{Math.round(tc.pct * 100)}%</span>} /><div style={{ flex: 1, minWidth: 0 }}><span className="tiny muted">{topic.teil} · {tc.t} Fragen</span><h3>{topic.n}</h3></div></div>
+            <AmpBar c={tc} />
+            <div className="row"><span className="tiny muted">{tc.open} offen</span><span className="spacer" /><button type="button" className="btn small" onClick={() => startRound(learnList(S, "learn", topic.id, area))}><Ic name="play" cls="ic xs" /> Lernen</button></div>
+          </section>;
+        })}
       </div>
       <div className="grid2">
         <section className="card">
           <div className="row"><h3>Heute laut Lernplan</h3><span className="spacer" /><button type="button" className="linkbtn" onClick={() => go("plan")}>Ganzer Plan</button></div>
-          <TodayPlan act={act} />
+          <TodayPlan act={act} area={area} />
           <div className="today"><span>Heute beantwortet</span><b className="num">{todayN}{pd ? ` von ${pd}` : ""}</b></div>
           <div className="bar"><i style={{ width: `${pd ? Math.min(100, (todayN / pd) * 100) : 100}%` }} /></div>
         </section>

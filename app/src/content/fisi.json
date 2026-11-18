@@ -73,192 +73,204 @@
       "type": "mc",
       "topic": "si-netzwerk",
       "q": "Ein Client erhält automatisch eine IPv4-Adresse, kann aber keine Namen wie intranet.example auflösen. Welcher Dienst ist als Erstes zu prüfen?",
-      "opts": ["DNS", "NTP", "SNMP", "SSH"],
-      "right": 0,
+      "opts": ["NTP", "SNMP", "DNS", "DHCP-Relay"],
+      "right": 2,
       "why": "Die Namensauflösung übernimmt DNS. Eine funktionierende IP-Verbindung schließt einen Fehler dieses Dienstes nicht aus."
     },
     {
       "id": "fisi:card:netzwerk-02",
       "type": "card",
       "topic": "si-netzwerk",
-      "q": "Worin unterscheiden sich ein Switch und ein Router grundsätzlich?",
-      "a": "Ein Switch verbindet Geräte innerhalb eines lokalen Netzes und leitet Frames anhand von MAC-Adressen weiter. Ein Router verbindet IP-Netze und leitet Pakete anhand von IP-Routen weiter."
+      "q": "Unterscheiden Sie Switch und Router. (2 P.)",
+      "a": "• Ein Switch verbindet Geräte innerhalb eines lokalen Netzes und leitet Frames anhand von MAC-Adressen weiter.\n• Ein Router verbindet IP-Netze und leitet Pakete anhand von IP-Routen weiter.",
+      "note": "Erwartungshorizont: 2 P., je zutreffendem Aspekt 1 P. Operator „Unterscheiden“: Unterschiede klar benennen."
     },
     {
       "id": "fisi:mc:netzwerk-03",
       "type": "mc",
       "topic": "si-netzwerk",
       "q": "Wozu wird ein VLAN typischerweise eingesetzt?",
-      "opts": ["Ein lokales Netz logisch in getrennte Broadcast-Domänen aufzuteilen", "IP-Adressen automatisch zu vergeben", "Datenverkehr grundsätzlich zu verschlüsseln", "Dateien zwischen Servern zu replizieren"],
-      "right": 0,
+      "opts": ["Den Verkehr zwischen zwei Standorten per Tunnel zu verschlüsseln", "Ein lokales Netz logisch in getrennte Broadcast-Domänen aufzuteilen", "Mehrere Switchports zu einem logischen Link mit mehr Bandbreite zu bündeln", "Private IP-Adressen beim Internetzugriff auf eine öffentliche Adresse umzusetzen"],
+      "right": 1,
       "why": "VLANs segmentieren ein Layer-2-Netz logisch. Sie ersetzen weder Verschlüsselung noch DHCP."
     },
     {
       "id": "fisi:card:netzwerk-04",
       "type": "card",
       "topic": "si-netzwerk",
-      "q": "Was sagt die Präfixlänge /24 bei einer IPv4-Adresse aus?",
-      "a": "Die ersten 24 Bits bilden den Netzanteil. Die Subnetzmaske lautet 255.255.255.0; die verbleibenden 8 Bits bilden den Hostanteil."
+      "q": "Erläutern Sie, was die Präfixlänge /24 bei einer IPv4-Adresse aussagt. (3 P.)",
+      "a": "• Die ersten 24 Bits bilden den Netzanteil.\n• Die Subnetzmaske lautet 255.255.255.0.\n• Die verbleibenden 8 Bits bilden den Hostanteil.",
+      "note": "Erwartungshorizont: 3 P., je zutreffendem Aspekt 1 P. Operator „Erläutern“: mit Begründung oder Beispiel."
     },
     {
       "id": "fisi:mc:netzwerk-05",
       "type": "mc",
       "topic": "si-netzwerk",
       "q": "Welcher Dienst verteilt in einem typischen Clientnetz dynamisch IP-Konfigurationen?",
-      "opts": ["DHCP", "DNS", "LDAP", "SMTP"],
-      "right": 0,
+      "opts": ["DNS", "RADIUS", "LDAP", "DHCP"],
+      "right": 3,
       "why": "DHCP kann IP-Adresse, Netzmaske, Standardgateway und weitere Netzparameter bereitstellen."
     },
     {
       "id": "fisi:card:netzwerk-06",
       "type": "card",
       "topic": "si-netzwerk",
-      "q": "Wozu dient das Standardgateway eines Hosts?",
-      "a": "Es ist der nächste Router, an den der Host Pakete für Ziele außerhalb des eigenen lokalen Subnetzes sendet."
+      "q": "Erläutern Sie die Aufgabe des Standardgateways eines Hosts. (2 P.)",
+      "a": "• Es ist der nächste Router des Hosts.\n• An ihn sendet der Host Pakete für Ziele außerhalb des eigenen lokalen Subnetzes.",
+      "note": "Erwartungshorizont: 2 P., je zutreffendem Aspekt 1 P. Operator „Erläutern“: mit Begründung oder Beispiel."
     },
     {
       "id": "fisi:mc:systeme-01",
       "type": "mc",
       "topic": "si-systeme",
       "q": "Welchen Vorteil bietet eine virtuelle Maschine gegenüber einem eigenen physischen Server?",
-      "opts": ["Mehrere isolierte Systeme können Hardware gemeinsam nutzen", "Sie benötigt grundsätzlich kein Betriebssystem", "Sie verhindert automatisch jeden Schadsoftwarebefall", "Sie macht Sicherungen überflüssig"],
-      "right": 0,
+      "opts": ["Ausfälle des physischen Hosts betreffen die Gastsysteme grundsätzlich nicht", "Jedes Gastsystem erreicht dauerhaft die volle Leistung des Hosts, unabhängig von anderen Gästen", "Mehrere isolierte Systeme können Hardware gemeinsam nutzen", "Patches für das Gastbetriebssystem entfallen, weil der Hypervisor sie übernimmt"],
+      "right": 2,
       "why": "Virtualisierung ermöglicht die konsolidierte Nutzung von Hardware und kann Systeme logisch voneinander trennen. Sie ersetzt weder Betriebssysteme noch Schutzmaßnahmen."
     },
     {
       "id": "fisi:card:systeme-02",
       "type": "card",
       "topic": "si-systeme",
-      "q": "Was ist der wesentliche Unterschied zwischen einem Container und einer virtuellen Maschine?",
-      "a": "Eine virtuelle Maschine virtualisiert typischerweise ein vollständiges Gastbetriebssystem. Container teilen sich den Kernel des Hostsystems und isolieren vor allem Prozesse und Ressourcen."
+      "q": "Unterscheiden Sie Container und virtuelle Maschine. (2 P.)",
+      "a": "• Eine virtuelle Maschine virtualisiert typischerweise ein vollständiges Gastbetriebssystem.\n• Container teilen sich den Kernel des Hostsystems und isolieren vor allem Prozesse und Ressourcen.",
+      "note": "Erwartungshorizont: 2 P., je zutreffendem Aspekt 1 P. Operator „Unterscheiden“: Unterschiede klar benennen."
     },
     {
       "id": "fisi:mc:systeme-03",
       "type": "mc",
       "topic": "si-systeme",
       "q": "Ein Linux-Dienst soll nach einem Neustart automatisch starten. Was ist zu konfigurieren?",
-      "opts": ["Den Dienst im Init-/Service-Manager für den Systemstart aktivieren", "Die DNS-Zone des Servers ändern", "Die MAC-Adresse des Clients eintragen", "Den Swap-Bereich formatieren"],
-      "right": 0,
+      "opts": ["Den Dienst einmalig manuell starten und die Sitzung offen lassen", "Den Dienst im Init-/Service-Manager für den Systemstart aktivieren", "Das Dienstkonto in die Gruppe der lokalen Administratoren aufnehmen", "Die Konfigurationsdatei des Dienstes schreibgeschützt setzen"],
+      "right": 1,
       "why": "Der Service-Manager steuert, welche Dienste beim Systemstart aktiviert werden."
     },
     {
       "id": "fisi:card:systeme-04",
       "type": "card",
       "topic": "si-systeme",
-      "q": "Warum sollten Benutzer und Dienste nach dem Minimalprinzip nur notwendige Berechtigungen erhalten?",
-      "a": "Ein kompromittiertes Konto oder ein fehlerhafter Dienst kann dann nur auf die unbedingt erforderlichen Ressourcen zugreifen. Das begrenzt mögliche Schäden."
+      "q": "Begründen Sie, warum Benutzer und Dienste nach dem Minimalprinzip nur notwendige Berechtigungen erhalten sollten. (2 P.)",
+      "a": "• Ein kompromittiertes Konto oder ein fehlerhafter Dienst kann nur auf die unbedingt erforderlichen Ressourcen zugreifen.\n• Das begrenzt mögliche Schäden.",
+      "note": "Erwartungshorizont: 2 P., je zutreffendem Aspekt 1 P. Operator „Begründen“: mit nachvollziehbarer Begründung."
     },
     {
       "id": "fisi:mc:systeme-05",
       "type": "mc",
       "topic": "si-systeme",
       "q": "Welche Maßnahme hilft, eine versehentlich gelöschte Datei auf einem Server wiederherzustellen?",
-      "opts": ["Eine getestete und aktuelle Sicherung zurückspielen", "Den DNS-Cache leeren", "Die CPU-Auslastung begrenzen", "Die Netzmaske verkürzen"],
-      "right": 0,
+      "opts": ["Einen nach dem Löschen erstellten Snapshot der VM zurücksetzen", "Das Dateisystem mit fsck beziehungsweise chkdsk prüfen lassen", "Die Berechtigungen des Ordners auf Vollzugriff für alle ändern", "Eine getestete und aktuelle Sicherung zurückspielen"],
+      "right": 3,
       "why": "Eine geeignete Sicherung ermöglicht die Wiederherstellung. Dafür müssen Sicherungsumfang und Rücksicherung regelmäßig geprüft werden."
     },
     {
       "id": "fisi:card:systeme-06",
       "type": "card",
       "topic": "si-systeme",
-      "q": "Weshalb sollte eine Wiederherstellung aus einer Sicherung regelmäßig getestet werden?",
-      "a": "Nur ein Rücksicherungstest zeigt, ob Daten vollständig, lesbar und innerhalb der benötigten Zeit wiederherstellbar sind. Ein erfolgreicher Sicherungslauf allein belegt das nicht."
+      "q": "Begründen Sie, warum eine Wiederherstellung aus einer Sicherung regelmäßig getestet werden sollte. (2 P.)",
+      "a": "• Nur ein Rücksicherungstest zeigt, ob Daten vollständig, lesbar und innerhalb der benötigten Zeit wiederherstellbar sind.\n• Ein erfolgreicher Sicherungslauf allein belegt das nicht.",
+      "note": "Erwartungshorizont: 2 P., je zutreffendem Aspekt 1 P. Operator „Begründen“: mit nachvollziehbarer Begründung."
     },
     {
       "id": "fisi:mc:sicherheit-01",
       "type": "mc",
       "topic": "si-sicherheit",
       "q": "Was erhöht die Kontosicherheit zusätzlich zu einem starken Passwort?",
-      "opts": ["Ein zweiter unabhängiger Faktor bei der Anmeldung", "Dasselbe Passwort auf allen Diensten", "Ein gemeinsames Administratorkonto", "Das Abschalten der Protokollierung"],
-      "right": 0,
+      "opts": ["Eine zweite Sicherheitsfrage, deren Antwort aus sozialen Netzwerken ableitbar ist", "Ein monatlich wechselndes Passwort mit gleichem Aufbau", "Ein zweiter unabhängiger Faktor bei der Anmeldung", "Ein Passwort mit mindestens 20 Zeichen für alle Dienste"],
+      "right": 2,
       "why": "Mehr-Faktor-Authentifizierung verlangt neben dem Wissen des Passworts einen weiteren Faktor."
     },
     {
       "id": "fisi:card:sicherheit-02",
       "type": "card",
       "topic": "si-sicherheit",
-      "q": "Was ist der Zweck einer Firewall?",
-      "a": "Sie kontrolliert Netzwerkverbindungen anhand festgelegter Regeln und erlaubt oder blockiert Verkehr. Sie ersetzt keine sichere Konfiguration der Endsysteme."
+      "q": "Erläutern Sie den Zweck einer Firewall und nennen Sie ihre Grenze. (2 P.)",
+      "a": "• Sie kontrolliert Netzwerkverbindungen anhand festgelegter Regeln und erlaubt oder blockiert Verkehr.\n• Sie ersetzt keine sichere Konfiguration der Endsysteme.",
+      "note": "Erwartungshorizont: 2 P., je zutreffendem Aspekt 1 P. Operator „Erläutern“: mit Begründung oder Beispiel."
     },
     {
       "id": "fisi:mc:sicherheit-03",
       "type": "mc",
       "topic": "si-sicherheit",
       "q": "Welche Aussage beschreibt eine verschlüsselte HTTPS-Verbindung am besten?",
-      "opts": ["Sie schützt die Übertragung zwischen Client und Server und ermöglicht die Prüfung der Serveridentität", "Sie garantiert, dass der Server frei von Schadsoftware ist", "Sie erstellt automatisch eine Datensicherung", "Sie verhindert jeden Phishing-Angriff"],
-      "right": 0,
+      "opts": ["Sie verschlüsselt auch die auf dem Server gespeicherten Daten", "Sie verbirgt gegenüber dem Netzbetreiber, welche Server angesprochen werden", "Sie garantiert, dass der Server frei von Schadsoftware ist", "Sie schützt die Übertragung zwischen Client und Server und ermöglicht die Prüfung der Serveridentität"],
+      "right": 3,
       "why": "TLS schützt Vertraulichkeit und Integrität der Verbindung und unterstützt die Authentisierung des Servers. Es macht den Inhalt oder Anbieter nicht automatisch vertrauenswürdig."
     },
     {
       "id": "fisi:card:sicherheit-04",
       "type": "card",
       "topic": "si-sicherheit",
-      "q": "Warum sollten Sicherungen gegen unberechtigte Änderung oder Löschung geschützt sein?",
-      "a": "Schadsoftware oder ein kompromittiertes Administratorkonto könnte sonst auch die Sicherungen zerstören. Getrennte, zugriffsbeschränkte oder unveränderbare Kopien verbessern die Wiederherstellbarkeit."
+      "q": "Begründen Sie, warum Sicherungen gegen unberechtigte Änderung oder Löschung geschützt sein sollten. (2 P.)",
+      "a": "• Schadsoftware oder ein kompromittiertes Administratorkonto könnte sonst auch die Sicherungen zerstören.\n• Getrennte, zugriffsbeschränkte oder unveränderbare Kopien verbessern die Wiederherstellbarkeit.",
+      "note": "Erwartungshorizont: 2 P., je zutreffendem Aspekt 1 P. Operator „Begründen“: mit nachvollziehbarer Begründung."
     },
     {
       "id": "fisi:mc:sicherheit-05",
       "type": "mc",
       "topic": "si-sicherheit",
       "q": "Ein Arbeitsplatzrechner zeigt einen möglichen Malwarebefall. Was ist eine sinnvolle erste Eindämmungsmaßnahme?",
-      "opts": ["Das Gerät nach dem Notfallprozess vom Netz isolieren und den Vorfall dokumentieren", "Alle Protokolle löschen", "Das Gerät ohne Prüfung weiterverwenden", "Das Administratorkennwort im Teamchat veröffentlichen"],
-      "right": 0,
+      "opts": ["Das Gerät sofort neu installieren, um die Infektion zu beseitigen", "Das Gerät nach dem Notfallprozess vom Netz isolieren und den Vorfall dokumentieren", "Einen Virenscan starten und das Gerät währenddessen normal weiterverwenden", "Das Benutzerkennwort per E-Mail an die IT senden"],
+      "right": 1,
       "why": "Eine kontrollierte Isolation kann weitere Ausbreitung begrenzen. Danach greifen die festgelegten Analyse- und Meldeprozesse."
     },
     {
       "id": "fisi:card:sicherheit-06",
       "type": "card",
       "topic": "si-sicherheit",
-      "q": "Was bedeutet das Prinzip der geringsten Berechtigung im Administrationsalltag?",
-      "a": "Konten und Dienste erhalten nur die Rechte, die sie für ihre Aufgabe benötigen. Administrative Tätigkeiten sollten mit getrennten, dafür vorgesehenen Konten erfolgen."
+      "q": "Beschreiben Sie das Prinzip der geringsten Berechtigung im Administrationsalltag. (2 P.)",
+      "a": "• Konten und Dienste erhalten nur die Rechte, die sie für ihre Aufgabe benötigen.\n• Administrative Tätigkeiten erfolgen mit getrennten, dafür vorgesehenen Konten.",
+      "note": "Erwartungshorizont: 2 P., je zutreffendem Aspekt 1 P. Operator „Beschreiben“: zusammenhängend und vollständig."
     },
     {
       "id": "fisi:mc:betrieb-01",
       "type": "mc",
       "topic": "si-betrieb",
       "q": "Mehrere Nutzer melden, dass ein zentraler Dienst nicht erreichbar ist. Was sollte der Support zuerst tun?",
-      "opts": ["Auswirkung und Umfang erfassen, den Vorfall priorisieren und nach Prozess eskalieren", "Ungeprüft alle Server neu starten", "Den Vorfall erst nach der Behebung dokumentieren", "Die Meldungen ohne Prüfung schließen"],
-      "right": 0,
+      "opts": ["Den ersten Meldenden um Geduld bitten, bis die Ursache sicher feststeht", "Den zuletzt geänderten Dienst ungeprüft zurücksetzen", "Auswirkung und Umfang erfassen, den Vorfall priorisieren und nach Prozess eskalieren", "Zunächst die Ursachenanalyse abschließen, bevor ein Ticket angelegt wird"],
+      "right": 2,
       "why": "Eine strukturierte Erstaufnahme klärt Auswirkung und Dringlichkeit und ermöglicht eine passende Eskalation."
     },
     {
       "id": "fisi:card:betrieb-02",
       "type": "card",
       "topic": "si-betrieb",
-      "q": "Welche Informationen gehören in ein aussagekräftiges Störungsticket?",
-      "a": "Mindestens betroffener Dienst und Nutzerkreis, Zeitpunkt, beobachtetes Verhalten, Auswirkungen, bereits durchgeführte Schritte und relevante Meldungen. So kann die Bearbeitung nachvollziehbar fortgesetzt werden."
+      "q": "Nennen Sie vier Informationen, die in ein aussagekräftiges Störungsticket gehören. (4 P.)",
+      "a": "• Betroffener Dienst und Nutzerkreis, Zeitpunkt\n• Beobachtetes Verhalten und Auswirkungen\n• Bereits durchgeführte Schritte\n• Relevante Meldungen, damit die Bearbeitung nachvollziehbar fortgesetzt werden kann",
+      "note": "Erwartungshorizont: 4 P., je zutreffendem Aspekt 1 P. Operator „Nennen“: Stichworte genügen."
     },
     {
       "id": "fisi:mc:betrieb-03",
       "type": "mc",
       "topic": "si-betrieb",
       "q": "Ein Monitoring meldet wiederholt kurze Ausfälle eines Netzwerkdienstes. Welche Maßnahme ist für die Ursachenanalyse am hilfreichsten?",
-      "opts": ["Zeitpunkte, Messwerte und korrelierende Systemprotokolle vergleichen", "Die Warnmeldungen dauerhaft deaktivieren", "Alle Messdaten vor der Analyse löschen", "Nur den Namen des Dienstes ändern"],
-      "right": 0,
+      "opts": ["Den Schwellenwert so anheben, dass die Warnungen nicht mehr auftreten", "Den Dienst nach jedem Ausfall neu starten und nichts weiter untersuchen", "Nur den Zustand zum Zeitpunkt der Prüfung beurteilen, nicht den Verlauf", "Zeitpunkte, Messwerte und korrelierende Systemprotokolle vergleichen"],
+      "right": 3,
       "why": "Zeitlich korrelierte Mess- und Protokolldaten helfen, Muster und mögliche gemeinsame Ursachen zu erkennen."
     },
     {
       "id": "fisi:card:betrieb-04",
       "type": "card",
       "topic": "si-betrieb",
-      "q": "Was ist der Unterschied zwischen einem Incident und einem Problem im IT-Servicebetrieb?",
-      "a": "Ein Incident ist eine ungeplante Unterbrechung oder Qualitätsminderung eines Dienstes. Ein Problem bezeichnet die zugrunde liegende oder mögliche Ursache eines oder mehrerer Incidents."
+      "q": "Unterscheiden Sie Incident und Problem im IT-Servicebetrieb. (2 P.)",
+      "a": "• Ein Incident ist eine ungeplante Unterbrechung oder Qualitätsminderung eines Dienstes.\n• Ein Problem ist die zugrunde liegende oder mögliche Ursache eines oder mehrerer Incidents.",
+      "note": "Erwartungshorizont: 2 P., je zutreffendem Aspekt 1 P. Operator „Unterscheiden“: Unterschiede klar benennen."
     },
     {
       "id": "fisi:mc:betrieb-05",
       "type": "mc",
       "topic": "si-betrieb",
       "q": "Was sollte vor einer geplanten Änderung an einer produktiven Netzwerkkonfiguration vorliegen?",
-      "opts": ["Ein geprüftes Änderungskonzept mit Auswirkungen, Freigabe und Rückfallplan", "Nur eine mündliche Erinnerung ohne Dokumentation", "Eine Sicherung der Protokolle nach der Änderung", "Die Abschaltung des Monitorings für die gesamte Woche"],
-      "right": 0,
+      "opts": ["Eine Freigabe der Fachabteilung, aber noch kein Rückfallplan", "Ein geprüftes Änderungskonzept mit Auswirkungen, Freigabe und Rückfallplan", "Ein Test direkt in der Produktivumgebung ohne Wartungsfenster", "Eine Dokumentation, die erst nach der Umsetzung erstellt wird"],
+      "right": 1,
       "why": "Planung, Freigabe und Rückfallmöglichkeit reduzieren das Risiko und machen Änderungen nachvollziehbar."
     },
     {
       "id": "fisi:card:betrieb-06",
       "type": "card",
       "topic": "si-betrieb",
-      "q": "Warum ist Redundanz allein keine vollständige Hochverfügbarkeitslösung?",
-      "a": "Redundante Komponenten können gemeinsame Fehlerursachen, Fehlkonfigurationen oder Strom- und Standortausfälle teilen. Abhängigkeiten, Umschaltung und Wiederherstellung müssen ebenfalls getestet werden."
+      "q": "Begründen Sie, warum Redundanz allein keine vollständige Hochverfügbarkeitslösung ist. (3 P.)",
+      "a": "• Redundante Komponenten können gemeinsame Fehlerursachen oder Fehlkonfigurationen teilen.\n• Strom- und Standortausfall können alle Komponenten gleichzeitig betreffen.\n• Abhängigkeiten, Umschaltung und Wiederherstellung müssen ebenfalls getestet werden.",
+      "note": "Erwartungshorizont: 3 P., je zutreffendem Aspekt 1 P. Operator „Begründen“: mit nachvollziehbarer Begründung."
     }
   ]
 }

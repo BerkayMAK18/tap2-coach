@@ -1,4 +1,7 @@
 import type { CardQuestion, McQuestion, Question, Topic } from "./schema";
+import { subnetQuestions } from "./fisi/subnetting";
+import { wisoQuestions } from "./fisi/wiso";
+import { ADMIN_SPECS, NETWORK_SPECS, OPERATIONS_SPECS, PROJECT_SPECS, SECURITY_SPECS, ihk } from "./fisi/ihk";
 
 export const FISI_TOPICS: Topic[] = [
   { id: "si-adressierung", n: "IPv4-Adressierung & Subnetting", teil: "Teil 2", prio: "Muss", ic: "server", th: [], decks: [], cats: [] },
@@ -34,7 +37,8 @@ const CIDR_CASES: [string, number][] = [
 
 const ipToInt = (ip: string) => ip.split(".").reduce((n, octet) => ((n << 8) | Number(octet)) >>> 0, 0);
 const intToIp = (n: number) => [24, 16, 8, 0].map((shift) => (n >>> shift) & 255).join(".");
-function subnetQuestions(): Question[] {
+// Rechenkarten und Netzadress-Fragen der ersten Fassung (stabile IDs); neue Aufgabenarten stehen in fisi/subnetting.ts.
+function legacySubnetQuestions(): Question[] {
   const out: Question[] = [];
   CIDR_CASES.forEach(([ip, prefix], i) => {
     const address = ipToInt(ip), mask = (0xffffffff << (32 - prefix)) >>> 0;
@@ -42,11 +46,11 @@ function subnetQuestions(): Question[] {
     const broadcast = (network + block - 1) >>> 0, hosts = block - 2;
     const n = String(i + 1).padStart(2, "0");
     out.push(card(`fisi:card:cidr-net-${n}`, "si-adressierung", `Bestimme Netzadresse, Broadcast-Adresse und nutzbaren Hostbereich für die CIDR-Adresse ${ip}/${prefix}.`, `Netzadresse: ${intToIp(network)}. Broadcast: ${intToIp(broadcast)}. Nutzbare Hosts: ${intToIp((network + 1) >>> 0)} bis ${intToIp((broadcast - 1) >>> 0)} (${hosts} Adressen).`));
-    const hostOpts = [hosts, hosts + 2, hosts - 2, Math.floor(hosts / 2)];
-    out.push(mc(`fisi:mc:cidr-host-${n}`, "si-adressierung", `Wie viele nutzbare IPv4-Hostadressen hat ein Subnetz mit CIDR-Präfix /${prefix}?`, hostOpts.map(String) as [string, string, string, string], 0, `Es bleiben ${32 - prefix} Hostbits. Damit gibt es 2 hoch ${32 - prefix} Adressen; Netz- und Broadcast-Adresse sind nicht als Hostadressen nutzbar.`));
     const candidates = [network, address, broadcast, (network + block) >>> 0, (network + 2) >>> 0];
     const networkOpts = [...new Set(candidates)].slice(0, 4);
     while (networkOpts.length < 4) networkOpts.push((network + block * (networkOpts.length + 1)) >>> 0);
+    // Antwortposition wechselt reihum, damit die richtige Antwort nicht immer vorn steht.
+    networkOpts.unshift(...networkOpts.splice(networkOpts.length - (i % 4)));
     const right = networkOpts.indexOf(network);
     out.push(mc(`fisi:mc:cidr-network-${n}`, "si-adressierung", `Welche Netzadresse gehört zur CIDR-Adresse ${ip}/${prefix}?`, networkOpts.map(intToIp) as [string, string, string, string], right, `Die Netzadresse entsteht durch bitweises UND der IPv4-Adresse mit der Subnetzmaske zu /${prefix}.`));
   });
@@ -240,58 +244,10 @@ const PROJECT_CARDS: [string, string][] = [
   ["Wozu dient eine Lessons-Learned-Runde?", "Sie sichert Erfahrungen zu Ursachen, Entscheidungen und Zusammenarbeit, damit künftige Projekte konkrete Verbesserungen ableiten können."],
 ];
 
-const WISO_CARDS: [string, string][] = [
-  ["Welche Aufgaben hat ein Betriebsrat grundsätzlich?", "Er vertritt die Interessen der Beschäftigten im Rahmen der gesetzlichen Mitbestimmungs- und Beteiligungsrechte; er ersetzt nicht die Geschäftsführung."],
-  ["Was regelt ein Tarifvertrag typischerweise?", "Zum Beispiel Entgelt, Arbeitszeit oder weitere Arbeitsbedingungen für den jeweils erfassten Geltungsbereich."],
-  ["Worin unterscheiden sich Brutto- und Nettolohn?", "Brutto ist das vereinbarte Entgelt vor Abzügen. Netto ist der Auszahlungsbetrag nach Steuern und Sozialversicherungsbeiträgen."],
-  ["Welche Zweige der Sozialversicherung gibt es in Deutschland?", "Kranken-, Pflege-, Renten-, Arbeitslosen- und Unfallversicherung."],
-  ["Was ist der Zweck einer Probezeit?", "Sie ermöglicht beiden Seiten, die Zusammenarbeit zunächst unter den dafür geltenden gesetzlichen und vertraglichen Bedingungen zu erproben."],
-  ["Warum sollte eine Kündigung auf Form und Frist geprüft werden?", "Wirksamkeit und Beendigungszeitpunkt hängen von gesetzlichen Vorgaben, Vertragslage und gegebenenfalls besonderen Schutzrechten ab."],
-  ["Was ist der Unterschied zwischen einem Arbeitsvertrag und einer Betriebsvereinbarung?", "Der Arbeitsvertrag regelt die individuelle Beschäftigung zwischen Arbeitgeber und Arbeitnehmer. Eine Betriebsvereinbarung wird zwischen Arbeitgeber und Betriebsrat für betriebliche Fragen geschlossen."],
-  ["Wozu dient eine Gefährdungsbeurteilung am Arbeitsplatz?", "Sie ermittelt Risiken für Sicherheit und Gesundheit und leitet geeignete Schutzmaßnahmen ab."],
-  ["Was bedeutet Datenschutz nach dem Prinzip der Datenminimierung?", "Nur personenbezogene Daten erheben und verarbeiten, die für einen festgelegten Zweck erforderlich sind."],
-  ["Wann ist eine Verarbeitung personenbezogener Daten zulässig?", "Wenn eine passende Rechtsgrundlage vorliegt, der Zweck festgelegt ist und weitere Datenschutzgrundsätze eingehalten werden."],
-  ["Was ist bei einer Datenschutzverletzung wichtig?", "Vorfall eindämmen, Fakten und betroffene Daten erfassen, intern unverzüglich eskalieren und die vorgesehenen Prüf- und Meldeprozesse auslösen."],
-  ["Warum sollten Beschäftigte mit vertraulichen Informationen sparsam umgehen?", "Unnötige Offenlegung erhöht das Risiko von Missbrauch, Datenschutzverletzungen und wirtschaftlichem Schaden."],
-  ["Wie wirkt Inflation auf die Kaufkraft eines festen Einkommens?", "Wenn Preise steigen und das Einkommen nicht entsprechend steigt, kann die reale Kaufkraft sinken."],
-  ["Was ist der Unterschied zwischen Angebot und Nachfrage?", "Angebot beschreibt bereitgestellte Güter oder Leistungen, Nachfrage den Kaufwunsch bei entsprechender Zahlungsbereitschaft."],
-  ["Was bedeutet das ökonomische Prinzip?", "Ein Ziel mit möglichst geringem Mitteleinsatz erreichen oder mit gegebenen Mitteln einen möglichst hohen Zielerreichungsgrad erzielen."],
-  ["Worin unterscheiden sich Garantie und gesetzliche Mängelrechte?", "Eine Garantie ist eine zusätzliche freiwillige Zusage mit eigenen Bedingungen. Gesetzliche Mängelrechte ergeben sich aus dem Gesetz und bestehen unabhängig davon."],
-  ["Was ist vor einem IT-Einkauf neben dem Anschaffungspreis zu vergleichen?", "Gesamtkosten, Funktion, Kompatibilität, Sicherheit, Lieferzeit, Support, Energiebedarf, Lizenzmodell und Lebenszyklus."],
-  ["Warum ist ein schriftlicher Kaufauftrag wichtig?", "Er hält Leistungsumfang, Preis, Lieferbedingungen, Termine und Freigabe nachvollziehbar fest."],
-  ["Was ist ein Interessenkonflikt bei einer Beschaffung?", "Eine private oder persönliche Beziehung kann eine sachliche, faire Auswahl beeinflussen oder den Anschein einer solchen Beeinflussung erwecken."],
-  ["Wozu dient ein Haushalts- oder Budgetplan im Betrieb?", "Er ordnet erwartete Einnahmen und Ausgaben einem Zeitraum und Zweck zu und ermöglicht Abweichungskontrolle."],
-  ["Wie berechnet sich ein prozentualer Preisnachlass?", "Nachlassbetrag = Ausgangspreis mal Prozentsatz; der Endpreis ist Ausgangspreis minus Nachlassbetrag."],
-  ["Was bedeutet Liquidität für ein Unternehmen?", "Die Fähigkeit, fällige Zahlungsverpflichtungen fristgerecht zu erfüllen."],
-  ["Warum ist ein schriftlicher Nachweis einer Arbeitsanweisung sinnvoll?", "Er klärt Zuständigkeit, Inhalt und Zeitpunkt und hilft, Rückfragen sowie Missverständnisse zu vermeiden."],
-  ["Was sollte bei einer Abmahnung grundsätzlich dokumentiert werden?", "Der konkrete beanstandete Sachverhalt, Zeitpunkt, Pflichtbezug und die Aufforderung zu künftig vertragsgemäßem Verhalten; Einzelfälle müssen rechtlich geprüft werden."],
-  ["Warum müssen Arbeitsbedingungen transparent mitgeteilt werden?", "Beschäftigte sollen nachvollziehen können, welche wesentlichen Bedingungen wie Tätigkeit, Vergütung, Arbeitszeit und Kündigungsregelungen gelten."],
-  ["Was ist bei einem Konflikt zwischen Arbeitsanweisung und Sicherheitsrichtlinie zu tun?", "Nicht eigenmächtig riskant handeln; Konflikt dokumentieren und über Führungskraft, Informationssicherheit oder den vorgesehenen Eskalationsweg klären."],
-  ["Was beschreibt die Nachfrageelastizität vereinfacht?", "Wie stark sich die nachgefragte Menge eines Gutes bei einer Preisänderung verändert."],
-  ["Was ist der Unterschied zwischen Fixkosten und variablen Kosten?", "Fixkosten fallen innerhalb eines Betrachtungsbereichs unabhängig von der Ausbringungsmenge an; variable Kosten verändern sich mit der Menge oder Nutzung."],
-  ["Wie wird die Umsatzsteuer in einem Nettopreisangebot behandelt?", "Der Nettopreis wird um den jeweils geltenden Umsatzsteuersatz ergänzt; der resultierende Bruttobetrag ist der zu zahlende Preis."],
-  ["Warum müssen Steuer- und Sozialabzüge bei einer Nettolohnschätzung aktuell geprüft werden?", "Sätze und persönliche Merkmale können sich ändern; eine veraltete Pauschalrechnung liefert keine verlässliche individuelle Auszahlung."],
-  ["Was ist ein Zielkonflikt zwischen Preis und Qualität?", "Eine kostengünstigere Variante kann geringere Leistung oder längere Ausfallrisiken haben; die Auswahl sollte Anforderungen und Lebenszykluskosten berücksichtigen."],
-  ["Wozu dient ein Beschaffungsvergleich mit mehreren Angeboten?", "Er verbessert Preis- und Leistungsvergleich, dokumentiert die Auswahl und kann Abhängigkeit von einem Anbieter reduzieren."],
-  ["Was ist bei einer nachhaltigen IT-Beschaffung zu bewerten?", "Lebensdauer, Reparierbarkeit, Energie- und Ressourcenverbrauch, Lieferkette, Wiederverwendung und sichere Entsorgung."],
-  ["Warum sollte ein Unternehmen Interessenkonflikte bei Vergaben offenlegen?", "Damit Entscheidungen sachlich geprüft und Vertrauen sowie faire Wettbewerbsbedingungen geschützt werden können."],
-  ["Wie unterscheidet sich eine gesetzliche Sozialleistung von einer betrieblichen Zusatzleistung?", "Eine Sozialleistung beruht auf gesetzlich geregelten Ansprüchen oder Systemen; eine betriebliche Zusatzleistung wird darüber hinaus durch Arbeitgeber oder Vereinbarung gewährt."],
-  ["Was ist das Ziel einer Gewerkschaft?", "Sie vertritt Beschäftigteninteressen und verhandelt insbesondere Tarifbedingungen für ihre Mitglieder beziehungsweise den vereinbarten Geltungsbereich."],
-  ["Warum gibt es Kündigungsschutzregelungen?", "Sie sollen Beschäftigte vor bestimmten sozial ungerechtfertigten oder unzulässigen Beendigungen schützen; Voraussetzungen hängen vom Einzelfall und geltendem Recht ab."],
-  ["Was sollte bei einer Arbeitszeitaufzeichnung sachlich erfasst werden?", "Beginn, Ende und Dauer der Arbeitszeit sowie erforderliche Pausen nach den geltenden betrieblichen und gesetzlichen Vorgaben."],
-  ["Was bedeutet Mitbestimmung des Betriebsrats bei technischen Einrichtungen?", "Wenn eine technische Einrichtung dazu bestimmt oder geeignet ist, Verhalten oder Leistung von Beschäftigten zu überwachen, können gesetzliche Mitbestimmungsrechte greifen."],
-  ["Warum sollte ein Betrieb bei einer Beschwerde über Belästigung einen klaren Prozess haben?", "Ein geregelter, vertraulicher und nachvollziehbarer Ablauf schützt Betroffene, ermöglicht angemessene Prüfung und reduziert weitere Belastungen."],
-  ["Was ist bei der Weitergabe einer Kundenliste an einen Dienstleister zu prüfen?", "Zweck, Rechtsgrundlage, Datenumfang, Auftragsverarbeitung, Zugriffsschutz, Speicherort und Löschfristen."],
-  ["Wie unterscheiden sich Wettbewerb und Kartellabsprache?", "Wettbewerb lässt Anbieter eigenständig um Kunden konkurrieren; abgestimmte Preise oder Marktaufteilungen zwischen Wettbewerbern können den Wettbewerb unzulässig beschränken."],
-  ["Was bedeutet Kaufkraftparität im Alltag vereinfacht?", "Sie vergleicht, welche Gütermenge mit einem Geldbetrag in unterschiedlichen Preisniveaus erworben werden kann."],
-  ["Warum braucht ein Unternehmen Rücklagen oder Liquiditätsreserven?", "Sie helfen, kurzfristige Zahlungsschwankungen, unerwartete Ausgaben oder Einnahmeausfälle zu überbrücken."],
-];
+const network = ihk(cards("net-konzept", "si-netzwerk", NETWORK_CARDS), NETWORK_SPECS);
+const admin = ihk(cards("admin", "si-systeme", ADMIN_CARDS), ADMIN_SPECS);
+const security = ihk(cards("security", "si-sicherheit", SECURITY_CARDS), SECURITY_SPECS);
+const operations = ihk(cards("operations", "si-betrieb", OPERATIONS_CARDS), OPERATIONS_SPECS);
+const project = ihk(cards("projekt", "si-projekt", PROJECT_CARDS), PROJECT_SPECS);
 
-const network = cards("net-konzept", "si-netzwerk", NETWORK_CARDS);
-const admin = cards("admin", "si-systeme", ADMIN_CARDS);
-const security = cards("security", "si-sicherheit", SECURITY_CARDS);
-const operations = cards("operations", "si-betrieb", OPERATIONS_CARDS);
-const project = cards("projekt", "si-projekt", PROJECT_CARDS);
-const wiso = cards("wiso", "si-wiso", WISO_CARDS);
-
-export const FISI_EXTRA: Question[] = [...subnetQuestions(), ...network, ...admin, ...security, ...operations, ...project, ...wiso];
+export const FISI_EXTRA: Question[] = [...legacySubnetQuestions(), ...subnetQuestions(), ...network, ...admin, ...security, ...operations, ...project, ...wisoQuestions()];

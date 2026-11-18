@@ -39,11 +39,30 @@ describe("Kataloge", () => {
   });
 
   it("CIDR-Fragen rechnen mit korrekten Netz- und Hostwerten", () => {
-    const hostCount = systemIntegration.questions.find((q) => q.id === "fisi:mc:cidr-host-01");
+    const host = systemIntegration.questions.find((q) => q.id === "fisi:mc:sub-host-01");
     const network = systemIntegration.questions.find((q) => q.id === "fisi:mc:cidr-network-01");
-    expect(hostCount?.type === "mc" && hostCount.opts[hostCount.right]).toBe("254");
+    const mask = systemIntegration.questions.find((q) => q.id === "fisi:mc:sub-maske-01");
+    const need = systemIntegration.questions.find((q) => q.id === "fisi:mc:sub-bedarf-01");
+    expect(host?.type === "mc" && host.opts[host.right]).toBe("192.168.10.80");
     expect(network?.type === "mc" && network.opts[network.right]).toBe("10.12.34.0");
-    expect(systemIntegration.questions.filter((q) => q.topic === "si-adressierung")).toHaveLength(222);
+    expect(mask?.type === "mc" && mask.opts[mask.right]).toBe("255.255.0.0, 65534 Hosts");
+    expect(need?.type === "mc" && need.opts[need.right]).toBe("/27");
+    expect(systemIntegration.questions.filter((q) => q.topic === "si-adressierung")).toHaveLength(237);
+  });
+
+  it("FISI-Fragen sind ohne Dubletten, MC-Antworten wechseln die Position und WiSo ist reines Multiple Choice", () => {
+    const qs = systemIntegration.questions;
+    const texts = qs.map((q) => q.q);
+    expect(new Set(texts).size).toBe(texts.length);
+    const mc = qs.filter((q) => q.type === "mc");
+    mc.forEach((q) => expect(new Set(q.opts).size, q.id).toBe(q.opts.length));
+    expect(new Set(mc.map((q) => q.right)).size).toBe(4);
+    expect(Math.max(...[0, 1, 2, 3].map((p) => mc.filter((q) => q.right === p).length)) / mc.length).toBeLessThan(0.4);
+    expect(qs.filter((q) => q.topic === "si-wiso").every((q) => q.type === "mc")).toBe(true);
+    qs.filter((q) => q.type === "card" && /^fisi:card:(net-konzept|admin|security|operations|projekt|netzwerk|systeme|sicherheit|betrieb)-/.test(q.id)).forEach((q) => {
+      expect(q.q, q.id).toMatch(/\(\d+ P\.\)$/);
+      expect(q.type === "card" && q.note, q.id).toContain("Erwartungshorizont");
+    });
   });
 
   it("wechselt Katalogdaten, ohne den FIAE-Standard zu verändern", () => {
